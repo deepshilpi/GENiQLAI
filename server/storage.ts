@@ -7,7 +7,7 @@ import {
   analyses, type Analysis, type InsertAnalysis
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getPosts(): Promise<Post[]> {
-    return db.select().from(posts).orderBy(posts.createdAt, 'desc');
+    return db.select().from(posts).orderBy(desc(posts.createdAt));
   }
   
   async getPostById(id: number): Promise<Post | undefined> {
@@ -127,7 +127,7 @@ export class DatabaseStorage implements IStorage {
   async getPostsByUserId(userId: number): Promise<Post[]> {
     return db.select().from(posts)
       .where(eq(posts.authorId, userId))
-      .orderBy(posts.createdAt, 'desc');
+      .orderBy(desc(posts.createdAt));
   }
   
   // Comment operations
@@ -141,7 +141,7 @@ export class DatabaseStorage implements IStorage {
   async getCommentsByPostId(postId: number): Promise<Comment[]> {
     return db.select().from(comments)
       .where(eq(comments.postId, postId))
-      .orderBy(comments.createdAt);
+      .orderBy(asc(comments.createdAt));
   }
   
   // Vote operations
@@ -303,7 +303,7 @@ export class DatabaseStorage implements IStorage {
   async getAnalysesByUserId(userId: number): Promise<Analysis[]> {
     return db.select().from(analyses)
       .where(eq(analyses.userId, userId))
-      .orderBy(analyses.createdAt, 'desc');
+      .orderBy(desc(analyses.createdAt));
   }
 }
 
