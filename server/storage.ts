@@ -6,10 +6,12 @@ import {
   follows, type Follow, type InsertFollow,
   analyses, type Analysis, type InsertAnalysis
 } from "@shared/schema";
+import { db, pool } from "./db";
+import { eq, and } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // User operations
@@ -44,162 +46,130 @@ export interface IStorage {
   getAnalysesByUserId(userId: number): Promise<Analysis[]>;
 
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private posts: Map<number, Post>;
-  private comments: Map<number, Comment>;
-  private votes: Map<number, Vote>;
-  private follows: Map<number, Follow>;
-  private analyses: Map<number, Analysis>;
-  
-  userIdCounter: number;
-  postIdCounter: number;
-  commentIdCounter: number;
-  voteIdCounter: number;
-  followIdCounter: number;
-  analysisIdCounter: number;
-  
-  sessionStore: session.SessionStore;
+export class DatabaseStorage implements IStorage {
+  sessionStore: any;
 
   constructor() {
-    this.users = new Map();
-    this.posts = new Map();
-    this.comments = new Map();
-    this.votes = new Map();
-    this.follows = new Map();
-    this.analyses = new Map();
-    
-    this.userIdCounter = 1;
-    this.postIdCounter = 1;
-    this.commentIdCounter = 1;
-    this.voteIdCounter = 1;
-    this.followIdCounter = 1;
-    this.analysisIdCounter = 1;
-    
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000 // 24 hours
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
     });
   }
 
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase(),
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const createdAt = new Date();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      planType: "free",
-      bio: "",
-      createdAt,
-      followersCount: 0,
-      followingCount: 0
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(users)
+      .values({
+        ...insertUser,
+        planType: "free",
+        bio: "",
+      })
+      .returning();
     return user;
   }
   
   async updateUserPlan(userId: number, planType: string): Promise<User> {
-    const user = await this.getUser(userId);
-    if (!user) {
+    const [updatedUser] = await db.update(users)
+      .set({ planType })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
       throw new Error("User not found");
     }
     
-    const updatedUser = { ...user, planType };
-    this.users.set(userId, updatedUser);
     return updatedUser;
   }
   
   async updateUserBio(userId: number, bio: string): Promise<User> {
-    const user = await this.getUser(userId);
-    if (!user) {
+    const [updatedUser] = await db.update(users)
+      .set({ bio })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
       throw new Error("User not found");
     }
     
-    const updatedUser = { ...user, bio };
-    this.users.set(userId, updatedUser);
     return updatedUser;
   }
   
   // Post operations
   async createPost(post: InsertPost): Promise<Post> {
-    const id = this.postIdCounter++;
-    const createdAt = new Date();
-    const newPost: Post = {
-      ...post,
-      id,
-      pumpCount: 0,
-      dumpCount: 0,
-      createdAt
-    };
-    this.posts.set(id, newPost);
+    const [newPost] = await db.insert(posts)
+      .values(post)
+      .returning();
     return newPost;
   }
   
   async getPosts(): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(posts).orderBy(posts.createdAt, 'desc');
   }
   
   async getPostById(id: number): Promise<Post | undefined> {
-    return this.posts.get(id);
+    const [post] = await db.select().from(posts).where(eq(posts.id, id));
+    return post;
   }
   
   async getPostsByUserId(userId: number): Promise<Post[]> {
-    return Array.from(this.posts.values())
-      .filter(post => post.authorId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(posts)
+      .where(eq(posts.authorId, userId))
+      .orderBy(posts.createdAt, 'desc');
   }
   
   // Comment operations
   async createComment(comment: InsertComment): Promise<Comment> {
-    const id = this.commentIdCounter++;
-    const createdAt = new Date();
-    const newComment: Comment = {
-      ...comment,
-      id,
-      createdAt
-    };
-    this.comments.set(id, newComment);
+    const [newComment] = await db.insert(comments)
+      .values(comment)
+      .returning();
     return newComment;
   }
   
   async getCommentsByPostId(postId: number): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(comment => comment.postId === postId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return db.select().from(comments)
+      .where(eq(comments.postId, postId))
+      .orderBy(comments.createdAt);
   }
   
   // Vote operations
   async createVote(vote: InsertVote): Promise<Vote> {
     // Check if user already voted on this post
     const existingVote = await this.getVoteByUserAndPost(vote.userId, vote.postId);
+    
     if (existingVote) {
       // If vote type is different, update post counts
       if (existingVote.voteType !== vote.voteType) {
+        // Update post count
         const post = await this.getPostById(vote.postId);
         if (post) {
-          const updatedPost = { ...post };
           if (existingVote.voteType === "pump") {
-            updatedPost.pumpCount--;
-            updatedPost.dumpCount++;
+            await db.update(posts)
+              .set({ 
+                pumpCount: post.pumpCount - 1,
+                dumpCount: post.dumpCount + 1
+              })
+              .where(eq(posts.id, post.id));
           } else {
-            updatedPost.pumpCount++;
-            updatedPost.dumpCount--;
+            await db.update(posts)
+              .set({ 
+                pumpCount: post.pumpCount + 1,
+                dumpCount: post.dumpCount - 1
+              })
+              .where(eq(posts.id, post.id));
           }
-          this.posts.set(post.id, updatedPost);
         }
         
         // Update the vote
@@ -211,43 +181,46 @@ export class MemStorage implements IStorage {
     }
     
     // Create new vote
-    const id = this.voteIdCounter++;
-    const createdAt = new Date();
-    const newVote: Vote = {
-      ...vote,
-      id,
-      createdAt
-    };
-    this.votes.set(id, newVote);
+    const [newVote] = await db.insert(votes)
+      .values(vote)
+      .returning();
     
     // Update post count
     const post = await this.getPostById(vote.postId);
     if (post) {
-      const updatedPost = { ...post };
       if (vote.voteType === "pump") {
-        updatedPost.pumpCount++;
+        await db.update(posts)
+          .set({ pumpCount: post.pumpCount + 1 })
+          .where(eq(posts.id, post.id));
       } else {
-        updatedPost.dumpCount++;
+        await db.update(posts)
+          .set({ dumpCount: post.dumpCount + 1 })
+          .where(eq(posts.id, post.id));
       }
-      this.posts.set(post.id, updatedPost);
     }
     
     return newVote;
   }
   
   async getVoteByUserAndPost(userId: number, postId: number): Promise<Vote | undefined> {
-    return Array.from(this.votes.values())
-      .find(vote => vote.userId === userId && vote.postId === postId);
+    const [vote] = await db.select().from(votes)
+      .where(and(
+        eq(votes.userId, userId),
+        eq(votes.postId, postId)
+      ));
+    return vote;
   }
   
   async updateVote(id: number, voteType: string): Promise<Vote> {
-    const vote = this.votes.get(id);
-    if (!vote) {
+    const [updatedVote] = await db.update(votes)
+      .set({ voteType })
+      .where(eq(votes.id, id))
+      .returning();
+    
+    if (!updatedVote) {
       throw new Error("Vote not found");
     }
     
-    const updatedVote = { ...vote, voteType };
-    this.votes.set(id, updatedVote);
     return updatedVote;
   }
   
@@ -259,78 +232,79 @@ export class MemStorage implements IStorage {
       throw new Error("Already following this user");
     }
     
-    const id = this.followIdCounter++;
-    const createdAt = new Date();
-    const newFollow: Follow = {
-      ...follow,
-      id,
-      createdAt
-    };
-    this.follows.set(id, newFollow);
+    const [newFollow] = await db.insert(follows)
+      .values(follow)
+      .returning();
     
     // Update follower and following counts
     const follower = await this.getUser(follow.followerId);
     const following = await this.getUser(follow.followingId);
     
     if (follower) {
-      const updatedFollower = { ...follower, followingCount: follower.followingCount + 1 };
-      this.users.set(follower.id, updatedFollower);
+      await db.update(users)
+        .set({ followingCount: follower.followingCount + 1 })
+        .where(eq(users.id, follower.id));
     }
     
     if (following) {
-      const updatedFollowing = { ...following, followersCount: following.followersCount + 1 };
-      this.users.set(following.id, updatedFollowing);
+      await db.update(users)
+        .set({ followersCount: following.followersCount + 1 })
+        .where(eq(users.id, following.id));
     }
     
     return newFollow;
   }
   
   async deleteFollow(followerId: number, followingId: number): Promise<void> {
-    const follow = Array.from(this.follows.values())
-      .find(f => f.followerId === followerId && f.followingId === followingId);
+    const [follow] = await db.select().from(follows)
+      .where(and(
+        eq(follows.followerId, followerId),
+        eq(follows.followingId, followingId)
+      ));
     
     if (follow) {
-      this.follows.delete(follow.id);
+      await db.delete(follows).where(eq(follows.id, follow.id));
       
       // Update follower and following counts
       const follower = await this.getUser(followerId);
       const following = await this.getUser(followingId);
       
       if (follower) {
-        const updatedFollower = { ...follower, followingCount: Math.max(0, follower.followingCount - 1) };
-        this.users.set(follower.id, updatedFollower);
+        await db.update(users)
+          .set({ followingCount: Math.max(0, follower.followingCount - 1) })
+          .where(eq(users.id, follower.id));
       }
       
       if (following) {
-        const updatedFollowing = { ...following, followersCount: Math.max(0, following.followersCount - 1) };
-        this.users.set(following.id, updatedFollowing);
+        await db.update(users)
+          .set({ followersCount: Math.max(0, following.followersCount - 1) })
+          .where(eq(users.id, following.id));
       }
     }
   }
   
   async isFollowing(followerId: number, followingId: number): Promise<boolean> {
-    return Array.from(this.follows.values())
-      .some(follow => follow.followerId === followerId && follow.followingId === followingId);
+    const [follow] = await db.select().from(follows)
+      .where(and(
+        eq(follows.followerId, followerId),
+        eq(follows.followingId, followingId)
+      ));
+    return !!follow;
   }
   
   // Analysis operations
   async createAnalysis(analysis: InsertAnalysis): Promise<Analysis> {
-    const id = this.analysisIdCounter++;
-    const createdAt = new Date();
-    const newAnalysis: Analysis = {
-      ...analysis,
-      id,
-      createdAt
-    };
-    this.analyses.set(id, newAnalysis);
+    const [newAnalysis] = await db.insert(analyses)
+      .values(analysis)
+      .returning();
     return newAnalysis;
   }
   
   async getAnalysesByUserId(userId: number): Promise<Analysis[]> {
-    return Array.from(this.analyses.values())
-      .filter(analysis => analysis.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(analyses)
+      .where(eq(analyses.userId, userId))
+      .orderBy(analyses.createdAt, 'desc');
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
