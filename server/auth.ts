@@ -83,9 +83,18 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Username already exists" });
       }
       
-      const existingEmail = Array.from(storage.users.values()).find(u => u.email === email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already in use" });
+      // Check if email exists already
+      try {
+        const [existingEmail] = await storage.db.select()
+          .from(storage.users)
+          .where(storage.eq(storage.users.email, email));
+          
+        if (existingEmail) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      } catch (error) {
+        console.error("Error checking email:", error);
+        return res.status(500).json({ message: "Error checking email" });
       }
       
       const hashedPassword = await hashPassword(password);
