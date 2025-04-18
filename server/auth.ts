@@ -5,7 +5,8 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { users, User as SelectUser } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -48,7 +49,11 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
+        // Get user by username
+        const [user] = await storage.db.select()
+          .from(users)
+          .where(eq(users.username, username));
+          
         if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false, { message: "Invalid username or password" });
         } else {
@@ -63,7 +68,11 @@ export function setupAuth(app: Express) {
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUser(id);
+      // Get user by ID
+      const [user] = await storage.db.select()
+        .from(users)
+        .where(eq(users.id, id));
+        
       done(null, user);
     } catch (error) {
       done(error);
@@ -78,7 +87,11 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Username, email, and password are required" });
       }
       
-      const existingUser = await storage.getUserByUsername(username);
+      // Check if username already exists
+      const [existingUser] = await storage.db.select()
+        .from(users)
+        .where(eq(users.username, username));
+        
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
@@ -86,8 +99,8 @@ export function setupAuth(app: Express) {
       // Check if email exists already
       try {
         const [existingEmail] = await storage.db.select()
-          .from(storage.users)
-          .where(storage.eq(storage.users.email, email));
+          .from(users)
+          .where(eq(users.email, email));
           
         if (existingEmail) {
           return res.status(400).json({ message: "Email already in use" });
@@ -98,13 +111,19 @@ export function setupAuth(app: Express) {
       }
       
       const hashedPassword = await hashPassword(password);
-      const user = await storage.createUser({
-        username,
-        email,
-        password: hashedPassword,
-      });
+      
+      // Insert new user
+      const [user] = await storage.db.insert(users)
+        .values({
+          username,
+          email,
+          password: hashedPassword,
+          bio: "",
+          planType: "free",
+        })
+        .returning();
 
-      req.login(user, (err) => {
+      req.login(user, (err: Error) => {
         if (err) return next(err);
         const { password, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
@@ -115,11 +134,11 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: SelectUser | false, info: { message: string } | undefined) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Authentication failed" });
       
-      req.login(user, (err) => {
+      req.login(user, (err: Error) => {
         if (err) return next(err);
         const { password, ...userWithoutPassword } = user;
         return res.status(200).json(userWithoutPassword);
@@ -128,7 +147,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+    req.logout((err: Error) => {
       if (err) return next(err);
       res.status(200).json({ message: "Logged out successfully" });
     });
