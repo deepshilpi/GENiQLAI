@@ -1,0 +1,67 @@
+Build a web application called GENIQL (Generative Execution Network for Intelligent Query Learning) using Replit Core with autoscale deployment, ChatGPT API, and Tavily API only. Do not use Firebase, Supabase, or any third-party services outside of those mentioned.
+
+Core Purpose
+GENIQL allows users to input a startup idea and get instant AI-powered analysis across 8 structured blocks. It also includes a Reddit-style community for entrepreneurs to engage, share ideas, and vote on posts. The platform is monetized via three subscription plans: Free, Pro, and Unicorn.
+
+Startup Analyzer – 8 AI Blocks
+User inputs a startup idea. The country is auto-detected via user IP and used in all API prompts. The system returns results in 8 blocks:
+1. Success Rate (ChatGPT API)
+2. Competitors & Market Share (ChatGPT API)
+3. Market Viability (ChatGPT API)
+4. Unique Value Proposition (ChatGPT API)
+5. CAGR – Compound Annual Growth Rate (ChatGPT API)
+6. Previous Failed Executions (chat got )
+7. Funding Requirements (ChatGPT API)
+8. Go-to-Market Strategy (ChatGPT API)
+
+Post-Analysis Features (Unicorn Plan Only)
+1. Planning to Execute (ChatGPT API)
+   User type its initial budget then 
+Full budget table (Dev, Marketing, Ops)
+* Step-by-step execution roadmap
+* Prompt: “Create a budget and execution plan for a [industry] startup in [country].”
+2. Finding Investors (ChatGPT API)
+* Lists 5+ potential investors with firm, dummy contact, and Crunchbase links
+* Disclaimer to verify manually
+* Prompt: “List 5 investors in [industry] startups in [country] with firms and profile links.”
+
+Community (Reddit-style)
+Pro users can also post there ideas there as a short post for after analysing
+A social space where users interact with startup ideas.
+All Users Can:
+* View and comment on posts
+* Vote with "Pump" (upvote) or "Dump" (downvote)
+* Follow users
+* Visit user profiles
+Only Pro & Unicorn Users Can:
+* Create new posts
+Posts include:
+* Title, Description, Tags
+* Author details
+* Pump/Dump counts
+* Comments
+Profile page includes:
+* Username, Bio, Follower/Following count
+* Posted startup ideas
+
+Pricing Plans
+* Free Plan ($0/month)
+    * Access first 4 analysis blocks
+    * Can browse and comment in community, but cannot post
+    * No access to budget or investor features
+* Pro Plan ($10/month)
+    * Access all 8 analysis blocks
+    * Can create posts in the community
+    * No access to budget or investor features
+* Unicorn Plan ($15/month)
+    * Full access to all features, including:
+        * Post-Analysis: Budget Breakdown & Execution Plan
+        * Post-Analysis: Investor Discovery
+New users are assigned to Free Plan by default.
+
+Also add a additional featurefor pro users  that shows 5 news articles published within last 3o days with startups names that performing well in other countries but not exist in your country now use tavily in this feature
+ 
+All pro and unicorn shown as blur for free users to showcase demo
+
+
+Make its ui exactly same as additional files I provided to you for reference
