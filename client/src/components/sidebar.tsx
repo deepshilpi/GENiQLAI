@@ -33,24 +33,31 @@ import {
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Start collapsed by default
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hovered, setHovered] = useState(false); // Track hover state
   const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   
   // Set initial collapsed state based on screen size
   useEffect(() => {
-    setCollapsed(isMobile);
+    // Always collapsed by default on desktop, fully closed on mobile
+    setCollapsed(true);
     
     // Add class to body for mobile sidebar control
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setCollapsed(true);
         document.body.classList.remove('sidebar-open');
+        setSidebarOpen(false);
       } else {
         document.body.classList.remove('sidebar-open');
+        // Keep desktop sidebar collapsed by default
+        document.body.classList.add('sidebar-collapsed');
       }
     };
+    
+    // Initial call to set correct state
+    handleResize();
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -66,6 +73,7 @@ export function Sidebar() {
         document.body.classList.remove('sidebar-open');
       }
     } else {
+      // For desktop, manually toggle collapsed state
       setCollapsed(!collapsed);
       
       if (collapsed) {
@@ -73,6 +81,19 @@ export function Sidebar() {
       } else {
         document.body.classList.add('sidebar-collapsed');
       }
+    }
+  };
+  
+  // Handle hover states for desktop
+  const handleMouseEnter = () => {
+    if (!isMobile && collapsed) {
+      setHovered(true);
+    }
+  };
+  
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setHovered(false);
     }
   };
   
@@ -103,9 +124,12 @@ export function Sidebar() {
       )}
       
       <aside 
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={cn(
           "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
-          collapsed ? "w-[70px]" : "w-[260px]",
+          // Show expanded width if hovered or manually expanded
+          (!collapsed || hovered) ? "w-[260px]" : "w-[70px]",
           isMobile && "w-[260px]",
           isMobile && sidebarOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "translate-x-0"
         )}
