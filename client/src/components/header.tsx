@@ -81,22 +81,11 @@ export function Header() {
   if (isMobile) {
     return (
       <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 vision-card shadow-lg">
-        {/* Menu toggle and Logo section */}
-        <div className="flex items-center gap-3">
-          {/* Menu toggle button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8 mr-1"
-            onClick={toggleSidebar}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-          
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-              <BrainCircuit className="w-4 h-4 text-white" />
+        {/* Logo section */}
+        <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
+              <BrainCircuit className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg text-white">GENIQL</span>
           </div>
@@ -200,6 +189,17 @@ export function Header() {
               </div>
               <DropdownMenuSeparator className="bg-vision-purple-200/10" />
               <div className="py-1">
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/")}>
+                  <BrainCircuit className="w-4 h-4 mr-2" />
+                  <span>AI Analysis</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/community")}>
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  <span>Community</span>
+                </DropdownMenuItem>
+              </div>
+              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+              <div className="py-1">
                 <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username}`)}>
                   <User className="w-4 h-4 mr-2" />
                   <span>My Profile</span>
@@ -216,6 +216,16 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Theme toggle */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+            onClick={toggleTheme}
+          >
+            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </Button>
         </div>
       </header>
     );
@@ -229,6 +239,15 @@ export function Header() {
       </div>
       
       <div className="flex items-center space-x-3">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+          onClick={toggleTheme}
+        >
+          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </Button>
+        
         {/* Notifications Button with badge */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
