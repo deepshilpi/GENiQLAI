@@ -138,68 +138,20 @@ export default function HomePage() {
     setIsAnalyzing(true);
     
     try {
-      // In a real implementation, this would call your actual API
-      // Simulating API call with mock data
-      setTimeout(() => {
-        const mockResults = {
-          successRate: {
-            percentage: 78,
-            message: "Your startup idea has a strong potential to succeed based on current market conditions."
-          },
-          competitors: {
-            competitors: [
-              { name: "Competitor A", marketShare: 35 },
-              { name: "Competitor B", marketShare: 25 },
-              { name: "Competitor C", marketShare: 15 },
-              { name: "Others", marketShare: 25 }
-            ],
-            message: "The market has established players, but there's room for innovative solutions."
-          },
-          marketViability: {
-            points: [
-              { 
-                title: "Strong Market Growth", 
-                subtitle: "The target market is expanding at 12% annually",
-                type: 'success'
-              },
-              { 
-                title: "Competitive Landscape", 
-                subtitle: "Several established competitors, but with outdated offerings",
-                type: 'warning'
-              },
-              { 
-                title: "Regulatory Challenges", 
-                subtitle: "Potential regulatory hurdles in certain regions",
-                type: 'danger'
-              }
-            ]
-          },
-          uniqueValueProposition: {
-            differentiator: "Your approach offers significantly better user experience with AI-driven personalization that competitors currently lack.",
-            strengths: [
-              "Advanced AI algorithms for personalization",
-              "Seamless mobile-first experience",
-              "Lower price point than competitors",
-              "Stronger data security measures"
-            ]
-          },
-          cagr: {
-            industryAverage: 8.5,
-            potential: 15.2,
-            data: {
-              years: ["2023", "2024", "2025", "2026", "2027"],
-              industryAverageData: [100, 108.5, 117.7, 127.7, 138.6],
-              potentialData: [100, 115.2, 132.7, 152.9, 176.1]
-            }
-          }
-        };
-        
-        setAnalysisResults(mockResults);
-        setAnalysisStep('results');
-        setIsAnalyzing(false);
-      }, 1500);
+      // Import analyzeStartupIdea from our client-side openai.ts utility
+      const { analyzeStartupIdea } = await import('@/lib/openai');
+      
+      // Call the API through our utility function
+      const results = await analyzeStartupIdea(startupIdea);
+      
+      // Set the results and update the UI state
+      setAnalysisResults(results);
+      setAnalysisStep('results');
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
+      // Display a more user-friendly error
+      alert("We couldn't analyze your startup idea at this moment. Please try again later.");
+    } finally {
       setIsAnalyzing(false);
     }
   };

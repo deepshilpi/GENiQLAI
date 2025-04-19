@@ -2,7 +2,13 @@ import OpenAI from "openai";
 import { AnalysisResults } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk-placeholder-key" });
+if (!process.env.OPENAI_API_KEY) {
+  console.warn("Missing OPENAI_API_KEY environment variable. AI analysis features will not work properly.");
+}
+
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
 
 // Function to analyze a startup idea using ChatGPT API
 export async function analyzeStartupIdea(

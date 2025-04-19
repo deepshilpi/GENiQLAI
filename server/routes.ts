@@ -24,11 +24,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Startup idea is required" });
     }
     
+    // Check for OpenAI API key
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(503).json({ 
+        message: "AI analysis is currently unavailable. Please try again later.",
+        error: "missing_api_key"
+      });
+    }
+    
     // Detect country from IP (simplified for demo)
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
-      const analysisResults = await analyzeStartupIdea(startupIdea, country, req.user.planType);
+      // Add timeout to prevent long-running requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 30000);
+      });
+      
+      // Race between the analysis and the timeout
+      const analysisResults = await Promise.race([
+        analyzeStartupIdea(startupIdea, country, req.user.planType),
+        timeoutPromise
+      ]) as AnalysisResults;
+      
+      // Validate the response structure
+      if (!analysisResults || !analysisResults.successRate) {
+        throw new Error("Invalid response format from AI service");
+      }
       
       // Save the analysis to storage
       await storage.createAnalysis({
@@ -41,7 +63,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(analysisResults);
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
-      return res.status(500).json({ message: "Failed to analyze startup idea" });
+      
+      // Provide more specific error messages
+      if (error.message.includes("timeout")) {
+        return res.status(504).json({ 
+          message: "Analysis is taking too long. Please try a shorter description or try again later.",
+          error: "timeout"
+        });
+      } else if (error.message.includes("rate limits")) {
+        return res.status(429).json({ 
+          message: "Too many requests. Please try again in a few minutes.",
+          error: "rate_limit" 
+        });
+      } else if (error.message.includes("content policy")) {
+        return res.status(400).json({ 
+          message: "Your startup idea could not be analyzed. Please revise your content and try again.",
+          error: "content_policy" 
+        });
+      }
+      
+      return res.status(500).json({ 
+        message: "Failed to analyze startup idea. Please try again later.",
+        error: "server_error"
+      });
     }
   });
   
