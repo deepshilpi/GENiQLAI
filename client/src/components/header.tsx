@@ -35,9 +35,19 @@ export function Header() {
   const isMobile = useIsMobile();
   
   // Handle sidebar toggle on mobile
+  // Toggle sidebar via a custom event that sidebar.tsx can listen for
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-    if (!sidebarOpen) {
+    const newState = !sidebarOpen;
+    setSidebarOpen(newState);
+    
+    // Dispatch custom event for sidebar component
+    const event = new CustomEvent('toggle-sidebar', { 
+      detail: { open: newState } 
+    });
+    window.dispatchEvent(event);
+    
+    // Also update body class for stylistic changes
+    if (newState) {
       document.body.classList.add('sidebar-open');
     } else {
       document.body.classList.remove('sidebar-open');
@@ -53,8 +63,18 @@ export function Header() {
       }
     };
     
+    // Listen for custom sidebar-state-change event from sidebar component
+    const handleSidebarStateChange = (event: CustomEvent) => {
+      setSidebarOpen(event.detail.open);
+    };
+    
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('sidebar-state-change', handleSidebarStateChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('sidebar-state-change', handleSidebarStateChange as EventListener);
+    };
   }, []);
   
   const getPageTitle = () => {

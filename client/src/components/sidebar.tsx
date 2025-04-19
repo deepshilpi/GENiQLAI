@@ -56,18 +56,35 @@ export function Sidebar() {
       }
     };
     
+    // Listen for custom toggle event from header component
+    const handleToggleEvent = (event: CustomEvent) => {
+      setSidebarOpen(event.detail.open);
+    };
+    
     // Initial call to set correct state
     handleResize();
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('toggle-sidebar', handleToggleEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('toggle-sidebar', handleToggleEvent as EventListener);
+    };
   }, [isMobile]);
   
   const toggleSidebar = () => {
     if (isMobile) {
-      setSidebarOpen(!sidebarOpen);
+      const newState = !sidebarOpen;
+      setSidebarOpen(newState);
       
-      if (!sidebarOpen) {
+      // Also dispatch event to sync with header component
+      const event = new CustomEvent('sidebar-state-change', { 
+        detail: { open: newState } 
+      });
+      window.dispatchEvent(event);
+      
+      if (newState) {
         document.body.classList.add('sidebar-open');
       } else {
         document.body.classList.remove('sidebar-open');
