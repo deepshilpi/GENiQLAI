@@ -233,7 +233,7 @@ export function Header() {
   
   // Desktop Header
   return (
-    <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300">
+    <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
       <div className="flex items-center gap-3">
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
