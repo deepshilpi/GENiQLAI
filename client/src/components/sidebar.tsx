@@ -79,19 +79,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-6">
         <ul className="space-y-2">
-          <li>
-            <div 
-              className={cn(
-                "vision-sidebar-item cursor-pointer",
-                isActive("/dashboard") && "active",
-                collapsed && "justify-center px-2"
-              )}
-              onClick={() => navigate("/dashboard")}
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              {!collapsed && <span>Dashboard</span>}
-            </div>
-          </li>
+          
           <li>
             <div 
               className={cn(
