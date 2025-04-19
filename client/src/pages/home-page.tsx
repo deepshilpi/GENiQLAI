@@ -176,10 +176,7 @@ export default function HomePage() {
   
   return (
     <div className="min-h-screen bg-vision-bg flex">
-      <Sidebar />
-      
       <div className="flex-1 flex flex-col main-content transition-all duration-300">
-        <Header />
         
         <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
           {/* Three.js background canvas */}

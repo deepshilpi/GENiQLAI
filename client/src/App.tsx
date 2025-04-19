@@ -23,18 +23,19 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   
   // Public pages don't need layout with sidebar
-  const isPublicPage = ['/auth'].includes(location) || !user;
+  const isPublicPage = ['/auth'].includes(location);
   
+  // Users shouldn't see sidebar/layout if they're on public pages
   if (isPublicPage) {
     return <>{children}</>;
   }
   
   return (
     <div className="app-container">
-      {/* Only show sidebar on desktop */}
-      {!isMobile && <Sidebar />}
+      {/* Only show sidebar on desktop and for authenticated users */}
+      {!isMobile && user && <Sidebar />}
       
-      {/* Header is always shown but transforms to mobile version on smaller screens */}
+      {/* Header shown for all pages except auth, but transforms for mobile */}
       <Header />
       
       <main className={`main-content ${isMobile ? 'pt-16' : ''}`}>
