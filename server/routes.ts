@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Detect country from IP (simplified for demo)
-    const country = req.body.country || detectCountryFromIP(req.ip);
+    const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
       const analysisResults = await analyzeStartupIdea(startupIdea, country, req.user.planType);
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const investors = await findInvestors(startupIdea, detectCountryFromIP(req.ip));
+      const investors = await findInvestors(startupIdea, detectCountryFromIP(req.ip || ''));
       return res.status(200).json(investors);
     } catch (error) {
       console.error("Error finding investors:", error);
@@ -95,18 +95,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get news articles (Pro and Unicorn feature)
+  // Get news articles (Available to all users)
   app.get("/api/news", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    if (req.user.planType === "free") {
-      return res.status(403).json({ message: "Pro or Unicorn plan required for this feature" });
-    }
+    // All users can now access news articles
     
     try {
-      const country = detectCountryFromIP(req.ip);
+      const country = detectCountryFromIP(req.ip || '');
       const articles = await searchStartupNews(country);
       return res.status(200).json(articles);
     } catch (error) {
@@ -186,16 +184,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create a post (Pro and Unicorn feature)
+  // Create a post (Available to all users)
   app.post("/api/posts", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    if (req.user.planType === "free") {
-      return res.status(403).json({ message: "Pro or Unicorn plan required to create posts" });
-    }
-    
+    // All users can now create posts
     const { title, description, tags } = req.body;
     
     if (!title || !description || !tags) {
