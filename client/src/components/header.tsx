@@ -81,9 +81,17 @@ export function Header() {
   if (isMobile) {
     return (
       <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 vision-card shadow-lg">
-        {/* Logo section */}
+        {/* Logo section with menu toggle */}
         <div className="flex items-center">
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg mr-1"
+              onClick={toggleSidebar}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
             <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
               <BrainCircuit className="w-5 h-5 text-white" />
             </div>
@@ -217,15 +225,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Theme toggle */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
-            onClick={toggleTheme}
-          >
-            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </Button>
+          {/* Theme toggle removed as requested */}
         </div>
       </header>
     );
@@ -239,13 +239,14 @@ export function Header() {
       </div>
       
       <div className="flex items-center space-x-3">
+        {/* Menu toggle for sidebar */}
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
-          onClick={toggleTheme}
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9 mr-2"
+          onClick={toggleSidebar}
         >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <Menu className="w-5 h-5" />
         </Button>
         
         {/* Notifications Button with badge */}
