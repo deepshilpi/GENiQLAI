@@ -61,6 +61,40 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Vision UI Dashboard specific colors
+        "vision-purple": {
+          100: "rgba(161, 99, 247, 0.1)",
+          200: "rgba(161, 99, 247, 0.2)",
+          300: "rgba(161, 99, 247, 0.3)",
+          400: "rgba(161, 99, 247, 0.4)",
+          500: "rgba(161, 99, 247, 0.6)",
+          600: "rgba(161, 99, 247, 0.8)",
+          700: "rgba(161, 99, 247, 1)",
+        },
+        "vision-blue": {
+          100: "rgba(24, 150, 255, 0.1)",
+          200: "rgba(24, 150, 255, 0.2)",
+          300: "rgba(24, 150, 255, 0.3)",
+          400: "rgba(24, 150, 255, 0.4)",
+          500: "rgba(24, 150, 255, 0.6)",
+          600: "rgba(24, 150, 255, 0.8)",
+          700: "rgba(24, 150, 255, 1)",
+        },
+        "vision-bg": "rgba(17, 8, 49, 1)",
+        "vision-card": "rgba(31, 35, 89, 0.25)",
+      },
+      backdropBlur: {
+        xs: "2px",
+        sm: "4px",
+        md: "8px",
+        lg: "12px",
+        xl: "16px",
+      },
+      backgroundImage: {
+        'vision-gradient': 'linear-gradient(127.09deg, rgba(6, 11, 40, 0.94) 19.41%, rgba(10, 14, 35, 0.69) 76.65%)',
+        'vision-primary-gradient': 'linear-gradient(90deg, #7551FF 0%, #A163F7 50.52%, #CB9FFF 100%)',
+        'vision-blue-gradient': 'linear-gradient(90deg, #0075FF 0%, #56ABFF 50.52%, #94C9FF 100%)',
+        'vision-sidebar': 'linear-gradient(120deg, rgba(26, 18, 63, 0.94) 0%, rgba(10, 10, 49, 0.94) 100%)',
       },
       keyframes: {
         "accordion-down": {

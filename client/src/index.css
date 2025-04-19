@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 223 67% 13%;
+    --background: 260 83% 11%; /* Vision UI dark purple background */
     --foreground: 0 0% 100%;
 
-    --card: 222 62% 17%;
+    --card: 245 65% 25% / 0.25; /* Semi-transparent card background */
     --card-foreground: 0 0% 100%;
 
-    --popover: 222 62% 17%;
+    --popover: 245 65% 25% / 0.35;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 222 83% 57%;
+    --primary: 259 100% 65%; /* Main purple from Vision UI */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 257 69% 53%;
+    --secondary: 220 100% 55%; /* Blue accent */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 227 30% 40%;
+    --muted: 259 30% 40%;
     --muted-foreground: 231 18% 82%;
 
-    --accent: 223 67% 21%;
+    --accent: 245 65% 25% / 0.5; /* Semi-transparent accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 68%;
@@ -34,26 +34,26 @@
     --warning: 38 92% 64%;
     --warning-foreground: 0 0% 20%;
 
-    --border: 222 47% 21%;
-    --input: 222 47% 21%;
-    --ring: 222 47% 21%;
+    --border: 259 30% 50% / 0.15;
+    --input: 259 30% 50% / 0.15;
+    --ring: 259 100% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 222 62% 17%;
+    --sidebar-background: 260 83% 10%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 222 83% 57%;
+    --sidebar-primary: 259 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 223 67% 21%;
+    --sidebar-accent: 260 83% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 47% 21%;
-    --sidebar-ring: 222 83% 57%;
+    --sidebar-border: 259 30% 50% / 0.15;
+    --sidebar-ring: 259 100% 65%;
 
-    --chart-1: 222 83% 57%;
-    --chart-2: 157 94% 36%;
+    --chart-1: 259 100% 65%;
+    --chart-2: 220 100% 55%;
     --chart-3: 38 92% 64%;
     --chart-4: 0 84% 68%;
-    --chart-5: 257 69% 53%;
+    --chart-5: 157 94% 36%;
   }
 }
 
@@ -63,14 +63,43 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-vision-bg text-foreground;
+    background-image: 
+      radial-gradient(50% 50% at 50% 50%, rgba(161, 99, 247, 0.1) 0%, rgba(33, 5, 91, 0) 100%),
+      linear-gradient(180deg, rgba(75, 22, 153, 0.15) 0%, rgba(45, 20, 121, 0) 100%);
+    background-attachment: fixed;
+    background-size: cover;
   }
 
-  .gradient-border {
+  /* Vision UI specific components */
+  .vision-card {
+    @apply rounded-xl bg-vision-card border border-vision-purple-200/10 backdrop-blur-md;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 
+                inset 0px 0px 2px 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .vision-header {
+    @apply backdrop-blur-lg bg-vision-purple-100/5 border-b border-vision-purple-200/10;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .vision-sidebar {
+    @apply bg-vision-sidebar border-r border-vision-purple-200/10 shadow-xl;
+  }
+
+  .vision-sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-vision-purple-100/10 transition-all;
+  }
+
+  .vision-sidebar-item.active {
+    @apply bg-vision-purple-100/10 text-white;
+  }
+
+  .vision-gradient-border {
     position: relative;
   }
   
-  .gradient-border::after {
+  .vision-gradient-border::after {
     content: '';
     position: absolute;
     top: 0;
@@ -78,14 +107,27 @@
     right: 0;
     bottom: 0;
     border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(90deg, hsl(var(--secondary)), hsl(var(--success)));
+    padding: 1.5px;
+    background: linear-gradient(90deg, #7551FF 0%, #A163F7 50%, #CB9FFF 100%);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     pointer-events: none;
   }
 
   .gradient-blue {
-    background: linear-gradient(90deg, hsla(var(--primary) / 0.2) 0%, hsla(var(--primary) / 0) 100%);
+    background: linear-gradient(90deg, rgba(24, 150, 255, 0.2) 0%, rgba(24, 150, 255, 0) 100%);
+  }
+
+  .gradient-purple {
+    background: linear-gradient(90deg, rgba(161, 99, 247, 0.2) 0%, rgba(161, 99, 247, 0) 100%);
+  }
+
+  /* Progress bar custom style */
+  .vision-progress {
+    @apply h-2 rounded-full overflow-hidden bg-gray-700/30;
+  }
+
+  .vision-progress-bar {
+    @apply h-full bg-vision-primary-gradient;
   }
 }
