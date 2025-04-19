@@ -88,30 +88,30 @@ export function Header() {
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
       
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8 sm:w-9 sm:h-9 sm:flex"
           onClick={toggleTheme}
         >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {isDarkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
         </Button>
         
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex header-actions"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8 sm:w-9 sm:h-9 hidden sm:flex header-actions"
         >
-          <Bell className="w-5 h-5" />
+          <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
         
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex header-actions"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8 sm:w-9 sm:h-9 hidden sm:flex header-actions"
         >
-          <Settings className="w-5 h-5" />
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
         
         <DropdownMenu>

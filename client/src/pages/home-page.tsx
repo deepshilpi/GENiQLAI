@@ -208,7 +208,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-vision-bg flex">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col ml-[260px]">
+      <div className="flex-1 flex flex-col main-content transition-all duration-300">
         <Header />
         
         <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
@@ -232,12 +232,12 @@ export default function HomePage() {
                   }}
                 />
                 
-                <div className="flex items-center justify-center space-x-3 mb-8">
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-3 mb-8 text-center sm:text-left">
                   <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
                     <BrainCircuit className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-white">GENIQL AI Startup Analysis</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">GENIQL AI Startup Analysis</h1>
                     <p className="text-white/60 text-sm">Free users get all 8 analysis points in basic mode</p>
                   </div>
                 </div>
@@ -255,11 +255,11 @@ export default function HomePage() {
                   />
                 </div>
                 
-                <div className="flex justify-end">
+                <div className="flex justify-center sm:justify-end">
                   <Button 
                     onClick={handleAnalyze}
                     disabled={!startupIdea.trim() || isAnalyzing}
-                    className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white font-medium"
+                    className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white font-medium w-full sm:w-auto"
                   >
                     {isAnalyzing ? (
                       <>
@@ -269,7 +269,8 @@ export default function HomePage() {
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Analyze My Startup Idea
+                        <span className="hidden sm:inline">Analyze My Startup Idea</span>
+                        <span className="sm:hidden">Analyze Idea</span>
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </>
                     )}
@@ -290,10 +291,10 @@ export default function HomePage() {
             <div className="w-full max-w-7xl">
               <div className="flex flex-col space-y-6">
                 {/* Header with back button */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <Button 
                     variant="ghost" 
-                    className="text-white/70 hover:text-white hover:bg-vision-purple-100/10"
+                    className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 self-start"
                     onClick={() => setAnalysisStep('input')}
                   >
                     <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
@@ -303,7 +304,7 @@ export default function HomePage() {
                   <div className="flex items-center">
                     <Button 
                       variant="ghost"
-                      className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 mr-2"
+                      className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 mr-2 header-actions"
                     >
                       Share Results
                     </Button>
@@ -322,7 +323,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Results grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 results-grid">
                   {/* Success Rate */}
                   {analysisResults?.successRate && (
                     <div className="vision-card p-6 flex flex-col">
@@ -455,18 +456,18 @@ export default function HomePage() {
                 </div>
                 
                 {/* Bottom action buttons */}
-                <div className="flex justify-between mt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
                   <Button 
                     variant="outline" 
-                    className="border-vision-purple-200/20 text-white hover:bg-vision-purple-100/10"
+                    className="border-vision-purple-200/20 text-white hover:bg-vision-purple-100/10 w-full sm:w-auto"
                     onClick={() => setAnalysisStep('input')}
                   >
                     Try Another Idea
                   </Button>
                   
-                  <div className="flex space-x-3">
+                  <div className="flex w-full sm:w-auto">
                     <Button 
-                      className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white"
+                      className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white w-full sm:w-auto"
                     >
                       Get Detailed Report
                     </Button>
