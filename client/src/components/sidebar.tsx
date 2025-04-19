@@ -1,24 +1,33 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { 
-  PieChart, 
-  Users, 
-  Lightbulb, 
+  LayoutDashboard, 
+  BrainCircuit, 
   MessageSquare, 
-  TrendingUp, 
+  BarChart3, 
   Newspaper, 
   User, 
   Settings, 
   CreditCard, 
   LogOut,
-  HelpCircle
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Sidebar() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
   
   const isActive = (path: string) => {
     return location === path;
@@ -27,118 +36,195 @@ export function Sidebar() {
   const handleLogout = () => {
     logoutMutation.mutate();
   };
+
+  if (isMobile && collapsed) {
+    return (
+      <div 
+        className="fixed left-0 top-1/2 -translate-y-1/2 bg-vision-purple-700 rounded-r-md p-2 shadow-lg z-50 cursor-pointer"
+        onClick={toggleSidebar}
+      >
+        <ChevronRight className="w-5 h-5 text-white" />
+      </div>
+    );
+  }
   
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-card flex flex-col border-r border-border z-10">
-      <div className="p-5 border-b border-border">
+    <aside 
+      className={cn(
+        "fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
+        collapsed ? "w-[70px]" : "w-[260px]"
+      )}
+    >
+      {/* Logo section */}
+      <div className="p-4 flex items-center justify-between">
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2">
-            <i className="fas fa-brain text-white"></i>
+          <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center flex-shrink-0">
+            <BrainCircuit className="w-6 h-6 text-white" />
           </div>
-          <span className="font-bold text-xl text-white">GENIQL</span>
-          <span className="text-xs bg-muted px-2 py-0.5 rounded ml-2">BETA</span>
+          {!collapsed && (
+            <div className="ml-3">
+              <span className="font-bold text-xl text-white">GENIQL</span>
+              <span className="text-[10px] bg-vision-purple-200/20 px-1.5 py-0.5 rounded-sm ml-1 text-white/80">BETA</span>
+            </div>
+          )}
         </div>
+        <button 
+          onClick={toggleSidebar} 
+          className="w-6 h-6 flex items-center justify-center rounded-full bg-vision-purple-200/10 text-white hover:bg-vision-purple-200/20 transition-colors"
+        >
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
       </div>
       
-      <nav className="flex-1 py-4">
-        <ul>
-          <li className="mb-1">
-            <Link href="/dashboard">
-              <a className={`flex items-center px-5 py-3 ${isActive("/dashboard") ? "text-white bg-primary rounded-r-full" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <PieChart className="w-5 h-5 mr-3" />
-                <span>Dashboard</span>
-              </a>
-            </Link>
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-6">
+        <ul className="space-y-2">
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/dashboard") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/dashboard")}
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              {!collapsed && <span>Dashboard</span>}
+            </div>
           </li>
-          <li className="mb-1">
-            <Link href="/startup-ideas">
-              <a className={`flex items-center px-5 py-3 ${isActive("/startup-ideas") ? "text-white bg-primary rounded-r-full" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <Lightbulb className="w-5 h-5 mr-3" />
-                <span>Startup Ideas</span>
-              </a>
-            </Link>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/")}
+            >
+              <BrainCircuit className="w-5 h-5" />
+              {!collapsed && <span>AI Analysis</span>}
+            </div>
           </li>
-          <li className="mb-1">
-            <Link href="/community">
-              <a className={`flex items-center px-5 py-3 ${isActive("/community") ? "text-white bg-primary rounded-r-full" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <MessageSquare className="w-5 h-5 mr-3" />
-                <span>Community</span>
-              </a>
-            </Link>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/community") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/community")}
+            >
+              <MessageSquare className="w-5 h-5" />
+              {!collapsed && <span>Community</span>}
+            </div>
           </li>
-          <li className="mb-1">
-            <Link href="/analytics">
-              <a className={`flex items-center px-5 py-3 ${isActive("/analytics") ? "text-white bg-primary rounded-r-full" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <TrendingUp className="w-5 h-5 mr-3" />
-                <span>Analytics</span>
-              </a>
-            </Link>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/analytics") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/analytics")}
+            >
+              <BarChart3 className="w-5 h-5" />
+              {!collapsed && <span>Analytics</span>}
+            </div>
           </li>
           {(user?.planType === "pro" || user?.planType === "unicorn") && (
-            <li className="mb-1">
-              <Link href="/market-news">
-                <a className={`flex items-center px-5 py-3 ${isActive("/market-news") ? "text-white bg-primary rounded-r-full" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                  <Newspaper className="w-5 h-5 mr-3" />
-                  <span>Market News</span>
-                </a>
-              </Link>
+            <li>
+              <div 
+                className={cn(
+                  "vision-sidebar-item cursor-pointer",
+                  isActive("/market-news") && "active",
+                  collapsed && "justify-center px-2"
+                )}
+                onClick={() => navigate("/market-news")}
+              >
+                <Newspaper className="w-5 h-5" />
+                {!collapsed && <span>Market News</span>}
+              </div>
             </li>
           )}
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-border">
-        <h4 className="text-muted-foreground uppercase text-xs tracking-wide mb-3">Account</h4>
-        <ul>
-          <li className="mb-1">
-            <Link href={`/profile/${user?.username}`}>
-              <a className={`flex items-center px-3 py-2 ${isActive(`/profile/${user?.username}`) ? "text-white" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <User className="w-5 h-5 mr-3" />
-                <span>Profile</span>
-              </a>
-            </Link>
+      {/* Account section */}
+      <div className="px-3 py-2 border-t border-vision-purple-200/10">
+        {!collapsed && (
+          <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2">Account</h4>
+        )}
+        <ul className="space-y-1 mb-4">
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive(`/profile/${user?.username}`) && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate(`/profile/${user?.username}`)}
+            >
+              <User className="w-5 h-5" />
+              {!collapsed && <span>Profile</span>}
+            </div>
           </li>
-          <li className="mb-1">
-            <Link href="/settings">
-              <a className={`flex items-center px-3 py-2 ${isActive("/settings") ? "text-white" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <Settings className="w-5 h-5 mr-3" />
-                <span>Settings</span>
-              </a>
-            </Link>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/settings") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/settings")}
+            >
+              <Settings className="w-5 h-5" />
+              {!collapsed && <span>Settings</span>}
+            </div>
           </li>
-          <li className="mb-1">
-            <Link href="/subscription">
-              <a className={`flex items-center px-3 py-2 ${isActive("/subscription") ? "text-white" : "text-muted-foreground hover:text-white transition-colors"}`}>
-                <CreditCard className="w-5 h-5 mr-3" />
-                <span>Subscription</span>
-              </a>
-            </Link>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/subscription") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/subscription")}
+            >
+              <CreditCard className="w-5 h-5" />
+              {!collapsed && <span>Plans</span>}
+            </div>
           </li>
-          <li className="mb-1">
+          <li>
             <button 
               onClick={handleLogout}
-              className="w-full text-left flex items-center px-3 py-2 text-muted-foreground hover:text-white transition-colors"
+              className={cn(
+                "vision-sidebar-item w-full text-left",
+                collapsed && "justify-center px-2"
+              )}
             >
-              <LogOut className="w-5 h-5 mr-3" />
-              <span>Logout</span>
+              <LogOut className="w-5 h-5" />
+              {!collapsed && <span>Logout</span>}
             </button>
           </li>
         </ul>
       </div>
       
-      <div className="p-4 m-3 bg-accent rounded-xl">
-        <div className="mb-2 text-sm text-foreground font-medium flex items-center">
-          <HelpCircle className="w-4 h-4 mr-2" />
-          Need help?
+      {/* Help section - only show when not collapsed */}
+      {!collapsed && (
+        <div className="p-4 mx-3 mb-4 vision-card bg-vision-card/50">
+          <div className="mb-2 text-sm text-white font-medium flex items-center">
+            <HelpCircle className="w-4 h-4 mr-2 text-vision-purple-700" />
+            Need help?
+          </div>
+          <p className="text-xs text-white/60 mb-3">Check our documentation</p>
+          <Button 
+            variant="outline" 
+            className="w-full bg-vision-purple-100/10 text-white text-xs h-8 border-vision-purple-300/20 hover:bg-vision-purple-200/20"
+          >
+            Documentation
+          </Button>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">Check our documentation</p>
-        <Button 
-          variant="outline" 
-          className="w-full bg-background-light text-foreground text-sm py-2 rounded-lg hover:bg-opacity-80 transition-colors"
-        >
-          Documentation
-        </Button>
-      </div>
+      )}
     </aside>
   );
 }

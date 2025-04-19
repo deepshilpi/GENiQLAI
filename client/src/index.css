@@ -70,6 +70,51 @@
     background-attachment: fixed;
     background-size: cover;
   }
+  
+  /* Vision UI colors */
+  .bg-vision-bg {
+    background-color: #0B1437;
+  }
+  
+  .bg-vision-card {
+    background-color: rgba(67, 24, 255, 0.1);
+  }
+  
+  .bg-vision-sidebar {
+    background-color: rgba(17, 8, 60, 0.95);
+  }
+  
+  .bg-vision-primary-gradient {
+    background: linear-gradient(90deg, #7551FF 0%, #A163F7 100%);
+  }
+  
+  .border-vision-purple-200 {
+    border-color: rgba(161, 99, 247, 0.2);
+  }
+  
+  .border-vision-purple-300 {
+    border-color: rgba(161, 99, 247, 0.3);
+  }
+  
+  .border-vision-purple-500 {
+    border-color: rgba(161, 99, 247, 0.5);
+  }
+  
+  .text-vision-purple-700 {
+    color: #A163F7;
+  }
+  
+  .bg-vision-purple-100 {
+    background-color: rgba(161, 99, 247, 0.1);
+  }
+  
+  .bg-vision-purple-200 {
+    background-color: rgba(161, 99, 247, 0.2);
+  }
+  
+  .bg-vision-purple-700 {
+    background-color: #A163F7;
+  }
 
   /* Vision UI specific components */
   .vision-card {

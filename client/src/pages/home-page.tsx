@@ -1,202 +1,231 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
-import { PricingPlans } from "@/components/pricing-plans";
-import { Footer } from "@/components/footer";
+import { Sidebar } from "@/components/sidebar";
+import { Header } from "@/components/header";
+import { 
+  BrainCircuit, 
+  Sparkles, 
+  ArrowRight, 
+  Loader2
+} from "lucide-react";
+import * as THREE from "three";
 
 export default function HomePage() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
-
+  const [startupIdea, setStartupIdea] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const pointsRef = useRef<THREE.Points | null>(null);
+  
+  // Initialize Three.js background animation
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    
+    // Scene setup
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+    
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(
+      75, 
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 20;
+    cameraRef.current = camera;
+    
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvasRef.current,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    rendererRef.current = renderer;
+    
+    // Create particle geometry
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 1500;
+    
+    const posArray = new Float32Array(particlesCount * 3);
+    const colorArray = new Float32Array(particlesCount * 3);
+    
+    for (let i = 0; i < particlesCount * 3; i++) {
+      // Position
+      posArray[i] = (Math.random() - 0.5) * 50;
+      
+      // Colors - purples and blues for vision UI theme
+      if (i % 3 === 0) { // R value
+        colorArray[i] = Math.random() * 0.5 + 0.3; // purple-ish
+      } else if (i % 3 === 1) { // G value
+        colorArray[i] = Math.random() * 0.2;
+      } else { // B value
+        colorArray[i] = Math.random() * 0.5 + 0.5; // blue-ish
+      }
+    }
+    
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+    
+    // Material
+    const particlesMaterial = new THREE.PointsMaterial({
+      size: 0.1,
+      vertexColors: true,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+    
+    // Mesh
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+    pointsRef.current = particlesMesh;
+    
+    // Animation
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      if (pointsRef.current) {
+        pointsRef.current.rotation.x += 0.0003;
+        pointsRef.current.rotation.y += 0.0005;
+      }
+      
+      renderer.render(scene, camera);
+    };
+    
+    animate();
+    
+    // Handle resize
+    const handleResize = () => {
+      if (!cameraRef.current || !rendererRef.current) return;
+      
+      cameraRef.current.aspect = window.innerWidth / window.innerHeight;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(window.innerWidth, window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (pointsRef.current) {
+        pointsRef.current.geometry.dispose();
+        (pointsRef.current.material as THREE.Material).dispose();
+      }
+      
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+    };
+  }, []);
+  
+  const handleAnalyze = async () => {
+    if (!startupIdea.trim() || isAnalyzing) return;
+    
+    setIsAnalyzing(true);
+    
+    try {
+      // In a real implementation, this would call your API
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+    } catch (error) {
+      console.error("Error analyzing startup idea:", error);
+      setIsAnalyzing(false);
+    }
+  };
+  
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Hero Section */}
-      <header className="bg-background py-6 px-4 border-b border-border">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2">
-              <i className="fas fa-brain text-white"></i>
-            </div>
-            <span className="font-bold text-xl text-white">GENIQL</span>
-            <span className="text-xs bg-muted px-2 py-0.5 rounded ml-2">BETA</span>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <Button onClick={() => navigate("/dashboard")}>
-                Dashboard
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => navigate("/auth")}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate("/auth")}>
-                  Get Started
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-vision-bg flex">
+      <Sidebar />
       
-      <main className="flex-grow">
-        {/* Hero Banner */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto text-center max-w-4xl">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Turn Startup Ideas into 
-              <span className="text-primary"> Data-Driven Success</span>
-            </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              GENIQL analyzes your startup idea across 8 key metrics using AI, giving you actionable insights and a community to connect with fellow entrepreneurs.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
-                Try It Free
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate("#features")}>
-                Learn More
-              </Button>
-            </div>
-          </div>
-        </section>
-      
-        {/* Features */}
-        <section id="features" className="py-16 px-4 bg-accent">
-          <div className="container mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">8-Point AI Analysis</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  title: "Success Rate",
-                  icon: "chart-pie",
-                  description: "Get a data-driven prediction of your startup's success probability based on market conditions."
-                },
-                {
-                  title: "Competitors",
-                  icon: "users",
-                  description: "Identify key competitors and understand your potential market share in the industry."
-                },
-                {
-                  title: "Market Viability",
-                  icon: "check-circle",
-                  description: "Evaluate if there's a sustainable market for your idea with growth potential."
-                },
-                {
-                  title: "Value Proposition",
-                  icon: "star",
-                  description: "Discover what makes your idea unique and how to position it in the market."
-                },
-                {
-                  title: "CAGR Analysis",
-                  icon: "chart-line",
-                  description: "Project your compound annual growth rate compared to industry averages."
-                },
-                {
-                  title: "Failed Executions",
-                  icon: "exclamation-triangle",
-                  description: "Learn from similar startups that didn't succeed and avoid common pitfalls."
-                },
-                {
-                  title: "Funding Requirements",
-                  icon: "dollar-sign",
-                  description: "Get estimates on how much capital you'll need at each stage of growth."
-                },
-                {
-                  title: "Go-to-Market Strategy",
-                  icon: "rocket",
-                  description: "Develop a comprehensive plan to launch and scale your startup effectively."
-                }
-              ].map((feature, index) => (
-                <Card key={index} className="bg-card border-border">
-                  <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                      <i className={`fas fa-${feature.icon} text-primary`}></i>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
+      <div className="flex-1 flex flex-col ml-[260px]">
+        <Header />
         
-        {/* Community */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row gap-12 items-center">
-              <div className="md:w-1/2">
-                <h2 className="text-3xl font-bold mb-4">Join Our Entrepreneur Community</h2>
-                <p className="text-muted-foreground mb-6">
-                  Connect with like-minded entrepreneurs, share your startup ideas, get feedback, and learn from others' experiences.
-                </p>
-                <ul className="space-y-3 mb-6">
-                  {[
-                    "Post your startup ideas after analysis",
-                    "Receive votes and feedback from the community",
-                    "Follow other entrepreneurs and track their journey",
-                    "Discover trending startup concepts and markets"
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start">
-                      <i className="fas fa-check-circle text-success mt-1 mr-2"></i>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button onClick={() => navigate(user ? "/community" : "/auth")}>
-                  Explore Community
-                </Button>
-              </div>
-              <div className="md:w-1/2 bg-card rounded-xl p-6">
-                <div className="space-y-4">
-                  {[1, 2].map((post) => (
-                    <div key={post} className="p-4 bg-accent rounded-lg">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20"></div>
-                        <div>
-                          <div className="font-medium">Entrepreneur #{post}</div>
-                          <div className="text-xs text-muted-foreground">Posted recently</div>
-                        </div>
-                      </div>
-                      <h3 className="font-bold mb-2">Example Startup Idea #{post}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        This is a preview of what community posts look like. Upgrade to Pro to create your own!
-                      </p>
-                      <div className="flex justify-between">
-                        <div className="flex gap-2">
-                          <span className="text-xs bg-accent-foreground/10 px-2 py-1 rounded">Tag</span>
-                          <span className="text-xs bg-accent-foreground/10 px-2 py-1 rounded">Tag</span>
-                        </div>
-                        <div className="flex gap-2 text-sm">
-                          <span><i className="fas fa-arrow-up text-success"></i> 42</span>
-                          <span><i className="fas fa-comment text-muted"></i> 15</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+        <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
+          {/* Three.js background canvas */}
+          <canvas 
+            ref={canvasRef} 
+            className="absolute top-0 left-0 w-full h-full -z-10"
+          />
+          
+          {/* Centered prompt box */}
+          <div className="w-full max-w-3xl">
+            <div className="vision-card overflow-hidden p-8 relative">
+              {/* Glowing effect at the top */}
+              <div 
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full" 
+                style={{
+                  background: "radial-gradient(circle, rgba(161, 99, 247, 0.3) 0%, rgba(161, 99, 247, 0) 70%)",
+                  filter: "blur(20px)"
+                }}
+              />
+              
+              <div className="flex items-center justify-center space-x-3 mb-8">
+                <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
+                  <BrainCircuit className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">GENIQL AI Startup Analysis</h1>
+                  <p className="text-white/60 text-sm">Free users get all 8 analysis points in basic mode</p>
                 </div>
               </div>
+              
+              <div className="mb-6">
+                <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">
+                  Describe your startup idea in detail
+                </label>
+                <Textarea
+                  id="startup-idea"
+                  value={startupIdea}
+                  onChange={(e) => setStartupIdea(e.target.value)}
+                  placeholder="Example: A subscription service that delivers personalized book recommendations based on AI analysis of reading preferences and behavior..."
+                  className="h-32 bg-vision-card/80 border-vision-purple-200/20 text-white placeholder:text-white/40 focus:border-vision-purple-500"
+                />
+              </div>
+              
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleAnalyze}
+                  disabled={!startupIdea.trim() || isAnalyzing}
+                  className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white font-medium"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Analyze My Startup Idea
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              {/* Bottom glowing effect */}
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20" 
+                style={{
+                  background: "radial-gradient(ellipse at center, rgba(161, 99, 247, 0.15) 0%, rgba(161, 99, 247, 0) 70%)",
+                  filter: "blur(20px)"
+                }}
+              />
             </div>
           </div>
-        </section>
-        
-        {/* Pricing */}
-        <section id="pricing" className="py-16 px-4 bg-accent">
-          <div className="container mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">Choose Your Plan</h2>
-            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Select the plan that fits your needs. Upgrade anytime as your startup grows.
-            </p>
-            <PricingPlans />
-          </div>
-        </section>
-      </main>
-      
-      <Footer />
+        </main>
+      </div>
     </div>
   );
 }
