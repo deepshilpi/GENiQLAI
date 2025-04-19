@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -13,11 +14,14 @@ import { Post } from "@shared/schema";
 import { isPlanAllowed } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { PricingPlans } from "@/components/pricing-plans";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CommunityPage() {
   const { user } = useAuth();
   const [showPostForm, setShowPostForm] = useState(false);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [_, navigate] = useLocation();
+  const { toast } = useToast();
 
   // Query posts
   const { data: posts, isLoading } = useQuery<Post[]>({
@@ -45,8 +49,13 @@ export default function CommunityPage() {
 
   const handleNewPost = () => {
     if (!user) {
-      // Redirect to auth page if not logged in
-      window.location.href = '/auth';
+      // Show toast and navigate to auth
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create posts in the community",
+        variant: "default",
+      });
+      navigate('/auth');
       return;
     }
     

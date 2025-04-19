@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface CommunityPostProps {
   post: Post;
@@ -13,11 +14,18 @@ interface CommunityPostProps {
 export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps) {
   const authorUsername = useMemo(() => "Username", []);
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
+  const [_, navigate] = useLocation();
+  const { toast } = useToast();
   
   const handlePump = () => {
     if (!currentUser) {
-      // Redirect to auth page or show login prompt
-      window.location.href = '/auth';
+      // Show toast and navigate to auth
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to vote on community posts",
+        variant: "default",
+      });
+      navigate('/auth');
       return;
     }
     onVote(post.id, "pump");
@@ -25,8 +33,13 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   
   const handleDump = () => {
     if (!currentUser) {
-      // Redirect to auth page or show login prompt
-      window.location.href = '/auth';
+      // Show toast and navigate to auth
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to vote on community posts",
+        variant: "default",
+      });
+      navigate('/auth');
       return;
     }
     onVote(post.id, "dump");

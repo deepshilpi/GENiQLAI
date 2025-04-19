@@ -69,3 +69,18 @@ export function isPlanAllowed(userPlan: string, requiredPlan: string): boolean {
   return planHierarchy[userPlan as keyof typeof planHierarchy] >= 
          planHierarchy[requiredPlan as keyof typeof planHierarchy];
 }
+
+export function redirectToAuthIfNeeded(user: any, navigate: Function, message?: string): boolean {
+  if (!user) {
+    // Show an optional message using toast instead of alert for better UX
+    if (message) {
+      // Just navigate without message, component should handle toast
+    }
+    
+    // Redirect to auth page
+    navigate('/auth');
+    return true;
+  }
+  
+  return false;
+}
