@@ -71,6 +71,20 @@
     background-size: cover;
   }
   
+  /* App Layout Structure */
+  .app-container {
+    @apply min-h-screen flex flex-col md:flex-row relative;
+  }
+  
+  .main-content {
+    @apply flex-1 md:ml-[260px] transition-all duration-300 min-h-screen;
+  }
+  
+  /* For collapsed sidebar on desktop */
+  .sidebar-collapsed .main-content {
+    @apply md:ml-[70px];
+  }
+  
   /* Vision UI colors */
   .bg-vision-bg {
     background-color: #0B1437;
@@ -176,10 +190,20 @@
     @apply h-full bg-vision-primary-gradient;
   }
   
+  /* Popups and Modals */
+  .vision-popup {
+    @apply bg-vision-card/90 backdrop-blur-md border border-vision-purple-200/20 rounded-xl shadow-lg;
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .main-content {
       @apply ml-0 !important;
+      padding-top: 60px; /* Space for fixed mobile header */
+    }
+    
+    .vision-header {
+      height: 60px;
     }
     
     .sidebar-open .main-content {
@@ -197,7 +221,7 @@
     
     /* Backdrop overlay when sidebar is open */
     .sidebar-backdrop {
-      @apply hidden fixed inset-0 bg-black/50 z-10;
+      @apply hidden fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
     }
     
     .sidebar-open .sidebar-backdrop {
