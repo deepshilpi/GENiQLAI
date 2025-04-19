@@ -46,7 +46,7 @@ export function Header() {
   };
   
   return (
-    <header className="vision-header px-6 py-3 flex items-center justify-between sticky top-0 z-10 ml-[260px] w-[calc(100%-260px)]">
+    <header className="vision-header px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300">
       <div className="flex items-center">
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
