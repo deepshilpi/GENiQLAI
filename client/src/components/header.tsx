@@ -48,10 +48,6 @@ export function Header() {
   return (
     <header className="vision-header px-6 py-3 flex items-center justify-between sticky top-0 z-10 ml-[260px] w-[calc(100%-260px)]">
       <div className="flex items-center">
-        <div className="mr-2 bg-vision-purple-100/10 p-1 rounded">
-          <Home className="text-white w-4 h-4" />
-        </div>
-        <span className="text-white/50 mx-2">/</span>
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
       
