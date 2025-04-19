@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import {
   LogOut,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -23,10 +24,39 @@ export function Sidebar() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
   
+  // Set initial collapsed state based on screen size
+  useEffect(() => {
+    setCollapsed(isMobile);
+    
+    // Add class to body for mobile sidebar control
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCollapsed(true);
+        document.body.classList.remove('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile]);
+  
   const toggleSidebar = () => {
-    setCollapsed(!collapsed);
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+      
+      if (!sidebarOpen) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
+    } else {
+      setCollapsed(!collapsed);
+    }
   };
   
   const isActive = (path: string) => {
@@ -37,22 +67,35 @@ export function Sidebar() {
     logoutMutation.mutate();
   };
 
-  if (isMobile && collapsed) {
+  // Mobile toggle button
+  if (isMobile && !sidebarOpen) {
     return (
-      <div 
-        className="fixed left-0 top-1/2 -translate-y-1/2 bg-vision-purple-700 rounded-r-md p-2 shadow-lg z-50 cursor-pointer"
-        onClick={toggleSidebar}
-      >
-        <ChevronRight className="w-5 h-5 text-white" />
-      </div>
+      <>
+        <div 
+          className="fixed left-0 top-1/2 -translate-y-1/2 bg-vision-purple-700 rounded-r-md p-2 shadow-lg z-50 cursor-pointer"
+          onClick={toggleSidebar}
+        >
+          <Menu className="w-5 h-5 text-white" />
+        </div>
+        <aside className="sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 w-[260px] -translate-x-full transition-transform duration-300"></aside>
+      </>
     );
   }
+  
+  // Add backdrop overlay for mobile
+  const handleBackdropClick = () => {
+    if (isMobile) {
+      toggleSidebar();
+    }
+  };
   
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
-        collapsed ? "w-[70px]" : "w-[260px]"
+        "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
+        collapsed ? "w-[70px]" : "w-[260px]",
+        isMobile && "w-[260px]",
+        isMobile && sidebarOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "translate-x-0"
       )}
     >
       {/* Logo section */}

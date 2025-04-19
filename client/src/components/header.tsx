@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,8 @@ import {
   User,
   Sun,
   Moon,
-  ChevronDown
+  ChevronDown,
+  Menu
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,11 +20,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Handle sidebar toggle on mobile
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+    if (!sidebarOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+  };
+  
+  useEffect(() => {
+    // Reset sidebar state when resizing from mobile to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(false);
+        document.body.classList.remove('sidebar-open');
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const getPageTitle = () => {
     if (location === "/") return "AI Analysis";
@@ -46,8 +73,18 @@ export function Header() {
   };
   
   return (
-    <header className="vision-header px-6 py-3 flex items-center justify-between sticky top-0 z-10 ml-[260px] w-[calc(100%-260px)]">
-      <div className="flex items-center">
+    <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 main-content transition-all duration-300">
+      <div className="flex items-center gap-3">
+        {isMobile && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg"
+            onClick={toggleSidebar}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+        )}
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
       
@@ -55,7 +92,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex"
           onClick={toggleTheme}
         >
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -64,7 +101,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex header-actions"
         >
           <Bell className="w-5 h-5" />
         </Button>
@@ -72,7 +109,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg hidden sm:flex header-actions"
         >
           <Settings className="w-5 h-5" />
         </Button>
@@ -80,7 +117,7 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
-              <div className="flex flex-col items-end mr-2">
+              <div className="hidden sm:flex flex-col items-end mr-2">
                 <span className="text-white text-sm font-medium">{user?.username || "Guest"}</span>
                 <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
               </div>
@@ -93,7 +130,7 @@ export function Header() {
                   <User className="w-5 h-5 text-white" />
                 )}
               </div>
-              <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
+              <ChevronDown className="w-4 h-4 text-white/50 ml-1 hidden sm:block" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white">

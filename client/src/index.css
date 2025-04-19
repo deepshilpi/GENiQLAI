@@ -183,7 +183,7 @@
     }
     
     .sidebar-open .main-content {
-      @apply ml-[260px] !important;
+      @apply ml-0 !important;
     }
     
     .sidebar {
@@ -193,6 +193,15 @@
     
     .sidebar-open .sidebar {
       @apply translate-x-0;
+    }
+    
+    /* Backdrop overlay when sidebar is open */
+    .sidebar-backdrop {
+      @apply hidden fixed inset-0 bg-black/50 z-10;
+    }
+    
+    .sidebar-open .sidebar-backdrop {
+      @apply block;
     }
     
     .vision-card {
