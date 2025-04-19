@@ -77,10 +77,16 @@
   }
   
   .main-content {
-    @apply flex-1 md:ml-[260px] transition-all duration-300 min-h-screen;
+    @apply flex-1 md:ml-[70px] transition-all duration-300 min-h-screen;
   }
   
-  /* For collapsed sidebar on desktop */
+  /* Sidebar related styles */
+  .sidebar-container {
+    position: relative;
+    z-index: 20;
+  }
+  
+  /* Ensure the main content position stays fixed regardless of sidebar state */
   .sidebar-collapsed .main-content {
     @apply md:ml-[70px];
   }
@@ -144,6 +150,7 @@
 
   .vision-sidebar {
     @apply bg-vision-sidebar border-r border-vision-purple-200/10 shadow-xl;
+    transition: width 0.3s ease, transform 0.3s ease;
   }
 
   .vision-sidebar-item {

@@ -140,7 +140,7 @@ export function Sidebar() {
           <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center flex-shrink-0">
             <BrainCircuit className="w-6 h-6 text-white" />
           </div>
-          {!collapsed && (
+          {(!collapsed || hovered) && (
             <div className="ml-3">
               <span className="font-bold text-xl text-white">GENIQL</span>
               <span className="text-[10px] bg-vision-purple-200/20 px-1.5 py-0.5 rounded-sm ml-1 text-white/80">BETA</span>
@@ -168,7 +168,7 @@ export function Sidebar() {
               onClick={() => navigate("/")}
             >
               <BrainCircuit className="w-5 h-5" />
-              {!collapsed && <span>AI Analysis</span>}
+              {(!collapsed || hovered) && <span>AI Analysis</span>}
             </div>
           </li>
           <li>
@@ -181,7 +181,7 @@ export function Sidebar() {
               onClick={() => navigate("/community")}
             >
               <MessageSquare className="w-5 h-5" />
-              {!collapsed && <span>Community</span>}
+              {(!collapsed || hovered) && <span>Community</span>}
             </div>
           </li>
           <li>
@@ -194,7 +194,7 @@ export function Sidebar() {
               onClick={() => navigate("/analytics")}
             >
               <BarChart3 className="w-5 h-5" />
-              {!collapsed && <span>Analytics</span>}
+              {(!collapsed || hovered) && <span>Analytics</span>}
             </div>
           </li>
           {(user?.planType === "pro" || user?.planType === "unicorn") && (
@@ -208,7 +208,7 @@ export function Sidebar() {
                 onClick={() => navigate("/market-news")}
               >
                 <Newspaper className="w-5 h-5" />
-                {!collapsed && <span>Market News</span>}
+                {(!collapsed || hovered) && <span>Market News</span>}
               </div>
             </li>
           )}
@@ -239,7 +239,7 @@ export function Sidebar() {
                       </span>
                     )}
                   </div>
-                  {!collapsed && <span>Notifications</span>}
+                  {(!collapsed || hovered) && <span>Notifications</span>}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
@@ -309,7 +309,7 @@ export function Sidebar() {
               onClick={() => navigate(`/profile/${user?.username}`)}
             >
               <User className="w-5 h-5" />
-              {!collapsed && <span>Profile</span>}
+              {(!collapsed || hovered) && <span>Profile</span>}
             </div>
           </li>
           <li>
