@@ -157,6 +157,9 @@ export function Sidebar() {
       
       {/* Navigation */}
       <nav className="flex-1 px-3 py-6">
+        {(!collapsed || hovered) && (
+          <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2 mb-2">Main Navigation</h4>
+        )}
         <ul className="space-y-2">
           <li>
             <div 
@@ -217,7 +220,7 @@ export function Sidebar() {
       
       {/* Account section */}
       <div className="px-3 py-2 border-t border-vision-purple-200/10">
-        {!collapsed && (
+        {(!collapsed || hovered) && (
           <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2">Account</h4>
         )}
         <ul className="space-y-1 mb-4">
@@ -322,7 +325,7 @@ export function Sidebar() {
               onClick={() => navigate("/settings")}
             >
               <Settings className="w-5 h-5" />
-              {!collapsed && <span>Settings</span>}
+              {(!collapsed || hovered) && <span>Settings</span>}
             </div>
           </li>
           <li>
@@ -335,7 +338,7 @@ export function Sidebar() {
               onClick={() => navigate("/subscription")}
             >
               <CreditCard className="w-5 h-5" />
-              {!collapsed && <span>Plans</span>}
+              {(!collapsed || hovered) && <span>Plans</span>}
             </div>
           </li>
           <li>
@@ -347,14 +350,14 @@ export function Sidebar() {
               )}
             >
               <LogOut className="w-5 h-5" />
-              {!collapsed && <span>Logout</span>}
+              {(!collapsed || hovered) && <span>Logout</span>}
             </button>
           </li>
         </ul>
       </div>
       
-      {/* Help section - only show when not collapsed */}
-      {!collapsed && (
+      {/* Help section - show when expanded or hovered */}
+      {(!collapsed || hovered) && (
         <div className="p-4 mx-3 mb-4 vision-card bg-vision-card/50">
           <div className="mb-2 text-sm text-white font-medium flex items-center">
             <HelpCircle className="w-4 h-4 mr-2 text-vision-purple-700" />
