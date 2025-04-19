@@ -44,6 +44,12 @@ export default function CommunityPage() {
   };
 
   const handleNewPost = () => {
+    if (!user) {
+      // Redirect to auth page if not logged in
+      window.location.href = '/auth';
+      return;
+    }
+    
     if (isPlanAllowed(user?.planType || "free", "pro")) {
       setShowPostForm(true);
     } else {
@@ -107,8 +113,10 @@ export default function CommunityPage() {
                   ))
                 ) : (
                   <div className="col-span-3 text-center py-12">
-                    <p className="text-muted-foreground mb-4">No posts yet. Be the first to share your startup idea!</p>
-                    <Button onClick={handleNewPost}>Create Post</Button>
+                    <p className="text-muted-foreground mb-4">No posts yet. {user ? "Be the first to share your startup idea!" : "Sign in to create a post!"}</p>
+                    <Button onClick={handleNewPost}>
+                      {user ? "Create Post" : "Sign In to Post"}
+                    </Button>
                   </div>
                 )}
               </div>

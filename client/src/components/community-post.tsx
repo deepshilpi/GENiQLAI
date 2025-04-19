@@ -15,10 +15,20 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
   
   const handlePump = () => {
+    if (!currentUser) {
+      // Redirect to auth page or show login prompt
+      window.location.href = '/auth';
+      return;
+    }
     onVote(post.id, "pump");
   };
   
   const handleDump = () => {
+    if (!currentUser) {
+      // Redirect to auth page or show login prompt
+      window.location.href = '/auth';
+      return;
+    }
     onVote(post.id, "dump");
   };
   
