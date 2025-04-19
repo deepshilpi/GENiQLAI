@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { detectUserCountry } from "@/lib/utils";
 import { 
   BrainCircuit, 
   Sparkles, 
@@ -133,6 +134,11 @@ export default function HomePage() {
   
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
+  const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number>(() => {
+    // Get from localStorage if available
+    const storedCount = localStorage.getItem('remainingFreeAnalyses');
+    return storedCount ? parseInt(storedCount) : 2;
+  });
   
   const handleAnalyze = async () => {
     if (!startupIdea.trim() || isAnalyzing) return;
@@ -140,15 +146,54 @@ export default function HomePage() {
     setIsAnalyzing(true);
     
     try {
-      // Import analyzeStartupIdea from our client-side openai.ts utility
-      const { analyzeStartupIdea } = await import('@/lib/openai');
+      // Call the server API to analyze the startup idea
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          startupIdea, 
+          country: detectUserCountry()
+        }),
+      });
       
-      // Call the API through our utility function
-      const results = await analyzeStartupIdea(startupIdea);
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle free analysis limit reached
+        if (errorData.error === 'analysis_limit_reached') {
+          setRemainingFreeAnalyses(0);
+          localStorage.setItem('remainingFreeAnalyses', '0');
+          
+          toast({
+            title: "Free Analysis Limit Reached",
+            description: "Sign up or log in to continue analyzing startup ideas.",
+            variant: "destructive"
+          });
+          
+          // Optional: Redirect to auth page after a delay
+          setTimeout(() => {
+            navigate('/auth');
+          }, 3000);
+          
+          return;
+        }
+        
+        throw new Error(errorData.message || 'Failed to analyze startup idea');
+      }
       
-      // Set the results and update the UI state
+      // Get results and update state
+      const results = await response.json();
       setAnalysisResults(results);
       setAnalysisStep('results');
+      
+      // Update remaining analyses for anonymous users
+      if (!user) {
+        const newRemaining = remainingFreeAnalyses - 1;
+        setRemainingFreeAnalyses(newRemaining);
+        localStorage.setItem('remainingFreeAnalyses', newRemaining.toString());
+      }
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
       
@@ -160,6 +205,8 @@ export default function HomePage() {
           errorMessage = "Analysis is taking too long. Please try a shorter description or try again later.";
         } else if (error.message.includes("content policy")) {
           errorMessage = "Your startup idea couldn't be analyzed due to content policy. Please revise and try again.";
+        } else {
+          errorMessage = error.message;
         }
       }
       
@@ -199,7 +246,7 @@ export default function HomePage() {
                   }}
                 />
                 
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-3 mb-8 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-3 mb-6 text-center sm:text-left">
                   <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
                     <BrainCircuit className="w-6 h-6 text-white" />
                   </div>
@@ -208,6 +255,27 @@ export default function HomePage() {
                     <p className="text-white/60 text-sm">Free users get all 8 analysis points in basic mode</p>
                   </div>
                 </div>
+                
+                {/* Free analyses counter for anonymous users */}
+                {!user && (
+                  <div className="mb-6 px-3 py-2 rounded-md bg-vision-purple-900/30 border border-vision-purple-400/20">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-white text-sm font-medium">Free analyses remaining</span>
+                      <span className="text-white text-sm font-bold">{remainingFreeAnalyses}/2</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-vision-purple-100/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-vision-primary-gradient" 
+                        style={{ width: `${(remainingFreeAnalyses / 2) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-white/60 text-xs mt-1">
+                      {remainingFreeAnalyses > 0 
+                        ? `You have ${remainingFreeAnalyses} free ${remainingFreeAnalyses === 1 ? 'analysis' : 'analyses'} left. Sign up to get more!` 
+                        : 'Free analyses used up. Sign up to continue analyzing ideas!'}
+                    </p>
+                  </div>
+                )}
                 
                 <div className="mb-6">
                   <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">

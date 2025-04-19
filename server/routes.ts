@@ -6,6 +6,14 @@ import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./open
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
 import { InsertPost, InsertComment, InsertVote, InsertFollow, AnalysisResults } from "@shared/schema";
+import session from "express-session";
+
+// Extend express-session types to include our custom properties
+declare module "express-session" {
+  interface SessionData {
+    anonymousAnalysisCount?: number;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -14,10 +22,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   // Analyze startup idea
   app.post("/api/analyze", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-    
     const { startupIdea } = req.body;
     
     if (!startupIdea) {
@@ -35,15 +39,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Detect country from IP (simplified for demo)
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
+    // Check analysis count for anonymous users
+    if (!req.isAuthenticated()) {
+      // Use session to track anonymous analyses
+      if (!req.session.anonymousAnalysisCount) {
+        req.session.anonymousAnalysisCount = 0;
+      }
+      
+      // Limit anonymous users to 2 analyses
+      if (req.session.anonymousAnalysisCount >= 2) {
+        return res.status(403).json({
+          message: "You've reached the free analysis limit. Sign up or login to continue analyzing startup ideas.",
+          error: "analysis_limit_reached",
+          remainingAnalyses: 0
+        });
+      }
+      
+      // Increment analysis count
+      req.session.anonymousAnalysisCount++;
+    }
+    
     try {
       // Add timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Request timeout")), 30000);
       });
       
+      // Determine plan type (free for anonymous users)
+      const planType = req.isAuthenticated() ? req.user.planType : 'free';
+      
       // Race between the analysis and the timeout
       const analysisResults = await Promise.race([
-        analyzeStartupIdea(startupIdea, country, req.user.planType),
+        analyzeStartupIdea(startupIdea, country, planType),
         timeoutPromise
       ]) as AnalysisResults;
       
@@ -52,13 +79,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Invalid response format from AI service");
       }
       
-      // Save the analysis to storage
-      await storage.createAnalysis({
-        userId: req.user.id,
-        startupIdea,
-        country,
-        results: analysisResults
-      });
+      // Save the analysis to storage only if user is authenticated
+      if (req.isAuthenticated()) {
+        await storage.createAnalysis({
+          userId: req.user.id,
+          startupIdea,
+          country,
+          results: analysisResults
+        });
+      }
       
       return res.status(200).json(analysisResults);
     } catch (error) {
@@ -143,12 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get news articles (Available to all users)
   app.get("/api/news", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-    
-    // All users can now access news articles
-    
+    // All users can access news articles without authentication
     try {
       const country = detectCountryFromIP(req.ip || '');
       const articles = await searchStartupNews(country);

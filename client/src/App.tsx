@@ -51,8 +51,8 @@ function Router() {
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
+        <Route path="/community" component={CommunityPage} />
         <ProtectedRoute path="/dashboard" component={DashboardPage} />
-        <ProtectedRoute path="/community" component={CommunityPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
         <Route component={NotFound} />
       </Switch>
