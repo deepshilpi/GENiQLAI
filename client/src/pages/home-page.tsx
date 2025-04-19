@@ -26,6 +26,14 @@ export default function HomePage() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const pointsRef = useRef<THREE.Points | null>(null);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user) {
+      // If user is on home page but not logged in, let them see the landing
+      // but disable the actual analysis functionality
+    }
+  }, [user, navigate]);
   
   // Initialize Three.js background animation
   useEffect(() => {
@@ -134,13 +142,19 @@ export default function HomePage() {
   
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
-  const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number>(() => {
-    // Get from localStorage if available
-    const storedCount = localStorage.getItem('remainingFreeAnalyses');
-    return storedCount ? parseInt(storedCount) : 2;
-  });
   
   const handleAnalyze = async () => {
+    // Require login for analysis
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to analyze your startup idea",
+        variant: "default",
+      });
+      navigate('/auth');
+      return;
+    }
+    
     if (!startupIdea.trim() || isAnalyzing) return;
     
     setIsAnalyzing(true);
@@ -160,26 +174,6 @@ export default function HomePage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        
-        // Handle free analysis limit reached
-        if (errorData.error === 'analysis_limit_reached') {
-          setRemainingFreeAnalyses(0);
-          localStorage.setItem('remainingFreeAnalyses', '0');
-          
-          toast({
-            title: "Free Analysis Limit Reached",
-            description: "Sign up or log in to continue analyzing startup ideas.",
-            variant: "destructive"
-          });
-          
-          // Optional: Redirect to auth page after a delay
-          setTimeout(() => {
-            navigate('/auth');
-          }, 3000);
-          
-          return;
-        }
-        
         throw new Error(errorData.message || 'Failed to analyze startup idea');
       }
       
@@ -187,13 +181,6 @@ export default function HomePage() {
       const results = await response.json();
       setAnalysisResults(results);
       setAnalysisStep('results');
-      
-      // Update remaining analyses for anonymous users
-      if (!user) {
-        const newRemaining = remainingFreeAnalyses - 1;
-        setRemainingFreeAnalyses(newRemaining);
-        localStorage.setItem('remainingFreeAnalyses', newRemaining.toString());
-      }
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
       
@@ -256,24 +243,23 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* Free analyses counter for anonymous users */}
+                {/* Login prompt for anonymous users */}
                 {!user && (
                   <div className="mb-6 px-3 py-2 rounded-md bg-vision-purple-900/30 border border-vision-purple-400/20">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-white text-sm font-medium">Free analyses remaining</span>
-                      <span className="text-white text-sm font-bold">{remainingFreeAnalyses}/2</span>
+                      <span className="text-white text-sm font-medium">Authentication Required</span>
                     </div>
-                    <div className="w-full h-1.5 bg-vision-purple-100/10 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-vision-primary-gradient" 
-                        style={{ width: `${(remainingFreeAnalyses / 2) * 100}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-white/60 text-xs mt-1">
-                      {remainingFreeAnalyses > 0 
-                        ? `You have ${remainingFreeAnalyses} free ${remainingFreeAnalyses === 1 ? 'analysis' : 'analyses'} left. Sign up to get more!` 
-                        : 'Free analyses used up. Sign up to continue analyzing ideas!'}
+                    <p className="text-white/60 text-sm mt-1">
+                      Sign in or create an account to analyze your startup idea
                     </p>
+                    <div className="mt-3">
+                      <Button 
+                        onClick={() => navigate('/auth')}
+                        className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white font-medium w-full"
+                      >
+                        Sign in / Create Account
+                      </Button>
+                    </div>
                   </div>
                 )}
                 
