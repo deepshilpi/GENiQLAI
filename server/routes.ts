@@ -5,7 +5,7 @@ import { setupAuth } from "./auth";
 import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
-import { InsertPost, InsertComment, InsertVote, InsertFollow } from "@shared/schema";
+import { InsertPost, InsertComment, InsertVote, InsertFollow, AnalysisResults } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -65,17 +65,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error analyzing startup idea:", error);
       
       // Provide more specific error messages
-      if (error.message.includes("timeout")) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("timeout")) {
         return res.status(504).json({ 
           message: "Analysis is taking too long. Please try a shorter description or try again later.",
           error: "timeout"
         });
-      } else if (error.message.includes("rate limits")) {
+      } else if (errorMessage.includes("rate limits")) {
         return res.status(429).json({ 
           message: "Too many requests. Please try again in a few minutes.",
           error: "rate_limit" 
         });
-      } else if (error.message.includes("content policy")) {
+      } else if (errorMessage.includes("content policy")) {
         return res.status(400).json({ 
           message: "Your startup idea could not be analyzed. Please revise your content and try again.",
           error: "content_policy" 

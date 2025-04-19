@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { 
@@ -16,6 +17,7 @@ import * as THREE from "three";
 export default function HomePage() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -149,8 +151,24 @@ export default function HomePage() {
       setAnalysisStep('results');
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
-      // Display a more user-friendly error
-      alert("We couldn't analyze your startup idea at this moment. Please try again later.");
+      
+      // Extract error message from response if available
+      let errorMessage = "We couldn't analyze your startup idea at this moment. Please try again later.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("timeout")) {
+          errorMessage = "Analysis is taking too long. Please try a shorter description or try again later.";
+        } else if (error.message.includes("content policy")) {
+          errorMessage = "Your startup idea couldn't be analyzed due to content policy. Please revise and try again.";
+        }
+      }
+      
+      // Use a toast notification instead of an alert for a better user experience
+      toast({
+        title: "Analysis Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsAnalyzing(false);
     }
