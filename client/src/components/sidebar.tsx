@@ -90,14 +90,24 @@ export function Sidebar() {
   };
   
   return (
-    <aside 
-      className={cn(
-        "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
-        collapsed ? "w-[70px]" : "w-[260px]",
-        isMobile && "w-[260px]",
-        isMobile && sidebarOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "translate-x-0"
+    <div className="sidebar-container">
+      {/* Backdrop overlay for mobile */}
+      {isMobile && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={handleBackdropClick}
+          aria-hidden="true"
+        />
       )}
-    >
+      
+      <aside 
+        className={cn(
+          "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
+          collapsed ? "w-[70px]" : "w-[260px]",
+          isMobile && "w-[260px]",
+          isMobile && sidebarOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "translate-x-0"
+        )}
+      >
       {/* Logo section */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center">
@@ -257,5 +267,6 @@ export function Sidebar() {
         </div>
       )}
     </aside>
+    </div>
   );
 }
