@@ -239,7 +239,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h1 className="text-xl sm:text-2xl font-bold text-white">GENIQL AI Startup Analysis</h1>
-                    <p className="text-white/60 text-sm">Free users get all 8 analysis points in basic mode</p>
+                    <p className="text-white/60 text-sm">Analyze your startup idea with AI-powered insights</p>
                   </div>
                 </div>
                 

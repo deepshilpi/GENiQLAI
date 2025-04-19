@@ -20,8 +20,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // API routes
-  // Analyze startup idea
+  // Analyze startup idea - require authentication
   app.post("/api/analyze", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to analyze startup ideas",
+        error: "auth_required"
+      });
+    }
+    
     const { startupIdea } = req.body;
     
     if (!startupIdea) {
@@ -38,26 +46,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Detect country from IP (simplified for demo)
     const country = req.body.country || detectCountryFromIP(req.ip || '');
-    
-    // Check analysis count for anonymous users
-    if (!req.isAuthenticated()) {
-      // Use session to track anonymous analyses
-      if (!req.session.anonymousAnalysisCount) {
-        req.session.anonymousAnalysisCount = 0;
-      }
-      
-      // Limit anonymous users to 2 analyses
-      if (req.session.anonymousAnalysisCount >= 2) {
-        return res.status(403).json({
-          message: "You've reached the free analysis limit. Sign up or login to continue analyzing startup ideas.",
-          error: "analysis_limit_reached",
-          remainingAnalyses: 0
-        });
-      }
-      
-      // Increment analysis count
-      req.session.anonymousAnalysisCount++;
-    }
     
     try {
       // Add timeout to prevent long-running requests
@@ -170,9 +158,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get news articles (Available to all users)
+  // Get news articles (Authentication required)
   app.get("/api/news", async (req, res) => {
-    // All users can access news articles without authentication
+    // Only authenticated users can access news articles
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view news articles",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const country = detectCountryFromIP(req.ip || '');
       const articles = await searchStartupNews(country);
@@ -226,8 +221,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Community features
-  // Get all posts
+  // Get all posts (Authentication required)
   app.get("/api/posts", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view posts",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const posts = await storage.getPosts();
       return res.status(200).json(posts);
@@ -237,8 +240,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get a specific post
+  // Get a specific post (Authentication required)
   app.get("/api/posts/:id", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view post details",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const postId = parseInt(req.params.id);
       const post = await storage.getPostById(postId);
@@ -283,8 +294,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get comments for a post
+  // Get comments for a post (Authentication required)
   app.get("/api/posts/:id/comments", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view comments",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const postId = parseInt(req.params.id);
       const comments = await storage.getCommentsByPostId(postId);
@@ -412,8 +431,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get user by username
+  // Get user by username (Authentication required)
   app.get("/api/users/:username", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view user profiles",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const user = await storage.getUserByUsername(req.params.username);
       
@@ -430,8 +457,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get posts by username
+  // Get posts by username (Authentication required)
   app.get("/api/users/:username/posts", async (req, res) => {
+    // Require authentication
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view user posts",
+        error: "auth_required"
+      });
+    }
+    
     try {
       const user = await storage.getUserByUsername(req.params.username);
       
