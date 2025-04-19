@@ -115,7 +115,7 @@ export function Sidebar() {
   return (
     <div className="sidebar-container">
       {/* Backdrop overlay for mobile */}
-      {isMobile && (
+      {isMobile && sidebarOpen && (
         <div 
           className="sidebar-backdrop" 
           onClick={handleBackdropClick}
@@ -151,7 +151,10 @@ export function Sidebar() {
           onClick={toggleSidebar} 
           className="w-6 h-6 flex items-center justify-center rounded-full bg-vision-purple-200/10 text-white hover:bg-vision-purple-200/20 transition-colors"
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isMobile ? 
+            (sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />) : 
+            (collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />)
+          }
         </button>
       </div>
       

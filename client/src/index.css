@@ -228,11 +228,13 @@
     
     /* Backdrop overlay when sidebar is open */
     .sidebar-backdrop {
-      @apply hidden fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
+      @apply fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
+      animation: fadeIn 0.3s ease;
     }
     
-    .sidebar-open .sidebar-backdrop {
-      @apply block;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .vision-card {
