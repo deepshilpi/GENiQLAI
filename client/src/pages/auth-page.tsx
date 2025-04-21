@@ -80,7 +80,7 @@ export default function AuthPage() {
 
             {/* Login Tab */}
             <TabsContent value="login">
-              <div className="vision-card p-6">
+              <div className="vision-card p-4 sm:p-6">
                 <Form {...loginForm}>
                   <form
                     onSubmit={loginForm.handleSubmit(onLoginSubmit)}
@@ -135,7 +135,7 @@ export default function AuthPage() {
 
             {/* Register Tab */}
             <TabsContent value="register">
-              <div className="vision-card p-6">
+              <div className="vision-card p-4 sm:p-6">
                 <Form {...registerForm}>
                   <form
                     onSubmit={registerForm.handleSubmit(onRegisterSubmit)}

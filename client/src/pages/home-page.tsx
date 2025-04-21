@@ -311,7 +311,7 @@ export default function HomePage() {
                   
                   {/* Competitors */}
                   {analysisResults?.competitors && (
-                    <div className="vision-card p-6 flex flex-col">
+                    <div className="vision-card p-4 sm:p-6 flex flex-col">
                       <h3 className="text-lg font-bold text-white mb-4">Market Competitors</h3>
                       <div className="flex-1">
                         {analysisResults.competitors.competitors.map((competitor: any, index: number) => (
@@ -335,7 +335,7 @@ export default function HomePage() {
                   
                   {/* Market Viability */}
                   {analysisResults?.marketViability && (
-                    <div className="vision-card p-6 flex flex-col">
+                    <div className="vision-card p-4 sm:p-6 flex flex-col">
                       <h3 className="text-lg font-bold text-white mb-4">Market Viability</h3>
                       <div className="flex-1">
                         {analysisResults.marketViability.points.map((point: any, index: number) => (
@@ -359,7 +359,7 @@ export default function HomePage() {
                   
                   {/* Unique Value Proposition */}
                   {analysisResults?.uniqueValueProposition && (
-                    <div className="vision-card p-6 flex flex-col col-span-1 md:col-span-2">
+                    <div className="vision-card p-4 sm:p-6 flex flex-col col-span-1 md:col-span-2">
                       <h3 className="text-lg font-bold text-white mb-4">Unique Value Proposition</h3>
                       <div className="flex-1">
                         <p className="mb-4 text-white/80 italic">{analysisResults.uniqueValueProposition.differentiator}</p>
@@ -378,21 +378,21 @@ export default function HomePage() {
                   
                   {/* CAGR Analysis */}
                   {analysisResults?.cagr && (
-                    <div className="vision-card p-6 flex flex-col col-span-1 md:col-span-3">
+                    <div className="vision-card p-4 sm:p-6 flex flex-col col-span-1 md:col-span-3">
                       <h3 className="text-lg font-bold text-white mb-2">Growth Projection (CAGR)</h3>
-                      <div className="flex items-center justify-between mb-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
                         <div className="flex items-center">
                           <div className="w-3 h-3 rounded-full bg-vision-purple-700 mr-2"></div>
-                          <span className="text-white/70 mr-6">Your Potential: {analysisResults.cagr.potential}%</span>
+                          <span className="text-white/70">Your Potential: {analysisResults.cagr.potential}%</span>
                         </div>
                         <div className="flex items-center">
                           <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
                           <span className="text-white/70">Industry Average: {analysisResults.cagr.industryAverage}%</span>
                         </div>
                       </div>
-                      <div className="h-64 w-full">
+                      <div className="h-48 sm:h-64 w-full">
                         {/* This would be a chart in a real implementation */}
-                        <div className="h-full w-full bg-vision-purple-100/10 rounded-lg p-4 flex items-end">
+                        <div className="h-full w-full bg-vision-purple-100/10 rounded-lg p-2 sm:p-4 flex items-end">
                           {analysisResults.cagr.data.years.map((year: string, index: number) => (
                             <div key={index} className="flex-1 flex flex-col items-center h-full">
                               <div className="flex-1 w-full flex items-end justify-center space-x-2">
