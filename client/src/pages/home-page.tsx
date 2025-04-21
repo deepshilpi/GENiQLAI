@@ -35,48 +35,7 @@ export default function HomePage() {
     }
   }, [user, navigate]);
   
-  // Initialize Three.js background animation
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    
-    // Scene setup
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-    
-    // Camera setup
-    const camera = new THREE.PerspectiveCamera(
-      75, 
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 20;
-    cameraRef.current = camera;
-    
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      alpha: true,
-      antialias: true
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    rendererRef.current = renderer;
-    
-    // Create particle geometry
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 1500;
-    
-    const posArray = new Float32Array(particlesCount * 3);
-    const colorArray = new Float32Array(particlesCount * 3);
-    
-    for (let i = 0; i < particlesCount * 3; i++) {
-      // Position
-      posArray[i] = (Math.random() - 0.5) * 50;
-      
-      // Colors - purples and blues for vision UI theme
-      if (i % 3 === 0) { // R value
-        colorArray[i] = Math.random() * 0.5 + 0.3; // purple-ish
+  // Background animations removed
       } else if (i % 3 === 1) { // G value
         colorArray[i] = Math.random() * 0.2;
       } else { // B value
