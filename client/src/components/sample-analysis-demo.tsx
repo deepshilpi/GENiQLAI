@@ -114,14 +114,14 @@ export function SampleAnalysisDemo() {
         
         {SAMPLE_ANALYSES.map(analysis => (
           <TabsContent key={analysis.id} value={analysis.id} className="outline-none">
-            <div className="vision-card p-6 mb-6">
+            <div className="vision-card p-4 sm:p-6 mb-6">
               <h3 className="text-xl font-bold text-white mb-2">{analysis.title}</h3>
               <p className="text-white/80">{analysis.description}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Success Rate */}
-              <div className="vision-card p-6 flex flex-col">
+              <div className="vision-card p-4 sm:p-6 flex flex-col">
                 <div className="flex items-center mb-4">
                   <PieChart className="w-5 h-5 text-vision-purple-500 mr-2" />
                   <h4 className="text-lg font-bold text-white">Success Rate</h4>
@@ -144,7 +144,7 @@ export function SampleAnalysisDemo() {
               </div>
               
               {/* Competitors */}
-              <div className="vision-card p-6 flex flex-col">
+              <div className="vision-card p-4 sm:p-6 flex flex-col">
                 <div className="flex items-center mb-4">
                   <Users className="w-5 h-5 text-vision-purple-500 mr-2" />
                   <h4 className="text-lg font-bold text-white">Market Competitors</h4>
@@ -171,7 +171,7 @@ export function SampleAnalysisDemo() {
               </div>
               
               {/* Market Viability */}
-              <div className="vision-card p-6 flex flex-col">
+              <div className="vision-card p-4 sm:p-6 flex flex-col">
                 <div className="flex items-center mb-4">
                   <AlertTriangle className="w-5 h-5 text-vision-purple-500 mr-2" />
                   <h4 className="text-lg font-bold text-white">Market Viability</h4>
@@ -196,23 +196,23 @@ export function SampleAnalysisDemo() {
               </div>
               
               {/* CAGR Analysis */}
-              <div className="vision-card p-6 flex flex-col col-span-1 md:col-span-3">
+              <div className="vision-card p-4 sm:p-6 flex flex-col col-span-1 md:col-span-3">
                 <div className="flex items-center mb-4">
                   <TrendingUp className="w-5 h-5 text-vision-purple-500 mr-2" />
                   <h4 className="text-lg font-bold text-white">Growth Projection (CAGR)</h4>
                 </div>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
                   <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-vision-purple-700 mr-2"></div>
-                    <span className="text-white/70 mr-6">Potential: {analysis.cagrData.potential}%</span>
+                    <span className="text-white/70">Potential: {analysis.cagrData.potential}%</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
                     <span className="text-white/70">Industry Average: {analysis.cagrData.industryAverage}%</span>
                   </div>
                 </div>
-                <div className="h-64 w-full">
-                  <div className="h-full w-full bg-vision-purple-100/10 rounded-lg p-4 flex items-end">
+                <div className="h-48 sm:h-64 w-full">
+                  <div className="h-full w-full bg-vision-purple-100/10 rounded-lg p-2 sm:p-4 flex items-end">
                     {analysis.cagrData.years.map((year, index) => {
                       // Create simulated growing data points
                       const industryValue = analysis.cagrData.industryAverage * (1 + index * 0.2);
