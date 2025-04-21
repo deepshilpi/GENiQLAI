@@ -135,13 +135,13 @@ export default function HomePage() {
       
       <div className="flex-1 flex flex-col main-content transition-all duration-300">
         
-        <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
+        <main className="flex-grow flex items-center justify-center overflow-hidden relative px-4 sm:px-6 py-8 sm:py-12">
           
           {/* Content based on analysis step */}
           {analysisStep === 'input' ? (
             /* Centered prompt box */
             <div className="w-full max-w-5xl flex flex-col">
-              <div className="vision-card overflow-hidden p-8 relative">
+              <div className="vision-card overflow-hidden p-4 sm:p-8 relative">
                 {/* Glowing effect at the top */}
                 <div 
                   className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full" 
@@ -282,7 +282,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Idea summary */}
-                <div className="vision-card p-6">
+                <div className="vision-card p-4 sm:p-6">
                   <h2 className="text-xl font-bold text-white mb-2">Analyzed Startup Idea</h2>
                   <p className="text-white/80">{startupIdea}</p>
                 </div>
@@ -291,7 +291,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 results-grid">
                   {/* Success Rate */}
                   {analysisResults?.successRate && (
-                    <div className="vision-card p-6 flex flex-col">
+                    <div className="vision-card p-4 sm:p-6 flex flex-col">
                       <h3 className="text-lg font-bold text-white mb-4">Success Rate</h3>
                       <div className="flex-1 flex flex-col items-center justify-center">
                         <div className="relative w-32 h-32 mb-4">

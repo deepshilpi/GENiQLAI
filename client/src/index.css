@@ -288,6 +288,12 @@
     [role="menu"] {
       max-width: 90vw;
     }
+    
+    /* Improve dropdown menu item touch targets */
+    [role="menuitem"] {
+      min-height: 44px !important;
+      padding: 10px 16px !important;
+    }
   }
   
   @media (max-width: 640px) {
