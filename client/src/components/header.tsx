@@ -83,11 +83,11 @@ export function Header() {
       <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 vision-card shadow-lg">
         {/* Logo section with menu toggle */}
         <div className="flex items-center">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg mr-1"
+              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg mr-1 w-10 h-10"
               onClick={toggleSidebar}
             >
               <Menu className="w-5 h-5" />
@@ -100,14 +100,14 @@ export function Header() {
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           {/* Notifications dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-10 h-10"
               >
                 <div className="relative">
                   <Bell className="w-5 h-5" />

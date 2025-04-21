@@ -148,10 +148,24 @@
 
   .vision-sidebar-item {
     @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-vision-purple-100/10 transition-all;
+    min-height: 42px;
   }
 
   .vision-sidebar-item.active {
     @apply bg-vision-purple-100/10 text-white;
+    position: relative;
+  }
+  
+  .vision-sidebar-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(90deg, #7551FF 0%, #A163F7 100%);
+    border-radius: 0 4px 4px 0;
   }
 
   .vision-gradient-border {
@@ -213,19 +227,37 @@
     .sidebar {
       @apply -translate-x-full;
       transition: transform 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      width: 260px !important;
     }
     
     .sidebar-open .sidebar {
       @apply translate-x-0;
     }
     
-    /* Backdrop overlay when sidebar is open */
-    .sidebar-backdrop {
-      @apply hidden fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
+    /* Ensure icons have proper spacing in mobile sidebar */
+    .vision-sidebar-item {
+      padding: 12px 16px;
+      margin-bottom: 8px;
     }
     
-    .sidebar-open .sidebar-backdrop {
-      @apply block;
+    /* Add scrolling for mobile sidebar when needed */
+    .sidebar {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Backdrop overlay when sidebar is open */
+    .sidebar-backdrop {
+      @apply fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .sidebar-backdrop.opacity-100 {
+      opacity: 1;
+      visibility: visible;
     }
     
     .vision-card {
