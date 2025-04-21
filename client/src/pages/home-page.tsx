@@ -21,11 +21,6 @@ export default function HomePage() {
   const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const pointsRef = useRef<THREE.Points | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -34,70 +29,6 @@ export default function HomePage() {
       // but disable the actual analysis functionality
     }
   }, [user, navigate]);
-  
-  // Background animations removed
-      } else if (i % 3 === 1) { // G value
-        colorArray[i] = Math.random() * 0.2;
-      } else { // B value
-        colorArray[i] = Math.random() * 0.5 + 0.5; // blue-ish
-      }
-    }
-    
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-    
-    // Material
-    const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.1,
-      vertexColors: true,
-      transparent: true,
-      blending: THREE.AdditiveBlending
-    });
-    
-    // Mesh
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-    pointsRef.current = particlesMesh;
-    
-    // Animation
-    const animate = () => {
-      requestAnimationFrame(animate);
-      
-      if (pointsRef.current) {
-        pointsRef.current.rotation.x += 0.0003;
-        pointsRef.current.rotation.y += 0.0005;
-      }
-      
-      renderer.render(scene, camera);
-    };
-    
-    animate();
-    
-    // Handle resize
-    const handleResize = () => {
-      if (!cameraRef.current || !rendererRef.current) return;
-      
-      cameraRef.current.aspect = window.innerWidth / window.innerHeight;
-      cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(window.innerWidth, window.innerHeight);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      
-      if (pointsRef.current) {
-        pointsRef.current.geometry.dispose();
-        (pointsRef.current.material as THREE.Material).dispose();
-      }
-      
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-      }
-    };
-  }, []);
   
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
@@ -172,11 +103,6 @@ export default function HomePage() {
       <div className="flex-1 flex flex-col main-content transition-all duration-300">
         
         <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
-          {/* Three.js background canvas */}
-          <canvas 
-            ref={canvasRef} 
-            className="absolute top-0 left-0 w-full h-full -z-10"
-          />
           
           {/* Content based on analysis step */}
           {analysisStep === 'input' ? (
