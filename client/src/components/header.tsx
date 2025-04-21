@@ -179,7 +179,7 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="rounded-lg p-0">
-                <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                   {user?.username ? (
                     <span className="text-sm font-medium text-white">
                       {user.username.charAt(0).toUpperCase()}
@@ -243,7 +243,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9 mr-2"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-10 h-10 mr-2"
           onClick={toggleSidebar}
         >
           <Menu className="w-5 h-5" />
@@ -255,7 +255,7 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-10 h-10"
             >
               <div className="relative">
                 <Bell className="w-5 h-5" />
@@ -326,7 +326,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-10 h-10"
           onClick={() => navigate("/settings")}
         >
           <Settings className="w-5 h-5" />
@@ -339,7 +339,7 @@ export function Header() {
                 <span className="text-white text-sm font-medium">{user?.username || "Guest"}</span>
                 <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
               </div>
-              <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                 {user?.username ? (
                   <span className="text-sm font-medium text-white">
                     {user.username.charAt(0).toUpperCase()}

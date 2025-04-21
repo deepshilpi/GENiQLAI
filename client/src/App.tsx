@@ -32,13 +32,13 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   
   return (
     <div className="app-container">
-      {/* Only show sidebar on desktop and for authenticated users */}
-      {!isMobile && user && <Sidebar />}
+      {/* Show sidebar for all authenticated users, visibility controlled by CSS for mobile */}
+      {user && <Sidebar />}
       
       {/* Header shown for all pages except auth, but transforms for mobile */}
       <Header />
       
-      <main className={`main-content ${isMobile ? 'pt-16' : ''}`}>
+      <main className={`main-content ${isMobile ? 'pt-16 px-4' : ''}`}>
         {children}
       </main>
     </div>
