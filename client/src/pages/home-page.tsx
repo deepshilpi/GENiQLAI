@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { detectUserCountry } from "@/lib/utils";
 import { SampleAnalysisDemo } from "@/components/sample-analysis-demo";
@@ -18,6 +20,7 @@ import * as THREE from "three";
 
 export default function HomePage() {
   const [location, navigate] = useLocation();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -25,15 +28,20 @@ export default function HomePage() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Check for first time users
+  // Redirect if not authenticated
   useEffect(() => {
-    // Check if this is the user's first time (using localStorage)
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (!hasSeenOnboarding) {
-      setIsNewUser(true);
-      setShowOnboarding(true);
+    if (!user) {
+      // If user is on home page but not logged in, let them see the landing
+      // but disable the actual analysis functionality
+    } else {
+      // Check if this is the user's first time (using localStorage)
+      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+      if (!hasSeenOnboarding) {
+        setIsNewUser(true);
+        setShowOnboarding(true);
+      }
     }
-  }, [navigate]);
+  }, [user, navigate]);
   
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
@@ -53,6 +61,17 @@ export default function HomePage() {
   };
   
   const handleAnalyze = async () => {
+    // Require login for analysis
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to analyze your startup idea",
+        variant: "default",
+      });
+      navigate('/auth');
+      return;
+    }
+    
     if (!startupIdea.trim() || isAnalyzing) return;
     
     setIsAnalyzing(true);
