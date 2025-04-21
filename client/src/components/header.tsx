@@ -1,37 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
-  Bell, 
-  Settings, 
-  User,
-  Sun,
-  Moon,
-  ChevronDown,
   Menu,
   BrainCircuit,
-  MessageSquare,
-  LogOut
+  Sparkles
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Badge } from "@/components/ui/badge";
 
 export function Header() {
   const [location, navigate] = useLocation();
-  const { user, logoutMutation } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   
   // Handle sidebar toggle on mobile
@@ -58,23 +39,8 @@ export function Header() {
   }, []);
   
   const getPageTitle = () => {
-    if (location === "/") return "AI Analysis";
-    if (location === "/dashboard") return "Dashboard";
-    if (location === "/community") return "Community";
-    if (location === "/analytics") return "Analytics";
-    if (location === "/market-news") return "Market News";
-    if (location.startsWith("/profile")) return "Profile";
-    if (location === "/settings") return "Settings";
-    if (location === "/subscription") return "Plans";
+    if (location === "/") return "AI Startup Analysis";
     return "";
-  };
-  
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-  
-  const handleLogout = () => {
-    logoutMutation.mutate();
   };
 
   // Mobile Header (replaces sidebar on mobile) - The main part of this new implementation
