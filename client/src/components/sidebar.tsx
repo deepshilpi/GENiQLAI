@@ -96,10 +96,7 @@ export function Sidebar() {
       {/* Backdrop overlay for mobile */}
       {isMobile && (
         <div 
-          className={cn(
-            "sidebar-backdrop", 
-            sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          )}
+          className="sidebar-backdrop" 
           onClick={handleBackdropClick}
           aria-hidden="true"
         />
@@ -109,8 +106,7 @@ export function Sidebar() {
         className={cn(
           "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
           collapsed ? "w-[70px]" : "w-[260px]",
-          isMobile && !collapsed && "w-[260px]",
-          isMobile && collapsed && "w-[80px]",
+          isMobile && "w-[260px]",
           isMobile && sidebarOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "translate-x-0"
         )}
       >
@@ -136,8 +132,8 @@ export function Sidebar() {
       </div>
       
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-5">
-        <ul className="space-y-4">
+      <nav className="flex-1 px-3 py-6">
+        <ul className="space-y-2">
           <li>
             <div 
               className={cn(
@@ -147,7 +143,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/")}
             >
-              <BrainCircuit className="w-5 h-5 min-w-[20px]" />
+              <BrainCircuit className="w-5 h-5" />
               {!collapsed && <span>AI Analysis</span>}
             </div>
           </li>
@@ -160,7 +156,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/community")}
             >
-              <MessageSquare className="w-5 h-5 min-w-[20px]" />
+              <MessageSquare className="w-5 h-5" />
               {!collapsed && <span>Community</span>}
             </div>
           </li>
@@ -173,7 +169,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/analytics")}
             >
-              <BarChart3 className="w-5 h-5 min-w-[20px]" />
+              <BarChart3 className="w-5 h-5" />
               {!collapsed && <span>Analytics</span>}
             </div>
           </li>
@@ -187,7 +183,7 @@ export function Sidebar() {
                 )}
                 onClick={() => navigate("/market-news")}
               >
-                <Newspaper className="w-5 h-5 min-w-[20px]" />
+                <Newspaper className="w-5 h-5" />
                 {!collapsed && <span>Market News</span>}
               </div>
             </li>
@@ -200,7 +196,7 @@ export function Sidebar() {
         {!collapsed && (
           <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2">Account</h4>
         )}
-        <ul className="space-y-4 my-4">
+        <ul className="space-y-1 mb-4">
           {/* Notifications Button */}
           <li>
             <DropdownMenu>
@@ -212,7 +208,7 @@ export function Sidebar() {
                   )}
                 >
                   <div className="relative">
-                    <Bell className="w-5 h-5 min-w-[20px]" />
+                    <Bell className="w-5 h-5" />
                     {notificationCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
                         {notificationCount}
@@ -288,7 +284,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate(`/profile/${user?.username}`)}
             >
-              <User className="w-5 h-5 min-w-[20px]" />
+              <User className="w-5 h-5" />
               {!collapsed && <span>Profile</span>}
             </div>
           </li>
@@ -301,7 +297,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/settings")}
             >
-              <Settings className="w-5 h-5 min-w-[20px]" />
+              <Settings className="w-5 h-5" />
               {!collapsed && <span>Settings</span>}
             </div>
           </li>
@@ -314,7 +310,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/subscription")}
             >
-              <CreditCard className="w-5 h-5 min-w-[20px]" />
+              <CreditCard className="w-5 h-5" />
               {!collapsed && <span>Plans</span>}
             </div>
           </li>
@@ -326,7 +322,7 @@ export function Sidebar() {
                 collapsed && "justify-center px-2"
               )}
             >
-              <LogOut className="w-5 h-5 min-w-[20px]" />
+              <LogOut className="w-5 h-5" />
               {!collapsed && <span>Logout</span>}
             </button>
           </li>

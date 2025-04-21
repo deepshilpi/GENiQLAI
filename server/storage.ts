@@ -10,11 +10,8 @@ import { db, pool } from "./db";
 import { eq, and, desc, asc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import memoryStore from "memorystore";
 
-// Initialize session stores
 const PostgresSessionStore = connectPg(session);
-const MemoryStore = memoryStore(session);
 
 export interface IStorage {
   // User operations
@@ -56,37 +53,10 @@ export class DatabaseStorage implements IStorage {
   sessionStore: any;
 
   constructor() {
-    try {
-      // Configure PostgreSQL session store
-      const pgStore = new PostgresSessionStore({
-        pool,
-        createTableIfMissing: true,
-        tableName: 'session',
-        pruneSessionInterval: 900 // 15 minutes in seconds
-      });
-      
-      // Add error handler
-      pgStore.on('error', (error: Error) => {
-        console.error('PostgreSQL session store error:', error);
-        console.log('Falling back to memory store for session management');
-        
-        // Switch to memory store on persistent failures
-        this.sessionStore = new MemoryStore({
-          checkPeriod: 86400000 // 24 hours in ms
-        });
-      });
-      
-      this.sessionStore = pgStore;
-      console.log('Using PostgreSQL session store');
-    } catch (error) {
-      console.error('Failed to initialize PostgreSQL session store:', error);
-      console.log('Falling back to memory store for session management');
-      
-      // Use memory store as fallback
-      this.sessionStore = new MemoryStore({
-        checkPeriod: 86400000 // 24 hours in ms
-      });
-    }
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
+    });
   }
 
   // User operations
