@@ -21,12 +21,16 @@ export default function AuthPage() {
   const [location, navigate] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
 
+  // Get the return URL from the query string if present
+  const searchParams = new URLSearchParams(window.location.search);
+  const returnTo = searchParams.get('returnTo') || '/';
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate(returnTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, returnTo]);
 
   // Registration form
   const registerForm = useForm<z.infer<typeof insertUserSchema>>({
@@ -62,8 +66,8 @@ export default function AuthPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
-                <BrainCircuit className="w-6 h-6 text-white" />
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">GENIQL</h1>
@@ -218,8 +222,8 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-1 bg-vision-card/30 backdrop-blur-sm items-center justify-center p-8">
         <div className="max-w-lg text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
-              <BrainCircuit className="w-8 h-8 text-white" />
+            <div className="w-20 h-20 flex items-center justify-center">
+              <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
             </div>
           </div>
           <h1 className="text-4xl font-bold mb-4 text-white">GENIQL</h1>

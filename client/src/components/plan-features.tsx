@@ -33,7 +33,7 @@ export function PlanFeatures() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Budget Planning Feature */}
         <div className="bg-card rounded-xl p-5 relative">
-          <BlurOverlay feature="Unicorn" />
+          <BlurOverlay feature="Unicorn" requiredPlan="unicorn" />
           
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Planning to Execute</h3>
@@ -133,7 +133,7 @@ export function PlanFeatures() {
         
         {/* Investor Discovery Feature */}
         <div className="bg-card rounded-xl p-5 relative">
-          <BlurOverlay feature="Unicorn" />
+          <BlurOverlay feature="Unicorn" requiredPlan="unicorn" />
           
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Finding Investors</h3>

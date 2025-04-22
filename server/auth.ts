@@ -1,10 +1,26 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+import createMemoryStore from "memorystore";
+import { User } from "@shared/schema";
+
+// Type declarations for passport authentication
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      username: string;
+      email: string;
+      [key: string]: any;
+    }
+  }
+}
 
 const scryptAsync = promisify(scrypt);
 
@@ -22,7 +38,30 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Initialize session store with PostgreSQL, falling back to memory store
+  let sessionStore;
+  const MemoryStore = createMemoryStore(session);
+  
+  try {
+    // First try to use PostgreSQL session store
+    const PostgresStore = connectPg(session);
+    sessionStore = new PostgresStore({
+      pool,
+      tableName: 'session',
+      createTableIfMissing: true,
+    });
+    console.log('Using PostgreSQL session store');
+  } catch (error) {
+    // If PostgreSQL fails, fallback to memory store
+    console.warn('PostgreSQL session store failed, falling back to memory store:', error);
+    sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    });
+    console.log('Using in-memory session store');
+  }
+  
   app.use(session({
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
@@ -53,20 +92,24 @@ export function setupAuth(app: Express) {
     }
   }));
 
-  passport.serializeUser((user: any, done) => {
+  passport.serializeUser((user: Express.User, done: (err: Error | null, id?: number) => void) => {
     done(null, user.id);
   });
 
-  passport.deserializeUser(async (id: number, done) => {
+  passport.deserializeUser(async (id: number, done: (err: Error | null, user?: Express.User | false) => void) => {
     try {
       const user = await storage.getUser(id);
+      if (!user) {
+        return done(null, false);
+      }
       done(null, user);
     } catch (error) {
-      done(error);
+      console.error("User deserialization error:", error);
+      done(error as Error);
     }
   });
 
-  app.post("/api/register", async (req, res) => {
+  app.post("/api/register", async (req: Request, res: Response) => {
     try {
       const { username, email, password } = req.body;
 
@@ -82,36 +125,40 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
-      req.login(user, (err) => {
+      req.login(user, (err: Error | null) => {
         if (err) {
           return res.status(500).json({ message: "Login failed after registration" });
         }
         return res.status(201).json(user);
       });
     } catch (error) {
+      console.error("Registration error:", error);
       res.status(500).json({ message: "Registration failed" });
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+  app.post("/api/login", (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate("local", (err: Error | null, user: User | false, info: { message: string } | undefined) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Authentication failed" });
 
-      req.login(user, (err) => {
-        if (err) return next(err);
+      req.login(user, (loginErr: Error | null) => {
+        if (loginErr) return next(loginErr);
         return res.json(user);
       });
     })(req, res, next);
   });
 
-  app.post("/api/logout", (req, res) => {
-    req.logout(() => {
+  app.post("/api/logout", (req: Request, res: Response) => {
+    req.logout((err: Error | null) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
       res.json({ message: "Logged out successfully" });
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", (req: Request, res: Response) => {
     if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }

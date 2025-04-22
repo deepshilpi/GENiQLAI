@@ -128,7 +128,13 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
         {/* Block 5: CAGR (Pro) */}
         {results.cagr && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && <BlurOverlay feature="Pro" />}
+            {needsProPlan && (
+              <BlurOverlay 
+                feature="CAGR Analysis" 
+                requiredPlan="pro"
+                description="Access detailed compound annual growth rate projections for your startup"
+              />
+            )}
             
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">CAGR</h3>
@@ -157,7 +163,13 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
         {/* Block 6: Previous Failed Executions (Pro) */}
         {results.previousFailedExecutions && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && <BlurOverlay feature="Pro" />}
+            {needsProPlan && (
+              <BlurOverlay 
+                feature="Failed Executions Analysis" 
+                requiredPlan="pro"
+                description="Learn from past mistakes - access data on similar startups that failed"
+              />
+            )}
             
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Previous Failed Executions</h3>
@@ -187,7 +199,13 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
         {/* Block 7: Funding Requirements (Pro) */}
         {results.fundingRequirements && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && <BlurOverlay feature="Pro" />}
+            {needsProPlan && (
+              <BlurOverlay 
+                feature="Funding Requirements" 
+                requiredPlan="pro"
+                description="Get detailed funding requirements and capital allocation recommendations"
+              />
+            )}
             
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Funding Requirements</h3>
@@ -249,7 +267,13 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
         {/* Block 8: Go-to-Market Strategy (Pro) */}
         {results.goToMarketStrategy && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && <BlurOverlay feature="Pro" />}
+            {needsProPlan && (
+              <BlurOverlay 
+                feature="Go-to-Market Strategy" 
+                requiredPlan="pro"
+                description="Access a detailed execution roadmap with timelines and action steps"
+              />
+            )}
             
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Go-to-Market Strategy</h3>

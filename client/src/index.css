@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('./assets/fonts/fonts.css');
+
 @layer base {
   :root {
     --background: 260 83% 11%; /* Vision UI dark purple background */
@@ -69,6 +71,10 @@
       linear-gradient(180deg, rgba(75, 22, 153, 0.15) 0%, rgba(45, 20, 121, 0) 100%);
     background-attachment: fixed;
     background-size: cover;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-medium;
   }
   
   /* App Layout Structure */

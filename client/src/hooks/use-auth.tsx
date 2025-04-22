@@ -11,6 +11,7 @@ type AuthContextType = {
   loginMutation: any;
   logoutMutation: any;
   registerMutation: any;
+  updatePlanMutation: any;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -80,6 +81,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const updatePlanMutation = useMutation({
+    mutationFn: async ({ planType }: { planType: string }) => {
+      const res = await apiRequest("POST", "/api/user/plan", { planType });
+      return await res.json();
+    },
+    onSuccess: (updatedUser: any) => {
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      toast({
+        title: "Subscription updated",
+        description: `Your plan has been upgraded to ${updatedUser.planType}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Subscription update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <AuthContext.Provider
       value={{
@@ -89,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        updatePlanMutation,
       }}
     >
       {children}

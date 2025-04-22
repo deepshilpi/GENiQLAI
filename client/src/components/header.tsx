@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
@@ -29,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 export function Header() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
+  const { openAuthDialog } = useAuthDialog();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3); // Example count
@@ -92,10 +94,10 @@ export function Header() {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-              <BrainCircuit className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 flex items-center justify-center">
+              <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
             </div>
-            <span className="font-bold text-lg text-white">GENIQL</span>
+            <span className="font-heading font-bold text-lg text-white">GENIQL</span>
           </div>
         </div>
 
@@ -176,54 +178,61 @@ export function Header() {
           </DropdownMenu>
 
           {/* User account menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rounded-lg p-0">
-                <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-                  {user?.username ? (
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-lg p-0">
+                  <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
                       {user.username.charAt(0).toUpperCase()}
                     </span>
-                  ) : (
-                    <User className="w-5 h-5 text-white" />
-                  )}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
+                <div className="px-2 py-2 border-b border-vision-purple-200/10">
+                  <p className="text-sm font-medium text-white truncate">{user.username}</p>
+                  <p className="text-xs text-white/50">{user.planType || "Free"} Plan</p>
                 </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
-              <div className="px-2 py-2 border-b border-vision-purple-200/10">
-                <p className="text-sm font-medium text-white truncate">{user?.username || "Guest"}</p>
-                <p className="text-xs text-white/50">{user?.planType || "Free"} Plan</p>
-              </div>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <div className="py-1">
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/")}>
-                  <BrainCircuit className="w-4 h-4 mr-2" />
-                  <span>AI Analysis</span>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <div className="py-1">
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/")}>
+                    <BrainCircuit className="w-4 h-4 mr-2" />
+                    <span>AI Analysis</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/community")}>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    <span>Community</span>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <div className="py-1">
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user.username}`)}>
+                    <User className="w-4 h-4 mr-2" />
+                    <span>My Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/settings")}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Logout</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/community")}>
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  <span>Community</span>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <div className="py-1">
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username}`)}>
-                  <User className="w-4 h-4 mr-2" />
-                  <span>My Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/settings")}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="secondary"
+              className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
+              onClick={() => openAuthDialog({ defaultTab: "login" })}
+            >
+              <User className="w-4 h-4 mr-2" />
+              <span>Sign In</span>
+            </Button>
+          )}
 
           {/* Theme toggle removed as requested */}
         </div>
@@ -332,47 +341,54 @@ export function Header() {
           <Settings className="w-5 h-5" />
         </Button>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
-              <div className="flex flex-col items-end mr-2">
-                <span className="text-white text-sm font-medium">{user?.username || "Guest"}</span>
-                <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
-              </div>
-              <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-                {user?.username ? (
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
+                <div className="flex flex-col items-end mr-2">
+                  <span className="text-white text-sm font-medium">{user.username}</span>
+                  <span className="text-white/50 text-xs">{user.planType || "Free"}</span>
+                </div>
+                <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
                     {user.username.charAt(0).toUpperCase()}
                   </span>
-                ) : (
-                  <User className="w-5 h-5 text-white" />
-                )}
-              </div>
-              <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-            <Link href={`/profile/${user?.username}`}>
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
-                <User className="w-4 h-4 mr-2" />
-                <span>Profile</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+              <Link href={`/profile/${user.username}`}>
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
+                  <User className="w-4 h-4 mr-2" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/settings">
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
+                  <Settings className="w-4 h-4 mr-2" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-vision-purple-100/10">
+                <LogOut className="w-4 h-4 mr-2" />
+                <span>Logout</span>
               </DropdownMenuItem>
-            </Link>
-            <Link href="/settings">
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
-                <Settings className="w-4 h-4 mr-2" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-vision-purple-100/10">
-              <LogOut className="w-4 h-4 mr-2" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button 
+            variant="secondary"
+            className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
+            onClick={() => openAuthDialog({ defaultTab: "login" })}
+          >
+            <User className="w-4 h-4 mr-2" />
+            <span>Sign In</span>
+          </Button>
+        )}
       </div>
     </header>
   );
