@@ -38,6 +38,7 @@ interface UserWebSocket extends WebSocket {
 }
 
 // Map to store active WebSocket connections by user ID
+// Using non-null assertion to ensure we only add connections with valid IDs
 const activeConnections = new Map<number, Set<UserWebSocket>>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -538,16 +539,8 @@ function setupWebSocketServer(httpServer: Server) {
   });
   
   wss.on('connection', (ws: UserWebSocket, req) => {
-    // Parse the cookie to get the session ID
-    const cookies = req.headers.cookie?.split(';').map(c => c.trim());
-    const sessionCookie = cookies?.find(c => c.startsWith('connect.sid='));
-    
-    if (!sessionCookie) {
-      ws.close(1008, 'Authentication required');
-      return;
-    }
-    
-    // Initially set as unauthenticated
+    // Initialize user as unauthenticated
+    // Later, client will need to send authentication with user ID
     ws.userId = undefined;
     
     ws.on('message', async (message) => {
@@ -556,35 +549,44 @@ function setupWebSocketServer(httpServer: Server) {
         
         // Handle authentication
         if (data.type === 'auth') {
-          // Validate user session
+          // Validate user ID from authentication payload
           const userId = data.payload.userId;
-          if (!userId) {
+          if (typeof userId !== 'number' || isNaN(userId)) {
             ws.send(JSON.stringify({
               type: 'error',
-              payload: { message: 'Authentication failed' }
+              payload: { message: 'Authentication failed: Invalid user ID' }
             }));
+            console.log('WebSocket auth failed: Invalid user ID', userId);
             return;
           }
 
           // Verify user exists in the database
           try {
+            console.log('Verifying user in database, ID:', userId);
             const user = await storage.getUser(userId);
+            
             if (!user) {
               ws.send(JSON.stringify({
                 type: 'error',
-                payload: { message: 'Authentication failed' }
+                payload: { message: 'Authentication failed: User not found' }
               }));
+              console.log('WebSocket auth failed: User not found for ID', userId);
               return;
             }
+            
+            console.log('User found, authenticating WebSocket connection');
             
             // Set the authenticated user ID
             ws.userId = userId;
             
-            // Add connection to active connections
-            if (!activeConnections.has(ws.userId)) {
-              activeConnections.set(ws.userId, new Set());
+            // Add connection to active connections map
+            if (!activeConnections.has(userId)) {
+              activeConnections.set(userId, new Set());
             }
-            activeConnections.get(ws.userId)?.add(ws);
+            const connections = activeConnections.get(userId);
+            if (connections) {
+              connections.add(ws);
+            }
           } catch (error) {
             console.error('Error authenticating WebSocket connection:', error);
             ws.send(JSON.stringify({

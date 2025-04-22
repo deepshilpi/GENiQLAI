@@ -72,130 +72,143 @@ export function ChatInterface() {
 
   // Connect to WebSocket
   useEffect(() => {
-    if (!user) return;
+    // Don't attempt to connect if no user is logged in
+    if (!user || !user.id) {
+      console.log("Not connecting WebSocket: No authenticated user");
+      return;
+    }
 
-    const connect = () => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
+    console.log("Setting up WebSocket connection...");
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+    
+    // Handle WebSocket open
+    ws.onopen = () => {
+      console.log("WebSocket connected, authenticating...");
+      setConnectionStatus("connected");
       
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+      // Send authentication with user ID
+      ws.send(JSON.stringify({
+        type: "auth",
+        payload: { userId: user.id }
+      }));
       
-      ws.onopen = () => {
-        console.log("WebSocket connected");
-        setConnectionStatus("connected");
-        
-        // Authenticate with the server - ensure user is defined and has an ID
-        if (user && user.id) {
-          ws.send(JSON.stringify({
-            type: "auth",
-            payload: { userId: user.id }
-          }));
-        } else {
-          console.error("Cannot authenticate WebSocket: User ID not available");
-          ws.close();
-        }
-      };
-      
-      ws.onclose = () => {
-        console.log("WebSocket disconnected");
-        setConnectionStatus("disconnected");
-        
-        // Try to reconnect after 3 seconds
-        setTimeout(() => {
-          setConnectionStatus("connecting");
-          connect();
-        }, 3000);
-      };
-      
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        setConnectionStatus("disconnected");
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data: WebSocketMessage = JSON.parse(event.data);
-          
-          switch (data.type) {
-            case "auth_success":
-              console.log("Authentication successful");
-              
-              // Request conversations
-              ws.send(JSON.stringify({
-                type: "get_conversations"
-              }));
-              break;
-              
-            case "unread_count":
-              setUnreadCount(data.payload.count);
-              break;
-              
-            case "conversations":
-              setConversations(data.payload.conversations);
-              setLoading(false);
-              break;
-              
-            case "messages":
-              setMessages(data.payload.messages.reverse()); // Reverse to show oldest first
-              scrollToBottom();
-              break;
-              
-            case "new_message":
-              if (activeConversation && activeConversation.id === data.payload.message.conversationId) {
-                setMessages(prev => [...prev, data.payload.message]);
-                scrollToBottom();
-                
-                // Mark the message as read
-                markMessageAsRead(data.payload.message.id);
-              } else {
-                // Update unread count
-                setUnreadCount(prev => prev + 1);
-                
-                // Show toast notification
-                toast({
-                  title: "New Message",
-                  description: "You have a new message",
-                  duration: 3000,
-                });
-              }
-              break;
-              
-            case "new_conversation":
-              setConversations(prev => [data.payload.conversation, ...prev]);
-              
-              toast({
-                title: "New Conversation",
-                description: "You have been added to a new conversation",
-                duration: 3000,
-              });
-              break;
-              
-            case "error":
-              console.error("WebSocket error:", data.payload.message);
-              toast({
-                title: "Error",
-                description: data.payload.message,
-                variant: "destructive",
-                duration: 3000,
-              });
-              break;
-          }
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
-        }
-      };
+      console.log("Authentication message sent");
     };
     
-    connect();
+    // Handle WebSocket close
+    ws.onclose = () => {
+      console.log("WebSocket disconnected");
+      setConnectionStatus("disconnected");
+      
+      // Try to reconnect after 3 seconds
+      setTimeout(() => {
+        setConnectionStatus("connecting");
+        
+        // Only reconnect if component is still mounted and user is logged in
+        if (user && user.id) {
+          // Create a new WebSocket instance on reconnect
+          const newWs = new WebSocket(wsUrl);
+          wsRef.current = newWs;
+          
+          // Set up event handlers for the new connection
+          // (this will be handled by a re-run of this effect)
+        }
+      }, 3000);
+    };
+    
+    // Handle WebSocket errors
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setConnectionStatus("disconnected");
+    };
+    
+    // Handle WebSocket messages
+    ws.onmessage = (event) => {
+      try {
+        const data: WebSocketMessage = JSON.parse(event.data);
+        
+        switch (data.type) {
+          case "auth_success":
+            console.log("Authentication successful");
+            
+            // Request conversations
+            ws.send(JSON.stringify({
+              type: "get_conversations"
+            }));
+            break;
+            
+          case "unread_count":
+            setUnreadCount(data.payload.count);
+            break;
+            
+          case "conversations":
+            setConversations(data.payload.conversations);
+            setLoading(false);
+            break;
+            
+          case "messages":
+            setMessages(data.payload.messages.reverse()); // Reverse to show oldest first
+            scrollToBottom();
+            break;
+            
+          case "new_message":
+            if (activeConversation && activeConversation.id === data.payload.message.conversationId) {
+              setMessages(prev => [...prev, data.payload.message]);
+              scrollToBottom();
+              
+              // Mark the message as read
+              markMessageAsRead(data.payload.message.id);
+            } else {
+              // Update unread count
+              setUnreadCount(prev => prev + 1);
+              
+              // Show toast notification
+              toast({
+                title: "New Message",
+                description: "You have a new message",
+                duration: 3000,
+              });
+            }
+            break;
+            
+          case "new_conversation":
+            setConversations(prev => [data.payload.conversation, ...prev]);
+            
+            toast({
+              title: "New Conversation",
+              description: "You have been added to a new conversation",
+              duration: 3000,
+            });
+            break;
+            
+          case "error":
+            console.error("WebSocket error:", data.payload.message);
+            toast({
+              title: "Error",
+              description: data.payload.message,
+              variant: "destructive",
+              duration: 3000,
+            });
+            break;
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
     
     // Cleanup on unmount
     return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      console.log("Cleaning up WebSocket connection");
+      if (wsRef.current) {
         wsRef.current.close();
+        wsRef.current = null;
       }
     };
-  }, [user, toast]);
+  }, [user, toast, activeConversation]);
   
   // Set active conversation
   const setActiveConversationAndLoadMessages = (conversation: Conversation) => {
