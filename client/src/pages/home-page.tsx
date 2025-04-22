@@ -7,9 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { detectUserCountry } from "@/lib/utils";
-import { SampleAnalysisDemo } from "@/components/sample-analysis-demo";
-import { OnboardingTour } from "@/components/onboarding-tour";
-import { IndustryTemplateSelector } from "@/components/industry-template-selector";
 import { 
   BrainCircuit, 
   Sparkles, 
@@ -24,41 +21,17 @@ export default function HomePage() {
   const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
     if (!user) {
       // If user is on home page but not logged in, let them see the landing
       // but disable the actual analysis functionality
-    } else {
-      // Check if this is the user's first time (using localStorage)
-      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-      if (!hasSeenOnboarding) {
-        setIsNewUser(true);
-        setShowOnboarding(true);
-      }
     }
   }, [user, navigate]);
   
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
-  
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    localStorage.setItem('hasSeenOnboarding', 'true');
-  };
-  
-  const handleSelectTemplate = (template: string) => {
-    setStartupIdea(template);
-    setShowTemplateSelector(false);
-    toast({
-      title: "Template Selected",
-      description: "Customize the template by editing it to match your specific idea.",
-    });
-  };
   
   const handleAnalyze = async () => {
     // Require login for analysis
@@ -127,12 +100,6 @@ export default function HomePage() {
   
   return (
     <div className="min-h-screen bg-vision-bg flex">
-      {/* Onboarding Tour */}
-      <OnboardingTour 
-        showTour={showOnboarding} 
-        onComplete={handleOnboardingComplete} 
-      />
-      
       <div className="flex-1 flex flex-col main-content transition-all duration-300">
         
         <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
@@ -140,7 +107,7 @@ export default function HomePage() {
           {/* Content based on analysis step */}
           {analysisStep === 'input' ? (
             /* Centered prompt box */
-            <div className="w-full max-w-5xl flex flex-col">
+            <div className="w-full max-w-3xl">
               <div className="vision-card overflow-hidden p-8 relative">
                 {/* Glowing effect at the top */}
                 <div 
@@ -182,28 +149,9 @@ export default function HomePage() {
                 )}
                 
                 <div className="mb-6">
-                  <div className="flex flex-wrap justify-between items-center mb-2">
-                    <label htmlFor="startup-idea" className="text-white/90 font-medium">
-                      Describe your startup idea in detail
-                    </label>
-                    {user && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setShowTemplateSelector(!showTemplateSelector)}
-                        className="text-white/70 border-vision-purple-200/20 hover:bg-vision-purple-100/10 text-xs"
-                      >
-                        {showTemplateSelector ? 'Hide Templates' : 'Use Template'}
-                      </Button>
-                    )}
-                  </div>
-                  
-                  {showTemplateSelector && (
-                    <div className="mb-6 bg-vision-card/40 border border-vision-purple-200/20 rounded-lg p-4">
-                      <IndustryTemplateSelector onSelect={handleSelectTemplate} />
-                    </div>
-                  )}
-                  
+                  <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">
+                    Describe your startup idea in detail
+                  </label>
                   <Textarea
                     id="startup-idea"
                     value={startupIdea}
@@ -243,13 +191,6 @@ export default function HomePage() {
                   }}
                 />
               </div>
-              
-              {/* Sample Analysis Demo for anonymous users */}
-              {!user && (
-                <div className="mt-16">
-                  <SampleAnalysisDemo />
-                </div>
-              )}
             </div>
           ) : (
             /* Analysis Results */

@@ -33,14 +33,14 @@ import {
 export function Sidebar() {
   const [location, navigate] = useLocation();
   const { user, logoutMutation } = useAuth();
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   
   // Set initial collapsed state based on screen size
   useEffect(() => {
-    setCollapsed(true);
+    setCollapsed(isMobile);
     
     // Add class to body for mobile sidebar control
     const handleResize = () => {
