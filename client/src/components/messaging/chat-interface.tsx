@@ -299,7 +299,7 @@ export function ChatInterface() {
   };
 
   return (
-    <Card className="w-full h-[85vh] max-h-[85vh] shadow-md overflow-hidden">
+    <Card className={`w-full shadow-md overflow-hidden ${isMobile ? 'mobile-chat-container' : 'h-[85vh] max-h-[85vh]'}`}>
       <Tabs defaultValue="chats" className="h-full flex flex-col">
         <CardHeader className="py-3 px-5 border-b flex flex-row items-center justify-between">
           <CardTitle className="text-xl">Messages</CardTitle>
@@ -454,7 +454,7 @@ export function ChatInterface() {
                                 key={message.id}
                                 className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
                               >
-                                <div className="flex max-w-[85%] md:max-w-[70%]">
+                                <div className="flex message-bubble max-w-[85%] md:max-w-[70%]">
                                   {!isCurrentUser && (
                                     <Avatar className="h-8 w-8 mr-2 mt-1 hidden sm:block">
                                       <AvatarFallback>
@@ -491,7 +491,7 @@ export function ChatInterface() {
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
                           placeholder="Type your message..."
-                          className="flex-1 h-10 min-h-10 py-2"
+                          className="flex-1 h-10 min-h-10 py-2 message-input"
                         />
                         <Button 
                           type="submit" 
