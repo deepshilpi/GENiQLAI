@@ -184,15 +184,15 @@ export function Header() {
                 <Button variant="ghost" className="rounded-lg p-0">
                   <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
-                      {user.username.charAt(0).toUpperCase()}
+                      {user?.username?.charAt(0)?.toUpperCase() || '?'}
                     </span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
                 <div className="px-2 py-2 border-b border-vision-purple-200/10">
-                  <p className="text-sm font-medium text-white truncate">{user.username}</p>
-                  <p className="text-xs text-white/50">{user.planType || "Free"} Plan</p>
+                  <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
+                  <p className="text-xs text-white/50">{user?.planType || "Free"} Plan</p>
                 </div>
                 <DropdownMenuSeparator className="bg-vision-purple-200/10" />
                 <div className="py-1">
@@ -207,7 +207,7 @@ export function Header() {
                 </div>
                 <DropdownMenuSeparator className="bg-vision-purple-200/10" />
                 <div className="py-1">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user.username}`)}>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
                     <User className="w-4 h-4 mr-2" />
                     <span>My Profile</span>
                   </DropdownMenuItem>
@@ -346,12 +346,12 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
                 <div className="flex flex-col items-end mr-2">
-                  <span className="text-white text-sm font-medium">{user.username}</span>
-                  <span className="text-white/50 text-xs">{user.planType || "Free"}</span>
+                  <span className="text-white text-sm font-medium">{user?.username || 'User'}</span>
+                  <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
                 </div>
                 <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {user.username.charAt(0).toUpperCase()}
+                    {user?.username?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                 </div>
                 <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
@@ -360,7 +360,7 @@ export function Header() {
             <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <Link href={`/profile/${user.username}`}>
+              <Link href={`/profile/${user?.username || 'user'}`}>
                 <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
                   <User className="w-4 h-4 mr-2" />
                   <span>Profile</span>

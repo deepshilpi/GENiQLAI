@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -18,33 +19,20 @@ import * as THREE from "three";
 export default function HomePage() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
+  const { openAuthDialog } = useAuthDialog();
   const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number | null>(null);
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!user) {
-      // If user is on home page but not logged in, let them see the landing
-      // but disable the actual analysis functionality
-    }
-  }, [user, navigate]);
+  // Everyone can now view the page and use limited features
+  // No need to redirect anonymous users anymore
 
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
 
   const handleAnalyze = async () => {
-    // Require login for analysis
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please sign in to analyze your startup idea",
-        variant: "default",
-      });
-      navigate('/auth');
-      return;
-    }
-
+    // Allow anyone to analyze, but with limits for anonymous users
     if (!startupIdea.trim() || isAnalyzing) return;
 
     setIsAnalyzing(true);
@@ -64,12 +52,38 @@ export default function HomePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Special handling for free limit reached
+        if (errorData.error === "free_limit_reached") {
+          setIsAnalyzing(false);
+          
+          // Show authentication dialog when limit is reached
+          openAuthDialog({ 
+            defaultTab: 'register',
+            returnTo: '/'
+          });
+          
+          toast({
+            title: "Free Analysis Limit Reached",
+            description: "Sign up to continue analyzing startup ideas and unlock more features!",
+            variant: "default",
+          });
+          
+          return;
+        }
+        
         throw new Error(errorData.message || 'Failed to analyze startup idea');
       }
 
       // Get results and update state
       const results = await response.json();
       setAnalysisResults(results);
+      
+      // Store remaining free analyses count if present in response metadata
+      if (results.meta && typeof results.meta.remainingFreeAnalyses === 'number') {
+        setRemainingFreeAnalyses(results.meta.remainingFreeAnalyses);
+      }
+      
       setAnalysisStep('results');
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
@@ -141,6 +155,31 @@ export default function HomePage() {
                     placeholder="Example: A subscription service that delivers personalized book recommendations based on AI analysis of reading preferences and behavior..."
                     className="h-32 bg-vision-card/80 border-vision-purple-200/20 text-white placeholder:text-white/40 focus:border-vision-purple-500"
                   />
+                  
+                  {/* Show remaining free analyses message for anonymous users */}
+                  {!user && (
+                    <div className="mt-2 text-sm text-white/60 flex items-center">
+                      {remainingFreeAnalyses !== null ? (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-1 text-vision-purple-500" />
+                          <span>
+                            {remainingFreeAnalyses === 2 ? (
+                              "You have 2 free analyses available - no signup required!"
+                            ) : remainingFreeAnalyses === 1 ? (
+                              "You have 1 free analysis remaining before signup is required."
+                            ) : (
+                              "You've used all free analyses. Sign up to continue!"
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-1 text-vision-purple-500" />
+                          <span>Try 2 free analyses without signup!</span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-center sm:justify-end">
@@ -208,6 +247,35 @@ export default function HomePage() {
                 <div className="vision-card p-6">
                   <h2 className="text-xl font-bold text-white mb-2">Analyzed Startup Idea</h2>
                   <p className="text-white/80">{startupIdea}</p>
+                  
+                  {/* Free analysis notification for anonymous users */}
+                  {!user && analysisResults?.meta && (
+                    <div className="mt-4 p-3 bg-vision-purple-100/10 rounded-lg border border-vision-purple-200/20">
+                      <div className="flex items-start">
+                        <Sparkles className="w-5 h-5 text-vision-purple-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-white/80 text-sm">
+                            {analysisResults.meta.remainingFreeAnalyses === 1 ? (
+                              "You have 1 free analysis remaining. Sign up to unlock all features!"
+                            ) : analysisResults.meta.remainingFreeAnalyses === 0 ? (
+                              "You've used all your free analyses. Sign up now to continue and save your results!"
+                            ) : (
+                              "You have used 1 of your 2 free analyses. Sign up to unlock premium features!"
+                            )}
+                          </p>
+                          <div className="mt-2">
+                            <Button 
+                              size="sm"
+                              className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white"
+                              onClick={() => openAuthDialog({ defaultTab: 'register' })}
+                            >
+                              Sign Up Now
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Results grid */}

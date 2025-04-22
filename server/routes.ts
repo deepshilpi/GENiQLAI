@@ -20,16 +20,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // API routes
-  // Analyze startup idea - require authentication
+  // Analyze startup idea - allow limited free usage for anonymous users
   app.post("/api/analyze", async (req, res) => {
-    // Require authentication
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to analyze startup ideas",
-        error: "auth_required"
-      });
-    }
-    
     const { startupIdea } = req.body;
     
     if (!startupIdea) {
@@ -42,6 +34,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "AI analysis is currently unavailable. Please try again later.",
         error: "missing_api_key"
       });
+    }
+    
+    // Track free analysis usage for anonymous users
+    if (!req.isAuthenticated()) {
+      // Initialize the session counter if not already present
+      if (req.session.anonymousAnalysisCount === undefined) {
+        req.session.anonymousAnalysisCount = 0;
+      }
+      
+      // Check if user has exceeded the free limit (2 analyses)
+      if (req.session.anonymousAnalysisCount >= 2) {
+        return res.status(403).json({ 
+          message: "Free analysis limit reached. Please sign up to continue analyzing startup ideas.",
+          error: "free_limit_reached",
+          remainingFreeAnalyses: 0,
+          totalFreeAnalyses: 2
+        });
+      }
+      
+      // Increment the counter for anonymous users
+      req.session.anonymousAnalysisCount++;
     }
     
     // Detect country from IP (simplified for demo)
@@ -77,7 +90,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      return res.status(200).json(analysisResults);
+      // Add metadata about free analysis usage for anonymous users
+      const responseData = {
+        ...analysisResults,
+        meta: {
+          isAuthenticated: req.isAuthenticated(),
+          remainingFreeAnalyses: req.isAuthenticated() ? 
+            null : 
+            Math.max(0, 2 - (req.session.anonymousAnalysisCount || 0)),
+          totalFreeAnalyses: 2
+        }
+      };
+      
+      return res.status(200).json(responseData);
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
       
