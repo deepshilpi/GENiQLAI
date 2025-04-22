@@ -1,11 +1,22 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
-import { InsertPost, InsertComment, InsertVote, InsertFollow, AnalysisResults } from "@shared/schema";
+import { 
+  InsertPost, 
+  InsertComment, 
+  InsertVote, 
+  InsertFollow, 
+  AnalysisResults, 
+  InsertConversation,
+  InsertConversationParticipant,
+  InsertMessage,
+  InsertMessageRead
+} from "@shared/schema";
 import session from "express-session";
 
 // Extend express-session types to include our custom properties

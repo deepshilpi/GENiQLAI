@@ -92,11 +92,66 @@ export const analyses = pgTable("analyses", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Direct messaging tables
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  name: text("name"), // Optional name for group chats
+  isGroup: boolean("is_group").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const conversationParticipants = pgTable("conversation_participants", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  isAdmin: boolean("is_admin").notNull().default(false),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id),
+  senderId: integer("sender_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const messageReads = pgTable("message_reads", {
+  id: serial("id").primaryKey(),
+  messageId: integer("message_id").notNull().references(() => messages.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  readAt: timestamp("read_at").notNull().defaultNow(),
+});
+
 export const insertAnalysisSchema = createInsertSchema(analyses).pick({
   userId: true,
   startupIdea: true,
   country: true,
   results: true,
+});
+
+// Create insert schemas for messaging tables
+export const insertConversationSchema = createInsertSchema(conversations).pick({
+  name: true,
+  isGroup: true,
+});
+
+export const insertConversationParticipantSchema = createInsertSchema(conversationParticipants).pick({
+  conversationId: true,
+  userId: true,
+  isAdmin: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  conversationId: true,
+  senderId: true,
+  content: true,
+});
+
+export const insertMessageReadSchema = createInsertSchema(messageReads).pick({
+  messageId: true,
+  userId: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -111,6 +166,14 @@ export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
 export type Analysis = typeof analyses.$inferSelect;
 export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type ConversationParticipant = typeof conversationParticipants.$inferSelect;
+export type InsertConversationParticipant = z.infer<typeof insertConversationParticipantSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type MessageRead = typeof messageReads.$inferSelect;
+export type InsertMessageRead = z.infer<typeof insertMessageReadSchema>;
 
 // Define relationships between tables
 export const usersRelations = relations(users, ({ many }) => ({
@@ -120,6 +183,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   followedBy: many(follows, { relationName: "followers" }),
   following: many(follows, { relationName: "following" }),
   analyses: many(analyses),
+  participatedConversations: many(conversationParticipants),
+  sentMessages: many(messages, { relationName: "sender" }),
+  messageReads: many(messageReads),
 }));
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -169,6 +235,47 @@ export const followsRelations = relations(follows, ({ one }) => ({
 export const analysesRelations = relations(analyses, ({ one }) => ({
   user: one(users, {
     fields: [analyses.userId],
+    references: [users.id],
+  }),
+}));
+
+// Messaging relationships
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  participants: many(conversationParticipants),
+  messages: many(messages),
+}));
+
+export const conversationParticipantsRelations = relations(conversationParticipants, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationParticipants.conversationId],
+    references: [conversations.id],
+  }),
+  user: one(users, {
+    fields: [conversationParticipants.userId],
+    references: [users.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one, many }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+    relationName: "sender",
+  }),
+  reads: many(messageReads),
+}));
+
+export const messageReadsRelations = relations(messageReads, ({ one }) => ({
+  message: one(messages, {
+    fields: [messageReads.messageId],
+    references: [messages.id],
+  }),
+  user: one(users, {
+    fields: [messageReads.userId],
     references: [users.id],
   }),
 }));
