@@ -557,22 +557,42 @@ function setupWebSocketServer(httpServer: Server) {
         // Handle authentication
         if (data.type === 'auth') {
           // Validate user session
-          const user = data.payload.user;
-          if (!user || !user.id) {
+          const userId = data.payload.userId;
+          if (!userId) {
             ws.send(JSON.stringify({
               type: 'error',
               payload: { message: 'Authentication failed' }
             }));
             return;
           }
-          
-          ws.userId = user.id;
-          
-          // Add connection to active connections
-          if (!activeConnections.has(ws.userId)) {
-            activeConnections.set(ws.userId, new Set());
+
+          // Verify user exists in the database
+          try {
+            const user = await storage.getUser(userId);
+            if (!user) {
+              ws.send(JSON.stringify({
+                type: 'error',
+                payload: { message: 'Authentication failed' }
+              }));
+              return;
+            }
+            
+            // Set the authenticated user ID
+            ws.userId = userId;
+            
+            // Add connection to active connections
+            if (!activeConnections.has(ws.userId)) {
+              activeConnections.set(ws.userId, new Set());
+            }
+            activeConnections.get(ws.userId)?.add(ws);
+          } catch (error) {
+            console.error('Error authenticating WebSocket connection:', error);
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Authentication failed' }
+            }));
+            return;
           }
-          activeConnections.get(ws.userId)?.add(ws);
           
           // Send confirmation
           ws.send(JSON.stringify({
