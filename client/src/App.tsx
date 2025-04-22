@@ -19,12 +19,12 @@ import { useAuth } from "@/hooks/use-auth";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-  const { user } = useAuth();
   
+  // We'll check auth status inside the rendered component
   return (
     <div className="app-container">
-      {/* Only show sidebar on desktop and for authenticated users */}
-      {!isMobile && user && <Sidebar />}
+      {/* Sidebar will check auth status internally */}
+      {!isMobile && <Sidebar />}
       
       {/* Header shown for all pages, but transforms for mobile */}
       <Header />

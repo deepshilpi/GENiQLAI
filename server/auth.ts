@@ -45,11 +45,22 @@ export function setupAuth(app: Express) {
   try {
     // First try to use PostgreSQL session store
     const PostgresStore = connectPg(session);
+    
+    // Create with error handling
     sessionStore = new PostgresStore({
       pool,
       tableName: 'session',
       createTableIfMissing: true,
     });
+    
+    // Verify the connection works
+    pool.query('SELECT NOW()', (err) => {
+      if (err) {
+        console.warn('PostgreSQL session store connection check failed:', err);
+        throw new Error('PostgreSQL connection check failed');
+      }
+    });
+    
     console.log('Using PostgreSQL session store');
   } catch (error) {
     // If PostgreSQL fails, fallback to memory store

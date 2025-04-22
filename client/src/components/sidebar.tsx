@@ -38,6 +38,11 @@ export function Sidebar() {
   const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   
+  // Early return if user is not authenticated
+  if (!user) {
+    return null;
+  }
+  
   // Set initial collapsed state based on screen size
   useEffect(() => {
     setCollapsed(isMobile);

@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Update user plan
-  app.post("/api/update-plan", async (req, res) => {
+  app.post("/api/user/plan", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }

@@ -56,25 +56,29 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Try to serve the app on port 5000, but use a fallback if it's not available
-  // this serves both the API and the client.
-  const tryPort = (port: number) => {
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    }).on('error', (e: any) => {
+  // Always use port 5000 for compatibility with Replit workflows
+  const PORT = 5000;
+  
+  // Kill anything already using port 5000 to ensure we can use it
+  try {
+    log(`Attempting to start server on port ${PORT}`);
+    
+    // Simple approach: Just try to listen directly on port 5000
+    server.listen(PORT, "0.0.0.0", () => {
+      log(`Server successfully started and listening on port ${PORT}`);
+    });
+    
+    // Handle errors
+    server.on('error', (e: any) => {
+      console.error('Server error:', e);
+      // Just exit with an error code so workflow will restart
       if (e.code === 'EADDRINUSE') {
-        log(`Port ${port} is already in use, trying next port...`);
-        tryPort(port + 1);
-      } else {
-        console.error(e);
+        console.error(`Port ${PORT} is already in use. Please free up port ${PORT} and try again.`);
+        process.exit(1);
       }
     });
-  };
-  
-  // Start with port 5000
-  tryPort(5000);
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 })();
