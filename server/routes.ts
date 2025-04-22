@@ -1,6 +1,6 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
@@ -26,10 +26,30 @@ declare module "express-session" {
   }
 }
 
+// Websocket message types
+type WebSocketMessage = {
+  type: string;
+  payload: any;
+};
+
+// Extend WebSocket with user ID property
+interface UserWebSocket extends WebSocket {
+  userId?: number;
+}
+
+// Map to store active WebSocket connections by user ID
+const activeConnections = new Map<number, Set<UserWebSocket>>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
-
+  
+  // Create HTTP server
+  const httpServer = createServer(app);
+  
+  // Setup WebSocket server
+  setupWebSocketServer(httpServer);
+  
   // API routes
   // Analyze startup idea - allow limited free usage for anonymous users
   app.post("/api/analyze", async (req, res) => {
@@ -244,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { bio } = req.body;
     
     if (bio === undefined) {
-      return res.status(400).json({ message: "Bio is required" });
+      return res.status(400).json({ message: "Bio field is required" });
     }
     
     try {
@@ -255,18 +275,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Failed to update bio" });
     }
   });
-  
-  // Community features
-  // Get all posts (Authentication required)
+
+  // Get all community posts
   app.get("/api/posts", async (req, res) => {
-    // Require authentication
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view posts",
-        error: "auth_required"
-      });
-    }
-    
     try {
       const posts = await storage.getPosts();
       return res.status(200).json(posts);
@@ -276,18 +287,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get a specific post (Authentication required)
+  // Get a specific post by ID
   app.get("/api/posts/:id", async (req, res) => {
-    // Require authentication
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view post details",
-        error: "auth_required"
-      });
+    const postId = parseInt(req.params.id);
+    
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
     }
     
     try {
-      const postId = parseInt(req.params.id);
       const post = await storage.getPostById(postId);
       
       if (!post) {
@@ -301,25 +309,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create a post (Available to all users)
+  // Create a new post
   app.post("/api/posts", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    // All users can now create posts
-    const { title, description, tags } = req.body;
+    const { title, content } = req.body;
     
-    if (!title || !description || !tags) {
-      return res.status(400).json({ message: "Title, description, and tags are required" });
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
     }
     
     try {
       const newPost: InsertPost = {
+        authorId: req.user.id,
         title,
-        description,
-        tags,
-        authorId: req.user.id
+        content,
+        pumpCount: 0,
+        dumpCount: 0
       };
       
       const post = await storage.createPost(newPost);
@@ -330,18 +338,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get comments for a post (Authentication required)
+  // Get comments for a post
   app.get("/api/posts/:id/comments", async (req, res) => {
-    // Require authentication
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view comments",
-        error: "auth_required"
-      });
+    const postId = parseInt(req.params.id);
+    
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
     }
     
     try {
-      const postId = parseInt(req.params.id);
       const comments = await storage.getCommentsByPostId(postId);
       return res.status(200).json(comments);
     } catch (error) {
@@ -350,28 +355,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create a comment
-  app.post("/api/comments", async (req, res) => {
+  // Add a comment to a post
+  app.post("/api/posts/:id/comments", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { content, postId } = req.body;
+    const postId = parseInt(req.params.id);
     
-    if (!content || !postId) {
-      return res.status(400).json({ message: "Content and postId are required" });
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+    
+    const { content } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({ message: "Comment content is required" });
     }
     
     try {
-      const post = await storage.getPostById(parseInt(postId));
+      // Verify the post exists
+      const post = await storage.getPostById(postId);
+      
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
       
       const newComment: InsertComment = {
-        content,
-        postId: parseInt(postId),
-        authorId: req.user.id
+        postId,
+        authorId: req.user.id,
+        content
       };
       
       const comment = await storage.createComment(newComment);
@@ -382,142 +395,367 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create a vote
-  app.post("/api/votes", async (req, res) => {
+  // Vote on a post (pump or dump)
+  app.post("/api/posts/:id/vote", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { postId, voteType } = req.body;
+    const postId = parseInt(req.params.id);
     
-    if (!postId || !voteType || !["pump", "dump"].includes(voteType)) {
-      return res.status(400).json({ message: "PostId and valid voteType are required" });
+    if (isNaN(postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+    
+    const { voteType } = req.body;
+    
+    if (!voteType || !["pump", "dump"].includes(voteType)) {
+      return res.status(400).json({ message: "Valid vote type (pump/dump) is required" });
     }
     
     try {
-      const post = await storage.getPostById(parseInt(postId));
+      // Verify the post exists
+      const post = await storage.getPostById(postId);
+      
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
       
       const newVote: InsertVote = {
-        postId: parseInt(postId),
+        postId,
         userId: req.user.id,
         voteType
       };
       
       const vote = await storage.createVote(newVote);
-      return res.status(201).json(vote);
+      return res.status(200).json(vote);
     } catch (error) {
-      console.error("Error creating vote:", error);
-      return res.status(500).json({ message: "Failed to create vote" });
+      console.error("Error voting on post:", error);
+      return res.status(500).json({ message: "Failed to vote on post" });
     }
   });
   
   // Follow a user
-  app.post("/api/follows", async (req, res) => {
+  app.post("/api/follow/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { followingId } = req.body;
+    const followingId = parseInt(req.params.id);
     
-    if (!followingId) {
-      return res.status(400).json({ message: "FollowingId is required" });
+    if (isNaN(followingId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
     }
     
-    // Cannot follow yourself
-    if (req.user.id === parseInt(followingId)) {
-      return res.status(400).json({ message: "Cannot follow yourself" });
+    if (followingId === req.user.id) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
     }
     
     try {
-      const userToFollow = await storage.getUser(parseInt(followingId));
-      if (!userToFollow) {
-        return res.status(404).json({ message: "User to follow not found" });
+      // Verify user exists
+      const user = await storage.getUser(followingId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
       
       const newFollow: InsertFollow = {
         followerId: req.user.id,
-        followingId: parseInt(followingId)
+        followingId
       };
       
       const follow = await storage.createFollow(newFollow);
-      return res.status(201).json(follow);
+      return res.status(200).json(follow);
     } catch (error) {
       console.error("Error following user:", error);
+      
+      if (error instanceof Error && error.message === "Already following this user") {
+        return res.status(400).json({ message: error.message });
+      }
+      
       return res.status(500).json({ message: "Failed to follow user" });
     }
   });
   
   // Unfollow a user
-  app.delete("/api/follows/:followingId", async (req, res) => {
+  app.delete("/api/follow/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const followingId = parseInt(req.params.followingId);
+    const followingId = parseInt(req.params.id);
+    
+    if (isNaN(followingId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
     
     try {
+      // Check if already following
+      const isFollowing = await storage.isFollowing(req.user.id, followingId);
+      
+      if (!isFollowing) {
+        return res.status(400).json({ message: "You are not following this user" });
+      }
+      
       await storage.deleteFollow(req.user.id, followingId);
-      return res.status(200).json({ message: "Unfollowed successfully" });
+      return res.status(200).json({ success: true });
     } catch (error) {
       console.error("Error unfollowing user:", error);
       return res.status(500).json({ message: "Failed to unfollow user" });
     }
   });
   
-  // Get user by username (Authentication required)
-  app.get("/api/users/:username", async (req, res) => {
-    // Require authentication
+  // Check if following a user
+  app.get("/api/follow/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view user profiles",
-        error: "auth_required"
-      });
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const followingId = parseInt(req.params.id);
+    
+    if (isNaN(followingId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
     }
     
     try {
-      const user = await storage.getUserByUsername(req.params.username);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Don't return the password
-      const { password, ...userWithoutPassword } = user;
-      return res.status(200).json(userWithoutPassword);
+      const isFollowing = await storage.isFollowing(req.user.id, followingId);
+      return res.status(200).json({ isFollowing });
     } catch (error) {
-      console.error("Error fetching user:", error);
-      return res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-  
-  // Get posts by username (Authentication required)
-  app.get("/api/users/:username/posts", async (req, res) => {
-    // Require authentication
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view user posts",
-        error: "auth_required"
-      });
-    }
-    
-    try {
-      const user = await storage.getUserByUsername(req.params.username);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      const posts = await storage.getPostsByUserId(user.id);
-      return res.status(200).json(posts);
-    } catch (error) {
-      console.error("Error fetching user posts:", error);
-      return res.status(500).json({ message: "Failed to fetch user posts" });
+      console.error("Error checking follow status:", error);
+      return res.status(500).json({ message: "Failed to check follow status" });
     }
   });
 
-  const httpServer = createServer(app);
+  // Return the HTTP server
   return httpServer;
+}
+
+// WebSocket server setup
+function setupWebSocketServer(httpServer: Server) {
+  const wss = new WebSocketServer({ 
+    server: httpServer,
+    path: '/ws'
+  });
+  
+  wss.on('connection', (ws: UserWebSocket, req) => {
+    // Parse the cookie to get the session ID
+    const cookies = req.headers.cookie?.split(';').map(c => c.trim());
+    const sessionCookie = cookies?.find(c => c.startsWith('connect.sid='));
+    
+    if (!sessionCookie) {
+      ws.close(1008, 'Authentication required');
+      return;
+    }
+    
+    // Initially set as unauthenticated
+    ws.userId = undefined;
+    
+    ws.on('message', async (message) => {
+      try {
+        const data: WebSocketMessage = JSON.parse(message.toString());
+        
+        // Handle authentication
+        if (data.type === 'auth') {
+          // Validate user session
+          const user = data.payload.user;
+          if (!user || !user.id) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Authentication failed' }
+            }));
+            return;
+          }
+          
+          ws.userId = user.id;
+          
+          // Add connection to active connections
+          if (!activeConnections.has(ws.userId)) {
+            activeConnections.set(ws.userId, new Set());
+          }
+          activeConnections.get(ws.userId)?.add(ws);
+          
+          // Send confirmation
+          ws.send(JSON.stringify({
+            type: 'auth_success',
+            payload: { userId: ws.userId }
+          }));
+          
+          // Send unread messages count if user is authenticated
+          if (ws.userId !== undefined) {
+            const unreadCount = await storage.getUnreadMessagesCount(ws.userId);
+            ws.send(JSON.stringify({
+              type: 'unread_count',
+              payload: { count: unreadCount }
+            }));
+          }
+          
+          return;
+        }
+        
+        // For all other message types, ensure the user is authenticated
+        if (ws.userId === undefined) {
+          ws.send(JSON.stringify({
+            type: 'error',
+            payload: { message: 'Authentication required' }
+          }));
+          return;
+        }
+        
+        // Handle different message types
+        switch (data.type) {
+          case 'get_conversations':
+            const conversations = await storage.getUserConversations(ws.userId);
+            ws.send(JSON.stringify({
+              type: 'conversations',
+              payload: { conversations }
+            }));
+            break;
+            
+          case 'get_messages':
+            const { conversationId, limit } = data.payload;
+            const messages = await storage.getMessagesByConversationId(
+              conversationId,
+              limit || 50
+            );
+            ws.send(JSON.stringify({
+              type: 'messages',
+              payload: { 
+                conversationId, 
+                messages 
+              }
+            }));
+            break;
+            
+          case 'send_message':
+            const { content, conversationId: msgConversationId } = data.payload;
+            
+            // Validate that user is a participant in the conversation
+            const participants = await storage.getConversationParticipants(msgConversationId);
+            const isParticipant = participants.some(p => p.userId === ws.userId);
+            
+            if (!isParticipant) {
+              ws.send(JSON.stringify({
+                type: 'error',
+                payload: { message: 'Not a participant in this conversation' }
+              }));
+              break;
+            }
+            
+            // Create message
+            const newMessage = await storage.createMessage({
+              conversationId: msgConversationId,
+              senderId: ws.userId,
+              content
+            });
+            
+            // Send message to all participants in conversation
+            participants.forEach(participant => {
+              const participantConnections = activeConnections.get(participant.userId);
+              
+              if (participantConnections) {
+                participantConnections.forEach(conn => {
+                  if (conn.readyState === WebSocket.OPEN) {
+                    conn.send(JSON.stringify({
+                      type: 'new_message',
+                      payload: { message: newMessage }
+                    }));
+                  }
+                });
+              }
+            });
+            break;
+            
+          case 'mark_read':
+            const { messageId } = data.payload;
+            
+            await storage.markMessageAsRead({
+              messageId,
+              userId: ws.userId
+            });
+            
+            // Send updated unread count
+            const newUnreadCount = await storage.getUnreadMessagesCount(ws.userId);
+            ws.send(JSON.stringify({
+              type: 'unread_count',
+              payload: { count: newUnreadCount }
+            }));
+            break;
+            
+          case 'create_conversation':
+            const { name, isGroup, participants: participantIds } = data.payload;
+            
+            // Create conversation
+            const newConversation = await storage.createConversation({
+              name: name || null,
+              isGroup: isGroup || false
+            });
+            
+            // Add participants
+            const participantPromises = [
+              // Add the creator as admin
+              storage.addParticipantToConversation({
+                conversationId: newConversation.id,
+                userId: ws.userId,
+                isAdmin: true
+              }),
+              // Add other participants
+              ...participantIds.filter((id: number) => id !== ws.userId).map((id: number) => 
+                storage.addParticipantToConversation({
+                  conversationId: newConversation.id,
+                  userId: id,
+                  isAdmin: false
+                })
+              )
+            ];
+            
+            await Promise.all(participantPromises);
+            
+            // Notify all participants
+            participantIds.forEach((participantId: number) => {
+              const participantConnections = activeConnections.get(participantId);
+              
+              if (participantConnections) {
+                participantConnections.forEach(conn => {
+                  if (conn.readyState === WebSocket.OPEN) {
+                    conn.send(JSON.stringify({
+                      type: 'new_conversation',
+                      payload: { conversation: newConversation }
+                    }));
+                  }
+                });
+              }
+            });
+            break;
+            
+          default:
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Unknown message type' }
+            }));
+        }
+        
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+        ws.send(JSON.stringify({
+          type: 'error',
+          payload: { message: 'Server error processing message' }
+        }));
+      }
+    });
+    
+    // Handle disconnection
+    ws.on('close', () => {
+      if (ws.userId !== undefined) {
+        const userConnections = activeConnections.get(ws.userId);
+        
+        if (userConnections) {
+          userConnections.delete(ws);
+          
+          if (userConnections.size === 0) {
+            activeConnections.delete(ws.userId);
+          }
+        }
+      }
+    });
+  });
 }

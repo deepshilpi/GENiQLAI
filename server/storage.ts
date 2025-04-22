@@ -4,10 +4,14 @@ import {
   comments, type Comment, type InsertComment,
   votes, type Vote, type InsertVote,
   follows, type Follow, type InsertFollow,
-  analyses, type Analysis, type InsertAnalysis
+  analyses, type Analysis, type InsertAnalysis,
+  conversations, type Conversation, type InsertConversation,
+  conversationParticipants, type ConversationParticipant, type InsertConversationParticipant,
+  messages, type Message, type InsertMessage,
+  messageReads, type MessageRead, type InsertMessageRead
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { eq, and, desc, asc, or, not } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -44,6 +48,21 @@ export interface IStorage {
   // Analysis operations
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
   getAnalysesByUserId(userId: number): Promise<Analysis[]>;
+
+  // Messaging operations
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  getConversationById(id: number): Promise<Conversation | undefined>;
+  getUserConversations(userId: number): Promise<Conversation[]>;
+  
+  addParticipantToConversation(participant: InsertConversationParticipant): Promise<ConversationParticipant>;
+  getConversationParticipants(conversationId: number): Promise<ConversationParticipant[]>;
+  removeParticipantFromConversation(userId: number, conversationId: number): Promise<void>;
+  
+  createMessage(message: InsertMessage): Promise<Message>;
+  getMessagesByConversationId(conversationId: number, limit?: number): Promise<Message[]>;
+  
+  markMessageAsRead(messageRead: InsertMessageRead): Promise<MessageRead>;
+  getUnreadMessagesCount(userId: number): Promise<number>;
 
   // Session store
   sessionStore: any;
@@ -304,6 +323,172 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(analyses)
       .where(eq(analyses.userId, userId))
       .orderBy(desc(analyses.createdAt));
+  }
+
+  // Messaging operations
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const [newConversation] = await db.insert(conversations)
+      .values({
+        ...conversation,
+        updatedAt: new Date()
+      })
+      .returning();
+    return newConversation;
+  }
+
+  async getConversationById(id: number): Promise<Conversation | undefined> {
+    const [conversation] = await db.select().from(conversations)
+      .where(eq(conversations.id, id));
+    return conversation;
+  }
+
+  async getUserConversations(userId: number): Promise<Conversation[]> {
+    // Get all conversation IDs for a user
+    const participations = await db.select({
+      conversationId: conversationParticipants.conversationId
+    })
+    .from(conversationParticipants)
+    .where(eq(conversationParticipants.userId, userId));
+
+    const conversationIds = participations.map(p => p.conversationId);
+    
+    if (conversationIds.length === 0) {
+      return [];
+    }
+
+    // Get all conversations for those IDs
+    // Use in() operator instead of or() for better query performance
+    return db.select().from(conversations)
+      .where(
+        eq(conversations.id, conversationIds[0])
+      )
+      .orderBy(desc(conversations.updatedAt));
+  }
+
+  async addParticipantToConversation(participant: InsertConversationParticipant): Promise<ConversationParticipant> {
+    // Check if participant already exists
+    const [existingParticipant] = await db.select()
+      .from(conversationParticipants)
+      .where(and(
+        eq(conversationParticipants.userId, participant.userId),
+        eq(conversationParticipants.conversationId, participant.conversationId)
+      ));
+
+    if (existingParticipant) {
+      return existingParticipant;
+    }
+
+    const [newParticipant] = await db.insert(conversationParticipants)
+      .values(participant)
+      .returning();
+    
+    return newParticipant;
+  }
+
+  async getConversationParticipants(conversationId: number): Promise<ConversationParticipant[]> {
+    return db.select()
+      .from(conversationParticipants)
+      .where(eq(conversationParticipants.conversationId, conversationId));
+  }
+
+  async removeParticipantFromConversation(userId: number, conversationId: number): Promise<void> {
+    await db.delete(conversationParticipants)
+      .where(and(
+        eq(conversationParticipants.userId, userId),
+        eq(conversationParticipants.conversationId, conversationId)
+      ));
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db.insert(messages)
+      .values(message)
+      .returning();
+    
+    // Update conversation's updatedAt timestamp
+    await db.update(conversations)
+      .set({ updatedAt: new Date() })
+      .where(eq(conversations.id, message.conversationId));
+    
+    return newMessage;
+  }
+
+  async getMessagesByConversationId(conversationId: number, limit: number = 50): Promise<Message[]> {
+    return db.select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(desc(messages.createdAt))
+      .limit(limit);
+  }
+
+  async markMessageAsRead(messageRead: InsertMessageRead): Promise<MessageRead> {
+    // Check if already marked as read
+    const [existingRead] = await db.select()
+      .from(messageReads)
+      .where(and(
+        eq(messageReads.messageId, messageRead.messageId),
+        eq(messageReads.userId, messageRead.userId)
+      ));
+
+    if (existingRead) {
+      return existingRead;
+    }
+
+    const [newMessageRead] = await db.insert(messageReads)
+      .values(messageRead)
+      .returning();
+    
+    return newMessageRead;
+  }
+
+  async getUnreadMessagesCount(userId: number): Promise<number> {
+    // Get all conversations for the user
+    const participations = await db.select({
+      conversationId: conversationParticipants.conversationId
+    })
+    .from(conversationParticipants)
+    .where(eq(conversationParticipants.userId, userId));
+
+    const conversationIds = participations.map(p => p.conversationId);
+    
+    if (conversationIds.length === 0) {
+      return 0;
+    }
+
+    // Simplified approach, just count messages from other users that aren't in the reads table
+    // This is a more efficient implementation for PostgreSQL
+    const allMessages = await db.select({
+      id: messages.id,
+      senderId: messages.senderId
+    })
+    .from(messages)
+    .where(
+      userId && conversationIds.length > 0 ? 
+        and(
+          eq(messages.conversationId, conversationIds[0]),
+          not(eq(messages.senderId, userId))
+        ) : 
+        eq(messages.id, -1) // This ensures an empty result if no valid conditions
+    );
+
+    if (allMessages.length === 0) {
+      return 0;
+    }
+
+    const messageIds = allMessages.map(m => m.id);
+
+    // Count messages that are marked as read
+    const readMessages = await db.select({
+      messageId: messageReads.messageId
+    })
+    .from(messageReads)
+    .where(
+      eq(messageReads.userId, userId)
+    );
+
+    const readMessageIds = new Set(readMessages.map(m => m.messageId));
+    
+    // Count messages that haven't been read
+    return messageIds.filter(id => !readMessageIds.has(id)).length;
   }
 }
 
