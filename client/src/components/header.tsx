@@ -82,22 +82,22 @@ export function Header() {
   // Mobile Header (replaces sidebar on mobile) - The main part of this new implementation
   if (isMobile) {
     return (
-      <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 vision-card shadow-lg">
+      <header className="geniql-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50 shadow-md">
         {/* Logo section with menu toggle */}
         <div className="flex items-center">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg mr-1"
+              className="text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md mr-1"
               onClick={toggleSidebar}
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="w-9 h-9 flex items-center justify-center">
-              <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
+            <div className="w-9 h-9 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center">
+              <BrainCircuit className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-heading font-bold text-lg text-white">GENIQL</span>
+            <span className="font-medium text-lg">GENIQL</span>
           </div>
         </div>
 
@@ -109,12 +109,12 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                className="text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md w-8 h-8"
               >
                 <div className="relative">
                   <Bell className="w-5 h-5" />
                   {notificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[10px] text-white font-medium">
                       {notificationCount}
                     </span>
                   )}
@@ -181,9 +181,9 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="rounded-lg p-0">
-                  <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-                    <span className="text-sm font-medium text-white">
+                <Button variant="ghost" className="rounded-md p-0">
+                  <div className="w-8 h-8 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center">
+                    <span className="text-sm font-medium text-primary">
                       {user?.username?.charAt(0)?.toUpperCase() || '?'}
                     </span>
                   </div>

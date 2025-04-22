@@ -1,4 +1,4 @@
-@import url('./assets/fonts/fonts.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,56 +6,63 @@
 
 @layer base {
   :root {
-    --background: 260 83% 11%; /* Vision UI dark purple background */
-    --foreground: 0 0% 100%;
-
-    --card: 245 65% 25% / 0.25; /* Semi-transparent card background */
-    --card-foreground: 0 0% 100%;
-
-    --popover: 245 65% 25% / 0.35;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 259 100% 65%; /* Main purple from Vision UI */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 100% 55%; /* Blue accent */
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 259 30% 40%;
-    --muted-foreground: 231 18% 82%;
-
-    --accent: 245 65% 25% / 0.5; /* Semi-transparent accent */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 68%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 157 94% 36%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 64%;
+    /* Modern dark theme base */
+    --background: 225 25% 8%;
+    --foreground: 220 10% 98%;
+    
+    /* Card with subtle transparency for depth */
+    --card: 224 25% 11%;
+    --card-foreground: 220 10% 98%;
+    
+    /* Popover with slight transparency */
+    --popover: 224 25% 13%;
+    --popover-foreground: 220 10% 98%;
+    
+    /* Indigo-blue primary color - from theme.json */
+    --primary: 225 80% 60%;
+    --primary-foreground: 220 10% 98%;
+    
+    /* Lighter blue secondary color */
+    --secondary: 215 70% 60%;
+    --secondary-foreground: 220 10% 98%;
+    
+    /* Muted colors for secondary elements */
+    --muted: 224 20% 20%;
+    --muted-foreground: 220 10% 70%;
+    
+    /* Accent for highlights and focus states */
+    --accent: 215 60% 20%;
+    --accent-foreground: 220 10% 98%;
+    
+    /* Semantic colors */
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 220 10% 98%;
+    
+    --success: 160 70% 40%;
+    --success-foreground: 220 10% 98%;
+    
+    --warning: 38 92% 60%;
     --warning-foreground: 0 0% 20%;
-
-    --border: 259 30% 50% / 0.15;
-    --input: 259 30% 50% / 0.15;
-    --ring: 259 100% 65%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 260 83% 10%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 259 100% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 83% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 259 30% 50% / 0.15;
-    --sidebar-ring: 259 100% 65%;
-
-    --chart-1: 259 100% 65%;
-    --chart-2: 220 100% 55%;
-    --chart-3: 38 92% 64%;
-    --chart-4: 0 84% 68%;
-    --chart-5: 157 94% 36%;
+    
+    /* Border, input, and ring colors */
+    --border: 224 15% 20%;
+    --input: 224 15% 20%;
+    --ring: 225 80% 60%;
+    
+    /* Border radius */
+    --radius: 0.5rem;
+    
+    /* Sidebar specific colors */
+    --sidebar-background: 224 30% 10%;
+    --sidebar-foreground: 220 10% 98%;
+    --sidebar-border: 224 15% 15%;
+    
+    /* Chart colors for data visualization */
+    --chart-1: 225 80% 60%;
+    --chart-2: 215 70% 60%;
+    --chart-3: 38 92% 60%;  
+    --chart-4: 0 70% 60%;
+    --chart-5: 160 70% 40%;
   }
 }
 
@@ -65,16 +72,38 @@
   }
 
   body {
-    @apply font-sans antialiased bg-vision-bg text-foreground overflow-x-hidden;
+    @apply font-sans text-foreground antialiased overflow-x-hidden min-h-screen;
+    background-color: hsl(var(--background));
     background-image: 
-      radial-gradient(50% 50% at 50% 50%, rgba(161, 99, 247, 0.1) 0%, rgba(33, 5, 91, 0) 100%),
-      linear-gradient(180deg, rgba(75, 22, 153, 0.15) 0%, rgba(45, 20, 121, 0) 100%);
+      radial-gradient(50% 50% at 50% 0%, hsla(var(--primary), 0.075) 0%, hsla(var(--background), 0) 70%),
+      radial-gradient(30% 50% at 100% 50%, hsla(var(--secondary), 0.05) 0%, hsla(var(--background), 0) 100%);
     background-attachment: fixed;
     background-size: cover;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-light;
+    @apply font-medium tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl mb-6;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl mb-5;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl mb-4;
+  }
+  
+  h4 {
+    @apply text-lg md:text-xl mb-3;
+  }
+
+  /* Typography improvements */
+  p {
+    @apply leading-relaxed;
   }
   
   /* App Layout Structure */
@@ -83,169 +112,143 @@
   }
   
   .main-content {
-    @apply flex-1 md:ml-[260px] transition-all duration-300 min-h-screen;
+    @apply flex-1 md:ml-64 transition-all duration-300 min-h-screen;
   }
   
   /* For collapsed sidebar on desktop */
   .sidebar-collapsed .main-content {
-    @apply md:ml-[70px];
+    @apply md:ml-16;
   }
   
-  /* Vision UI colors */
-  .bg-vision-bg {
-    background-color: #0B1437;
+  /* Card styling */
+  .geniql-card {
+    @apply rounded-lg bg-card border border-border/50 shadow-md overflow-hidden;
   }
   
-  .bg-vision-card {
-    background-color: rgba(67, 24, 255, 0.1);
+  /* Header styling */
+  .geniql-header {
+    @apply bg-card/80 backdrop-blur-md border-b border-border z-10;
   }
   
-  .bg-vision-sidebar {
-    background-color: rgba(17, 8, 60, 0.95);
+  /* Sidebar styling */
+  .geniql-sidebar {
+    @apply fixed top-0 left-0 h-full w-64 bg-sidebar-background border-r border-sidebar-border 
+           shadow-xl transition-transform duration-300 z-20;
   }
   
-  .bg-vision-primary-gradient {
-    background: linear-gradient(90deg, #7551FF 0%, #A163F7 100%);
-  }
-  
-  .border-vision-purple-200 {
-    border-color: rgba(161, 99, 247, 0.2);
-  }
-  
-  .border-vision-purple-300 {
-    border-color: rgba(161, 99, 247, 0.3);
-  }
-  
-  .border-vision-purple-500 {
-    border-color: rgba(161, 99, 247, 0.5);
-  }
-  
-  .text-vision-purple-700 {
-    color: #A163F7;
-  }
-  
-  .bg-vision-purple-100 {
-    background-color: rgba(161, 99, 247, 0.1);
-  }
-  
-  .bg-vision-purple-200 {
-    background-color: rgba(161, 99, 247, 0.2);
-  }
-  
-  .bg-vision-purple-700 {
-    background-color: #A163F7;
+  .geniql-sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium text-sidebar-foreground/80 
+           hover:text-sidebar-foreground hover:bg-primary/10 transition-all;
   }
 
-  /* Vision UI specific components */
-  .vision-card {
-    @apply rounded-xl bg-vision-card border border-vision-purple-200/10 backdrop-blur-md;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 
-                inset 0px 0px 2px 1px rgba(255, 255, 255, 0.05);
-  }
-
-  .vision-header {
-    @apply backdrop-blur-lg bg-vision-purple-100/5 border-b border-vision-purple-200/10;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .vision-sidebar {
-    @apply bg-vision-sidebar border-r border-vision-purple-200/10 shadow-xl;
-  }
-
-  .vision-sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-vision-purple-100/10 transition-all;
-  }
-
-  .vision-sidebar-item.active {
-    @apply bg-vision-purple-100/10 text-white;
-  }
-
-  .vision-gradient-border {
-    position: relative;
+  .geniql-sidebar-item.active {
+    @apply bg-primary/15 text-primary;
   }
   
-  .vision-gradient-border::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    padding: 1.5px;
-    background: linear-gradient(90deg, #7551FF 0%, #A163F7 50%, #CB9FFF 100%);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground;
   }
-
-  .gradient-blue {
-    background: linear-gradient(90deg, rgba(24, 150, 255, 0.2) 0%, rgba(24, 150, 255, 0) 100%);
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground;
   }
-
-  .gradient-purple {
-    background: linear-gradient(90deg, rgba(161, 99, 247, 0.2) 0%, rgba(161, 99, 247, 0) 100%);
+  
+  .btn-outline {
+    @apply border border-border bg-transparent hover:bg-accent/10;
   }
-
+  
+  .btn-ghost {
+    @apply bg-transparent hover:bg-accent/10;
+  }
+  
+  /* Form Elements */
+  .form-input {
+    @apply rounded-md border border-border bg-card/50 focus:ring-1 focus:ring-primary;
+  }
+  
+  /* Data visualization elements */
+  .data-card {
+    @apply geniql-card p-4;
+  }
+  
+  .data-chart {
+    @apply mt-3 h-60;
+  }
+  
   /* Progress bar custom style */
-  .vision-progress {
-    @apply h-2 rounded-full overflow-hidden bg-gray-700/30;
+  .progress-bar-container {
+    @apply h-2 rounded-full overflow-hidden bg-muted;
   }
 
-  .vision-progress-bar {
-    @apply h-full bg-vision-primary-gradient;
+  .progress-bar {
+    @apply h-full bg-primary;
   }
   
-  /* Popups and Modals */
-  .vision-popup {
-    @apply bg-vision-card/90 backdrop-blur-md border border-vision-purple-200/20 rounded-xl shadow-lg;
+  /* Avatars */
+  .avatar-container {
+    @apply relative overflow-hidden rounded-full bg-muted;
   }
   
-  /* Responsive adjustments */
+  /* Chat/Messages */
+  .message-bubble {
+    @apply rounded-2xl p-3 max-w-[85%] md:max-w-[70%];
+  }
+  
+  .message-bubble-sent {
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  .message-bubble-received {
+    @apply bg-accent text-accent-foreground;
+  }
+  
+  .message-input {
+    @apply rounded-full border border-border bg-background/50 focus:ring-1 focus:ring-primary;
+  }
+  
+  /* Mobile Responsive Adjustments */
   @media (max-width: 768px) {
     .main-content {
-      @apply ml-0 !important;
-      padding-top: 60px; /* Space for fixed mobile header */
+      @apply ml-0 pt-16 !important; /* Space for fixed mobile header */
     }
     
-    .vision-header {
-      height: 60px;
+    .geniql-header {
+      @apply h-16 fixed top-0 left-0 right-0;
     }
     
     .sidebar-open .main-content {
       @apply ml-0 !important;
     }
     
-    .sidebar {
+    .geniql-sidebar {
       @apply -translate-x-full;
-      transition: transform 0.3s ease;
     }
     
-    .sidebar-open .sidebar {
+    .sidebar-open .geniql-sidebar {
       @apply translate-x-0;
     }
     
     /* Backdrop overlay when sidebar is open */
     .sidebar-backdrop {
-      @apply hidden fixed inset-0 bg-black/50 z-10 backdrop-blur-sm;
+      @apply hidden fixed inset-0 bg-background/80 z-10 backdrop-blur-sm;
     }
     
     .sidebar-open .sidebar-backdrop {
       @apply block;
     }
     
-    .vision-card {
+    .geniql-card {
       @apply p-4;
     }
   }
   
   /* Chat interface mobile styles */
   .mobile-chat-container {
-    @apply h-[calc(100vh-80px)] !important;
-    @apply m-0 !important;
-    @apply border-0 rounded-none !important;
+    @apply h-[calc(100vh-64px)] m-0 border-0 rounded-none !important;
   }
 
+  /* Small screen adjustments */
   @media (max-width: 640px) {
     .results-grid {
       @apply grid-cols-1 !important;
@@ -270,6 +273,19 @@
     
     .message-input {
       @apply text-sm !important;
+    }
+    
+    /* Typography adjustments for mobile */
+    h1 {
+      @apply text-2xl mb-4;
+    }
+    
+    h2 {
+      @apply text-xl mb-3;
+    }
+    
+    h3 {
+      @apply text-lg mb-3;
     }
   }
 }
