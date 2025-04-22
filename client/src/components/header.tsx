@@ -121,58 +121,58 @@ export function Header() {
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-72">
+            <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel className="flex justify-between items-center">
                 <span>Notifications</span>
-                <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+                <Badge variant="destructive" className="text-xs">
                   {notificationCount} new
                 </Badge>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+              <DropdownMenuSeparator />
               {/* Sample notifications */}
               <div className="max-h-80 overflow-y-auto py-1">
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                   <div className="flex w-full">
-                    <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/20 flex-shrink-0 flex items-center justify-center mr-2">
-                      <MessageSquare className="w-4 h-4 text-vision-purple-700" />
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center mr-2">
+                      <MessageSquare className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-white">New community comment</p>
-                      <p className="text-xs text-white/60 mt-1">John replied to your post about AI startups</p>
-                      <p className="text-xs text-white/40 mt-1">2 hours ago</p>
+                      <p className="text-sm font-medium">New community comment</p>
+                      <p className="text-xs text-muted-foreground mt-1">John replied to your post about AI startups</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">2 hours ago</p>
                     </div>
                   </div>
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                   <div className="flex w-full">
-                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                      <BrainCircuit className="w-4 h-4 text-green-500" />
+                    <div className="w-8 h-8 rounded-full bg-success/20 flex-shrink-0 flex items-center justify-center mr-2">
+                      <BrainCircuit className="w-4 h-4 text-success" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-white">Analysis complete</p>
-                      <p className="text-xs text-white/60 mt-1">Your startup idea analysis is ready to view</p>
-                      <p className="text-xs text-white/40 mt-1">1 day ago</p>
+                      <p className="text-sm font-medium">Analysis complete</p>
+                      <p className="text-xs text-muted-foreground mt-1">Your startup idea analysis is ready to view</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">1 day ago</p>
                     </div>
                   </div>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                   <div className="flex w-full">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                      <User className="w-4 h-4 text-blue-500" />
+                    <div className="w-8 h-8 rounded-full bg-secondary/20 flex-shrink-0 flex items-center justify-center mr-2">
+                      <User className="w-4 h-4 text-secondary" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-white">New follower</p>
-                      <p className="text-xs text-white/60 mt-1">Sarah is now following you</p>
-                      <p className="text-xs text-white/40 mt-1">3 days ago</p>
+                      <p className="text-sm font-medium">New follower</p>
+                      <p className="text-xs text-muted-foreground mt-1">Sarah is now following you</p>
+                      <p className="text-xs text-muted-foreground/70 mt-1">3 days ago</p>
                     </div>
                   </div>
                 </DropdownMenuItem>
               </div>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2">
-                <span className="text-sm text-white/70">View all notifications</span>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer justify-center py-2">
+                <span className="text-sm text-muted-foreground">View all notifications</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -189,35 +189,35 @@ export function Header() {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
-                <div className="px-2 py-2 border-b border-vision-purple-200/10">
-                  <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
-                  <p className="text-xs text-white/50">{user?.planType || "Free"} Plan</p>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2 border-b">
+                  <p className="text-sm font-medium truncate">{user?.username || 'User'}</p>
+                  <p className="text-xs text-muted-foreground">{user?.planType || "Free"} Plan</p>
                 </div>
-                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuSeparator />
                 <div className="py-1">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/")}>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/")}>
                     <BrainCircuit className="w-4 h-4 mr-2" />
                     <span>AI Analysis</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/community")}>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/community")}>
                     <MessageSquare className="w-4 h-4 mr-2" />
                     <span>Community</span>
                   </DropdownMenuItem>
                 </div>
-                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuSeparator />
                 <div className="py-1">
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
                     <User className="w-4 h-4 mr-2" />
                     <span>My Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/settings")}>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
                     <Settings className="w-4 h-4 mr-2" />
                     <span>Settings</span>
                   </DropdownMenuItem>
                 </div>
-                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={handleLogout}>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   <span>Logout</span>
                 </DropdownMenuItem>
@@ -225,8 +225,9 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Button 
-              variant="secondary"
-              className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
+              variant="default"
+              size="sm"
+              className="font-medium"
               onClick={() => openAuthDialog({ defaultTab: "login" })}
             >
               <User className="w-4 h-4 mr-2" />
@@ -242,9 +243,9 @@ export function Header() {
   
   // Desktop Header
   return (
-    <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
+    <header className="geniql-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
       <div className="flex items-center gap-3">
-        <span className="text-white font-medium">{getPageTitle()}</span>
+        <span className="font-medium">{getPageTitle()}</span>
       </div>
       
       <div className="flex items-center space-x-3">
@@ -252,7 +253,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9 mr-2"
+          className="text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md w-9 h-9 mr-2"
           onClick={toggleSidebar}
         >
           <Menu className="w-5 h-5" />
@@ -264,70 +265,70 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+              className="text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md w-9 h-9"
             >
               <div className="relative">
                 <Bell className="w-5 h-5" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[10px] text-white font-medium">
                     {notificationCount}
                   </span>
                 )}
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
+          <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="flex justify-between items-center">
               <span>Notifications</span>
-              <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+              <Badge variant="destructive" className="text-xs">
                 {notificationCount} new
               </Badge>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+            <DropdownMenuSeparator />
             {/* Sample notifications */}
             <div className="max-h-96 overflow-y-auto py-1">
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+              <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                 <div className="flex w-full">
-                  <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/20 flex-shrink-0 flex items-center justify-center mr-2">
-                    <MessageSquare className="w-4 h-4 text-vision-purple-700" />
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <MessageSquare className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">New community comment</p>
-                    <p className="text-xs text-white/60 mt-1">John replied to your post about AI startups</p>
-                    <p className="text-xs text-white/40 mt-1">2 hours ago</p>
+                    <p className="text-sm font-medium">New community comment</p>
+                    <p className="text-xs text-muted-foreground mt-1">John replied to your post about AI startups</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">2 hours ago</p>
                   </div>
                 </div>
               </DropdownMenuItem>
               
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+              <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                 <div className="flex w-full">
-                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                    <BrainCircuit className="w-4 h-4 text-green-500" />
+                  <div className="w-8 h-8 rounded-full bg-success/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <BrainCircuit className="w-4 h-4 text-success" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">Analysis complete</p>
-                    <p className="text-xs text-white/60 mt-1">Your startup idea analysis is ready to view</p>
-                    <p className="text-xs text-white/40 mt-1">1 day ago</p>
+                    <p className="text-sm font-medium">Analysis complete</p>
+                    <p className="text-xs text-muted-foreground mt-1">Your startup idea analysis is ready to view</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">1 day ago</p>
                   </div>
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+              <DropdownMenuItem className="cursor-pointer flex flex-col items-start py-3">
                 <div className="flex w-full">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                    <User className="w-4 h-4 text-blue-500" />
+                  <div className="w-8 h-8 rounded-full bg-secondary/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <User className="w-4 h-4 text-secondary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white">New follower</p>
-                    <p className="text-xs text-white/60 mt-1">Sarah is now following you</p>
-                    <p className="text-xs text-white/40 mt-1">3 days ago</p>
+                    <p className="text-sm font-medium">New follower</p>
+                    <p className="text-xs text-muted-foreground mt-1">Sarah is now following you</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">3 days ago</p>
                   </div>
                 </div>
               </DropdownMenuItem>
             </div>
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-            <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2">
-              <span className="text-sm text-white/70">View all notifications</span>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer justify-center py-2">
+              <span className="text-sm text-muted-foreground">View all notifications</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -335,7 +336,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+          className="text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md w-9 h-9"
           onClick={() => navigate("/settings")}
         >
           <Settings className="w-5 h-5" />
@@ -344,36 +345,32 @@ export function Header() {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
+              <Button variant="ghost" className="flex items-center space-x-2 hover:bg-primary/10 rounded-md">
                 <div className="flex flex-col items-end mr-2">
-                  <span className="text-white text-sm font-medium">{user?.username || 'User'}</span>
-                  <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
+                  <span className="text-sm font-medium">{user?.username || 'User'}</span>
+                  <span className="text-muted-foreground text-xs">{user?.planType || "Free"}</span>
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">
+                <div className="w-9 h-9 rounded-md bg-primary/20 border border-primary/30 flex items-center justify-center">
+                  <span className="text-sm font-medium text-primary">
                     {user?.username?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
+                <ChevronDown className="w-4 h-4 text-muted-foreground ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <Link href={`/profile/${user?.username || 'user'}`}>
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
-                  <User className="w-4 h-4 mr-2" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-              </Link>
-              <Link href="/settings">
-                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10">
-                  <Settings className="w-4 h-4 mr-2" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-vision-purple-100/10">
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
+                <User className="w-4 h-4 mr-2" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/settings")}>
+                <Settings className="w-4 h-4 mr-2" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                 <LogOut className="w-4 h-4 mr-2" />
                 <span>Logout</span>
               </DropdownMenuItem>
@@ -381,8 +378,9 @@ export function Header() {
           </DropdownMenu>
         ) : (
           <Button 
-            variant="secondary"
-            className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
+            variant="default"
+            size="sm"
+            className="font-medium"
             onClick={() => openAuthDialog({ defaultTab: "login" })}
           >
             <User className="w-4 h-4 mr-2" />
