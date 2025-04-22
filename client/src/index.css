@@ -239,6 +239,13 @@
     }
   }
   
+  /* Chat interface mobile styles */
+  .mobile-chat-container {
+    @apply h-[calc(100vh-80px)] !important;
+    @apply m-0 !important;
+    @apply border-0 rounded-none !important;
+  }
+
   @media (max-width: 640px) {
     .results-grid {
       @apply grid-cols-1 !important;
@@ -254,6 +261,15 @@
     
     .desktop-only {
       @apply hidden;
+    }
+    
+    /* Messaging specific mobile tweaks */
+    .message-bubble {
+      @apply max-w-[90%] !important;
+    }
+    
+    .message-input {
+      @apply text-sm !important;
     }
   }
 }
