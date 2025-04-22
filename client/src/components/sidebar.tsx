@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Bell
+  Bell,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -162,6 +163,19 @@ export function Sidebar() {
             >
               <MessageSquare className="w-5 h-5" />
               {!collapsed && <span>Community</span>}
+            </div>
+          </li>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/messages") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/messages")}
+            >
+              <Mail className="w-5 h-5" />
+              {!collapsed && <span>Messages</span>}
             </div>
           </li>
           <li>

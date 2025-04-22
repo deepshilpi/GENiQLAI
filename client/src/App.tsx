@@ -11,6 +11,7 @@ import HomePage from "@/pages/home-page";
 import DashboardPage from "@/pages/dashboard-page";
 import CommunityPage from "@/pages/community-page";
 import ProfilePage from "@/pages/profile-page";
+import MessagesPage from "@/pages/messages-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -43,6 +44,7 @@ function Router() {
         <Route path="/" component={HomePage} />
         <ProtectedRoute path="/community" component={CommunityPage} />
         <ProtectedRoute path="/dashboard" component={DashboardPage} />
+        <ProtectedRoute path="/messages" component={MessagesPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
         <Route component={NotFound} />
       </Switch>
