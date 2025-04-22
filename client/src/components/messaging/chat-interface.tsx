@@ -85,11 +85,16 @@ export function ChatInterface() {
         console.log("WebSocket connected");
         setConnectionStatus("connected");
         
-        // Authenticate with the server - only send user ID for security
-        ws.send(JSON.stringify({
-          type: "auth",
-          payload: { userId: user?.id }
-        }));
+        // Authenticate with the server - ensure user is defined and has an ID
+        if (user && user.id) {
+          ws.send(JSON.stringify({
+            type: "auth",
+            payload: { userId: user.id }
+          }));
+        } else {
+          console.error("Cannot authenticate WebSocket: User ID not available");
+          ws.close();
+        }
       };
       
       ws.onclose = () => {
@@ -240,11 +245,20 @@ export function ChatInterface() {
   
   // Create new conversation
   const createNewConversation = (recipientId: number, isGroup: boolean = false) => {
+    if (!user || !user.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a conversation",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "create_conversation",
         payload: {
-          participants: [user?.id, recipientId],
+          participants: [user.id, recipientId],
           isGroup
         }
       }));

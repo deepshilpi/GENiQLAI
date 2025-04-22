@@ -704,6 +704,15 @@ function setupWebSocketServer(httpServer: Server) {
           case 'create_conversation':
             const { name, isGroup, participants: participantIds } = data.payload;
             
+            // Type check to ensure ws.userId is defined
+            if (typeof ws.userId !== 'number') {
+              ws.send(JSON.stringify({
+                type: 'error',
+                payload: { message: 'User authentication required' }
+              }));
+              break;
+            }
+            
             // Create conversation
             const newConversation = await storage.createConversation({
               name: name || null,
@@ -717,21 +726,33 @@ function setupWebSocketServer(httpServer: Server) {
                 conversationId: newConversation.id,
                 userId: ws.userId,
                 isAdmin: true
-              }),
-              // Add other participants
-              ...participantIds.filter((id: number) => id !== ws.userId).map((id: number) => 
-                storage.addParticipantToConversation({
-                  conversationId: newConversation.id,
-                  userId: id,
-                  isAdmin: false
-                })
-              )
+              })
             ];
+            
+            // Add other participants if they exist
+            if (Array.isArray(participantIds)) {
+              const otherParticipants = participantIds
+                .filter((id: number) => typeof id === 'number' && id !== ws.userId)
+                .map((id: number) => 
+                  storage.addParticipantToConversation({
+                    conversationId: newConversation.id,
+                    userId: id,
+                    isAdmin: false
+                  })
+                );
+              
+              participantPromises.push(...otherParticipants);
+            }
             
             await Promise.all(participantPromises);
             
             // Notify all participants
-            participantIds.forEach((participantId: number) => {
+            const allParticipantIds = [ws.userId];
+            if (Array.isArray(participantIds)) {
+              allParticipantIds.push(...participantIds.filter((id: number) => typeof id === 'number'));
+            }
+            
+            allParticipantIds.forEach((participantId: number) => {
               const participantConnections = activeConnections.get(participantId);
               
               if (participantConnections) {
