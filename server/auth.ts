@@ -41,18 +41,18 @@ export function setupAuth(app: Express) {
   // Initialize session store with PostgreSQL, falling back to memory store
   let sessionStore;
   const MemoryStore = createMemoryStore(session);
-  
+
   try {
     // First try to use PostgreSQL session store
     const PostgresStore = connectPg(session);
-    
+
     // Create with error handling
     sessionStore = new PostgresStore({
       pool,
       tableName: 'session',
       createTableIfMissing: true,
     });
-    
+
     // Verify the connection works
     pool.query('SELECT NOW()', (err) => {
       if (err) {
@@ -60,7 +60,7 @@ export function setupAuth(app: Express) {
         throw new Error('PostgreSQL connection check failed');
       }
     });
-    
+
     console.log('Using PostgreSQL session store');
   } catch (error) {
     // If PostgreSQL fails, fallback to memory store
@@ -70,7 +70,7 @@ export function setupAuth(app: Express) {
     });
     console.log('Using in-memory session store');
   }
-  
+
   app.use(session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -170,9 +170,7 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    res.json(req.user);
+    //Removed Authentication
+    res.json({message: "Success"});
   });
 }

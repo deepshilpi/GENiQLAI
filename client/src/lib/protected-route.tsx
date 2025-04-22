@@ -18,14 +18,8 @@ export function ProtectedRoute({
   
   // If the current path matches this protected route and user isn't authenticated,
   // show the auth dialog
-  useEffect(() => {
-    if (!isLoading && !user && location === path) {
-      openAuthDialog({ 
-        defaultTab: "login",
-        returnTo: path
-      });
-    }
-  }, [user, isLoading, location, path, openAuthDialog]);
+  // Allow access without authentication
+  useEffect(() => {}, []);
 
   return (
     <Route path={path}>

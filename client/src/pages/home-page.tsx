@@ -29,10 +29,10 @@ export default function HomePage() {
       // but disable the actual analysis functionality
     }
   }, [user, navigate]);
-  
+
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [analysisStep, setAnalysisStep] = useState<'input' | 'results'>('input');
-  
+
   const handleAnalyze = async () => {
     // Require login for analysis
     if (!user) {
@@ -44,11 +44,11 @@ export default function HomePage() {
       navigate('/auth');
       return;
     }
-    
+
     if (!startupIdea.trim() || isAnalyzing) return;
-    
+
     setIsAnalyzing(true);
-    
+
     try {
       // Call the server API to analyze the startup idea
       const response = await fetch('/api/analyze', {
@@ -61,22 +61,22 @@ export default function HomePage() {
           country: detectUserCountry()
         }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to analyze startup idea');
       }
-      
+
       // Get results and update state
       const results = await response.json();
       setAnalysisResults(results);
       setAnalysisStep('results');
     } catch (error) {
       console.error("Error analyzing startup idea:", error);
-      
+
       // Extract error message from response if available
       let errorMessage = "We couldn't analyze your startup idea at this moment. Please try again later.";
-      
+
       if (error instanceof Error) {
         if (error.message.includes("timeout")) {
           errorMessage = "Analysis is taking too long. Please try a shorter description or try again later.";
@@ -86,7 +86,7 @@ export default function HomePage() {
           errorMessage = error.message;
         }
       }
-      
+
       // Use a toast notification instead of an alert for a better user experience
       toast({
         title: "Analysis Failed",
@@ -97,13 +97,13 @@ export default function HomePage() {
       setIsAnalyzing(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-vision-bg flex">
       <div className="flex-1 flex flex-col main-content transition-all duration-300">
-        
+
         <main className="flex-grow flex items-center justify-center overflow-hidden relative px-6 py-12">
-          
+
           {/* Content based on analysis step */}
           {analysisStep === 'input' ? (
             /* Centered prompt box */
@@ -117,7 +117,7 @@ export default function HomePage() {
                     filter: "blur(20px)"
                   }}
                 />
-                
+
                 <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-3 mb-6 text-center sm:text-left">
                   <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
                     <BrainCircuit className="w-6 h-6 text-white" />
@@ -127,27 +127,9 @@ export default function HomePage() {
                     <p className="text-white/60 text-sm">Analyze your startup idea with AI-powered insights</p>
                   </div>
                 </div>
-                
-                {/* Login prompt for anonymous users */}
-                {!user && (
-                  <div className="mb-6 px-3 py-2 rounded-md bg-vision-purple-900/30 border border-vision-purple-400/20">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-white text-sm font-medium">Authentication Required</span>
-                    </div>
-                    <p className="text-white/60 text-sm mt-1">
-                      Sign in or create an account to analyze your startup idea
-                    </p>
-                    <div className="mt-3">
-                      <Button 
-                        onClick={() => navigate('/auth')}
-                        className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white font-medium w-full"
-                      >
-                        Sign in / Create Account
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
+
+                {/* Start directly with input form */}
+
                 <div className="mb-6">
                   <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">
                     Describe your startup idea in detail
@@ -160,7 +142,7 @@ export default function HomePage() {
                     className="h-32 bg-vision-card/80 border-vision-purple-200/20 text-white placeholder:text-white/40 focus:border-vision-purple-500"
                   />
                 </div>
-                
+
                 <div className="flex justify-center sm:justify-end">
                   <Button 
                     onClick={handleAnalyze}
@@ -182,7 +164,7 @@ export default function HomePage() {
                     )}
                   </Button>
                 </div>
-                
+
                 {/* Bottom glowing effect */}
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20" 
                   style={{
@@ -206,7 +188,7 @@ export default function HomePage() {
                     <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
                     Back to Input
                   </Button>
-                  
+
                   <div className="flex items-center">
                     <Button 
                       variant="ghost"
@@ -221,13 +203,13 @@ export default function HomePage() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Idea summary */}
                 <div className="vision-card p-6">
                   <h2 className="text-xl font-bold text-white mb-2">Analyzed Startup Idea</h2>
                   <p className="text-white/80">{startupIdea}</p>
                 </div>
-                
+
                 {/* Results grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 results-grid">
                   {/* Success Rate */}
@@ -249,7 +231,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Competitors */}
                   {analysisResults?.competitors && (
                     <div className="vision-card p-6 flex flex-col">
@@ -273,7 +255,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Market Viability */}
                   {analysisResults?.marketViability && (
                     <div className="vision-card p-6 flex flex-col">
@@ -297,7 +279,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Unique Value Proposition */}
                   {analysisResults?.uniqueValueProposition && (
                     <div className="vision-card p-6 flex flex-col col-span-1 md:col-span-2">
@@ -316,7 +298,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* CAGR Analysis */}
                   {analysisResults?.cagr && (
                     <div className="vision-card p-6 flex flex-col col-span-1 md:col-span-3">
@@ -360,7 +342,7 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Bottom action buttons */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
                   <Button 
@@ -370,7 +352,7 @@ export default function HomePage() {
                   >
                     Try Another Idea
                   </Button>
-                  
+
                   <div className="flex w-full sm:w-auto">
                     <Button 
                       className="bg-vision-primary-gradient hover:brightness-110 transition-all text-white w-full sm:w-auto"
