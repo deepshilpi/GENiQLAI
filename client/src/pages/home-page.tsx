@@ -120,27 +120,8 @@ export default function HomePage() {
 
           {/* Content based on analysis step */}
           {analysisStep === 'input' ? (
-            /* Centered prompt box */
-            <div className="w-full max-w-3xl">
-              <div className="vision-card overflow-hidden p-8 relative">
-                {/* Glowing effect at the top */}
-                <div 
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full" 
-                  style={{
-                    background: "radial-gradient(circle, rgba(161, 99, 247, 0.3) 0%, rgba(161, 99, 247, 0) 70%)",
-                    filter: "blur(20px)"
-                  }}
-                />
-
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-3 mb-6 text-center sm:text-left">
-                  <div className="w-12 h-12 rounded-xl bg-vision-primary-gradient flex items-center justify-center">
-                    <BrainCircuit className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-white">GENIQL AI Startup Analysis</h1>
-                    <p className="text-white/60 text-sm">Analyze your startup idea with AI-powered insights</p>
-                  </div>
-                </div>
+            <div className="w-full max-w-3xl text-center">
+              <h1 className="text-4xl font-bold text-white mb-8">What's your idea?</h1>
 
                 {/* Start directly with input form */}
 
