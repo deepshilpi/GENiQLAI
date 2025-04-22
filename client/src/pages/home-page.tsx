@@ -122,20 +122,17 @@ export default function HomePage() {
           {analysisStep === 'input' ? (
             <div className="w-full max-w-3xl text-center">
               <h1 className="text-4xl font-bold text-white mb-8">What's your idea?</h1>
-
-                {/* Start directly with input form */}
-
-                <div className="mb-6">
-                  <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">
-                    Describe your startup idea in detail
-                  </label>
-                  <Textarea
-                    id="startup-idea"
-                    value={startupIdea}
-                    onChange={(e) => setStartupIdea(e.target.value)}
-                    placeholder="Example: A subscription service that delivers personalized book recommendations based on AI analysis of reading preferences and behavior..."
-                    className="h-32 bg-vision-card/80 border-vision-purple-200/20 text-white placeholder:text-white/40 focus:border-vision-purple-500"
-                  />
+              <div className="mb-6">
+                <label htmlFor="startup-idea" className="block text-white/90 font-medium mb-2">
+                  Describe your startup idea in detail
+                </label>
+                <Textarea
+                  id="startup-idea"
+                  value={startupIdea}
+                  onChange={(e) => setStartupIdea(e.target.value)}
+                  placeholder="Example: A subscription service that delivers personalized book recommendations based on AI analysis of reading preferences and behavior..."
+                  className="h-32 bg-vision-card/80 border-vision-purple-200/20 text-white placeholder:text-white/40 focus:border-vision-purple-500"
+                />
                   
                   {/* Show remaining free analyses message for anonymous users */}
                   {!user && (
