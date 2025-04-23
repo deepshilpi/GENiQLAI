@@ -25,12 +25,12 @@ import {
 } from "@/components/ui/dialog";
 
 // Extended post type for UI with author and current user vote
-interface ExtendedPost extends Post {
+interface ExtendedPost extends Omit<Post, 'tags'> {
   author?: {
     username?: string;
   };
   currentUserVote?: 'pump' | 'dump' | null;
-  tags?: string[];
+  tags: string[];
 }
 import { PricingPlans } from "@/components/pricing-plans";
 import { useToast } from "@/hooks/use-toast";
@@ -49,12 +49,12 @@ export default function CommunityPage() {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState<"posts" | "users" | "tags">("posts");
-  const [filteredPosts, setFilteredPosts] = useState<Post[] | null>(null);
+  const [filteredPosts, setFilteredPosts] = useState<ExtendedPost[] | null>(null);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
   // Query posts
-  const { data: posts, isLoading } = useQuery<Post[]>({
+  const { data: postsData, isLoading } = useQuery<ExtendedPost[]>({
     queryKey: ["/api/posts"],
     queryFn: async () => {
       const res = await fetch("/api/posts", { credentials: "include" });
@@ -62,6 +62,9 @@ export default function CommunityPage() {
       return res.json();
     }
   });
+
+  // Ensure the posts are properly typed as ExtendedPost[]
+  const posts = postsData as ExtendedPost[];
 
   // Update filtered posts when posts or search query changes
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function CommunityPage() {
     }
 
     const query = searchQuery.toLowerCase();
-    let filtered: Post[] = [];
+    let filtered: ExtendedPost[] = [];
 
     switch (searchType) {
       case "posts":
@@ -258,7 +261,7 @@ export default function CommunityPage() {
                         <div key={index} className="bg-card animate-pulse rounded-xl h-32"></div>
                       ))
                     ) : (filteredPosts || posts)?.length ? (
-                      (filteredPosts || posts).map(post => (
+                      (filteredPosts || posts).map((post: any) => (
                         <div key={post.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors">
                           <div className="flex">
                             {/* Vote Column */}
@@ -290,7 +293,7 @@ export default function CommunityPage() {
                             <div className="flex-1 p-4">
                               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                                 <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                                  {post.author?.username?.charAt(0).toUpperCase()}
+                                  {post.author?.username?.charAt(0).toUpperCase() || post.authorId?.toString().charAt(0)}
                                 </div>
                                 <span>Posted by {post.author?.username || "Anonymous"}</span>
                                 <span>•</span>
@@ -300,9 +303,19 @@ export default function CommunityPage() {
                               <h3 className="font-bold text-lg mb-2">{post.title}</h3>
                               <p className="text-muted-foreground line-clamp-3 mb-3">{post.description}</p>
                               
+                              {post.imageUrl && (
+                                <div className="mb-3 rounded-md overflow-hidden">
+                                  <img 
+                                    src={post.imageUrl} 
+                                    alt={post.title}
+                                    className="w-full h-auto max-h-56 object-cover"
+                                  />
+                                </div>
+                              )}
+                              
                               {post.tags?.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
-                                  {post.tags.map((tag, index) => (
+                                  {post.tags.map((tag: string, index: number) => (
                                     <div key={index} className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs">
                                       {tag}
                                     </div>
