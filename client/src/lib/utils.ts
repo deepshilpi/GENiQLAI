@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string = "USD", country?: string): string {
+export function formatCurrency(amount: number, currency: Currency | string = "USD", country?: string): string {
   // Map of countries to their locale codes for proper formatting
   const countryToLocale: Record<string, string> = {
     "United States": "en-US",
@@ -27,9 +27,11 @@ export function formatCurrency(amount: number, currency: string = "USD", country
   const locale = country && countryToLocale[country] ? countryToLocale[country] : "en-US";
   
   // Format with locale-specific settings
+  const currencyCode = typeof currency === 'string' ? currency : currency.code;
+  
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: currency,
+    currency: currencyCode,
     maximumFractionDigits: 0,
     currencyDisplay: "symbol"
   }).format(amount);
@@ -81,26 +83,34 @@ export function detectUserCountry(): string {
   return "United States";
 }
 
-export function getCountryCurrency(country: string): string {
-  const countryToCurrency: Record<string, string> = {
-    "United States": "USD",
-    "Canada": "CAD",
-    "United Kingdom": "GBP",
-    "Australia": "AUD",
-    "India": "INR",
-    "Japan": "JPY",
-    "China": "CNY",
-    "Brazil": "BRL",
-    "European Union": "EUR",
-    "Mexico": "MXN",
-    "Singapore": "SGD",
-    "South Korea": "KRW",
-    "South Africa": "ZAR",
-    "Nigeria": "NGN",
-    "Kenya": "KES"
+interface Currency {
+  code: string;
+  symbol: string;
+}
+
+export function getCountryCurrency(country: string): Currency {
+  const countryToCurrency: Record<string, Currency> = {
+    "United States": { code: "USD", symbol: "$" },
+    "Canada": { code: "CAD", symbol: "C$" },
+    "United Kingdom": { code: "GBP", symbol: "£" },
+    "Australia": { code: "AUD", symbol: "A$" },
+    "India": { code: "INR", symbol: "₹" },
+    "Japan": { code: "JPY", symbol: "¥" },
+    "China": { code: "CNY", symbol: "¥" },
+    "Brazil": { code: "BRL", symbol: "R$" },
+    "European Union": { code: "EUR", symbol: "€" },
+    "Germany": { code: "EUR", symbol: "€" },
+    "France": { code: "EUR", symbol: "€" },
+    "Mexico": { code: "MXN", symbol: "$" },
+    "Singapore": { code: "SGD", symbol: "S$" },
+    "South Korea": { code: "KRW", symbol: "₩" },
+    "South Africa": { code: "ZAR", symbol: "R" },
+    "Nigeria": { code: "NGN", symbol: "₦" },
+    "Kenya": { code: "KES", symbol: "KSh" },
+    "Israel": { code: "ILS", symbol: "₪" }
   };
   
-  return countryToCurrency[country] || "USD";
+  return countryToCurrency[country] || { code: "USD", symbol: "$" };
 }
 
 export function isPlanAllowed(userPlan: string, requiredPlan: string): boolean {
