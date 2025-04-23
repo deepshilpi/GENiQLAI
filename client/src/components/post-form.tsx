@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { X, Upload, ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,6 +19,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif"
+];
+
 const formSchema = z.object({
   title: z.string().min(5, {
     message: "Title must be at least 5 characters.",
@@ -30,6 +39,7 @@ const formSchema = z.object({
   }).max(1000, {
     message: "Description must not exceed 1000 characters."
   }),
+  imageUrl: z.string().optional(),
   tags: z.array(z.string()).min(1, {
     message: "Add at least one tag."
   }).max(5, {
@@ -44,14 +54,55 @@ interface PostFormProps {
 export function PostForm({ onComplete }: PostFormProps) {
   const { toast } = useToast();
   const [tagInput, setTagInput] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
+      imageUrl: "",
       tags: [],
     },
+  });
+  
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload image');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      form.setValue('imageUrl', data.imageUrl);
+      setImagePreview(data.imageUrl);
+      setIsUploading(false);
+      toast({
+        title: "Image uploaded",
+        description: "Your image has been successfully uploaded.",
+      });
+    },
+    onError: (error) => {
+      setIsUploading(false);
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
   
   const createPostMutation = useMutation({
@@ -107,6 +158,51 @@ export function PostForm({ onComplete }: PostFormProps) {
     );
   };
   
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (!file) return;
+    
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check file type
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Only JPEG, PNG, WebP, and GIF images are supported",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Create a preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Upload the image
+    setIsUploading(true);
+    uploadImageMutation.mutate(file);
+  };
+  
+  const removeImage = () => {
+    setImagePreview(null);
+    form.setValue('imageUrl', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createPostMutation.mutate(values);
   };
@@ -155,6 +251,75 @@ export function PostForm({ onComplete }: PostFormProps) {
           )}
         />
         
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image (optional)</FormLabel>
+              <FormControl>
+                <div className="space-y-4">
+                  {imagePreview ? (
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img 
+                        src={imagePreview} 
+                        alt="Upload preview" 
+                        className="max-h-[300px] w-full object-cover"
+                      />
+                      <Button 
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 rounded-full p-0 w-8 h-8"
+                        onClick={removeImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-12 text-center">
+                      <input
+                        type="file"
+                        accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        ref={fileInputRef}
+                      />
+                      {isUploading ? (
+                        <div className="flex flex-col items-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          <p className="mt-2 text-sm text-muted-foreground">Uploading image...</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                          <div className="mt-4">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => fileInputRef.current?.click()}
+                            >
+                              <Upload className="mr-2 h-4 w-4" />
+                              Select Image
+                            </Button>
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            PNG, JPG, WebP or GIF (max. 5MB)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormDescription>
+                Add an image to make your post more engaging. This is optional.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="tags"
