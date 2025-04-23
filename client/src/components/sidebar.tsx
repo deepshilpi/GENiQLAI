@@ -141,7 +141,7 @@ export function Sidebar() {
       </div>
       
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6">
+      <nav className="flex-1 px-3 py-2">
         <ul className="space-y-2">
           <li>
             <div 
