@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getCountryCurrency } from "@/lib/utils";
 
 interface MarketSizeProps {
   segments: Array<{
@@ -11,12 +11,16 @@ interface MarketSizeProps {
   }>;
   totalSize?: number;
   message: string;
+  country?: string;
 }
 
-const COLORS = ['#A163F7', '#7551FF', '#CB9FFF', '#0075FF', '#56ABFF'];
+const COLORS = ['#A163F7', '#7551FF', '#CB9FFF', '#0075FF', '#56ABFF', '#94C9FF'];
 
-export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProps) {
+export function MarketSizeChart({ segments, totalSize, message, country = "United States" }: MarketSizeProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  
+  // Get currency based on country
+  const currency = getCountryCurrency(country);
 
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -49,7 +53,7 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
           <p className="font-medium text-sm">{data.name}</p>
           <p className="text-xs text-primary">{data.value.toFixed(1)}%</p>
           {data.actualValue && (
-            <p className="text-xs text-muted-foreground">{formatCurrency(data.actualValue)}</p>
+            <p className="text-xs text-muted-foreground">{formatCurrency(data.actualValue, currency, country)}</p>
           )}
         </div>
       );
@@ -65,7 +69,7 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
             <div className="text-center z-10 pointer-events-none p-4 bg-vision-purple-200/10 backdrop-blur-md rounded-full border border-vision-purple-200/30">
               <div className="absolute inset-0 bg-vision-primary-gradient/10 rounded-full blur-xl"></div>
               <p className="text-xs font-medium text-white/70 mb-1">Total Available Market</p>
-              <p className="text-2xl font-bold text-white relative">{formatCurrency(totalSize)}</p>
+              <p className="text-2xl font-bold text-white relative">{formatCurrency(totalSize, currency, country)}</p>
             </div>
           )}
         </div>
@@ -128,7 +132,7 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
         </ResponsiveContainer>
       </div>
 
-      <div className="p-4 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
+      <div className="p-5 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
         <p className="text-sm text-white/90 leading-relaxed">{message}</p>
       </div>
       
@@ -155,7 +159,7 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
             </div>
             {segment.value && (
               <span className="text-lg font-semibold text-white mt-1">
-                {formatCurrency(segment.value)}
+                {formatCurrency(segment.value, currency, country)}
               </span>
             )}
             <div 
