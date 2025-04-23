@@ -739,10 +739,11 @@ export default function AnalysisPage() {
           
           {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
-            className="grid gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
+            className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
+            style={{ gridAutoRows: "minmax(auto, auto)" }}
           >
             {/* 1. Success Rate */}
             {analysisData.successRate && (
@@ -756,7 +757,7 @@ export default function AnalysisPage() {
                       Success Rate Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <SuccessRateChart 
                       percentage={analysisData.successRate.percentage}
                       goodPoints={analysisData.successRate.goodPoints}
@@ -780,7 +781,7 @@ export default function AnalysisPage() {
                       Competitors & Market Share
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <CompetitorsChart 
                       competitors={analysisData.competitors.competitors} 
                       message={analysisData.competitors.message} 
@@ -802,7 +803,7 @@ export default function AnalysisPage() {
                       Target Audience Fit
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <div className="space-y-5">
                       <div className="h-64">
                         {/* Radar chart will go here */}
@@ -850,7 +851,7 @@ export default function AnalysisPage() {
                       Market Size Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <MarketSizeChart 
                       segments={analysisData.marketSize.segments}
                       totalSize={analysisData.marketSize.totalSize}
@@ -873,7 +874,7 @@ export default function AnalysisPage() {
                       Business Model Strength
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <BusinessModelStrengthChart 
                       overall={analysisData.businessModelStrength.overall}
                       components={analysisData.businessModelStrength.components}
@@ -896,7 +897,7 @@ export default function AnalysisPage() {
                       Funding Requirements
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <FundingRequirementsCard 
                       total={analysisData.fundingRequired.total}
                       breakdown={analysisData.fundingRequired.breakdown}
@@ -919,7 +920,7 @@ export default function AnalysisPage() {
                       SWOT Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <SWOTAnalysis 
                       strengths={analysisData.swotAnalysis.strengths}
                       weaknesses={analysisData.swotAnalysis.weaknesses}
@@ -943,7 +944,7 @@ export default function AnalysisPage() {
                       Previous Failed Executions
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <FailedExecutionsCard
                       failures={analysisData.previousFailedExecutions.failures}
                       message={analysisData.previousFailedExecutions.message}

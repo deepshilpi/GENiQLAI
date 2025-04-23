@@ -60,18 +60,18 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <Card className="border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-sm shadow-lg shadow-vision-purple-200/10">
-        <CardContent className="p-5 text-center">
+        <CardContent className="p-4 sm:p-5 text-center">
           <h3 className="text-sm font-medium text-white/70 mb-1">Total Funding Required</h3>
           <div className="relative">
             <div className="absolute inset-0 bg-vision-primary-gradient/20 rounded-full blur-xl"></div>
-            <p className="text-3xl font-bold text-white relative">{formatCurrency(total)}</p>
+            <p className="text-3xl font-bold text-white relative">{formatCurrency(total, 'USD')}</p>
           </div>
         </CardContent>
       </Card>
 
-      <div className="h-72 w-full">
+      <div className="h-64 sm:h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <defs>
@@ -88,8 +88,8 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
               cy="50%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={100}
-              innerRadius={40}
+              outerRadius={90}
+              innerRadius={35}
               paddingAngle={2}
               fill="#8884d8"
               dataKey="value"
@@ -123,7 +123,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {breakdown.map((item, i) => (
           <Card 
             key={i} 
@@ -132,7 +132,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
               boxShadow: `0 6px 12px -6px ${COLORS[i % COLORS.length]}33`,
             }}
           >
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="mb-2">
                 <div 
                   className="w-full h-1 rounded-full mb-2"
@@ -145,7 +145,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
                 </h4>
               </div>
               <div className="flex justify-between items-end mt-1.5">
-                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount)}</p>
+                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount, 'USD')}</p>
                 <span className="text-xs font-medium bg-vision-purple-200/20 px-2 py-0.5 rounded-full text-white/70">
                   {item.percentage}%
                 </span>

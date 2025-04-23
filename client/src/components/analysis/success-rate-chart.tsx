@@ -24,39 +24,50 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message }:
     successLevel === "medium" ? "bg-amber-500/10 border-amber-500/30" :
     "bg-red-500/10 border-red-500/30";
     
-  // Calculate gauge position
-  const rotation = (percentage / 100) * 180;
-  
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <div className="flex flex-col sm:flex-row gap-6">
-        {/* Left column: Gauge visualization */}
-        <div className="flex flex-col items-center sm:w-1/2">
-          <div className="relative w-48 h-24 mb-4">
-            {/* Semi-circle background */}
-            <div className="absolute w-full h-full overflow-hidden">
-              <div className="absolute bottom-0 w-full h-full rounded-t-full bg-vision-purple-100/5 border-t border-x border-vision-purple-200/20"></div>
-            </div>
-            
-            {/* Gauge indicator */}
-            <div 
-              className="absolute bottom-0 left-1/2 w-1 h-[50%] bg-white origin-bottom -translate-x-1/2"
-              style={{ transform: `translateX(-50%) rotate(${rotation}deg)` }}
-            >
-              <div className="absolute top-0 left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ backgroundColor: gaugeColor }}></div>
-            </div>
-            
-            {/* Gauge center */}
-            <div className="absolute bottom-0 left-1/2 w-6 h-6 -translate-x-1/2 translate-y-1/2 rounded-full bg-vision-purple-100/20 border border-vision-purple-200/30"></div>
-            
-            {/* Gauge labels */}
-            <div className="absolute bottom-0 left-0 text-xs text-white/60">0%</div>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1 text-xs text-white/60">50%</div>
-            <div className="absolute bottom-0 right-0 text-xs text-white/60">100%</div>
+        {/* Left column: Gauge visualization - Using SVG for more reliable rendering */}
+        <div className="flex flex-col items-center justify-center sm:w-1/2">
+          {/* SVG Gauge */}
+          <div className="relative mb-6">
+            <svg width="160" height="100" viewBox="0 0 160 100" className="transform scale-100">
+              {/* Background semi-circle */}
+              <path 
+                d="M 10 90 A 70 70 0 0 1 150 90" 
+                fill="none" 
+                stroke="rgba(139, 92, 246, 0.2)" 
+                strokeWidth="4"
+              />
+              
+              {/* Gauge indicator */}
+              <path 
+                d={`M 80 90 L ${80 + 70 * Math.cos((percentage / 100) * Math.PI)} ${90 - 70 * Math.sin((percentage / 100) * Math.PI)}`} 
+                stroke="white" 
+                strokeWidth="2"
+              />
+              
+              {/* Indicator circle */}
+              <circle 
+                cx={80 + 70 * Math.cos((percentage / 100) * Math.PI)} 
+                cy={90 - 70 * Math.sin((percentage / 100) * Math.PI)} 
+                r="6" 
+                fill={gaugeColor}
+                className="drop-shadow-lg animate-pulse" 
+              />
+              
+              {/* Center point */}
+              <circle cx="80" cy="90" r="5" fill="rgba(139, 92, 246, 0.3)" stroke="rgba(139, 92, 246, 0.4)" strokeWidth="1" />
+              
+              {/* Labels */}
+              <text x="10" y="95" fontSize="10" fill="rgba(255, 255, 255, 0.6)">0%</text>
+              <text x="75" y="75" fontSize="10" fill="rgba(255, 255, 255, 0.6)">50%</text>
+              <text x="145" y="95" fontSize="10" fill="rgba(255, 255, 255, 0.6)">100%</text>
+            </svg>
           </div>
           
           {/* Percentage display */}
-          <div className={`p-3 rounded-full ${bgColor} mb-3`}>
+          <div className={`p-3 rounded-full ${bgColor} mb-3 w-24 h-24 flex items-center justify-center`}>
             <span className="text-2xl font-semibold text-white">{percentage}%</span>
           </div>
           
@@ -109,7 +120,7 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message }:
       </div>
       
       {/* Success message */}
-      <div className={`p-3 text-sm rounded-md mt-4 text-white/80 ${
+      <div className={`p-4 text-sm rounded-md mt-4 text-white/80 ${
         successLevel === "high" ? "bg-green-500/5 border border-green-500/20" :
         successLevel === "medium" ? "bg-amber-500/5 border border-amber-500/20" :
         "bg-red-500/5 border border-red-500/20"
