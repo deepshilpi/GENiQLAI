@@ -4,7 +4,6 @@ import { Header } from "@/components/header";
 import { StartupAnalyzer } from "@/components/startup-analyzer";
 import { StartupAnalyzerResults } from "@/components/startup-analyzer-results";
 import { PlanFeatures } from "@/components/plan-features";
-import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
 import { AnalysisResults } from "@shared/schema";
 import { NewsArticles } from "@/components/news-articles";
@@ -135,8 +134,6 @@ export default function DashboardPage() {
             <NewsArticles />
           )}
         </main>
-        
-        <Footer />
       </div>
     </div>
   );
