@@ -5,6 +5,7 @@ import {
   votes, type Vote, type InsertVote,
   follows, type Follow, type InsertFollow,
   analyses, type Analysis, type InsertAnalysis,
+  savedIdeas, type SavedIdea, type InsertSavedIdea,
   conversations, type Conversation, type InsertConversation,
   conversationParticipants, type ConversationParticipant, type InsertConversationParticipant,
   messages, type Message, type InsertMessage,
@@ -48,6 +49,13 @@ export interface IStorage {
   // Analysis operations
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
   getAnalysesByUserId(userId: number): Promise<Analysis[]>;
+  
+  // Saved Ideas operations
+  createSavedIdea(savedIdea: InsertSavedIdea): Promise<SavedIdea>;
+  getSavedIdeasByUserId(userId: number): Promise<SavedIdea[]>;
+  getSavedIdeaById(id: number): Promise<SavedIdea | undefined>;
+  updateSavedIdea(id: number, updates: Partial<InsertSavedIdea>): Promise<SavedIdea>;
+  deleteSavedIdea(id: number): Promise<void>;
 
   // Messaging operations
   createConversation(conversation: InsertConversation): Promise<Conversation>;

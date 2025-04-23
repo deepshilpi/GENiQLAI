@@ -524,9 +524,9 @@ export default function AnalysisPage() {
       {phase === "input" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Enter Your Startup Idea</CardTitle>
+            <CardTitle className="text-xl text-white">What's in your mind?</CardTitle>
             <CardDescription className="text-white/70">
-              Provide a detailed description of your startup idea for comprehensive analysis
+              Share your startup idea for comprehensive AI-powered analysis
 
             </CardDescription>
           </CardHeader>

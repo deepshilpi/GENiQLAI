@@ -95,6 +95,17 @@ export const analyses = pgTable("analyses", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const savedIdeas = pgTable("saved_ideas", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  startupIdea: text("startup_idea").notNull(),
+  country: text("country").notNull(),
+  category: text("category"),
+  isFavorite: boolean("is_favorite").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Direct messaging tables
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
@@ -134,6 +145,15 @@ export const insertAnalysisSchema = createInsertSchema(analyses).pick({
   results: true,
 });
 
+export const insertSavedIdeaSchema = createInsertSchema(savedIdeas).pick({
+  userId: true,
+  title: true,
+  startupIdea: true,
+  country: true,
+  category: true,
+  isFavorite: true,
+});
+
 // Create insert schemas for messaging tables
 export const insertConversationSchema = createInsertSchema(conversations).pick({
   name: true,
@@ -169,6 +189,8 @@ export type Follow = typeof follows.$inferSelect;
 export type InsertFollow = z.infer<typeof insertFollowSchema>;
 export type Analysis = typeof analyses.$inferSelect;
 export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;
+export type SavedIdea = typeof savedIdeas.$inferSelect;
+export type InsertSavedIdea = z.infer<typeof insertSavedIdeaSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type ConversationParticipant = typeof conversationParticipants.$inferSelect;
@@ -186,6 +208,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   followedBy: many(follows, { relationName: "followers" }),
   following: many(follows, { relationName: "following" }),
   analyses: many(analyses),
+  savedIdeas: many(savedIdeas),
   participatedConversations: many(conversationParticipants),
   sentMessages: many(messages, { relationName: "sender" }),
   messageReads: many(messageReads),
@@ -238,6 +261,13 @@ export const followsRelations = relations(follows, ({ one }) => ({
 export const analysesRelations = relations(analyses, ({ one }) => ({
   user: one(users, {
     fields: [analyses.userId],
+    references: [users.id],
+  }),
+}));
+
+export const savedIdeasRelations = relations(savedIdeas, ({ one }) => ({
+  user: one(users, {
+    fields: [savedIdeas.userId],
     references: [users.id],
   }),
 }));
