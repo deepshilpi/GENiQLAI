@@ -141,9 +141,9 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                       <FormLabel className="text-white">Username</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Enter your username" 
+                          placeholder="Choose a username" 
                           autoComplete="username"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
@@ -161,9 +161,9 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                       <FormControl>
                         <Input 
                           type="password" 
-                          placeholder="Enter your password" 
+                          placeholder="Create a password" 
                           autoComplete="current-password"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
@@ -203,7 +203,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                         <Input 
                           placeholder="Choose a username" 
                           autoComplete="username"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
@@ -223,7 +223,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                           type="email"
                           placeholder="Enter your email" 
                           autoComplete="email"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
@@ -243,7 +243,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                           type="password" 
                           placeholder="Create a password" 
                           autoComplete="new-password"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
@@ -263,7 +263,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                           type="password" 
                           placeholder="Confirm your password" 
                           autoComplete="new-password"
-                          className="bg-vision-card-dark text-white border-vision-purple-200/20" 
+                          className="bg-transparent text-white border-vision-purple-200/20 placeholder:text-white/40" 
                           {...field} 
                         />
                       </FormControl>
