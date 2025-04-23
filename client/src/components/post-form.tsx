@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { X, Upload, Image, Trash2 } from "lucide-react";
+import { X, Sparkles, Hash, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   title: z.string().min(5, {
@@ -36,7 +36,6 @@ const formSchema = z.object({
   }).max(5, {
     message: "Maximum 5 tags allowed."
   }),
-  imageUrl: z.string().optional(),
 });
 
 interface PostFormProps {
@@ -46,9 +45,6 @@ interface PostFormProps {
 export function PostForm({ onComplete }: PostFormProps) {
   const { toast } = useToast();
   const [tagInput, setTagInput] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,7 +52,6 @@ export function PostForm({ onComplete }: PostFormProps) {
       title: "",
       description: "",
       tags: [],
-      imageUrl: "",
     },
   });
   
@@ -68,7 +63,7 @@ export function PostForm({ onComplete }: PostFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       toast({
         title: "Post created!",
-        description: "Your post has been shared with the community.",
+        description: "Your startup idea has been shared with the community.",
       });
       onComplete();
     },
@@ -113,66 +108,6 @@ export function PostForm({ onComplete }: PostFormProps) {
     );
   };
   
-  const handleImageUpload = async (file: File) => {
-    if (!file) return;
-    
-    // Check file size and type
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      toast({
-        title: "Image too large",
-        description: "Please choose an image under 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please choose an image file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    
-    try {
-      // Create a base64 version of the image for preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setImagePreview(base64);
-        // In a real app, you would upload to server/storage service here
-        // and get back a URL to set in the form
-        
-        // For demo purposes, we'll just use the base64 as the URL
-        form.setValue("imageUrl", base64);
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-  
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-  
-  const removeImage = () => {
-    setImagePreview(null);
-    form.setValue("imageUrl", "");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-  
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createPostMutation.mutate(values);
   };
@@ -180,19 +115,29 @@ export function PostForm({ onComplete }: PostFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="bg-vision-purple-900/20 backdrop-blur-sm rounded-lg p-5 border border-vision-purple-200/20 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb className="h-5 w-5 text-vision-purple-400" />
+            <p className="text-sm text-vision-purple-200">
+              Share your innovative startup idea with the GENIQL community to receive AI-powered analysis and feedback.
+            </p>
+          </div>
+        </div>
+        
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel className="text-white">Title</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Enter a catchy title for your startup idea" 
+                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 focus-visible:bg-vision-purple-100/10"
                   {...field} 
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-vision-purple-200/70">
                 This will be the main headline for your post.
               </FormDescription>
               <FormMessage />
@@ -205,15 +150,16 @@ export function PostForm({ onComplete }: PostFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel className="text-white">Description</FormLabel>
               <FormControl>
                 <Textarea 
                   placeholder="Describe your startup idea in detail..." 
-                  rows={5}
+                  rows={6}
+                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 resize-none focus-visible:bg-vision-purple-100/10"
                   {...field} 
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-vision-purple-200/70">
                 Explain your idea, target market, and why it's unique.
               </FormDescription>
               <FormMessage />
@@ -226,7 +172,9 @@ export function PostForm({ onComplete }: PostFormProps) {
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tags</FormLabel>
+              <FormLabel className="text-white flex items-center gap-2">
+                <Hash className="h-4 w-4 text-vision-purple-400" /> Tags
+              </FormLabel>
               <div className="flex mb-2">
                 <FormControl>
                   <Input 
@@ -239,11 +187,12 @@ export function PostForm({ onComplete }: PostFormProps) {
                         handleAddTag();
                       }
                     }}
+                    className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 focus-visible:bg-vision-purple-100/10"
                   />
                 </FormControl>
                 <Button 
                   type="button" 
-                  className="ml-2" 
+                  className="ml-2 bg-vision-primary-gradient hover:brightness-110" 
                   onClick={handleAddTag}
                 >
                   Add
@@ -252,20 +201,20 @@ export function PostForm({ onComplete }: PostFormProps) {
               
               <div className="flex flex-wrap gap-2 mt-2">
                 {field.value.map((tag, index) => (
-                  <div key={index} className="bg-accent rounded-full px-3 py-1 text-sm flex items-center">
-                    {tag}
+                  <Badge key={index} className="bg-vision-purple-900/50 hover:bg-vision-purple-900/70 text-white py-1 px-3">
+                    #{tag}
                     <button 
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-muted-foreground hover:text-destructive"
+                      className="ml-2 text-vision-purple-200/70 hover:text-white transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  </div>
+                  </Badge>
                 ))}
               </div>
               
-              <FormDescription>
+              <FormDescription className="text-vision-purple-200/70">
                 Add up to 5 tags to categorize your startup idea.
               </FormDescription>
               <FormMessage />
@@ -273,80 +222,27 @@ export function PostForm({ onComplete }: PostFormProps) {
           )}
         />
         
-        {/* Image Upload */}
-        <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image (Optional)</FormLabel>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleImageUpload(file);
-                  }
-                }}
-              />
-
-              {!imagePreview ? (
-                <Card 
-                  className="border-dashed border-2 cursor-pointer hover:border-primary transition-colors"
-                  onClick={triggerFileInput}
-                >
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground text-center">
-                      Click to upload an image<br />
-                      <span className="text-xs">PNG, JPG, GIF up to 5MB</span>
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="relative overflow-hidden">
-                  <CardContent className="p-0">
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="w-full h-auto object-cover max-h-64"
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="destructive"
-                      className="absolute top-2 right-2 rounded-full h-8 w-8"
-                      onClick={removeImage}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-              <FormDescription>
-                Add an image to make your post more engaging.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-4">
           <Button 
             type="button" 
             variant="outline" 
             onClick={onComplete}
+            className="border-vision-purple-200/30 text-vision-purple-200 hover:bg-vision-purple-900/50"
           >
             Cancel
           </Button>
           <Button 
             type="submit"
             disabled={createPostMutation.isPending}
+            className="bg-vision-primary-gradient hover:brightness-110 gap-2"
           >
-            {createPostMutation.isPending ? "Posting..." : "Post"}
+            {createPostMutation.isPending ? (
+              <>Posting...</>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" /> Post
+              </>
+            )}
           </Button>
         </div>
       </form>
