@@ -14,7 +14,8 @@ import {
   Menu,
   BrainCircuit,
   MessageSquare,
-  LogOut
+  LogOut,
+  BookmarkIcon
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { MobileMenu } from "@/components/mobile-menu";
 import Logo from "@/assets/logo";
+import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 
 export function Header() {
   const [location, navigate] = useLocation();
@@ -103,6 +105,21 @@ export function Header() {
 
           {/* Action buttons */}
           <div className="flex items-center space-x-3">
+            {/* Saved Ideas - Only visible when logged in */}
+            {user && (
+              <SavedIdeasDropdown 
+                trigger={
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                  >
+                    <BookmarkIcon className="w-5 h-5" />
+                  </Button>
+                }
+              />
+            )}
+            
             {/* Notifications dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -247,6 +264,11 @@ export function Header() {
       </div>
       
       <div className="flex items-center space-x-3">
+        {/* Saved Ideas Dropdown - Only show for authenticated users */}
+        {user && (
+          <SavedIdeasDropdown />
+        )}
+        
         {/* Notifications Button with badge */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
