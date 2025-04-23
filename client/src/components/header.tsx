@@ -77,7 +77,7 @@ export function Header() {
   // Mobile Header
   if (isMobile) {
     return (
-      <>
+      <div>
         {/* Mobile Menu */}
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         
@@ -234,7 +234,7 @@ export function Header() {
             )}
           </div>
         </header>
-      </>
+      </div>
     );
   }
   
