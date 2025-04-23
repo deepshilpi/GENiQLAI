@@ -128,3 +128,142 @@ export function redirectToAuthIfNeeded(user: any, navigate: Function, message?: 
   
   return false;
 }
+
+// Market data interfaces
+interface CountryMarketData {
+  growthRate: string;
+  maturity: string;
+  competitiveIntensity: string;
+  consumerAdoption: string;
+  regulatoryEnvironment: string;
+  investmentActivity: string;
+}
+
+// Country-specific market data with consistent values
+export function getCountryMarketData(country: string): CountryMarketData {
+  const marketData: Record<string, CountryMarketData> = {
+    "United States": {
+      growthRate: "7.2",
+      maturity: "Mature",
+      competitiveIntensity: "Very High",
+      consumerAdoption: "Early Majority",
+      regulatoryEnvironment: "Moderate",
+      investmentActivity: "High"
+    },
+    "United Kingdom": {
+      growthRate: "5.8",
+      maturity: "Mature",
+      competitiveIntensity: "High",
+      consumerAdoption: "Early Majority",
+      regulatoryEnvironment: "Moderate",
+      investmentActivity: "Moderate"
+    },
+    "Canada": {
+      growthRate: "6.3",
+      maturity: "Growing",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Early Adopters",
+      regulatoryEnvironment: "Favorable",
+      investmentActivity: "Moderate"
+    },
+    "Australia": {
+      growthRate: "5.5",
+      maturity: "Growing",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Early Adopters",
+      regulatoryEnvironment: "Favorable",
+      investmentActivity: "Moderate"
+    },
+    "India": {
+      growthRate: "12.7",
+      maturity: "Emerging",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Innovators",
+      regulatoryEnvironment: "Evolving",
+      investmentActivity: "High"
+    },
+    "China": {
+      growthRate: "9.4",
+      maturity: "Growing",
+      competitiveIntensity: "High",
+      consumerAdoption: "Early Adopters",
+      regulatoryEnvironment: "Restrictive",
+      investmentActivity: "Very High"
+    },
+    "Japan": {
+      growthRate: "4.2",
+      maturity: "Mature",
+      competitiveIntensity: "High",
+      consumerAdoption: "Late Majority",
+      regulatoryEnvironment: "Strict",
+      investmentActivity: "Moderate"
+    },
+    "Germany": {
+      growthRate: "5.1",
+      maturity: "Mature",
+      competitiveIntensity: "High",
+      consumerAdoption: "Early Majority",
+      regulatoryEnvironment: "Strict",
+      investmentActivity: "Moderate"
+    },
+    "France": {
+      growthRate: "4.9",
+      maturity: "Mature",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Early Majority",
+      regulatoryEnvironment: "Moderate",
+      investmentActivity: "Moderate"
+    },
+    "Brazil": {
+      growthRate: "8.3",
+      maturity: "Emerging",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Innovators",
+      regulatoryEnvironment: "Complex",
+      investmentActivity: "Growing"
+    },
+    "Singapore": {
+      growthRate: "7.8",
+      maturity: "Growing",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Early Adopters",
+      regulatoryEnvironment: "Favorable",
+      investmentActivity: "High"
+    },
+    "Israel": {
+      growthRate: "9.1",
+      maturity: "Growing",
+      competitiveIntensity: "Moderate",
+      consumerAdoption: "Innovators",
+      regulatoryEnvironment: "Supportive",
+      investmentActivity: "Very High"
+    },
+    "South Korea": {
+      growthRate: "6.9",
+      maturity: "Growing",
+      competitiveIntensity: "High",
+      consumerAdoption: "Early Adopters",
+      regulatoryEnvironment: "Moderate",
+      investmentActivity: "High"
+    },
+    "Nigeria": {
+      growthRate: "11.2",
+      maturity: "Emerging",
+      competitiveIntensity: "Low",
+      consumerAdoption: "Innovators",
+      regulatoryEnvironment: "Developing",
+      investmentActivity: "Growing"
+    },
+    "Kenya": {
+      growthRate: "10.5",
+      maturity: "Emerging",
+      competitiveIntensity: "Low",
+      consumerAdoption: "Innovators",
+      regulatoryEnvironment: "Developing",
+      investmentActivity: "Growing"
+    }
+  };
+  
+  // Return data for the specified country, or US data as default
+  return marketData[country] || marketData["United States"];
+}

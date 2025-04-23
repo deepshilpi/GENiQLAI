@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { formatCurrency, getCountryCurrency } from "@/lib/utils";
+import { formatCurrency, getCountryCurrency, getCountryMarketData } from "@/lib/utils";
 
 interface MarketSizeProps {
   segments: Array<{
@@ -133,7 +133,48 @@ export function MarketSizeChart({ segments, totalSize, message, country = "Unite
       </div>
 
       <div className="p-5 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
+        <div className="flex items-center mb-3">
+          <div className="w-6 h-6 rounded-full overflow-hidden mr-2 border border-vision-purple-200/30">
+            <img 
+              src={`https://flagcdn.com/w80/${country === 'United States' ? 'us' : country === 'United Kingdom' ? 'gb' : country.toLowerCase().slice(0, 2)}.png`} 
+              alt={`${country} flag`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h4 className="text-sm font-semibold text-white">Market Analysis: {country}</h4>
+        </div>
         <p className="text-sm text-white/90 leading-relaxed">{message}</p>
+        
+        {/* Country-specific market insights */}
+        <div className="mt-4 pt-4 border-t border-vision-purple-200/10">
+          <h5 className="text-xs font-semibold text-white/80 mb-2">Country-Specific Insights</h5>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Currency: {currency.symbol} ({currency.code})</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Market Growth Rate: {getCountryMarketData(country).growthRate}% YoY</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Market Maturity: {getCountryMarketData(country).maturity}</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Competitive Intensity: {getCountryMarketData(country).competitiveIntensity}</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Consumer Adoption: {getCountryMarketData(country).consumerAdoption}</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
+              <span className="text-white/70">Regulatory Environment: {getCountryMarketData(country).regulatoryEnvironment}</span>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
