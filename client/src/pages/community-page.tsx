@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { CommunityPost } from "@/components/community-post";
 import { PostForm } from "@/components/post-form";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthContext } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -61,7 +61,8 @@ import {
 } from "lucide-react";
 
 export default function CommunityPage() {
-  const { user } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
   const [showPostForm, setShowPostForm] = useState(false);
   // No longer using plan dialog
   const [searchQuery, setSearchQuery] = useState("");

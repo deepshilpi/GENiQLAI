@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { AnalysisResults } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSavedIdeas } from "@/hooks/use-saved-ideas";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthContext } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
 interface SaveIdeaButtonProps {
@@ -17,7 +17,8 @@ interface SaveIdeaButtonProps {
 }
 
 export function SaveIdeaButton({ startupIdea, analysisResults, className }: SaveIdeaButtonProps) {
-  const { user } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
   const { toast } = useToast();
   const { createSavedIdea, isCreating } = useSavedIdeas();
   const [open, setOpen] = useState(false);

@@ -46,11 +46,13 @@ function Router() {
       <Switch>
         <Route path="/" component={AnalysisPage} />
         <Route path="/home" component={HomePage} />
-        <ProtectedRoute path="/community" component={CommunityPage} />
+        <Route path="/community" component={CommunityPage} />
         <ProtectedRoute path="/dashboard" component={DashboardPage} />
         <ProtectedRoute path="/messages" component={MessagesPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
         <ProtectedRoute path="/settings" component={SettingsPage} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>
