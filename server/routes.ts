@@ -717,7 +717,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ideaType: ideaType || "general",
         notes: notes || "",
         resultsSnapshot: resultsSnapshot || null,
-        createdAt: new Date()
       };
       
       const savedIdea = await storage.createSavedIdea(newSavedIdea);
