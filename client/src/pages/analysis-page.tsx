@@ -316,7 +316,8 @@ export default function AnalysisPage() {
     "fundingRequired",  // Funding requirements
     "swotAnalysis",     // SWOT analysis
     "failedExecutions", // Previous failed executions
-    "actions"           // Action buttons (save, export, etc.)
+    "relatedIdeas",     // Related startup ideas
+    "actionButtons"     // Action buttons (save, export, etc.)
   ];
   
   // Forms setup
