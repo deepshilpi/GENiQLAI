@@ -178,34 +178,20 @@ export function Sidebar() {
               {!collapsed && <span>Messages</span>}
             </div>
           </li>
+
           <li>
             <div 
               className={cn(
                 "vision-sidebar-item cursor-pointer",
-                isActive("/analytics") && "active",
+                isActive("/market-news") && "active",
                 collapsed && "justify-center px-2"
               )}
-              onClick={() => navigate("/analytics")}
+              onClick={() => navigate("/market-news")}
             >
-              <BarChart3 className="w-5 h-5" />
-              {!collapsed && <span>Analytics</span>}
+              <Newspaper className="w-5 h-5" />
+              {!collapsed && <span>Market News</span>}
             </div>
           </li>
-          {(user?.planType === "pro" || user?.planType === "unicorn") && (
-            <li>
-              <div 
-                className={cn(
-                  "vision-sidebar-item cursor-pointer",
-                  isActive("/market-news") && "active",
-                  collapsed && "justify-center px-2"
-                )}
-                onClick={() => navigate("/market-news")}
-              >
-                <Newspaper className="w-5 h-5" />
-                {!collapsed && <span>Market News</span>}
-              </div>
-            </li>
-          )}
         </ul>
       </nav>
       
@@ -322,19 +308,7 @@ export function Sidebar() {
                 {!collapsed && <span>Settings</span>}
               </div>
             </li>
-            <li>
-              <div 
-                className={cn(
-                  "vision-sidebar-item cursor-pointer",
-                  isActive("/subscription") && "active",
-                  collapsed && "justify-center px-2"
-                )}
-                onClick={() => navigate("/subscription")}
-              >
-                <CreditCard className="w-5 h-5" />
-                {!collapsed && <span>Plans</span>}
-              </div>
-            </li>
+
             <li>
               <button 
                 onClick={handleLogout}
@@ -375,19 +349,7 @@ export function Sidebar() {
                 {!collapsed && <span>Register</span>}
               </button>
             </li>
-            <li>
-              <div 
-                className={cn(
-                  "vision-sidebar-item cursor-pointer",
-                  isActive("/pricing") && "active",
-                  collapsed && "justify-center px-2"
-                )}
-                onClick={() => navigate("/pricing")}
-              >
-                <CreditCard className="w-5 h-5" />
-                {!collapsed && <span>Pricing</span>}
-              </div>
-            </li>
+
           </ul>
         )}
       </div>

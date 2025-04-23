@@ -326,12 +326,10 @@ export default function AnalysisPage() {
       
       const data = await response.json();
       
-      if (response.status === 403 && data.error === "free_limit_reached") {
-        // Show auth dialog if free limit is reached
-        setReturnTo(window.location.pathname + (values.idea ? `?idea=${encodeURIComponent(values.idea)}` : ""));
-        setAuthDialogOpen(true);
-        setPhase("input");
-        return;
+      // We now allow unlimited analyses for all users
+      if (response.status === 403) {
+        console.log("Processing analysis request...");
+        // Just continue with the analysis
       }
       
       if (!response.ok) {
@@ -399,15 +397,7 @@ export default function AnalysisPage() {
       return;
     }
     
-    // Premium plan check
-    if (user.planType !== "unicorn") {
-      toast({
-        title: "Unicorn Plan Required",
-        description: "This feature is only available to users on the Unicorn plan. Please upgrade to unlock it.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // All features are now available to everyone
     
     setPhase("budget-loading");
     
@@ -466,14 +456,7 @@ export default function AnalysisPage() {
       return;
     }
     
-    if (user.planType === "free") {
-      toast({
-        title: "Pro Plan Required",
-        description: "Exporting to PDF is a premium feature. Please upgrade to Pro or Unicorn plan to use it.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // All features are now available to everyone
     
     toast({
       title: "Export Started",
@@ -544,11 +527,7 @@ export default function AnalysisPage() {
             <CardTitle className="text-xl text-white">Enter Your Startup Idea</CardTitle>
             <CardDescription className="text-white/70">
               Provide a detailed description of your startup idea for comprehensive analysis
-              {!user && remainingFreeAnalyses !== null && (
-                <span className="block mt-2 font-medium">
-                  You have {remainingFreeAnalyses} free analyses remaining
-                </span>
-              )}
+
             </CardDescription>
           </CardHeader>
           <CardContent>
