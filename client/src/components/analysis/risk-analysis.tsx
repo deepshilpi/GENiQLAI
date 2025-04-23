@@ -1,297 +1,201 @@
-import { AlertTriangle, Shield, Info } from 'lucide-react';
+import { HeatMapGrid } from 'react-grid-heatmap';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, ShieldCheck, Info } from "lucide-react";
 import { useState } from 'react';
-
-interface RiskFactor {
-  name: string;
-  probability: number; // 0-100
-  impact: number; // 0-100
-  mitigation: string;
-}
 
 interface RiskAnalysisProps {
   overallRiskScore: number; // 0-100, higher means riskier
-  riskFactors: RiskFactor[];
+  riskFactors: Array<{
+    name: string;
+    probability: number; // 0-100
+    impact: number; // 0-100
+    mitigation: string;
+  }>;
   message: string;
 }
 
 export function RiskAnalysis({ overallRiskScore, riskFactors, message }: RiskAnalysisProps) {
-  const [selectedRisk, setSelectedRisk] = useState<RiskFactor | null>(null);
+  const [selectedRisk, setSelectedRisk] = useState<number | null>(null);
   
-  // Determine risk level and colors
-  const riskLevel = 
-    overallRiskScore >= 80 ? "critical" :
-    overallRiskScore >= 60 ? "high" :
-    overallRiskScore >= 40 ? "medium" :
-    "low";
+  // Determine risk level text
+  const getRiskLevelText = (score: number) => {
+    if (score >= 80) return "Very High";
+    if (score >= 60) return "High";
+    if (score >= 40) return "Moderate";
+    if (score >= 20) return "Low";
+    return "Very Low";
+  };
   
-  const riskColor = 
-    riskLevel === "critical" ? "#ef4444" : // red-500
-    riskLevel === "high" ? "#f97316" : // orange-500
-    riskLevel === "medium" ? "#f59e0b" : // amber-500
-    "#22c55e"; // green-500
+  // Get color based on risk score
+  const getRiskColor = (score: number) => {
+    if (score >= 80) return "bg-red-600/30 text-red-400";
+    if (score >= 60) return "bg-orange-500/30 text-orange-400";
+    if (score >= 40) return "bg-yellow-500/30 text-yellow-400";
+    if (score >= 20) return "bg-green-500/30 text-green-400";
+    return "bg-blue-500/30 text-blue-400";
+  };
+  
+  // Format risk data into a heat map matrix
+  const buildHeatmapData = () => {
+    // Create a 5x5 grid (impact vs probability)
+    const grid = Array(5).fill(0).map(() => Array(5).fill(0));
     
-  const riskText = 
-    riskLevel === "critical" ? "Critical Risk" :
-    riskLevel === "high" ? "High Risk" :
-    riskLevel === "medium" ? "Medium Risk" :
-    "Low Risk";
-  
-  // Sort risk factors by combined risk score (probability * impact)
-  const sortedRisks = [...riskFactors].sort((a, b) => {
-    const scoreA = (a.probability * a.impact) / 100;
-    const scoreB = (b.probability * b.impact) / 100;
-    return scoreB - scoreA;
-  });
-  
-  // Get cell color for risk matrix
-  const getCellColor = (prob: number, imp: number) => {
-    const combinedScore = (prob * imp) / 100;
+    // Count how many risk factors fall into each cell
+    riskFactors.forEach(factor => {
+      const probIndex = Math.min(4, Math.floor(factor.probability / 20));
+      const impactIndex = Math.min(4, Math.floor(factor.impact / 20));
+      grid[4 - impactIndex][probIndex] += 1; // Inverse impact axis to have high impact at the top
+    });
     
-    if (combinedScore >= 70) return "bg-red-500/60";
-    if (combinedScore >= 50) return "bg-orange-500/60";
-    if (combinedScore >= 30) return "bg-amber-500/60";
-    if (combinedScore >= 15) return "bg-yellow-500/60";
-    return "bg-green-500/60";
+    return grid;
   };
   
-  // Check if cell should be highlighted (has a risk in it)
-  const hasCellRisk = (probRange: [number, number], impRange: [number, number]) => {
-    return sortedRisks.some(risk => 
-      risk.probability >= probRange[0] && 
-      risk.probability <= probRange[1] && 
-      risk.impact >= impRange[0] && 
-      risk.impact <= impRange[1]
-    );
+  // Calculate a color for each cell in the heat map
+  const getCellColor = (value: number, x: number, y: number) => {
+    // Base color intensity on the presence of risks
+    if (value === 0) return '#11083c20';
+    
+    // Calculate risk level (0-4 for both axes)
+    const probLevel = x; // 0-4 from left to right
+    const impactLevel = 4 - y; // 0-4 from bottom to top (inverse of y)
+    const riskLevel = (probLevel + impactLevel) / 2; // 0-4 average
+    
+    // Color based on risk level
+    if (riskLevel >= 3.5) return '#ff000040'; // High risk (red)
+    if (riskLevel >= 2.5) return '#ff660040'; // Medium-high risk (orange)
+    if (riskLevel >= 1.5) return '#ffcc0040'; // Medium risk (yellow)
+    if (riskLevel >= 0.5) return '#66cc0040'; // Low-medium risk (yellow-green)
+    return '#00cc0040'; // Low risk (green)
   };
+
+  // Y-axis labels (Impact, from high to low)
+  const yLabels = ['Very High', 'High', 'Medium', 'Low', 'Very Low'];
   
-  // Get risks in cell
-  const getCellRisks = (probRange: [number, number], impRange: [number, number]) => {
-    return sortedRisks.filter(risk => 
-      risk.probability >= probRange[0] && 
-      risk.probability <= probRange[1] && 
-      risk.impact >= impRange[0] && 
-      risk.impact <= impRange[1]
-    );
-  };
-  
-  // Define matrix cells (5x5 grid)
-  const matrixCells = [
-    // probability ranges (low to high)
-    [0, 20], [21, 40], [41, 60], [61, 80], [81, 100]
-  ];
-  
-  // Define impact ranges (low to high)
-  const impactRanges = [
-    [0, 20], [21, 40], [41, 60], [61, 80], [81, 100]
-  ];
+  // X-axis labels (Probability, from low to high)
+  const xLabels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
   
   return (
-    <div className="flex flex-col">
-      {/* Overall Risk Score */}
-      <div className="flex items-center justify-center mb-6">
-        <div className="relative">
-          <svg className="w-28 h-28">
-            <circle
-              cx="56"
-              cy="56"
-              r="50"
-              fill="none"
-              stroke="rgba(255,255,255,0.1)"
-              strokeWidth="10"
-            />
-            <circle
-              cx="56"
-              cy="56"
-              r="50"
-              fill="none"
-              stroke={riskColor}
-              strokeWidth="10"
-              strokeDasharray={`${overallRiskScore * 3.14}, 1000`}
-              strokeLinecap="round"
-              transform="rotate(-90 56 56)"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-white">{overallRiskScore}%</span>
-            <span className="text-xs text-white/70">Risk Score</span>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 className="text-xl font-semibold text-white">Risk Profile</h3>
+          <div className="flex items-center">
+            <p className="text-sm text-white/70">Overall Risk Level:</p>
+            <Badge className={`ml-2 ${getRiskColor(overallRiskScore)}`}>
+              {getRiskLevelText(overallRiskScore)}
+            </Badge>
           </div>
         </div>
+        <Badge className="px-2 py-1 bg-vision-purple-200/30 text-white">
+          {overallRiskScore}/100
+        </Badge>
       </div>
       
-      {/* Risk level indicator */}
-      <div className="flex items-center justify-center mb-4">
-        <AlertTriangle className="w-5 h-5 mr-2" style={{ color: riskColor }} />
-        <span className="text-sm font-medium text-white">{riskText}</span>
+      <div className="h-64 w-full">
+        <HeatMapGrid
+          data={buildHeatmapData()}
+          xLabels={xLabels}
+          yLabels={yLabels}
+          cellRender={(x, y, value) => (
+            <div 
+              className="w-full h-full flex items-center justify-center text-xs text-white cursor-pointer"
+              title={`${yLabels[y]} Impact, ${xLabels[x]} Probability: ${value} risk factor(s)`}
+            >
+              {value > 0 ? value : ''}
+            </div>
+          )}
+          cellStyle={(x, y, value) => ({
+            background: getCellColor(value, x, y),
+            borderRadius: '4px',
+            margin: '1px',
+            transition: 'all 0.3s ease-in-out'
+          })}
+          xLabelsStyle={() => ({
+            fontSize: '9px',
+            color: 'rgba(255, 255, 255, 0.7)',
+            transform: 'rotate(-90deg)',
+            marginRight: '5px',
+          })}
+          yLabelsStyle={() => ({
+            fontSize: '9px',
+            color: 'rgba(255, 255, 255, 0.7)',
+            marginRight: '5px',
+          })}
+          cellHeight="30px"
+          square={true}
+          onClick={(x, y) => {
+            const probLevel = x; // 0-4 from left to right
+            const impactLevel = 4 - y; // 0-4 from bottom to top (inverse of y)
+            
+            // Find risks that fall within this cell
+            const matchingRisks = riskFactors.filter(factor => {
+              const factorProbLevel = Math.min(4, Math.floor(factor.probability / 20));
+              const factorImpactLevel = Math.min(4, Math.floor(factor.impact / 20));
+              return factorProbLevel === probLevel && factorImpactLevel === impactLevel;
+            });
+            
+            if (matchingRisks.length > 0) {
+              // Select the first matching risk
+              const riskIndex = riskFactors.findIndex(r => r.name === matchingRisks[0].name);
+              setSelectedRisk(riskIndex);
+            }
+          }}
+        />
       </div>
       
-      {/* Risk Matrix */}
-      <div className="mb-6">
-        <div className="flex items-center mb-2">
-          <h3 className="text-sm font-medium text-white">Risk Assessment Matrix</h3>
-          <Info className="w-4 h-4 ml-2 text-white/50" />
+      <div className="space-y-2 mt-4">
+        <h4 className="text-sm font-medium text-white">Key Risk Factors</h4>
+        <div className="flex flex-wrap gap-2">
+          {riskFactors.map((risk, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              size="sm"
+              className={`bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20 ${
+                selectedRisk === index ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedRisk(selectedRisk === index ? null : index)}
+            >
+              {risk.name}
+            </Button>
+          ))}
         </div>
         
-        <div className="relative bg-vision-purple-100/5 border border-vision-purple-200/10 rounded-md p-1">
-          {/* Y-axis label (Probability) */}
-          <div className="absolute -left-8 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-white/70">
-            Probability
-          </div>
-          
-          {/* X-axis label (Impact) */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-6 text-xs text-white/70">
-            Impact
-          </div>
-          
-          {/* Risk Matrix Grid */}
-          <div className="grid grid-cols-5 gap-1">
-            {/* Generate rows in reverse (high probability at top) */}
-            {matrixCells.slice().reverse().map((probRange, rowIndex) => (
-              // For each row, generate cells across impact values
-              impactRanges.map((impRange, colIndex) => {
-                const revRowIndex = 4 - rowIndex; // Reverse the row index to match the array
-                const cellRisks = getCellRisks(probRange, impRange);
-                
-                return (
-                  <div 
-                    key={`${revRowIndex}-${colIndex}`}
-                    className={`relative w-12 h-12 ${getCellColor(
-                      (probRange[0] + probRange[1]) / 2, 
-                      (impRange[0] + impRange[1]) / 2
-                    )} rounded-sm flex items-center justify-center cursor-pointer ${
-                      cellRisks.length > 0 ? 'ring-2 ring-white/50' : 'opacity-40'
-                    }`}
-                    onClick={() => cellRisks.length > 0 && setSelectedRisk(cellRisks[0])}
-                  >
-                    {cellRisks.length > 0 && (
-                      <>
-                        <span className="text-white font-bold text-sm">
-                          {cellRisks.length}
-                        </span>
-                        
-                        {/* First row labels (top) */}
-                        {revRowIndex === 4 && colIndex === 0 && (
-                          <span className="absolute -top-5 left-0 text-xs text-white/60">Very Likely</span>
-                        )}
-                        {revRowIndex === 0 && colIndex === 0 && (
-                          <span className="absolute -bottom-5 left-0 text-xs text-white/60">Unlikely</span>
-                        )}
-                        {revRowIndex === 0 && colIndex === 0 && (
-                          <span className="absolute top-full left-0 -translate-y-1/2 translate-x-12 text-xs text-white/60">Minor</span>
-                        )}
-                        {revRowIndex === 0 && colIndex === 4 && (
-                          <span className="absolute top-full right-0 -translate-y-1/2 -translate-x-2 text-xs text-white/60">Severe</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      {/* Risk Details */}
-      {selectedRisk ? (
-        <div className="p-4 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
-          <div className="flex justify-between items-start mb-2">
-            <h4 className="text-sm font-medium text-white">{selectedRisk.name}</h4>
-            <button 
-              className="text-white/60 hover:text-white/80"
-              onClick={() => setSelectedRisk(null)}
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <div className="flex flex-col">
-              <span className="text-xs text-white/70">Probability</span>
-              <div className="mt-1 h-2 w-full bg-vision-purple-200/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-orange-500" 
-                  style={{ width: `${selectedRisk.probability}%` }}
-                ></div>
-              </div>
-              <span className="text-xs text-right text-white/70 mt-1">{selectedRisk.probability}%</span>
+        {selectedRisk !== null && (
+          <div className="p-4 mt-2 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/20">
+            <div className="flex items-center mb-2">
+              <AlertTriangle className="w-4 h-4 mr-2 text-primary" />
+              <h5 className="text-sm font-medium text-white">{riskFactors[selectedRisk].name}</h5>
             </div>
-            
-            <div className="flex flex-col">
-              <span className="text-xs text-white/70">Impact</span>
-              <div className="mt-1 h-2 w-full bg-vision-purple-200/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-red-500" 
-                  style={{ width: `${selectedRisk.impact}%` }}
-                ></div>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="text-xs text-white/70">
+                Probability: 
+                <span className="ml-1 text-white">
+                  {riskFactors[selectedRisk].probability}%
+                </span>
               </div>
-              <span className="text-xs text-right text-white/70 mt-1">{selectedRisk.impact}%</span>
-            </div>
-          </div>
-          
-          <div className="mt-3">
-            <h5 className="text-xs font-medium text-white flex items-center mb-1">
-              <Shield className="w-3.5 h-3.5 mr-1.5 text-primary" />
-              Mitigation Strategy
-            </h5>
-            <p className="text-xs text-white/80">{selectedRisk.mitigation}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="p-3 mb-4 text-sm text-center border rounded-md text-white/60 bg-vision-purple-100/5 border-vision-purple-200/10">
-          Select a risk from the matrix to see details
-        </div>
-      )}
-      
-      {/* Risk List */}
-      <div className="space-y-2 mb-4">
-        {sortedRisks.slice(0, 3).map((risk, index) => (
-          <div 
-            key={index}
-            className="p-3 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10 cursor-pointer hover:bg-vision-purple-100/10 transition"
-            onClick={() => setSelectedRisk(risk)}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="text-sm font-medium text-white">{risk.name}</h4>
-              <div className="flex items-center">
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{
-                  backgroundColor: `rgba(${
-                    risk.probability * risk.impact / 100 >= 50 ? '239, 68, 68' : 
-                    risk.probability * risk.impact / 100 >= 30 ? '249, 115, 22' : 
-                    risk.probability * risk.impact / 100 >= 15 ? '245, 158, 11' : '34, 197, 94'
-                  }, 0.2)`,
-                  color: `rgb(${
-                    risk.probability * risk.impact / 100 >= 50 ? '239, 68, 68' : 
-                    risk.probability * risk.impact / 100 >= 30 ? '249, 115, 22' : 
-                    risk.probability * risk.impact / 100 >= 15 ? '245, 158, 11' : '34, 197, 94'
-                  })`
-                }}>
-                  {Math.round(risk.probability * risk.impact / 100)}% Risk
+              <div className="text-xs text-white/70">
+                Impact: 
+                <span className="ml-1 text-white">
+                  {riskFactors[selectedRisk].impact}%
                 </span>
               </div>
             </div>
-            <div className="flex items-center text-xs text-white/70 justify-between">
-              <span>P: {risk.probability}%</span>
-              <span>I: {risk.impact}%</span>
+            <div className="flex items-start mt-2">
+              <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 text-green-500" />
+              <p className="text-xs text-white/80">
+                <span className="font-medium text-white">Mitigation: </span>
+                {riskFactors[selectedRisk].mitigation}
+              </p>
             </div>
-          </div>
-        ))}
-        
-        {sortedRisks.length > 3 && (
-          <div className="p-2 text-center text-xs text-white/60">
-            + {sortedRisks.length - 3} more risks
           </div>
         )}
       </div>
       
-      {/* Risk message */}
-      <div className="p-3 border rounded-md bg-vision-primary-gradient/10 border-primary/30">
-        <div className="flex items-center mb-2">
-          <AlertTriangle className="w-4 h-4 mr-2 text-primary" />
-          <h4 className="text-sm font-medium text-white">Risk Assessment</h4>
-        </div>
-        <p className="text-sm text-white/80">
-          {message}
-        </p>
+      <div className="flex items-start p-3 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
+        <Info className="flex-shrink-0 w-4 h-4 mt-0.5 mr-2 text-primary" />
+        <p className="text-sm text-white/80">{message}</p>
       </div>
     </div>
   );
