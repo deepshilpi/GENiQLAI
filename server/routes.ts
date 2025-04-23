@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import path from "path";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { setupDatabaseRoutes } from "./database-routes";
 import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
@@ -46,6 +47,9 @@ const activeConnections = new Map<number, Set<UserWebSocket>>();
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
+  
+  // Setup database management routes
+  setupDatabaseRoutes(app);
   
   // Serve uploaded files
   app.use('/uploads', (req, res, next) => {
