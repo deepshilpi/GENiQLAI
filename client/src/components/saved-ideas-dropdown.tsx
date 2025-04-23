@@ -131,32 +131,30 @@ export function SavedIdeasDropdown({ className, trigger, asMenuItem = false }: S
                     <span className="truncate">{idea.title}</span>
                   </div>
                 </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="w-56">
-                    <DropdownMenuItem onSelect={() => handleViewIdea(idea)}>
-                      <div className="flex flex-col w-full">
-                        <span className="font-medium">{idea.title}</span>
-                        <p className="text-xs text-muted-foreground truncate mt-1">
-                          {idea.description.length > 50 
-                            ? `${idea.description.slice(0, 50)}...` 
-                            : idea.description}
-                        </p>
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => openEditDialog(idea)}>
-                      <Edit2Icon className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onSelect={() => openDeleteDialog(idea)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2Icon className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
+                <DropdownMenuSubContent className="w-56">
+                  <DropdownMenuItem onSelect={() => handleViewIdea(idea)}>
+                    <div className="flex flex-col w-full">
+                      <span className="font-medium">{idea.title}</span>
+                      <p className="text-xs text-muted-foreground truncate mt-1">
+                        {idea.description.length > 50 
+                          ? `${idea.description.slice(0, 50)}...` 
+                          : idea.description}
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => openEditDialog(idea)}>
+                    <Edit2Icon className="h-4 w-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onSelect={() => openDeleteDialog(idea)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
               </DropdownMenuSub>
             </DropdownMenuGroup>
           ))}

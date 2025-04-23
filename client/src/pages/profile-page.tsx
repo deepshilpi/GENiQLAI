@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Camera, Edit, Activity, BarChart, 
   ThumbsUp, MessageSquare, Users, Star,
-  Calendar, TrendingUp, ChevronRight
+  Calendar, TrendingUp, ChevronRight,
+  Brain, Wallet, Lock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -639,43 +640,52 @@ export default function ProfilePage() {
               {isOwnProfile ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <Card>
+                    <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Analysis Count</CardTitle>
+                        <CardTitle className="text-lg text-white flex items-center gap-2">
+                          <Brain className="h-4 w-4 text-primary" />
+                          Analysis Count
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold">{user.analysisCount || 0}</div>
-                        <p className="text-muted-foreground text-sm">Ideas analyzed</p>
+                        <div className="text-3xl font-bold text-white">{user.analysisCount || 0}</div>
+                        <p className="text-white/60 text-sm">Ideas analyzed</p>
                       </CardContent>
                     </Card>
                     
-                    <Card>
+                    <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Success Rate</CardTitle>
+                        <CardTitle className="text-lg text-white flex items-center gap-2">
+                          <Star className="h-4 w-4 text-primary" />
+                          Success Rate
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="flex flex-col gap-2">
-                          <div className="text-3xl font-bold">{user.successRate || 0}%</div>
-                          <Progress value={user.successRate || 0} className="h-2" />
+                          <div className="text-3xl font-bold text-white">{user.successRate || 75}%</div>
+                          <Progress value={user.successRate || 75} className="h-2 bg-vision-purple-100/10" />
                         </div>
                       </CardContent>
                     </Card>
                     
-                    <Card>
+                    <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Plan Status</CardTitle>
+                        <CardTitle className="text-lg text-white flex items-center gap-2">
+                          <Wallet className="h-4 w-4 text-primary" />
+                          Plan Status
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center gap-2">
-                          <Badge variant={user.planType === 'free' ? 'outline' : (user.planType === 'pro' ? 'default' : 'secondary')}>
+                          <Badge className="bg-vision-primary-gradient text-white">
                             {user.planType === 'free' ? 'Free' : (user.planType === 'pro' ? 'Pro' : 'Unicorn')}
                           </Badge>
-                          <span className="text-muted-foreground text-sm">
+                          <span className="text-white/60 text-sm">
                             {user.analysisCount || 0}/
                             {user.planType === 'free' ? '2' : (user.planType === 'pro' ? '10' : 'Unlimited')}
                           </span>
                         </div>
-                        <p className="text-muted-foreground text-sm mt-2">
+                        <p className="text-white/60 text-sm mt-2">
                           {user.planType === 'free' 
                             ? 'Upgrade to Pro for more analyses' 
                             : (user.planType === 'pro' 
@@ -686,33 +696,37 @@ export default function ProfilePage() {
                     </Card>
                   </div>
                   
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        <div className="flex items-center gap-2">
-                          <BarChart className="h-5 w-5" />
-                          <span>Recent Analyses</span>
-                        </div>
+                  <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Brain className="h-5 w-5 text-primary" />
+                        <span>Recent Analyses</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {/* If we had real analyses, we would render them here */}
                       <div className="text-center py-8">
-                        <p className="text-muted-foreground mb-2">No analyses yet.</p>
-                        <Button>Start Your First Analysis</Button>
+                        <Brain className="h-12 w-12 mx-auto mb-4 text-white/30" />
+                        <p className="text-white/60 mb-4">No analyses yet.</p>
+                        <Button className="bg-vision-primary-gradient text-white hover:brightness-110">
+                          Start Your First Analysis
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 </>
               ) : (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Startup Analysis History</CardTitle>
-                  </CardHeader>
+                <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg text-center py-12">
                   <CardContent>
-                    <p className="text-muted-foreground">
-                      This user's analysis history is private.
-                    </p>
+                    <div className="max-w-md mx-auto">
+                      <div className="w-16 h-16 rounded-full bg-vision-purple-100/10 mx-auto mb-4 flex items-center justify-center">
+                        <Lock className="h-8 w-8 text-white/50" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2">Private Analytics</h3>
+                      <p className="text-white/60 mb-4">
+                        Analysis data is private to each user.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               )}
