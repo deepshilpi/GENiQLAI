@@ -19,6 +19,8 @@ import { Post } from "@shared/schema";
 import { 
   Dialog, 
   DialogContent, 
+  DialogTitle,
+  DialogDescription,
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -190,7 +192,12 @@ export default function CommunityPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-card border-border max-w-3xl">
-                <DialogTitle className="sr-only">Create New Post</DialogTitle>
+                <div className="mb-4">
+                  <DialogTitle className="text-xl font-bold">Create New Post</DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground mt-1">
+                    Share your startup idea with the community
+                  </DialogDescription>
+                </div>
                 <PostForm onComplete={() => setShowPostForm(false)} />
               </DialogContent>
             </Dialog>
@@ -283,8 +290,9 @@ export default function CommunityPage() {
                       ))
                     ) : (filteredPosts || posts)?.length ? (
                       (filteredPosts || posts).map((post: any) => (
-                        <div key={post.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200">
-                          <div className="flex flex-col sm:flex-row">
+                        <div key={post.id} className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200 relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none opacity-50"></div>
+                          <div className="flex flex-col sm:flex-row relative z-10">
                             {/* Vote Column - Horizontal on Mobile, Vertical on Desktop */}
                             <div className="sm:w-16 bg-accent/30 flex flex-row sm:flex-col items-center justify-center py-2 sm:py-4 px-4 sm:px-0 border-b sm:border-b-0 sm:border-r border-border">
                               <Button 
@@ -357,36 +365,45 @@ export default function CommunityPage() {
                         </div>
                       ))
                     ) : (
-                      <div className="bg-card border border-border rounded-lg p-8 text-center">
-                        <p className="text-muted-foreground mb-4">
-                          {searchQuery 
-                            ? "No posts matching your search." 
-                            : `No posts yet. ${user ? "Be the first to share your startup idea!" : "Sign in to create a post!"}`}
-                        </p>
-                        {!searchQuery && (
-                          <Button onClick={handleNewPost}>
-                            {user ? "Create Post" : "Sign In to Post"}
-                          </Button>
-                        )}
-                        {searchQuery && (
-                          <Button variant="outline" onClick={() => setSearchQuery("")}>
-                            Clear Search
-                          </Button>
-                        )}
+                      <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+                        <div className="relative z-10">
+                          <p className="text-muted-foreground mb-4">
+                            {searchQuery 
+                              ? "No posts matching your search." 
+                              : `No posts yet. ${user ? "Be the first to share your startup idea!" : "Sign in to create a post!"}`}
+                          </p>
+                          {!searchQuery && (
+                            <Button onClick={handleNewPost} className="bg-primary hover:bg-primary/90">
+                              {user ? "Create Post" : "Sign In to Post"}
+                            </Button>
+                          )}
+                          {searchQuery && (
+                            <Button variant="outline" onClick={() => setSearchQuery("")}>
+                              Clear Search
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="trending" className="mt-0">
-                  <div className="bg-card border border-border rounded-lg p-8 text-center">
-                    <p className="text-muted-foreground">Trending posts will appear here based on engagement.</p>
+                  <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+                    <div className="relative z-10">
+                      <p className="text-muted-foreground">Trending posts will appear here based on engagement.</p>
+                    </div>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="following" className="mt-0">
-                  <div className="bg-card border border-border rounded-lg p-8 text-center">
-                    <p className="text-muted-foreground">Posts from people you follow will appear here.</p>
+                  <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+                    <div className="relative z-10">
+                      <p className="text-muted-foreground">Posts from people you follow will appear here.</p>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -394,7 +411,7 @@ export default function CommunityPage() {
             
             {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
             <div className="w-full lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-w-full lg:sticky lg:top-20">
                 
                 {/* Popular Tags Card */}
                 <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
