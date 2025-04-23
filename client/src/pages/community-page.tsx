@@ -210,7 +210,7 @@ export default function CommunityPage() {
                   variant={searchType === "posts" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("posts")}
-                  className="rounded-full px-4 text-xs whitespace-nowrap"
+                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
                 >
                   <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
                   Posts
@@ -219,7 +219,7 @@ export default function CommunityPage() {
                   variant={searchType === "users" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("users")}
-                  className="rounded-full px-4 text-xs whitespace-nowrap"
+                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
                 >
                   <Users className="h-3.5 w-3.5 mr-1.5" />
                   Users
@@ -228,7 +228,7 @@ export default function CommunityPage() {
                   variant={searchType === "tags" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("tags")}
-                  className="rounded-full px-4 text-xs whitespace-nowrap"
+                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
                 >
                   <Filter className="h-3.5 w-3.5 mr-1.5" />
                   Tags
@@ -274,23 +274,24 @@ export default function CommunityPage() {
                   <div className="space-y-4">
                     {isLoading ? (
                       Array.from({ length: 5 }).map((_, index) => (
-                        <div key={index} className="bg-card animate-pulse rounded-xl h-32"></div>
+                        <div key={index} className="bg-card animate-pulse rounded-lg h-32 shadow-sm"></div>
                       ))
                     ) : (filteredPosts || posts)?.length ? (
                       (filteredPosts || posts).map((post: any) => (
-                        <div key={post.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors">
-                          <div className="flex">
-                            {/* Vote Column */}
-                            <div className="w-16 bg-background flex flex-col items-center py-4">
+                        <div key={post.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200">
+                          <div className="flex flex-col sm:flex-row">
+                            {/* Vote Column - Horizontal on Mobile, Vertical on Desktop */}
+                            <div className="sm:w-16 bg-accent/30 flex flex-row sm:flex-col items-center justify-center py-2 sm:py-4 px-4 sm:px-0 border-b sm:border-b-0 sm:border-r border-border">
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 rounded-full"
                                 onClick={() => handleVote(post.id, "pump")}
+                                aria-label="Vote up"
                               >
-                                <TrendingUp className={`h-5 w-5 ${post.currentUserVote === 'pump' ? 'text-green-500' : 'text-muted-foreground'}`} />
+                                <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'pump' ? 'text-green-500' : 'text-muted-foreground'}`} />
                               </Button>
-                              <span className="my-1 font-bold">
+                              <span className="mx-2 sm:mx-0 sm:my-1 font-medium text-sm">
                                 {post.pumpCount && post.dumpCount
                                   ? post.pumpCount - post.dumpCount
                                   : 0}
@@ -298,42 +299,50 @@ export default function CommunityPage() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 w-8 p-0 rotate-180"
+                                className="h-8 w-8 p-0 rotate-180 rounded-full"
                                 onClick={() => handleVote(post.id, "dump")}
+                                aria-label="Vote down"
                               >
-                                <TrendingUp className={`h-5 w-5 ${post.currentUserVote === 'dump' ? 'text-red-500' : 'text-muted-foreground'}`} />
+                                <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'dump' ? 'text-red-500' : 'text-muted-foreground'}`} />
                               </Button>
                             </div>
                             
-                            {/* Content Column */}
-                            <div className="flex-1 p-4">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                            {/* Content Column - Enhanced for Mobile */}
+                            <div className="flex-1 p-3 sm:p-4">
+                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
                                 <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
                                   {post.author?.username?.charAt(0).toUpperCase() || post.authorId?.toString().charAt(0)}
                                 </div>
-                                <span>Posted by {post.author?.username || "Anonymous"}</span>
-                                <span>•</span>
-                                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                                <span className="truncate max-w-[120px] sm:max-w-none">
+                                  Posted by {post.author?.username || "Anonymous"}
+                                </span>
+                                <span className="hidden xs:inline">•</span>
+                                <span className="text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
                               </div>
                               
-                              <h3 className="font-bold text-lg mb-2">{post.title}</h3>
-                              <p className="text-muted-foreground line-clamp-3 mb-3">{post.description}</p>
+                              <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{post.title}</h3>
+                              <p className="text-muted-foreground text-sm line-clamp-2 sm:line-clamp-3 mb-3">{post.description}</p>
                               
                               {post.imageUrl && (
-                                <div className="mb-3 rounded-md overflow-hidden">
+                                <div className="mb-3 rounded-md overflow-hidden bg-accent/30">
                                   <img 
                                     src={post.imageUrl} 
                                     alt={post.title}
-                                    className="w-full h-auto max-h-56 object-cover"
+                                    loading="lazy"
+                                    className="w-full h-auto max-h-40 sm:max-h-56 object-cover transition-transform hover:scale-105 duration-300"
                                   />
                                 </div>
                               )}
                               
                               {post.tags?.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                   {post.tags.map((tag: string, index: number) => (
-                                    <div key={index} className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs">
-                                      {tag}
+                                    <div 
+                                      key={index} 
+                                      className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs hover:bg-primary/20 transition-colors cursor-pointer"
+                                      onClick={() => setSearchQuery(tag)}
+                                    >
+                                      #{tag}
                                     </div>
                                   ))}
                                 </div>
@@ -378,46 +387,105 @@ export default function CommunityPage() {
               </Tabs>
             </div>
             
-            {/* Right Column - Sidebar */}
-            <div className="hidden lg:block">
-              <div className="bg-card border border-border rounded-lg p-4 mb-4">
-                <h3 className="font-bold mb-2">About Community</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  A place to share and discuss startup ideas, get feedback, and connect with other founders.
-                </p>
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Members</span>
-                    <span className="font-bold">{posts?.length || 0}+</span>
+            {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
+            <div className="lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                {/* Community Card - Modern Style */}
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 bg-primary/20 rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-base">GENIQL Community</h3>
+                      <p className="text-xs text-muted-foreground">Founded April 2025</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Online</span>
-                    <span className="font-bold">
-                      {Math.floor(Math.random() * (posts?.length || 10) + 1)}
-                    </span>
+                  
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    A place to share and discuss startup ideas, get feedback, and connect with other founders.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-accent/30 rounded-md p-2.5 text-center">
+                      <div className="font-semibold text-lg">{posts?.length || 0}</div>
+                      <div className="text-xs text-muted-foreground">Members</div>
+                    </div>
+                    <div className="bg-accent/30 rounded-md p-2.5 text-center">
+                      <div className="font-semibold text-lg">
+                        {Math.min(Math.floor((posts?.length || 10) / 3) + 1, 50)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Online</div>
+                    </div>
                   </div>
-                  <div className="border-t border-border my-2"></div>
-                  <Button className="w-full" onClick={handleNewPost}>
-                    <ImageIcon className="w-4 h-4 mr-2" /> Create Post
+                  
+                  <Button 
+                    className="w-full rounded-md" 
+                    onClick={handleNewPost}
+                    variant="default"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" /> 
+                    <span className="hidden xs:inline">Create Post</span>
+                    <span className="xs:hidden">Post</span>
                   </Button>
                 </div>
-              </div>
-              
-              <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-bold mb-2">Top Tags</h3>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {['AI', 'SaaS', 'Fintech', 'E-commerce', 'Health', 'Education'].map((tag) => (
-                    <div 
-                      key={tag} 
-                      className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm cursor-pointer hover:bg-primary/20 transition-colors"
+                
+                {/* Popular Tags Card - Enhanced Design */}
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-base flex items-center">
+                      <Filter className="w-4 h-4 mr-2 text-primary" />
+                      Popular Tags
+                    </h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => {
                         setSearchType("tags");
-                        setSearchQuery(tag);
+                        setSearchQuery("");
                       }}
                     >
-                      {tag}
-                    </div>
-                  ))}
+                      View All
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {['AI', 'SaaS', 'Fintech', 'E-commerce', 'Health', 'Marketplace', 'Mobile', 'Education'].map((tag) => (
+                      <div 
+                        key={tag} 
+                        className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs cursor-pointer hover:bg-primary/20 transition-colors flex items-center"
+                        onClick={() => {
+                          setSearchType("tags");
+                          setSearchQuery(tag);
+                        }}
+                      >
+                        #{tag}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Community Rules - Only visible on desktop */}
+                <div className="hidden lg:block bg-card border border-border rounded-lg p-4 shadow-sm">
+                  <h3 className="font-semibold text-base mb-3 flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-primary" />
+                    Getting Started
+                  </h3>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</div>
+                      <span>Share your innovative startup idea with the community</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</div>
+                      <span>Get constructive feedback from experienced founders</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</div>
+                      <span>Use the AI analysis tool to evaluate market potential</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>

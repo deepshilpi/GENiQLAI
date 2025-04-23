@@ -77,6 +77,23 @@
     background-size: cover;
   }
   
+  /* Utility class to hide scrollbars but maintain scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  /* For touch devices - optimize the scroll & touch experience */
+  @media (hover: none) {
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading font-light;
   }
