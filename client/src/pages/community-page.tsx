@@ -192,10 +192,10 @@ export default function CommunityPage() {
                   <span className="sm:hidden">Post</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card border-border max-w-3xl">
+              <DialogContent className="bg-background/95 backdrop-blur-sm border-primary/20 max-w-3xl">
                 <div className="mb-4">
-                  <DialogTitle className="text-xl font-bold">Create New Post</DialogTitle>
-                  <DialogDescription className="text-sm text-muted-foreground mt-1">
+                  <DialogTitle className="text-2xl font-bold text-foreground">Create New Post</DialogTitle>
+                  <DialogDescription className="text-sm text-foreground/70 mt-2">
                     Share your startup idea with the community
                   </DialogDescription>
                 </div>
