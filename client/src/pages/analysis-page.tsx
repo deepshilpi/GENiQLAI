@@ -506,21 +506,6 @@ export default function AnalysisPage() {
         returnTo={returnTo}
       />
       
-      {/* Header */}
-      <Card className="mb-8 border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-xl shadow-vision-purple-200/5">
-        <CardHeader className="py-6">
-          <CardTitle className="flex items-center text-3xl text-white font-medium">
-            <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center mr-3">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            GENIQL Startup Analysis
-          </CardTitle>
-          <CardDescription className="text-white/70 text-lg mt-2 max-w-3xl">
-            Analyze your startup idea with our advanced AI to understand its potential, challenges, and execution requirements.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-      
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
