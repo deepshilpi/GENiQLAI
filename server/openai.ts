@@ -25,9 +25,6 @@ export async function analyzeStartupIdea(
       throw new Error("OpenAI API key is not configured");
     }
     
-    // Determine which blocks to include based on the user's plan
-    const includeProBlocks = planType === "pro" || planType === "unicorn";
-    
     // Build the system prompt with instructions
     const systemPrompt = `You are a startup analysis expert. Analyze the startup idea for ${country} market and provide detailed insights in JSON format.
     
@@ -36,12 +33,10 @@ export async function analyzeStartupIdea(
     2. competitors: Object with competitors array (each with name and marketShare as number) and a message
     3. marketViability: Object with points array (each with title, subtitle, and type - one of: 'success', 'warning', 'danger')
     4. uniqueValueProposition: Object with differentiator (string) and strengths (array of strings)
-    
-    ${includeProBlocks ? `Additionally, include these blocks:
     5. cagr: Object with industryAverage (number), potential (number), and data object containing years (array of strings), industryAverageData (array of numbers), potentialData (array of numbers)
     6. previousFailedExecutions: Object with failures array (each with name, year, reason) and a message
     7. fundingRequirements: Object with seedRound (min/max), seriesA (min/max/timeframe), allocation (percentages)
-    8. goToMarketStrategy: Object with steps array (each with name and timeframe)` : ""}
+    8. goToMarketStrategy: Object with steps array (each with name and timeframe)
     
     Follow the exact format specified. Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`;
 
@@ -94,7 +89,7 @@ export async function analyzeStartupIdea(
   }
 }
 
-// Generate execution plan with budget and roadmap (Unicorn feature)
+// Generate execution plan with budget and roadmap
 export async function generateExecutionPlan(
   startupIdea: string,
   initialBudget: number
@@ -167,7 +162,7 @@ export async function generateExecutionPlan(
   }
 }
 
-// Find potential investors for a startup idea (Unicorn feature)
+// Find potential investors for a startup idea
 export async function findInvestors(
   startupIdea: string,
   country: string

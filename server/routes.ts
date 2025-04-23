@@ -103,15 +103,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Add metadata about free analysis usage for anonymous users
+      // Add metadata about usage
       const responseData = {
         ...analysisResults,
         meta: {
-          isAuthenticated: req.isAuthenticated(),
-          remainingFreeAnalyses: req.isAuthenticated() ? 
-            null : 
-            Math.max(0, 2 - (req.session.anonymousAnalysisCount || 0)),
-          totalFreeAnalyses: 2
+          isAuthenticated: req.isAuthenticated()
         }
       };
       
@@ -146,14 +142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Generate execution plan (Unicorn feature)
+  // Generate execution plan
   app.post("/api/execution-plan", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
-    }
-    
-    if (req.user.planType !== "unicorn") {
-      return res.status(403).json({ message: "Unicorn plan required for this feature" });
     }
     
     const { startupIdea, initialBudget } = req.body;
@@ -171,14 +163,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Find investors (Unicorn feature)
+  // Find investors
   app.post("/api/investors", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
-    }
-    
-    if (req.user.planType !== "unicorn") {
-      return res.status(403).json({ message: "Unicorn plan required for this feature" });
     }
     
     const { startupIdea } = req.body;
