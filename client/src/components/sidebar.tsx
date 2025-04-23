@@ -51,11 +51,15 @@ export function Sidebar() {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setCollapsed(true);
+        setSidebarOpen(false);
         document.body.classList.remove('sidebar-open');
       } else {
         document.body.classList.remove('sidebar-open');
       }
     };
+    
+    // Initial setup
+    handleResize();
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -99,9 +103,9 @@ export function Sidebar() {
   return (
     <div className="sidebar-container">
       {/* Backdrop overlay for mobile */}
-      {isMobile && (
+      {isMobile && sidebarOpen && (
         <div 
-          className="sidebar-backdrop" 
+          className="fixed inset-0 bg-black/50 z-10 sidebar-backdrop" 
           onClick={handleBackdropClick}
           aria-hidden="true"
         />
