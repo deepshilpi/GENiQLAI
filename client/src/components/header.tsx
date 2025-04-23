@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Home, 
   Bell, 
@@ -15,7 +16,8 @@ import {
   BrainCircuit,
   MessageSquare,
   LogOut,
-  BookmarkIcon
+  BookmarkIcon,
+  Download
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,6 +32,8 @@ import { Badge } from "@/components/ui/badge";
 import { MobileMenu } from "@/components/mobile-menu";
 import Logo from "@/assets/logo";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
+import { useNotifications } from "@/hooks/use-notifications";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 export function Header() {
   const [location, navigate] = useLocation();
@@ -37,7 +41,7 @@ export function Header() {
   const { openAuthDialog } = useAuthDialog();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3); // Example count
+  const { unreadCount: notificationCount } = useNotifications(); // Real notification count from hook
   const isMobile = useIsMobile();
   
   // Handle mobile menu toggle
