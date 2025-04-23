@@ -15,7 +15,8 @@ import {
   InsertConversation,
   InsertConversationParticipant,
   InsertMessage,
-  InsertMessageRead
+  InsertMessageRead,
+  InsertSavedIdea
 } from "@shared/schema";
 import session from "express-session";
 

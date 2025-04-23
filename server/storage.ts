@@ -333,6 +333,42 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(analyses.createdAt));
   }
 
+  // Saved Ideas operations
+  async createSavedIdea(savedIdea: InsertSavedIdea): Promise<SavedIdea> {
+    const [newSavedIdea] = await db.insert(savedIdeas)
+      .values(savedIdea)
+      .returning();
+    return newSavedIdea;
+  }
+
+  async getSavedIdeasByUserId(userId: number): Promise<SavedIdea[]> {
+    return db.select().from(savedIdeas)
+      .where(eq(savedIdeas.userId, userId))
+      .orderBy(desc(savedIdeas.createdAt));
+  }
+
+  async getSavedIdeaById(id: number): Promise<SavedIdea | undefined> {
+    const [savedIdea] = await db.select().from(savedIdeas).where(eq(savedIdeas.id, id));
+    return savedIdea;
+  }
+
+  async updateSavedIdea(id: number, updates: Partial<InsertSavedIdea>): Promise<SavedIdea> {
+    const [updatedSavedIdea] = await db.update(savedIdeas)
+      .set(updates)
+      .where(eq(savedIdeas.id, id))
+      .returning();
+    
+    if (!updatedSavedIdea) {
+      throw new Error("Saved idea not found");
+    }
+    
+    return updatedSavedIdea;
+  }
+
+  async deleteSavedIdea(id: number): Promise<void> {
+    await db.delete(savedIdeas).where(eq(savedIdeas.id, id));
+  }
+
   // Messaging operations
   async createConversation(conversation: InsertConversation): Promise<Conversation> {
     const [newConversation] = await db.insert(conversations)
