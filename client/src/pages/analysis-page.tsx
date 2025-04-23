@@ -220,7 +220,30 @@ export default function AnalysisPage() {
         data.investorsData = investorsData;
       }
       
-      setBudgetAnalysisData(data);
+      // Add additional console logs to diagnose the issue
+      console.log("Budget analysis data structure:", JSON.stringify(data).substring(0, 200) + "...");
+      
+      // Force the proper structure when setting the state
+      if (data && !data.budgetAnalysis && data.initialBudget) {
+        // The API is returning the budget analysis directly without the budgetAnalysis wrapper
+        setBudgetAnalysisData({
+          ...data,
+          // Create the expected nested structure if it doesn't exist
+          budgetAnalysis: {
+            initialBudget: data.initialBudget,
+            feasibilityAndScalability: data.feasibilityAndScalability,
+            riskAnalysis: data.riskAnalysis,
+            goToMarketStrategy: data.goToMarketStrategy,
+            longTermVision: data.longTermVision,
+            teamExecutionCapability: data.teamExecutionCapability,
+            fundingAndInvestmentPotential: data.fundingAndInvestmentPotential
+          }
+        });
+      } else {
+        // The API is returning the proper structure
+        setBudgetAnalysisData(data);
+      }
+      
       setPhase("budget-results");
     } catch (err) {
       console.error("Error generating execution plan:", err);
@@ -820,6 +843,9 @@ export default function AnalysisPage() {
             {budgetAnalysisData.budgetAnalysis && (
               <p className="text-white/80">budgetAnalysis keys: {Object.keys(budgetAnalysisData.budgetAnalysis).join(", ")}</p>
             )}
+            <p className="text-white/80">feasibilityAndScalability exists: {budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability ? "Yes" : "No"}</p>
+            <p className="text-white/80">riskAnalysis exists: {budgetAnalysisData.budgetAnalysis?.riskAnalysis ? "Yes" : "No"}</p>
+            <p className="text-white/80">goToMarketStrategy exists: {budgetAnalysisData.budgetAnalysis?.goToMarketStrategy ? "Yes" : "No"}</p>
           </div>
           {/* Budget Result Header */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">

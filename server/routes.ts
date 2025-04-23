@@ -250,6 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
       // Combine the data in the correct structure - use the same structure expected by the client
+      // Make sure budgetAnalysis is properly nested to match what the client expects
       const responseData = {
         ...executionPlan,
         budgetAnalysis
@@ -257,6 +258,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Full response structure:", Object.keys(responseData));
       console.log("Budget analysis (budgetAnalysis) exists:", !!responseData.budgetAnalysis);
+      
+      // Log the first few properties of budgetAnalysis to verify its structure
+      if (responseData.budgetAnalysis) {
+        console.log("Budget analysis keys:", Object.keys(responseData.budgetAnalysis));
+        console.log("Budget analysis first property:", 
+          Object.keys(responseData.budgetAnalysis).length > 0 ? 
+          Object.keys(responseData.budgetAnalysis)[0] + ": " + 
+          JSON.stringify(responseData.budgetAnalysis[Object.keys(responseData.budgetAnalysis)[0]]).substring(0, 50) : 
+          "No properties");
+      }
       
       // Return the combined data
       return res.status(200).json(responseData);
