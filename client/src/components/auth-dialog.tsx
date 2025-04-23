@@ -87,6 +87,15 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
 
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
+      if (!loginMutation) {
+        toast({
+          title: "Login Error",
+          description: "Authentication service is not available",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       await loginMutation.mutateAsync({
         username: data.username,
         password: data.password
@@ -103,6 +112,15 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
 
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     try {
+      if (!registerMutation) {
+        toast({
+          title: "Registration Error",
+          description: "Authentication service is not available",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       await registerMutation.mutateAsync({
         username: data.username,
         email: data.email,
@@ -178,9 +196,9 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                 <Button 
                   type="submit" 
                   className="w-full bg-vision-primary-gradient hover:brightness-110 transition-all"
-                  disabled={loginMutation.isPending}
+                  disabled={loginMutation?.isPending}
                 >
-                  {loginMutation.isPending ? (
+                  {loginMutation?.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Logging in...
@@ -278,9 +296,9 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
                 <Button 
                   type="submit" 
                   className="w-full bg-vision-primary-gradient hover:brightness-110 transition-all"
-                  disabled={registerMutation.isPending}
+                  disabled={registerMutation?.isPending}
                 >
-                  {registerMutation.isPending ? (
+                  {registerMutation?.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creating account...
