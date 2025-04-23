@@ -12,6 +12,8 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AuthDialogProvider } from "@/hooks/use-auth-dialog";
+import { PremiumFeaturesProvider } from "@/hooks/use-premium-features";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
@@ -52,8 +54,12 @@ function Router() {
 function App() {
   return (
     <>
-      <Toaster />
-      <Router />
+      <AuthDialogProvider>
+        <PremiumFeaturesProvider>
+          <Toaster />
+          <Router />
+        </PremiumFeaturesProvider>
+      </AuthDialogProvider>
     </>
   );
 }

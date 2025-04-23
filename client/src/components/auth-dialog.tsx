@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthContext } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,10 @@ interface AuthDialogProps {
 export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: AuthDialogProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">(defaultTab);
   const [location, navigate] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const loginMutation = auth?.loginMutation;
+  const registerMutation = auth?.registerMutation;
   const { toast } = useToast();
 
   // Login form

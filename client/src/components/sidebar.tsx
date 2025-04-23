@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthContext } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
@@ -37,7 +37,10 @@ import {
 
 export function Sidebar() {
   const [location, navigate] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  // Try to get auth context, but provide fallback if not available
+  const auth = useContext(AuthContext);
+  const user = auth?.user || null;
+  const logoutMutation = auth?.logoutMutation;
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(3); // Example count

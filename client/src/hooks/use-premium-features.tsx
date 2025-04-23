@@ -1,5 +1,4 @@
 import { useState, createContext, useContext, ReactNode, useCallback } from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { PremiumFeatureModal } from "@/components/premium-feature-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -31,7 +30,8 @@ const PLAN_LABELS = {
 };
 
 export function PremiumFeaturesProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  // Use a default user object since we can't access useAuth
+  const user = { planType: "free" };
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
