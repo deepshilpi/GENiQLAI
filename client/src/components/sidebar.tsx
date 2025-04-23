@@ -183,19 +183,7 @@ export function Sidebar() {
             </div>
           </li>
 
-          <li>
-            <div 
-              className={cn(
-                "vision-sidebar-item cursor-pointer",
-                isActive("/market-news") && "active",
-                collapsed && "justify-center px-2"
-              )}
-              onClick={() => navigate("/market-news")}
-            >
-              <Newspaper className="w-5 h-5" />
-              {!collapsed && <span>Market News</span>}
-            </div>
-          </li>
+          
         </ul>
       </nav>
       
