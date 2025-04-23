@@ -193,13 +193,18 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="ml-64 flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full max-w-full">
           <Header />
-          <main className="p-6 flex-1">
-            <div className="animate-pulse space-y-4">
-              <div className="h-32 bg-card rounded-xl"></div>
-              <div className="h-24 bg-card rounded-xl"></div>
-              <div className="h-48 bg-card rounded-xl"></div>
+          <main className="p-3 sm:p-4 md:p-6 flex-1 overflow-y-auto w-full">
+            <div className="animate-pulse space-y-6">
+              <div className="h-12 w-48 bg-vision-card/60 rounded-lg"></div>
+              <div className="h-40 bg-vision-card/90 rounded-lg shadow-lg"></div>
+              <div className="h-12 bg-vision-card/60 rounded-lg"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="bg-vision-card/60 animate-pulse rounded-lg h-64"></div>
+                ))}
+              </div>
             </div>
           </main>
         </div>
@@ -211,13 +216,26 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="ml-64 flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full max-w-full">
           <Header />
-          <main className="p-6 flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">User Not Found</h2>
-              <p className="text-muted-foreground">The user you're looking for doesn't exist.</p>
-            </div>
+          <main className="p-3 sm:p-4 md:p-6 flex-1 overflow-y-auto w-full flex items-center justify-center">
+            <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg max-w-md w-full">
+              <CardHeader>
+                <CardTitle className="text-white text-center">User Not Found</CardTitle>
+                <CardDescription className="text-white/70 text-center">
+                  The user you're looking for doesn't exist
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex justify-center">
+                <Button 
+                  onClick={() => window.location.href = "/community"}
+                  className="bg-vision-primary-gradient text-white hover:brightness-110"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Explore Community
+                </Button>
+              </CardFooter>
+            </Card>
           </main>
         </div>
       </div>
@@ -228,141 +246,185 @@ export default function ProfilePage() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       
-      <div className="ml-64 flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full max-w-full">
         <Header />
         
-        <main className="p-6 flex-1">
-          {/* Profile Header */}
-          <div className="bg-card rounded-xl p-6 mb-6">
-            <div className="flex flex-col md:flex-row items-start gap-6">
-              <div className="relative">
-                {/* Hidden file input */}
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleProfilePicUpload(file);
-                    }
-                  }}
-                />
-                
-                {/* Profile picture display */}
-                <div 
-                  className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold overflow-hidden"
-                  style={{ position: 'relative' }}
-                >
-                  {profilePic || user.profilePictureUrl ? (
-                    <img 
-                      src={profilePic || user.profilePictureUrl || ''} 
-                      alt={`${username}'s profile`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    username.charAt(0).toUpperCase()
-                  )}
+        <main className="p-3 sm:p-4 md:p-6 flex-1 overflow-y-auto w-full">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+                <Users className="hidden sm:inline-block h-5 w-5 text-primary" />
+                {username}'s Profile
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                View profile details, posts, and activity
+              </p>
+            </div>
+          </div>
+          
+          {/* Profile Header Card */}
+          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg mb-6">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="relative">
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleProfilePicUpload(file);
+                      }
+                    }}
+                  />
                   
-                  {/* Edit overlay button for own profile */}
-                  {isOwnProfile && (
-                    <div 
-                      className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Camera className="text-white h-6 w-6" />
-                    </div>
-                  )}
-                  
-                  {/* Loading overlay */}
-                  {isUploadingImage && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                  <div>
-                    <h1 className="text-2xl font-bold">{username}</h1>
-                    <p className="text-muted-foreground">
-                      Member since {new Date(user.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  
-                  <div className="ml-auto">
-                    {isOwnProfile ? (
-                      <Button 
-                        variant={editing ? "default" : "outline"} 
-                        onClick={() => setEditing(!editing)}
-                      >
-                        {editing ? "Cancel" : "Edit Profile"}
-                      </Button>
+                  {/* Profile picture display */}
+                  <div 
+                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-vision-primary-gradient/30 flex items-center justify-center text-2xl font-bold overflow-hidden border-4 border-vision-purple-200/30"
+                    style={{ position: 'relative' }}
+                  >
+                    {profilePic || user.profilePictureUrl ? (
+                      <img 
+                        src={profilePic || user.profilePictureUrl || ''} 
+                        alt={`${username}'s profile`}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
-                      <Button 
-                        variant={isFollowing ? "outline" : "default"}
-                        onClick={isFollowing ? handleUnfollow : handleFollow}
+                      <span className="text-white">{username.charAt(0).toUpperCase()}</span>
+                    )}
+                    
+                    {/* Edit overlay button for own profile */}
+                    {isOwnProfile && (
+                      <div 
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                        onClick={() => fileInputRef.current?.click()}
                       >
-                        {isFollowing ? "Unfollow" : "Follow"}
-                      </Button>
+                        <Camera className="text-white h-6 w-6" />
+                      </div>
+                    )}
+                    
+                    {/* Loading overlay */}
+                    {isUploadingImage && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+                      </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex gap-4 mb-4">
-                  <div>
-                    <span className="font-bold">{posts?.length || 0}</span>
-                    <span className="text-muted-foreground ml-1">Posts</span>
+                <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+                    <div>
+                      <h1 className="text-2xl font-bold text-white">{username}</h1>
+                      <div className="flex items-center text-white/60 mt-1 text-sm">
+                        <Calendar className="w-4 h-4 mr-1.5" />
+                        Member since {new Date(user.createdAt).toLocaleDateString()}
+                      </div>
+                      
+                      {user.planType && (
+                        <Badge className="mt-2 bg-vision-primary-gradient text-white">
+                          {user.planType} Plan
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="md:ml-auto">
+                      {isOwnProfile ? (
+                        <Button 
+                          variant={editing ? "default" : "outline"}
+                          className={editing 
+                            ? "bg-vision-primary-gradient text-white hover:brightness-110" 
+                            : "border-vision-purple-200/30 text-white hover:border-primary"}
+                          onClick={() => setEditing(!editing)}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          {editing ? "Cancel" : "Edit Profile"}
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant={isFollowing ? "outline" : "default"}
+                          className={isFollowing 
+                            ? "border-vision-purple-200/30 text-white hover:border-primary" 
+                            : "bg-vision-primary-gradient text-white hover:brightness-110"}
+                          onClick={isFollowing ? handleUnfollow : handleFollow}
+                        >
+                          <Users className="w-4 h-4 mr-2" />
+                          {isFollowing ? "Unfollow" : "Follow"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-bold">{user.followersCount}</span>
-                    <span className="text-muted-foreground ml-1">Followers</span>
+                  
+                  <div className="flex gap-6 mb-6">
+                    <div className="text-center px-4 py-2 bg-vision-purple-100/10 rounded-lg">
+                      <div className="text-xl font-bold text-white">{posts?.length || 0}</div>
+                      <div className="text-xs text-white/60 mt-1">Posts</div>
+                    </div>
+                    <div className="text-center px-4 py-2 bg-vision-purple-100/10 rounded-lg">
+                      <div className="text-xl font-bold text-white">{user.followersCount || 0}</div>
+                      <div className="text-xs text-white/60 mt-1">Followers</div>
+                    </div>
+                    <div className="text-center px-4 py-2 bg-vision-purple-100/10 rounded-lg">
+                      <div className="text-xl font-bold text-white">{user.followingCount || 0}</div>
+                      <div className="text-xs text-white/60 mt-1">Following</div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-bold">{user.followingCount}</span>
-                    <span className="text-muted-foreground ml-1">Following</span>
-                  </div>
+                  
+                  {editing ? (
+                    <div className="space-y-3">
+                      <Label htmlFor="bio" className="text-white">Bio</Label>
+                      <Textarea 
+                        id="bio" 
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        placeholder="Tell others about yourself..."
+                        rows={3}
+                        className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90"
+                      />
+                      <Button 
+                        onClick={handleSaveBio} 
+                        disabled={updateBioMutation.isPending}
+                        className="bg-vision-primary-gradient text-white hover:brightness-110"
+                      >
+                        {updateBioMutation.isPending ? "Saving..." : "Save Bio"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="bg-vision-purple-100/5 rounded-lg p-4 text-white/80">
+                      {user.bio || "No bio provided."}
+                    </div>
+                  )}
                 </div>
-                
-                {editing ? (
-                  <div className="space-y-3">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea 
-                      id="bio" 
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      placeholder="Tell others about yourself..."
-                      rows={3}
-                    />
-                    <Button onClick={handleSaveBio} disabled={updateBioMutation.isPending}>
-                      {updateBioMutation.isPending ? "Saving..." : "Save Bio"}
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">
-                    {user.bio || "No bio provided."}
-                  </p>
-                )}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
           
           {/* Profile Content */}
-          <Tabs defaultValue="posts">
-            <TabsList>
-              <TabsTrigger value="posts">Posts</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <Tabs defaultValue="posts" className="w-full">
+            <TabsList className="mb-6 bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 w-full rounded-lg shadow-sm overflow-x-auto">
+              <TabsTrigger value="posts" className="flex-1 py-3">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Posts
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="flex-1 py-3">
+                <Activity className="h-4 w-4 mr-2" />
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-1 py-3">
+                <BarChart className="h-4 w-4 mr-2" />
+                Analytics
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="posts" className="mt-4">
               {isLoadingPosts ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="bg-card animate-pulse rounded-xl h-64"></div>
+                    <div key={i} className="bg-vision-card/60 animate-pulse rounded-lg h-64"></div>
                   ))}
                 </div>
               ) : posts && posts.length > 0 ? (
@@ -377,25 +439,40 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No posts yet.</p>
-                  {isOwnProfile && (
-                    <Button>Create Your First Post</Button>
-                  )}
-                </div>
+                <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg text-center py-8">
+                  <CardContent>
+                    <div className="max-w-md mx-auto">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-4 text-white/30" />
+                      <h3 className="text-xl font-medium text-white mb-2">No Posts Yet</h3>
+                      <p className="text-white/60 mb-6">
+                        {isOwnProfile 
+                          ? "You haven't shared any posts with the community yet." 
+                          : `${username} hasn't shared any posts with the community yet.`}
+                      </p>
+                      {isOwnProfile && (
+                        <Button 
+                          className="bg-vision-primary-gradient text-white hover:brightness-110"
+                          onClick={() => window.location.href = "/community"}
+                        >
+                          Create Your First Post
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </TabsContent>
             
             <TabsContent value="activity" className="mt-4">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="h-5 w-5" />
+                  <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Activity className="h-5 w-5 text-primary" />
                         <span>Recent Activity</span>
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-white/70">
                         See what {isOwnProfile ? "you've" : `${username} has`} been up to.
                       </CardDescription>
                     </CardHeader>
@@ -404,89 +481,89 @@ export default function ProfilePage() {
                         {/* Activity Items - This would be populated from real data in a production app */}
                         <div className="space-y-6">
                           {/* Post Activity */}
-                          <div className="relative pl-6 border-l border-border">
-                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
-                              <MessageSquare className="h-3 w-3 text-primary-foreground" />
+                          <div className="relative pl-6 border-l border-vision-purple-200/20">
+                            <div className="absolute -left-2 top-0 bg-vision-primary-gradient rounded-full p-1">
+                              <MessageSquare className="h-3 w-3 text-white" />
                             </div>
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">
+                              <div className="text-sm font-medium text-white">
                                 Created a post
-                                <span className="text-muted-foreground font-normal ml-2">2 hours ago</span>
+                                <span className="text-white/40 font-normal ml-2">2 hours ago</span>
                               </div>
-                              <Link href="/community" className="block text-sm p-3 bg-accent/50 rounded-md hover:bg-accent transition-colors">
+                              <Link href="/community" className="block text-sm p-3 bg-vision-purple-100/10 rounded-lg hover:bg-vision-purple-100/20 text-white/80 transition-colors">
                                 "AI-powered dog walking service that automates scheduling and payments while optimizing routes."
                               </Link>
                             </div>
                           </div>
                           
                           {/* Vote Activity */}
-                          <div className="relative pl-6 border-l border-border">
-                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
-                              <ThumbsUp className="h-3 w-3 text-primary-foreground" />
+                          <div className="relative pl-6 border-l border-vision-purple-200/20">
+                            <div className="absolute -left-2 top-0 bg-vision-primary-gradient rounded-full p-1">
+                              <ThumbsUp className="h-3 w-3 text-white" />
                             </div>
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">
+                              <div className="text-sm font-medium text-white">
                                 Pumped a post
-                                <span className="text-muted-foreground font-normal ml-2">4 hours ago</span>
+                                <span className="text-white/40 font-normal ml-2">4 hours ago</span>
                               </div>
-                              <Link href="/community" className="block text-sm p-3 bg-accent/50 rounded-md hover:bg-accent transition-colors">
+                              <Link href="/community" className="block text-sm p-3 bg-vision-purple-100/10 rounded-lg hover:bg-vision-purple-100/20 text-white/80 transition-colors">
                                 "On-demand marketplace connecting home chefs with hungry customers for authentic, home-cooked meals."
                               </Link>
                             </div>
                           </div>
                           
                           {/* Analysis Activity */}
-                          <div className="relative pl-6 border-l border-border">
-                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
-                              <BarChart className="h-3 w-3 text-primary-foreground" />
+                          <div className="relative pl-6 border-l border-vision-purple-200/20">
+                            <div className="absolute -left-2 top-0 bg-vision-primary-gradient rounded-full p-1">
+                              <BarChart className="h-3 w-3 text-white" />
                             </div>
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">
+                              <div className="text-sm font-medium text-white">
                                 Analyzed a startup idea
-                                <span className="text-muted-foreground font-normal ml-2">1 day ago</span>
+                                <span className="text-white/40 font-normal ml-2">1 day ago</span>
                               </div>
-                              <div className="text-sm p-3 bg-accent/50 rounded-md">
+                              <div className="text-sm p-3 bg-vision-purple-100/10 rounded-lg text-white/80">
                                 "Subscription box for exotic spices with recipe cards and cultural information for home cooks."
                                 <div className="mt-2">
-                                  <Badge variant="outline">Success Rate: 76%</Badge>
+                                  <Badge className="bg-vision-primary-gradient/50 text-white border-none">Success Rate: 76%</Badge>
                                 </div>
                               </div>
                             </div>
                           </div>
                           
                           {/* Follow Activity */}
-                          <div className="relative pl-6 border-l border-border">
-                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
-                              <Users className="h-3 w-3 text-primary-foreground" />
+                          <div className="relative pl-6 border-l border-vision-purple-200/20">
+                            <div className="absolute -left-2 top-0 bg-vision-primary-gradient rounded-full p-1">
+                              <Users className="h-3 w-3 text-white" />
                             </div>
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">
+                              <div className="text-sm font-medium text-white">
                                 Started following
-                                <span className="text-muted-foreground font-normal ml-2">2 days ago</span>
+                                <span className="text-white/40 font-normal ml-2">2 days ago</span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarFallback>SV</AvatarFallback>
-                                </Avatar>
+                              <div className="flex items-center gap-2 p-3 bg-vision-purple-100/10 rounded-lg">
+                                <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/30 flex items-center justify-center text-white font-medium text-xs">
+                                  SV
+                                </div>
                                 <div>
-                                  <div className="text-sm font-medium">SarahV</div>
-                                  <div className="text-xs text-muted-foreground">Fintech Entrepreneur</div>
+                                  <div className="text-sm font-medium text-white">SarahV</div>
+                                  <div className="text-xs text-white/50">Fintech Entrepreneur</div>
                                 </div>
                               </div>
                             </div>
                           </div>
                           
                           {/* Comment Activity */}
-                          <div className="relative pl-6 border-l border-border">
-                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
-                              <MessageSquare className="h-3 w-3 text-primary-foreground" />
+                          <div className="relative pl-6 border-l border-vision-purple-200/20">
+                            <div className="absolute -left-2 top-0 bg-vision-primary-gradient rounded-full p-1">
+                              <MessageSquare className="h-3 w-3 text-white" />
                             </div>
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">
+                              <div className="text-sm font-medium text-white">
                                 Commented on a post
-                                <span className="text-muted-foreground font-normal ml-2">3 days ago</span>
+                                <span className="text-white/40 font-normal ml-2">3 days ago</span>
                               </div>
-                              <div className="text-sm p-3 bg-accent/50 rounded-md">
+                              <div className="text-sm p-3 bg-vision-purple-100/10 rounded-lg text-white/80">
                                 "I think this has huge potential. Have you considered how you'll handle logistics for perishable items?"
                               </div>
                             </div>
@@ -497,57 +574,57 @@ export default function ProfilePage() {
                   </Card>
                 </div>
                 
-                <div>
-                  <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Star className="h-4 w-4" />
+                <div className="space-y-6">
+                  <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Star className="h-4 w-4 text-primary" />
                         <span>Top Categories</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {['AI', 'SaaS', 'Marketplace', 'EdTech', 'Fintech'].map((category, i) => (
-                          <div key={i} className="flex justify-between items-center">
-                            <span>{category}</span>
-                            <Progress value={100 - i * 15} className="w-24 h-2" />
-                          </div>
-                        ))}
-                      </div>
+                    <CardContent className="space-y-3">
+                      {['AI', 'SaaS', 'Marketplace', 'EdTech', 'Fintech'].map((category, i) => (
+                        <div key={i} className="flex justify-between items-center">
+                          <span className="text-white">{category}</span>
+                          <Progress value={100 - i * 15} className="w-24 h-2 bg-vision-purple-100/10" />
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                   
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                  <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Calendar className="h-4 w-4 text-primary" />
                         <span>Activity Overview</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between">
-                          <div>
-                            <div className="text-2xl font-bold">{posts?.length || 0}</div>
-                            <div className="text-xs text-muted-foreground">Total Posts</div>
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center p-3 bg-vision-purple-100/10 rounded-lg">
+                            <div className="text-xl font-bold text-white">{posts?.length || 0}</div>
+                            <div className="text-xs text-white/50 mt-1">Posts</div>
                           </div>
-                          <div>
-                            <div className="text-2xl font-bold">{user.analysisCount || 0}</div>
-                            <div className="text-xs text-muted-foreground">Analyses Run</div>
+                          <div className="text-center p-3 bg-vision-purple-100/10 rounded-lg">
+                            <div className="text-xl font-bold text-white">{user.analysisCount || 0}</div>
+                            <div className="text-xs text-white/50 mt-1">Analyses</div>
                           </div>
-                          <div>
-                            <div className="text-2xl font-bold">{user.followersCount}</div>
-                            <div className="text-xs text-muted-foreground">Followers</div>
+                          <div className="text-center p-3 bg-vision-purple-100/10 rounded-lg">
+                            <div className="text-xl font-bold text-white">{user.followersCount || 0}</div>
+                            <div className="text-xs text-white/50 mt-1">Followers</div>
                           </div>
                         </div>
-                        <Separator />
+                        
+                        <Separator className="bg-vision-purple-200/10" />
+                        
                         <div>
-                          <div className="text-sm font-medium mb-2">Activity Level</div>
+                          <div className="text-sm font-medium text-white mb-2">Activity Level</div>
                           <div className="flex items-center gap-2">
-                            <Progress value={65} className="h-2 flex-1" />
-                            <span className="text-xs font-medium">65%</span>
+                            <Progress value={65} className="h-2 flex-1 bg-vision-purple-100/10" />
+                            <span className="text-xs font-medium text-white">65%</span>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">
+                          <div className="text-xs text-white/50 mt-1">
                             More active than 65% of users
                           </div>
                         </div>
