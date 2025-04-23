@@ -720,7 +720,9 @@ export default function ProfilePage() {
                   <CardContent>
                     <div className="max-w-md mx-auto">
                       <div className="w-16 h-16 rounded-full bg-vision-purple-100/10 mx-auto mb-4 flex items-center justify-center">
-                        <Lock className="h-8 w-8 text-white/50" />
+                        <span className="text-white/50">
+                          <Lock className="h-8 w-8" />
+                        </span>
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">Private Analytics</h3>
                       <p className="text-white/60 mb-4">

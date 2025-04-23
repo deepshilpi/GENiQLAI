@@ -42,7 +42,9 @@ import {
   Monitor,
   Download,
   UserPlus,
-  HelpCircle
+  HelpCircle,
+  MessageSquare,
+  Moon
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
