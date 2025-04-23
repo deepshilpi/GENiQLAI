@@ -3,7 +3,6 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Home, 
   Bell, 
@@ -16,8 +15,7 @@ import {
   BrainCircuit,
   MessageSquare,
   LogOut,
-  BookmarkIcon,
-  Download
+  BookmarkIcon
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,8 +30,6 @@ import { Badge } from "@/components/ui/badge";
 import { MobileMenu } from "@/components/mobile-menu";
 import Logo from "@/assets/logo";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
-import { useNotifications } from "@/hooks/use-notifications";
-import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 export function Header() {
   const [location, navigate] = useLocation();
@@ -41,7 +37,7 @@ export function Header() {
   const { openAuthDialog } = useAuthDialog();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { unreadCount: notificationCount } = useNotifications(); // Real notification count from hook
+  const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   
   // Handle mobile menu toggle
@@ -124,8 +120,79 @@ export function Header() {
               />
             )}
             
-            {/* Notifications dropdown - Real implementation with export feature */}
-            <NotificationsDropdown iconSize="sm" />
+            {/* Notifications dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                >
+                  <div className="relative">
+                    <Bell className="w-5 h-5" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-72">
+                <DropdownMenuLabel className="flex justify-between items-center">
+                  <span>Notifications</span>
+                  <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+                    {notificationCount} new
+                  </Badge>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                {/* Sample notifications */}
+                <div className="max-h-80 overflow-y-auto py-1">
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                    <div className="flex w-full">
+                      <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/20 flex-shrink-0 flex items-center justify-center mr-2">
+                        <MessageSquare className="w-4 h-4 text-vision-purple-700" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">New community comment</p>
+                        <p className="text-xs text-white/60 mt-1">John replied to your post about AI startups</p>
+                        <p className="text-xs text-white/40 mt-1">2 hours ago</p>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                    <div className="flex w-full">
+                      <div className="w-8 h-8 rounded-full bg-green-500/20 flex-shrink-0 flex items-center justify-center mr-2">
+                        <BrainCircuit className="w-4 h-4 text-green-500" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">Analysis complete</p>
+                        <p className="text-xs text-white/60 mt-1">Your startup idea analysis is ready to view</p>
+                        <p className="text-xs text-white/40 mt-1">1 day ago</p>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                    <div className="flex w-full">
+                      <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center mr-2">
+                        <User className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">New follower</p>
+                        <p className="text-xs text-white/60 mt-1">Sarah is now following you</p>
+                        <p className="text-xs text-white/40 mt-1">3 days ago</p>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2">
+                  <span className="text-sm text-white/70">View all notifications</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* User account menu */}
             {user ? (
@@ -202,8 +269,79 @@ export function Header() {
           <SavedIdeasDropdown />
         )}
         
-        {/* Notifications with export feature */}
-        <NotificationsDropdown />
+        {/* Notifications Button with badge */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+            >
+              <div className="relative">
+                <Bell className="w-5 h-5" />
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                    {notificationCount}
+                  </span>
+                )}
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
+            <DropdownMenuLabel className="flex justify-between items-center">
+              <span>Notifications</span>
+              <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+                {notificationCount} new
+              </Badge>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+            {/* Sample notifications */}
+            <div className="max-h-96 overflow-y-auto py-1">
+              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <div className="flex w-full">
+                  <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <MessageSquare className="w-4 h-4 text-vision-purple-700" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">New community comment</p>
+                    <p className="text-xs text-white/60 mt-1">John replied to your post about AI startups</p>
+                    <p className="text-xs text-white/40 mt-1">2 hours ago</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <div className="flex w-full">
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <BrainCircuit className="w-4 h-4 text-green-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">Analysis complete</p>
+                    <p className="text-xs text-white/60 mt-1">Your startup idea analysis is ready to view</p>
+                    <p className="text-xs text-white/40 mt-1">1 day ago</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
+                <div className="flex w-full">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center mr-2">
+                    <User className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">New follower</p>
+                    <p className="text-xs text-white/60 mt-1">Sarah is now following you</p>
+                    <p className="text-xs text-white/40 mt-1">3 days ago</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            </div>
+            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+            <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2">
+              <span className="text-sm text-white/70">View all notifications</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <Button 
           variant="ghost" 
