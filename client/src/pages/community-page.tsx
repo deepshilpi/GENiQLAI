@@ -151,20 +151,30 @@ export default function CommunityPage() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       
-      <div className="ml-64 flex-1 flex flex-col">
+      <div className="ml-0 md:ml-64 flex-1 flex flex-col transition-all duration-300">
         <Header />
         
-        <main className="p-6 flex-1">
-          <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+        <main className="p-4 md:p-6 flex-1">
+          {/* Page Header with Responsive Design */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
-              <h2 className="text-2xl font-bold">Startup Community</h2>
-              <p className="text-muted-foreground">Connect with founders and share your ideas</p>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+                <Users className="hidden sm:inline-block h-5 w-5 text-primary" />
+                Startup Community
+              </h1>
+              <p className="text-sm text-muted-foreground">Connect with founders and share your innovative ideas</p>
             </div>
             
             <Dialog open={showPostForm} onOpenChange={setShowPostForm}>
               <DialogTrigger asChild>
-                <Button onClick={handleNewPost} className="bg-primary text-white">
-                  <ImageIcon className="w-4 h-4 mr-2" /> Create Post
+                <Button 
+                  onClick={handleNewPost} 
+                  className="bg-primary hover:bg-primary/90 text-white rounded-full transition-all duration-200" 
+                  size="sm"
+                >
+                  <ImageIcon className="w-4 h-4 mr-2" /> 
+                  <span className="hidden sm:inline">Create Post</span>
+                  <span className="sm:hidden">Post</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-card border-border max-w-3xl">
@@ -183,49 +193,55 @@ export default function CommunityPage() {
             </DialogContent>
           </Dialog>
           
-          {/* Search Bar - Reddit Style */}
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <div className="flex flex-col md:flex-row gap-4">
+          {/* Enhanced Search Bar with Better Mobile Support */}
+          <div className="bg-card border border-border rounded-lg p-3 md:p-4 mb-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search posts, users, or tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background"
+                  className="pl-10 bg-background h-10 focus-visible:ring-primary/50"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <Button 
                   variant={searchType === "posts" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("posts")}
+                  className="rounded-full px-4 text-xs whitespace-nowrap"
                 >
+                  <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
                   Posts
                 </Button>
                 <Button 
                   variant={searchType === "users" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("users")}
+                  className="rounded-full px-4 text-xs whitespace-nowrap"
                 >
+                  <Users className="h-3.5 w-3.5 mr-1.5" />
                   Users
                 </Button>
                 <Button 
                   variant={searchType === "tags" ? "default" : "outline"} 
                   size="sm"
                   onClick={() => handleSearchTypeChange("tags")}
+                  className="rounded-full px-4 text-xs whitespace-nowrap"
                 >
+                  <Filter className="h-3.5 w-3.5 mr-1.5" />
                   Tags
                 </Button>
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-3">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+            {/* Main Content Area - Responsive Grid (9/12 on desktop, full on mobile) */}
+            <div className="lg:col-span-8 xl:col-span-9 order-2 lg:order-1">
               <Tabs defaultValue="latest" className="mb-6">
-                <TabsList className="mb-4 bg-card w-full">
+                <TabsList className="mb-4 bg-card w-full rounded-lg shadow-sm overflow-hidden">
                   <TabsTrigger value="latest" className="flex-1 py-3">
                     <Clock className="h-4 w-4 mr-2" />
                     Latest
