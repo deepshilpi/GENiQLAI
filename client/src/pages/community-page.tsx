@@ -160,13 +160,13 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
       
-      <div className="ml-0 md:ml-64 flex-1 flex flex-col transition-all duration-300">
+      <div className="ml-0 md:ml-64 flex-1 flex flex-col w-full transition-all duration-300">
         <Header />
         
-        <main className="p-4 md:p-6 flex-1">
+        <main className="p-4 md:p-6 flex-1 overflow-y-auto">
           {/* Page Header with Responsive Design */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
