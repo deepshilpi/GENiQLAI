@@ -52,6 +52,75 @@ import { MarketSizeChart } from "@/components/analysis/market-size-chart";
 import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
 import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
 
+// Define component prop interfaces
+interface FeasibilityAndScalabilityProps {
+  initialFeasibility: number;
+  scalingPoints: Array<{
+    milestone: string;
+    investment: number;
+    potentialReturns: number;
+    feasibilityScore: number;
+  }>;
+  message: string;
+}
+
+interface RiskAnalysisProps {
+  overallRisk: number;
+  risks: Array<{
+    category: string;
+    likelihood: number;
+    impact: number;
+    mitigationStrategy: string;
+  }>;
+  message: string;
+}
+
+interface GoToMarketStrategyProps {
+  timeline: Array<{
+    phase: string;
+    duration: string;
+    activities: string[];
+    estimatedCost: number;
+  }>;
+  message: string;
+}
+
+interface LongTermVisionProps {
+  milestones: Array<{
+    year: string;
+    goals: string[];
+    projectedMetrics: {
+      revenue?: number;
+      users?: number;
+      marketShare?: number;
+    };
+  }>;
+  message: string;
+}
+
+interface TeamExecutionProps {
+  requiredRoles: Array<{
+    title: string;
+    skills: string[];
+    importance: number;
+    estimatedCost: number;
+  }>;
+  hiringTimeline: string;
+  message: string;
+}
+
+interface FundingInvestorsProps {
+  investors: Array<{
+    name: string;
+    firm: string;
+    investmentFocus: string[];
+    location: string;
+    contactInfo?: string;
+    portfolioFit: number;
+  }>;
+  message: string;
+}
+
 // Define the phases of the analysis process
 type AnalysisPhase = 
   | "input"        // Initial idea input
@@ -851,7 +920,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <FeasibilityScalability
-                    data={budgetAnalysisData.feasibilityAndScalability}
+                    initialFeasibility={budgetAnalysisData.feasibilityAndScalability.initialFeasibility}
+                    scalingPoints={budgetAnalysisData.feasibilityAndScalability.scalingPoints}
+                    message={budgetAnalysisData.feasibilityAndScalability.message}
                   />
                 </CardContent>
               </Card>
@@ -868,7 +939,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <RiskAnalysis
-                    data={budgetAnalysisData.riskAnalysis}
+                    overallRisk={budgetAnalysisData.riskAnalysis.overallRisk}
+                    risks={budgetAnalysisData.riskAnalysis.risks}
+                    message={budgetAnalysisData.riskAnalysis.message}
                   />
                 </CardContent>
               </Card>
@@ -885,7 +958,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <GoToMarketStrategy
-                    data={budgetAnalysisData.goToMarketStrategy}
+                    timeline={budgetAnalysisData.goToMarketStrategy.timeline}
+                    message={budgetAnalysisData.goToMarketStrategy.message}
                   />
                 </CardContent>
               </Card>
@@ -902,7 +976,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <LongTermVision
-                    data={budgetAnalysisData.longTermVision}
+                    milestones={budgetAnalysisData.longTermVision.milestones}
+                    message={budgetAnalysisData.longTermVision.message}
                   />
                 </CardContent>
               </Card>
@@ -919,7 +994,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <TeamExecution
-                    data={budgetAnalysisData.teamExecutionCapability}
+                    requiredRoles={budgetAnalysisData.teamExecutionCapability.requiredRoles}
+                    hiringTimeline={budgetAnalysisData.teamExecutionCapability.hiringTimeline}
+                    message={budgetAnalysisData.teamExecutionCapability.message}
                   />
                 </CardContent>
               </Card>
@@ -936,7 +1013,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <FundingInvestors
-                    data={budgetAnalysisData.fundingAndInvestmentPotential}
+                    investors={budgetAnalysisData.fundingAndInvestmentPotential.investors}
+                    message={budgetAnalysisData.fundingAndInvestmentPotential.message}
                   />
                 </CardContent>
               </Card>

@@ -33,64 +33,42 @@ export default function HomePage() {
     setIsAnalyzing(true);
 
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          startupIdea,
-          country: detectUserCountry()
-        }),
-      });
+      // Check remaining free analyses first for non-logged in users
+      if (!user) {
+        const checkResponse = await fetch('/api/check-free-analyses');
+        if (checkResponse.ok) {
+          const data = await checkResponse.json();
+          if (data.remainingFreeAnalyses <= 0) {
+            setIsAnalyzing(false);
+            openAuthDialog({
+              defaultTab: 'register',
+              returnTo: '/'
+            });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-
-        if (errorData.error === "free_limit_reached") {
-          setIsAnalyzing(false);
-          openAuthDialog({
-            defaultTab: 'register',
-            returnTo: '/'
-          });
-
-          toast({
-            title: "Free Analysis Limit Reached",
-            description: "Sign up to continue analyzing startup ideas and unlock more features!",
-            variant: "default",
-          });
-
-          return;
+            toast({
+              title: "Free Analysis Limit Reached",
+              description: "Sign up to continue analyzing startup ideas and unlock more features!",
+              variant: "default",
+            });
+            return;
+          }
+          setRemainingFreeAnalyses(data.remainingFreeAnalyses);
         }
-
-        throw new Error(errorData.message || 'Failed to analyze startup idea');
       }
 
-      const results = await response.json();
-      setAnalysisResults(results);
-
-      if (results.meta && typeof results.meta.remainingFreeAnalyses === 'number') {
-        setRemainingFreeAnalyses(results.meta.remainingFreeAnalyses);
-      }
-
-      setAnalysisStep('results');
+      // Store the startup idea in sessionStorage for the analysis page
+      sessionStorage.setItem('pendingStartupIdea', startupIdea);
+      sessionStorage.setItem('userCountry', detectUserCountry());
+      
+      // Redirect to the analysis page
+      navigate('/analysis');
+      
     } catch (error) {
-      console.error("Error analyzing startup idea:", error);
-      let errorMessage = "We couldn't analyze your startup idea at this moment. Please try again later.";
-
-      if (error instanceof Error) {
-        if (error.message.includes("timeout")) {
-          errorMessage = "Analysis is taking too long. Please try a shorter description or try again later.";
-        } else if (error.message.includes("content policy")) {
-          errorMessage = "Your startup idea couldn't be analyzed due to content policy. Please revise and try again.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
+      console.error("Error preparing analysis:", error);
+      
       toast({
-        title: "Analysis Failed",
-        description: errorMessage,
+        title: "Error",
+        description: "We couldn't process your request at this moment. Please try again later.",
         variant: "destructive"
       });
     } finally {
