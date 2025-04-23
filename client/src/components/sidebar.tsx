@@ -392,22 +392,7 @@ export function Sidebar() {
         )}
       </div>
       
-      {/* Help section - only show when not collapsed */}
-      {!collapsed && (
-        <div className="p-4 mx-3 mb-4 vision-card bg-vision-card/50">
-          <div className="mb-2 text-sm text-white font-medium flex items-center">
-            <HelpCircle className="w-4 h-4 mr-2 text-vision-purple-700" />
-            Need help?
-          </div>
-          <p className="text-xs text-white/60 mb-3">Check our documentation</p>
-          <Button 
-            variant="outline" 
-            className="w-full bg-vision-purple-100/10 text-white text-xs h-8 border-vision-purple-300/20 hover:bg-vision-purple-200/20"
-          >
-            Documentation
-          </Button>
-        </div>
-      )}
+      
     </aside>
     </div>
   );
