@@ -343,33 +343,20 @@ export function Sidebar() {
             </li>
           </ul>
         ) : (
-          // Guest user view
+          // Guest user view - Single button for login/register
           <ul className="space-y-1 mb-4">
             <li>
               <button
                 onClick={() => openAuthDialog({ defaultTab: 'login' })}
                 className={cn(
-                  "vision-sidebar-item w-full text-left",
+                  "vision-sidebar-item w-full text-left bg-primary/20 hover:bg-primary/30",
                   collapsed && "justify-center px-2"
                 )}
               >
                 <User className="w-5 h-5" />
-                {!collapsed && <span>Login</span>}
+                {!collapsed && <span>Sign In / Register</span>}
               </button>
             </li>
-            <li>
-              <button
-                onClick={() => openAuthDialog({ defaultTab: 'register' })}
-                className={cn(
-                  "vision-sidebar-item w-full text-left",
-                  collapsed && "justify-center px-2"
-                )}
-              >
-                <User className="w-5 h-5" />
-                {!collapsed && <span>Register</span>}
-              </button>
-            </li>
-
           </ul>
         )}
       </div>

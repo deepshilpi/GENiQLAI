@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { CommunityPost } from "@/components/community-post";
 import { PostForm } from "@/components/post-form";
 import { AuthContext } from "@/hooks/use-auth";
+import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -63,6 +64,7 @@ import {
 export default function CommunityPage() {
   const auth = useContext(AuthContext);
   const user = auth?.user;
+  const { openAuthDialog } = useAuthDialog();
   const [showPostForm, setShowPostForm] = useState(false);
   // No longer using plan dialog
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,10 +130,10 @@ export default function CommunityPage() {
 
   const handleVote = (postId: number, voteType: string) => {
     if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to vote on posts",
-        variant: "default",
+      // Show auth dialog instead of toast
+      openAuthDialog({ 
+        defaultTab: 'login',
+        returnTo: '/community'
       });
       return;
     }
@@ -140,13 +142,11 @@ export default function CommunityPage() {
 
   const handleNewPost = () => {
     if (!user) {
-      // Show toast and navigate to auth
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create posts in the community",
-        variant: "default",
+      // Show auth dialog instead of redirecting
+      openAuthDialog({ 
+        defaultTab: 'login',
+        returnTo: '/community'
       });
-      navigate('/auth');
       return;
     }
     

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSavedIdeas } from "@/hooks/use-saved-ideas";
 import { AuthContext } from "@/hooks/use-auth";
+import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface SaveIdeaButtonProps {
@@ -19,6 +20,7 @@ interface SaveIdeaButtonProps {
 export function SaveIdeaButton({ startupIdea, analysisResults, className }: SaveIdeaButtonProps) {
   const auth = useContext(AuthContext);
   const user = auth?.user;
+  const { openAuthDialog } = useAuthDialog();
   const { toast } = useToast();
   const { createSavedIdea, isCreating } = useSavedIdeas();
   const [open, setOpen] = useState(false);
@@ -27,6 +29,15 @@ export function SaveIdeaButton({ startupIdea, analysisResults, className }: Save
   const [notes, setNotes] = useState("");
 
   const handleSave = () => {
+    if (!user) {
+      // Show login dialog instead of hiding button
+      openAuthDialog({ 
+        defaultTab: 'login',
+        returnTo: '/'
+      });
+      return;
+    }
+    
     if (!title.trim()) {
       toast({
         title: "Title required",
@@ -53,10 +64,17 @@ export function SaveIdeaButton({ startupIdea, analysisResults, className }: Save
     setNotes("");
   };
 
-  // If user is not logged in, don't show the button
-  if (!user) {
-    return null;
-  }
+  // Changed to always show button
+  const handleButtonClick = () => {
+    if (!user) {
+      openAuthDialog({ 
+        defaultTab: 'login',
+        returnTo: '/'
+      });
+      return;
+    }
+    setOpen(true);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -65,6 +83,7 @@ export function SaveIdeaButton({ startupIdea, analysisResults, className }: Save
           variant="default" 
           size="sm" 
           className={`flex items-center gap-2 ${className}`}
+          onClick={handleButtonClick}
         >
           <SaveIcon className="h-4 w-4" />
           Save Idea
