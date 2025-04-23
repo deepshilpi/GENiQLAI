@@ -280,42 +280,48 @@ export const messageReadsRelations = relations(messageReads, ({ one }) => ({
 }));
 
 export type AnalysisResults = {
+  // Initial Analysis Blocks (8)
   successRate?: {
     percentage: number;
     message: string;
+    positivePoint: string;
+    negativePoint: string;
   };
   competitors?: {
     competitors: Array<{
       name: string;
       marketShare: number;
+      website?: string;
     }>;
     message: string;
+    totalMarketSize?: number;
   };
-  marketViability?: {
-    points: Array<{
-      title: string;
-      subtitle: string;
-      type: 'success' | 'warning' | 'danger';
-    }>;
-  };
-  uniqueValueProposition?: {
-    differentiator: string;
-    strengths: string[];
-  };
-  cagr?: {
-    industryAverage: number;
-    potential: number;
-    data: {
-      years: string[];
-      industryAverageData: number[];
-      potentialData: number[];
-    };
-  };
-  previousFailedExecutions?: {
-    failures: Array<{
+  targetAudienceFit?: {
+    segments: Array<{
       name: string;
-      year: string;
-      reason: string;
+      score: number;
+      maxScore: number;
+    }>;
+    message: string;
+    overallFit: number;
+  };
+  marketSize?: {
+    total: number;
+    segments: Array<{
+      name: string; // e.g., "Local", "National", "Global"
+      value: number;
+      percentage: number;
+    }>;
+    cagr: number;
+    message: string;
+  };
+  businessModelStrength?: {
+    overallScore: number;
+    categories: Array<{
+      name: string;
+      score: number;
+      maxScore: number;
+      description: string;
     }>;
     message: string;
   };
@@ -334,13 +340,111 @@ export type AnalysisResults = {
       marketing: number;
       operations: number;
     };
+    message: string;
+  };
+  swotAnalysis?: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+    message: string;
+  };
+  previousFailedExecutions?: {
+    failures: Array<{
+      name: string;
+      year: string;
+      reason: string;
+      relevance: number; // 0-100 scale
+    }>;
+    message: string;
+  };
+  
+  // Related Ideas
+  relatedIdeas?: Array<{
+    title: string;
+    description: string;
+    similarityScore: number; // 0-100 scale
+    potentialScore: number; // 0-100 scale
+  }>;
+  
+  // Budget-Based Analysis Blocks (6)
+  feasibilityAnalysis?: {
+    overallScore: number;
+    scalabilityTrajectory: Array<{
+      milestone: string;
+      score: number;
+      description: string;
+    }>;
+    breakEvenPoint: {
+      timeframe: string;
+      investment: number;
+    };
+    message: string;
+  };
+  riskAnalysis?: {
+    overallRiskScore: number; // 0-100, higher means riskier
+    riskFactors: Array<{
+      name: string;
+      probability: number; // 0-100
+      impact: number; // 0-100
+      mitigation: string;
+    }>;
+    message: string;
   };
   goToMarketStrategy?: {
-    steps: Array<{
+    stages: Array<{
       name: string;
       timeframe: string;
+      tasks: string[];
+      budget: number;
     }>;
+    totalTimeEstimate: string;
+    message: string;
   };
+  longTermVision?: {
+    milestones: Array<{
+      title: string;
+      timeframe: string;
+      description: string;
+      targetMetric: {
+        name: string;
+        value: string;
+      };
+    }>;
+    message: string;
+  };
+  teamStructure?: {
+    coreRoles: Array<{
+      title: string;
+      priority: 'high' | 'medium' | 'low';
+      skills: string[];
+      estimatedCost: number;
+    }>;
+    recommendedTeamSize: {
+      initial: number;
+      yearOne: number;
+      yearThree: number;
+    };
+    message: string;
+  };
+  potentialInvestors?: {
+    investors: Array<{
+      name: string;
+      firm: string;
+      focusAreas: string[];
+      typicalInvestment: {
+        min: number;
+        max: number;
+      };
+      portfolioFit: number; // 0-100 scale
+      country: string;
+      contactInfo?: string;
+      crunchbaseLink?: string;
+    }>;
+    message: string;
+  };
+  
+  // Budget Execution Plan
   planningToExecute?: {
     budget: {
       development: number;
@@ -351,14 +455,6 @@ export type AnalysisResults = {
       step: string;
       timeframe: string;
       cost: number;
-    }>;
-  };
-  findingInvestors?: {
-    investors: Array<{
-      name: string;
-      firm: string;
-      tags: string[];
-      crunchbaseLink: string;
     }>;
   };
 };

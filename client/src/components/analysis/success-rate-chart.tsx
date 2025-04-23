@@ -1,11 +1,13 @@
-import { Gauge, Sparkles, AlertTriangle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Gauge, Sparkles, AlertTriangle, ThumbsUp, ThumbsDown, Check, X } from "lucide-react";
 
 interface SuccessRateChartProps {
   percentage: number;
   message: string;
+  positivePoint?: string;
+  negativePoint?: string;
 }
 
-export function SuccessRateChart({ percentage, message }: SuccessRateChartProps) {
+export function SuccessRateChart({ percentage, message, positivePoint, negativePoint }: SuccessRateChartProps) {
   // Determine success level and colors
   const successLevel = 
     percentage >= 70 ? "high" :
@@ -69,8 +71,25 @@ export function SuccessRateChart({ percentage, message }: SuccessRateChartProps)
         </span>
       </div>
       
+      {/* Key Points */}
+      <div className="w-full space-y-2 mt-3 mb-3">
+        {positivePoint && (
+          <div className="flex items-start p-2 rounded-md bg-green-500/5 border border-green-500/20">
+            <Check className="w-5 h-5 mr-2 text-green-400 mt-0.5 flex-shrink-0" />
+            <span className="text-sm text-white/80">{positivePoint}</span>
+          </div>
+        )}
+        
+        {negativePoint && (
+          <div className="flex items-start p-2 rounded-md bg-red-500/5 border border-red-500/20">
+            <X className="w-5 h-5 mr-2 text-red-400 mt-0.5 flex-shrink-0" />
+            <span className="text-sm text-white/80">{negativePoint}</span>
+          </div>
+        )}
+      </div>
+      
       {/* Success message */}
-      <div className={`p-3 text-sm rounded-md mt-2 text-white/80 ${
+      <div className={`p-3 text-sm rounded-md mt-2 text-white/80 w-full ${
         successLevel === "high" ? "bg-green-500/5 border border-green-500/20" :
         successLevel === "medium" ? "bg-amber-500/5 border border-amber-500/20" :
         "bg-red-500/5 border border-red-500/20"

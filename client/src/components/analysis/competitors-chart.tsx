@@ -1,15 +1,19 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
-import { Crown, Target } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Crown, Target, ExternalLink, Globe } from 'lucide-react';
 
-interface CompetitorsChartProps {
-  competitors: Array<{
-    name: string;
-    marketShare: number;
-  }>;
-  message: string;
+interface CompetitorType {
+  name: string;
+  marketShare: number;
+  website?: string;
 }
 
-export function CompetitorsChart({ competitors, message }: CompetitorsChartProps) {
+interface CompetitorsChartProps {
+  competitors: CompetitorType[];
+  message: string;
+  totalMarketSize?: number;
+}
+
+export function CompetitorsChart({ competitors, message, totalMarketSize }: CompetitorsChartProps) {
   // Sort competitors by market share (descending)
   const sortedCompetitors = [...competitors].sort((a, b) => b.marketShare - a.marketShare);
   
@@ -38,6 +42,20 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
 
   return (
     <div className="flex flex-col">
+      {/* Market size */}
+      {totalMarketSize && (
+        <div className="p-3 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
+          <div className="flex items-center mb-2">
+            <Globe className="w-4 h-4 mr-2 text-blue-400" />
+            <h4 className="text-sm font-medium text-white">Total Market Size</h4>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-white/80">Estimated Annual Value</span>
+            <span className="text-sm font-medium text-white">${totalMarketSize.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+      
       {/* Market leader highlight */}
       {sortedCompetitors.length > 0 && (
         <div className="p-3 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
@@ -49,6 +67,17 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
             <span className="text-sm text-white/80">{sortedCompetitors[0].name}</span>
             <span className="text-sm font-medium text-white">{sortedCompetitors[0].marketShare}% Market Share</span>
           </div>
+          {sortedCompetitors[0].website && (
+            <a 
+              href={sortedCompetitors[0].website} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center mt-2 text-xs text-primary hover:underline"
+            >
+              <ExternalLink className="w-3 h-3 mr-1" />
+              Visit {sortedCompetitors[0].name}
+            </a>
+          )}
         </div>
       )}
       
@@ -87,6 +116,36 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
           </BarChart>
         </ResponsiveContainer>
       </div>
+      
+      {/* Competitor List with Links */}
+      {sortedCompetitors.length > 1 && (
+        <div className="mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10 overflow-hidden">
+          <div className="p-3 border-b border-vision-purple-200/10">
+            <h4 className="text-sm font-medium text-white">Key Competitors</h4>
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {sortedCompetitors.slice(1, 5).map((competitor, index) => (
+              <div key={index} className="p-3 border-b border-vision-purple-200/10 last:border-b-0">
+                <div className="flex justify-between">
+                  <span className="text-sm text-white">{competitor.name}</span>
+                  <span className="text-sm text-white/70">{competitor.marketShare}%</span>
+                </div>
+                {competitor.website && (
+                  <a 
+                    href={competitor.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center mt-1 text-xs text-primary hover:underline"
+                  >
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Website
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Market opportunity summary */}
       <div className="p-3 border rounded-md bg-vision-primary-gradient/10 border-primary/30">
