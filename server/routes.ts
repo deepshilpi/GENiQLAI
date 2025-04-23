@@ -168,12 +168,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Save the analysis to storage only if user is authenticated
       if (req.isAuthenticated()) {
-        await storage.createAnalysis({
-          userId: req.user.id,
-          startupIdea,
-          country,
-          results: analysisResults
-        });
+        console.log("Attempting to save analysis for user:", req.user.id);
+        try {
+          const savedAnalysis = await storage.createAnalysis({
+            userId: req.user.id,
+            startupIdea,
+            country,
+            results: analysisResults
+          });
+          console.log("Successfully saved analysis with ID:", savedAnalysis.id);
+        } catch (saveError) {
+          console.error("Error saving analysis:", saveError);
+          // Continue with the response even if storing fails
+        }
       }
       
       // Add metadata about free analysis usage for anonymous users
@@ -448,7 +455,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all community posts
   app.get("/api/posts", async (req, res) => {
     try {
+      console.log("Attempting to fetch posts...");
       const posts = await storage.getPosts();
+      console.log(`Successfully fetched ${posts.length} posts`);
       return res.status(200).json(posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -724,7 +733,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      console.log("Attempting to fetch saved ideas for user:", req.user.id);
       const savedIdeas = await storage.getSavedIdeasByUserId(req.user.id);
+      console.log(`Successfully fetched ${savedIdeas.length} saved ideas`);
       return res.status(200).json(savedIdeas);
     } catch (error) {
       console.error("Error fetching saved ideas:", error);
