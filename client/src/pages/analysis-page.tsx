@@ -56,6 +56,7 @@ import { FundingInvestors } from "@/components/analysis/funding-investors";
 import { MarketSizeChart } from "@/components/analysis/market-size-chart";
 import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
 import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
+import { SaveIdeaButton } from "@/components/save-idea-button";
 
 // Define component prop interfaces
 interface FeasibilityAndScalabilityProps {
@@ -1008,13 +1009,13 @@ export default function AnalysisPage() {
             </Card>
           )}
           
-          {/* Three Option Buttons */}
+          {/* Four Option Buttons */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-xl text-white">What's Next?</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-4">
                 <Button 
                   variant="outline" 
                   className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
@@ -1038,6 +1039,13 @@ export default function AnalysisPage() {
                     <div className="text-xs text-white/70">Get detailed execution plan based on budget</div>
                   </div>
                 </Button>
+                
+                {/* Save Idea Button - Only shown to logged in users */}
+                <SaveIdeaButton
+                  startupIdea={ideaForm.getValues().idea}
+                  analysisResults={analysisData}
+                  className="h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 hover:bg-vision-purple-200/20"
+                />
                 
                 <Button 
                   variant="outline" 
