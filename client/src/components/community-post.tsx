@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowUp, ArrowDown, MessageSquare, Image as ImageIcon } from "lucide-react";
 import { Post, User } from "@shared/schema";
@@ -12,10 +12,29 @@ interface CommunityPostProps {
 }
 
 export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps) {
-  const authorUsername = useMemo(() => "Username", []);
+  const [authorUsername, setAuthorUsername] = useState<string>("");
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
+  
+  // Fetch the author's username
+  useEffect(() => {
+    async function fetchAuthor() {
+      try {
+        const response = await fetch(`/api/users/${post.authorId}`);
+        if (response.ok) {
+          const author = await response.json();
+          setAuthorUsername(author.username);
+        }
+      } catch (error) {
+        console.error("Error fetching author:", error);
+      }
+    }
+    
+    if (post.authorId) {
+      fetchAuthor();
+    }
+  }, [post.authorId]);
   
   const handlePump = () => {
     if (!currentUser) {
@@ -107,7 +126,7 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
           <Link href={`/post/${post.id}`}>
             <a className="flex items-center text-muted-foreground text-sm ml-auto">
               <MessageSquare className="mr-1 w-4 h-4" />
-              <span>15</span>
+              <span>{post.commentCount || 0}</span>
             </a>
           </Link>
         </div>

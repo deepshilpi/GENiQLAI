@@ -80,8 +80,12 @@ export function PostForm({ onComplete }: PostFormProps) {
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload image');
+        try {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to upload image');
+        } catch (e) {
+          throw new Error('Failed to upload image');
+        }
       }
       
       return response.json();
