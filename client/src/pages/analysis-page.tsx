@@ -763,6 +763,7 @@ export default function AnalysisPage() {
                       goodPoints={analysisData.successRate.goodPoints}
                       badPoints={analysisData.successRate.badPoints}
                       message={analysisData.successRate.message}
+                      country={ideaForm.getValues().country || "United States"}
                     />
                   </CardContent>
                 </Card>
@@ -864,7 +865,7 @@ export default function AnalysisPage() {
             
             {/* 5. Business Model Strength */}
             {analysisData.businessModelStrength && (
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-3">
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -879,6 +880,7 @@ export default function AnalysisPage() {
                       overall={analysisData.businessModelStrength.overall}
                       components={analysisData.businessModelStrength.components}
                       message={analysisData.businessModelStrength.message}
+                      country={ideaForm.getValues().country || "United States"}
                     />
                   </CardContent>
                 </Card>
@@ -887,7 +889,7 @@ export default function AnalysisPage() {
             
             {/* 6. Funding Requirements */}
             {analysisData.fundingRequired && (
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-3">
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -902,6 +904,7 @@ export default function AnalysisPage() {
                       total={analysisData.fundingRequired.total}
                       breakdown={analysisData.fundingRequired.breakdown}
                       message={analysisData.fundingRequired.message}
+                      country={ideaForm.getValues().country || "United States"}
                     />
                   </CardContent>
                 </Card>

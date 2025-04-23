@@ -1,13 +1,18 @@
 import { Gauge, Check, X, AlertTriangle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { getCountryCurrency, formatCurrency } from "@/lib/utils";
+import { FlagIcon } from "../flag-icon";
 
 interface SuccessRateChartProps {
   percentage: number;
   goodPoints: string[];
   badPoints: string[];
   message: string;
+  country?: string;
 }
 
-export function SuccessRateChart({ percentage, goodPoints, badPoints, message }: SuccessRateChartProps) {
+export function SuccessRateChart({ percentage, goodPoints, badPoints, message, country = "United States" }: SuccessRateChartProps) {
+  // Get currency for the selected country
+  const currency = getCountryCurrency(country);
   // Determine success level and colors
   const successLevel = 
     percentage >= 70 ? "high" :
@@ -126,6 +131,12 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message }:
                successLevel === "medium" ? "Moderate Potential" : 
                "Challenging Prospect"}
             </span>
+          </div>
+          
+          {/* Country indicator with flag */}
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-vision-purple-100/10 border border-vision-purple-200/20">
+            <FlagIcon country={country} size="md" />
+            <span className="text-sm font-medium text-white">{country}</span>
           </div>
         </div>
 

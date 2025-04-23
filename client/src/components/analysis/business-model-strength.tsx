@@ -12,9 +12,10 @@ interface BusinessModelStrengthProps {
     description: string;
   }>;
   message: string;
+  country?: string;
 }
 
-export function BusinessModelStrengthChart({ overall, components, message }: BusinessModelStrengthProps) {
+export function BusinessModelStrengthChart({ overall, components, message, country = "United States" }: BusinessModelStrengthProps) {
   const getScoreColor = (score: number) => {
     if (score >= 70) return "text-green-500";
     if (score >= 50) return "text-amber-500";
