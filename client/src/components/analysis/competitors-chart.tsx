@@ -1,5 +1,5 @@
-import { ExternalLink } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
+import { Crown, Target } from 'lucide-react';
 
 interface CompetitorsChartProps {
   competitors: Array<{
@@ -12,92 +12,91 @@ interface CompetitorsChartProps {
 export function CompetitorsChart({ competitors, message }: CompetitorsChartProps) {
   // Sort competitors by market share (descending)
   const sortedCompetitors = [...competitors].sort((a, b) => b.marketShare - a.marketShare);
-
-  // Generate chart data with colors
-  const chartData = sortedCompetitors.map((competitor, index) => ({
-    ...competitor,
-    color: `hsl(${(index * 40) % 360}, 70%, 60%)` // Generate unique colors for each competitor
-  }));
-
-  // Generate domain name from competitor name
-  const getDomain = (name: string) => {
-    return name.toLowerCase()
-      .replace(/[^a-z0-9]/g, '')
-      .replace(/\s+/g, '') + '.com';
+  
+  // Add your company with 0% market share for comparison
+  const chartData = [
+    { name: 'Your Startup', marketShare: 0, isYours: true },
+    ...sortedCompetitors.map(comp => ({ ...comp, isYours: false }))
+  ];
+  
+  // For the tooltip custom content
+  const renderTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="p-2 bg-vision-card/95 border border-vision-purple-200/20 rounded-md shadow-md">
+          <p className="font-medium text-white">{data.name}</p>
+          <p className="text-white/80">Market Share: {data.marketShare}%</p>
+          {data.isYours && (
+            <p className="text-primary text-xs mt-1">Your potential entry point</p>
+          )}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
     <div className="flex flex-col">
-      {/* Main chart */}
-      <div className="h-64 mb-4">
+      {/* Market leader highlight */}
+      {sortedCompetitors.length > 0 && (
+        <div className="p-3 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
+          <div className="flex items-center mb-2">
+            <Crown className="w-4 h-4 mr-2 text-yellow-400" />
+            <h4 className="text-sm font-medium text-white">Market Leader</h4>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-white/80">{sortedCompetitors[0].name}</span>
+            <span className="text-sm font-medium text-white">{sortedCompetitors[0].marketShare}% Market Share</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Competitors chart */}
+      <div className="h-60 w-full mb-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+            margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+            barSize={36}
           >
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
             <XAxis 
               dataKey="name" 
-              tick={{ fontSize: 12, fill: 'rgba(255, 255, 255, 0.7)' }}
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
-              tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+              tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+              tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+              height={60}
+              tickFormatter={(value) => value.length > 10 ? `${value.substring(0, 10)}...` : value}
+              angle={-45}
+              textAnchor="end"
             />
             <YAxis 
               tickFormatter={(value) => `${value}%`}
-              tick={{ fontSize: 12, fill: 'rgba(255, 255, 255, 0.7)' }} 
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
-              tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+              tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+              tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
             />
-            <Tooltip 
-              formatter={(value) => [`${value}%`, 'Market Share']}
-              contentStyle={{ 
-                backgroundColor: 'rgba(11, 20, 55, 0.8)', 
-                borderColor: 'rgba(117, 81, 255, 0.3)',
-                borderRadius: '8px',
-                color: 'white' 
-              }}
+            <Tooltip content={renderTooltip} />
+            <Bar 
+              dataKey="marketShare" 
+              name="Market Share" 
+              radius={[4, 4, 0, 0]}
+              fill={(data) => data.isYours ? "#7551FF" : "#CB9FFF"}
             />
-            <Bar dataKey="marketShare" radius={[4, 4, 0, 0]}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
       
-      {/* List of competitors with links */}
-      <div className="grid gap-2 mt-2">
-        {chartData.map((competitor, index) => (
-          <div 
-            key={index}
-            className="flex items-center justify-between p-2 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10"
-          >
-            <div className="flex items-center">
-              <div 
-                className="w-3 h-3 mr-2 rounded-full" 
-                style={{ backgroundColor: competitor.color }}
-              ></div>
-              <span className="text-sm text-white">{competitor.name}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-3 text-sm text-white/70">{competitor.marketShare}%</span>
-              <a 
-                href={`https://${getDomain(competitor.name)}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center text-xs text-primary hover:text-primary/80"
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                {getDomain(competitor.name)}
-              </a>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Market message summary */}
-      <div className="p-3 mt-4 text-sm border rounded-md text-white/80 bg-vision-purple-100/5 border-vision-purple-200/10">
-        {message}
+      {/* Market opportunity summary */}
+      <div className="p-3 border rounded-md bg-vision-primary-gradient/10 border-primary/30">
+        <div className="flex items-center mb-2">
+          <Target className="w-4 h-4 mr-2 text-primary" />
+          <h4 className="text-sm font-medium text-white">Market Opportunity</h4>
+        </div>
+        <p className="text-sm text-white/80">
+          {message}
+        </p>
       </div>
     </div>
   );

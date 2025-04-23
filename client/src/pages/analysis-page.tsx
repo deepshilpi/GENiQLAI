@@ -86,7 +86,8 @@ const budgetSchema = z.object({
 export default function AnalysisPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const [location] = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("");
   
@@ -101,7 +102,7 @@ export default function AnalysisPage() {
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
     resolver: zodResolver(startupIdeaSchema),
     defaultValues: {
-      idea: searchParams.idea || "",
+      idea: searchParams.get('idea') || "",
       country: "",
     },
   });
