@@ -1,4 +1,17 @@
-import { Users, UserCircle, BadgeCheck, DollarSign, Clock, Award } from 'lucide-react';
+import React from "react";
+import { Users, BriefcaseIcon, Award, Lightbulb, Calendar } from "lucide-react";
+import { 
+  Bar, 
+  BarChart, 
+  PolarAngleAxis, 
+  PolarGrid, 
+  Radar, 
+  RadarChart, 
+  ResponsiveContainer, 
+  Tooltip, 
+  XAxis,
+  YAxis 
+} from "recharts";
 
 interface TeamExecutionProps {
   requiredRoles: Array<{
@@ -12,119 +25,233 @@ interface TeamExecutionProps {
 }
 
 export function TeamExecution({ requiredRoles, hiringTimeline, message }: TeamExecutionProps) {
-  // Sort roles by importance (descending)
+  // Sort roles by importance
   const sortedRoles = [...requiredRoles].sort((a, b) => b.importance - a.importance);
   
-  // Calculate total estimated cost
-  const totalCost = sortedRoles.reduce((total, role) => total + role.estimatedCost, 0);
+  // Calculate total cost
+  const totalCost = requiredRoles.reduce((sum, role) => sum + role.estimatedCost, 0);
   
-  // Format currency function
-  const formatCurrency = (value: number): string => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(1)}M`;
-    } else if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    } else {
-      return `$${value.toFixed(0)}`;
+  // Prepare data for radar chart
+  const radarData = requiredRoles.map(role => ({
+    title: role.title,
+    importance: role.importance,
+  }));
+  
+  // Prepare data for bar chart
+  const barData = requiredRoles.map(role => ({
+    title: role.title,
+    cost: role.estimatedCost,
+    percentage: Math.round((role.estimatedCost / totalCost) * 100)
+  }));
+  
+  // Function to get color based on importance
+  const getImportanceColor = (importance: number) => {
+    if (importance >= 80) return "#ef4444"; // High importance - red
+    if (importance >= 50) return "#f59e0b"; // Medium importance - amber
+    return "#22c55e"; // Low importance - green
+  };
+  
+  // Custom tooltip for radar chart
+  const renderRadarTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const importanceColor = getImportanceColor(data.importance);
+      
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border border-border p-2 rounded-md shadow-md">
+          <p className="text-xs font-medium text-white mb-1">{data.title}</p>
+          <p className="text-xs text-white/80">
+            <span className="font-medium">Importance:</span>{" "}
+            <span style={{ color: importanceColor }}>{data.importance}%</span>
+          </p>
+        </div>
+      );
     }
+    return null;
   };
   
-  // Get importance level and color
-  const getImportanceLevel = (importance: number): string => {
-    return importance >= 80 ? "Critical" :
-           importance >= 60 ? "Very Important" :
-           importance >= 40 ? "Important" :
-           importance >= 20 ? "Beneficial" :
-           "Optional";
-  };
-  
-  const getImportanceColor = (importance: number): string => {
-    return importance >= 80 ? "text-red-400 bg-red-500/10" :
-           importance >= 60 ? "text-amber-400 bg-amber-500/10" :
-           importance >= 40 ? "text-amber-400 bg-amber-500/5" :
-           importance >= 20 ? "text-blue-400 bg-blue-500/5" :
-           "text-green-400 bg-green-500/5";
+  // Custom tooltip for bar chart
+  const renderBarTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border border-border p-2 rounded-md shadow-md">
+          <p className="text-xs font-medium text-white mb-1">{data.title}</p>
+          <p className="text-xs text-white/80">
+            <span className="font-medium">Annual Cost:</span>{" "}
+            ${data.cost.toLocaleString()}
+          </p>
+          <p className="text-xs text-white/80">
+            <span className="font-medium">Percentage:</span>{" "}
+            {data.percentage}% of total budget
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
-    <div className="flex flex-col">
-      {/* Team cost overview */}
-      <div className="p-3 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
-        <div className="flex items-center mb-2">
-          <DollarSign className="w-4 h-4 mr-2 text-green-400" />
-          <h4 className="text-sm font-medium text-white">Team Investment</h4>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-white/80">Estimated Annual Team Cost</span>
-          <span className="text-xl font-medium text-green-400">{formatCurrency(totalCost)}</span>
-        </div>
-        <div className="flex items-center mt-3 text-xs text-white/60">
-          <Clock className="w-3.5 h-3.5 mr-1.5" />
-          <span>Hiring Approach: {hiringTimeline}</span>
+    <div className="space-y-5">
+      <div className="flex items-center mb-2">
+        <Users className="w-5 h-5 mr-2 text-primary" />
+        <h3 className="text-lg font-medium text-white">Team Execution Capability</h3>
+      </div>
+
+      {/* Total cost and timeline overview */}
+      <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 className="text-sm font-medium text-white mb-1">Estimated Team Budget</h4>
+            <div className="flex items-baseline">
+              <span className="text-xl font-semibold text-white">${totalCost.toLocaleString()}</span>
+              <span className="text-xs text-white/70 ml-2">annual</span>
+            </div>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-white mb-1">Hiring Timeline</h4>
+            <div className="flex items-center">
+              <Calendar className="w-4 h-4 text-primary mr-2" />
+              <span className="text-sm text-white">{hiringTimeline}</span>
+            </div>
+          </div>
         </div>
       </div>
-      
-      {/* Key roles */}
-      <div className="mb-6 space-y-4">
-        <h4 className="text-sm font-medium text-white mb-2 flex items-center">
-          <Users className="w-4 h-4 mr-2 text-primary" />
-          Key Team Members
-        </h4>
+
+      {/* Role importance radar chart */}
+      <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
+        <h4 className="text-sm font-medium text-white mb-1">Team Role Importance</h4>
+        <p className="text-xs text-white/70 mb-4">Critical roles to prioritize for execution success</p>
+        
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart 
+              cx="50%" 
+              cy="50%" 
+              outerRadius="80%" 
+              data={radarData}
+            >
+              <PolarGrid stroke="rgba(255,255,255,0.1)" />
+              <PolarAngleAxis 
+                dataKey="title" 
+                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 10 }}
+              />
+              <Radar
+                name="Importance"
+                dataKey="importance"
+                stroke="#A163F7"
+                fill="#A163F7"
+                fillOpacity={0.6}
+              />
+              <Tooltip content={renderRadarTooltip} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Budget allocation bar chart */}
+      <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
+        <h4 className="text-sm font-medium text-white mb-1">Budget Allocation by Role</h4>
+        <p className="text-xs text-white/70 mb-4">Annual cost distribution across team roles</p>
+        
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              layout="vertical"
+              data={barData}
+              margin={{ top: 5, right: 30, left: 90, bottom: 5 }}
+            >
+              <XAxis 
+                type="number" 
+                tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.7)' }}
+                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                tickFormatter={(value) => `$${value/1000}k`}
+              />
+              <YAxis 
+                type="category" 
+                dataKey="title" 
+                tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.7)' }}
+                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                width={80}
+              />
+              <Tooltip content={renderBarTooltip} />
+              <Bar 
+                dataKey="cost" 
+                fill="#56ABFF" 
+                radius={[0, 4, 4, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Key roles with skills */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium text-white">Key Team Roles</h4>
         
         {sortedRoles.map((role, index) => (
           <div 
-            key={index}
-            className="p-3 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/10"
+            key={index} 
+            className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start">
-                <UserCircle className="w-8 h-8 text-primary mr-3 mt-1" />
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex">
+                <div 
+                  className="h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5"
+                  style={{ backgroundColor: `${getImportanceColor(role.importance)}30` }}
+                >
+                  <BriefcaseIcon 
+                    className="h-4 w-4" 
+                    style={{ color: getImportanceColor(role.importance) }}
+                  />
+                </div>
                 <div>
-                  <h5 className="text-md font-medium text-white">{role.title}</h5>
-                  <div className="flex items-center mt-1 mb-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${getImportanceColor(role.importance)}`}>
-                      {getImportanceLevel(role.importance)}
+                  <h5 className="text-sm font-medium text-white">{role.title}</h5>
+                  <div className="flex items-center mt-1">
+                    <Award className="h-3 w-3 text-primary mr-1" />
+                    <span 
+                      className="text-xs font-medium" 
+                      style={{ color: getImportanceColor(role.importance) }}
+                    >
+                      {role.importance}% importance
                     </span>
-                    <span className="mx-2 text-white/40">•</span>
-                    <span className="text-xs text-white/60 flex items-center">
-                      <DollarSign className="w-3.5 h-3.5 mr-1" />
-                      {formatCurrency(role.estimatedCost)}/year
-                    </span>
-                  </div>
-                  
-                  <h6 className="text-xs font-medium text-white/80 mb-1.5 flex items-center">
-                    <BadgeCheck className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                    Required Skills
-                  </h6>
-                  <div className="flex flex-wrap gap-2">
-                    {role.skills.map((skill, skillIndex) => (
-                      <span 
-                        key={skillIndex}
-                        className="text-xs px-2 py-1 rounded-full bg-vision-purple-100/10 border border-vision-purple-200/20 text-white/80"
-                      >
-                        {skill}
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>
-              
-              <div className="text-xs text-center">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-vision-purple-100/10 border border-vision-purple-200/20 mb-1">
-                  <span className="text-sm font-medium text-white">{role.importance}</span>
-                </div>
-                <span className="text-white/60">Priority</span>
+              <div className="text-right">
+                <p className="text-xs text-white/70">Annual Cost</p>
+                <p className="text-sm font-medium text-white">${role.estimatedCost.toLocaleString()}</p>
+              </div>
+            </div>
+            
+            <div className="bg-vision-purple-100/5 p-3 rounded-md">
+              <div className="flex items-center mb-2">
+                <Lightbulb className="h-3 w-3 text-primary mr-1" />
+                <h6 className="text-xs font-medium text-white">Required Skills</h6>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {role.skills.map((skill, skillIndex) => (
+                  <span 
+                    key={skillIndex} 
+                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
         ))}
       </div>
-      
-      {/* Team execution insight */}
+
+      {/* Expert insight */}
       <div className="p-3 border rounded-md bg-vision-primary-gradient/10 border-primary/30">
         <div className="flex items-center mb-2">
-          <Award className="w-4 h-4 mr-2 text-primary" />
-          <h4 className="text-sm font-medium text-white">Execution Strategy</h4>
+          <Users className="w-4 h-4 mr-2 text-primary" />
+          <h4 className="text-sm font-medium text-white">Team Building Strategy</h4>
         </div>
         <p className="text-sm text-white/80">
           {message}
