@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useSearchParams } from "wouter/use-location";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,6 +53,7 @@ import {
   X,
 } from "lucide-react";
 import { AuthDialog } from "@/components/auth-dialog";
+import { PremiumFeatureOverlay } from "@/components/premium-feature-overlay";
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";
 import { CompetitorsChart } from "@/components/analysis/competitors-chart";
 import { MarketViabilityCard } from "@/components/analysis/market-viability-card";
@@ -61,13 +62,6 @@ import { CAGRChart } from "@/components/analysis/cagr-chart";
 import { FailedExecutionsCard } from "@/components/analysis/failed-executions-card";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
 import { GTMStrategyCard } from "@/components/analysis/gtm-strategy-card";
-import { TargetAudienceFit } from "@/components/analysis/target-audience-fit";
-import { MarketSizeChart } from "@/components/analysis/market-size-chart";
-import { BusinessModelStrength } from "@/components/analysis/business-model-strength";
-import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
-import { RelatedIdeas } from "@/components/analysis/related-ideas";
-import { RiskAnalysis } from "@/components/analysis/risk-analysis";
-import { FeasibilityAnalysis } from "@/components/analysis/feasibility-analysis";
 
 // Define the phases of the analysis
 type AnalysisPhase = "input" | "loading" | "results" | "budget-input" | "budget-loading" | "budget-results";
@@ -92,8 +86,7 @@ const budgetSchema = z.object({
 export default function AnalysisPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [location] = useLocation();
-  const searchParams = new URLSearchParams(location.search);
+  const [searchParams] = useSearchParams();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("");
   
@@ -108,7 +101,7 @@ export default function AnalysisPage() {
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
     resolver: zodResolver(startupIdeaSchema),
     defaultValues: {
-      idea: searchParams.get('idea') || "",
+      idea: searchParams.idea || "",
       country: "",
     },
   });
@@ -171,6 +164,15 @@ export default function AnalysisPage() {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
+      return;
+    }
+    
+    if (user.planType !== "unicorn") {
+      toast({
+        title: "Unicorn Plan Required",
+        description: "This feature is only available to users on the Unicorn plan. Please upgrade to unlock it.",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -239,6 +241,15 @@ export default function AnalysisPage() {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
+      return;
+    }
+    
+    if (user.planType === "free") {
+      toast({
+        title: "Pro Plan Required",
+        description: "Exporting to PDF is a premium feature. Please upgrade to Pro or Unicorn plan to use it.",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -483,8 +494,8 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* Target Audience Fit */}
-            {analysisData.targetAudienceFit && (
+            {/* Market Viability */}
+            {analysisData.marketViability && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -494,84 +505,66 @@ export default function AnalysisPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <TargetAudienceFit 
-                      segments={analysisData.targetAudienceFit.segments}
-                      message={analysisData.targetAudienceFit.message}
-                      overallFit={analysisData.targetAudienceFit.overallFit}
+                    <MarketViabilityCard 
+                      points={analysisData.marketViability.points} 
                     />
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* Business Model Strength */}
-            {analysisData.businessModelStrength && (
+            {/* Unique Value Proposition */}
+            {analysisData.uniqueValueProposition && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <BarChart3 className="w-5 h-5 mr-2 text-primary" />
-                      Business Model Strength
+                      <Lightbulb className="w-5 h-5 mr-2 text-primary" />
+                      Unique Value Proposition
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <BusinessModelStrength 
-                      overallScore={analysisData.businessModelStrength.overallScore}
-                      categories={analysisData.businessModelStrength.categories}
-                      message={analysisData.businessModelStrength.message}
+                    <UVPCard 
+                      differentiator={analysisData.uniqueValueProposition.differentiator} 
+                      strengths={analysisData.uniqueValueProposition.strengths} 
                     />
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* SWOT Analysis */}
-            {analysisData.swotAnalysis && (
+            {/* CAGR (Pro+ feature) */}
+            {analysisData.cagr ? (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Activity className="w-5 h-5 mr-2 text-primary" />
-                      SWOT Analysis
+                      <TrendingUp className="w-5 h-5 mr-2 text-primary" />
+                      Growth Projection (CAGR)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <SWOTAnalysis 
-                      strengths={analysisData.swotAnalysis.strengths}
-                      weaknesses={analysisData.swotAnalysis.weaknesses}
-                      opportunities={analysisData.swotAnalysis.opportunities}
-                      threats={analysisData.swotAnalysis.threats}
-                      message={analysisData.swotAnalysis.message}
+                    <CAGRChart
+                      industryAverage={analysisData.cagr.industryAverage}
+                      potential={analysisData.cagr.potential}
+                      data={analysisData.cagr.data}
                     />
                   </CardContent>
                 </Card>
               </motion.div>
-            )}
-            
-            {/* Market Size */}
-            {analysisData.marketSize && (
+            ) : (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <PieChart className="w-5 h-5 mr-2 text-primary" />
-                      Market Size Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <MarketSizeChart
-                      total={analysisData.marketSize.total}
-                      segments={analysisData.marketSize.segments}
-                      cagr={analysisData.marketSize.cagr}
-                      message={analysisData.marketSize.message}
-                    />
-                  </CardContent>
-                </Card>
+                <PremiumFeatureOverlay
+                  title="Growth Projection (CAGR)"
+                  description="Upgrade to Pro or Unicorn plan to see detailed growth projections for your industry."
+                  icon={<TrendingUp className="w-12 h-12 text-primary/50" />}
+                  requiredPlan="pro"
+                />
               </motion.div>
             )}
             
-            {/* Previous Failed Executions */}
-            {analysisData.previousFailedExecutions && (
+            {/* Previous Failed Executions (Pro+ feature) */}
+            {analysisData.previousFailedExecutions ? (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -588,10 +581,19 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <PremiumFeatureOverlay
+                  title="Previous Failed Executions"
+                  description="Upgrade to Pro or Unicorn plan to see similar ideas that failed and why."
+                  icon={<AlertTriangle className="w-12 h-12 text-primary/50" />}
+                  requiredPlan="pro"
+                />
+              </motion.div>
             )}
             
-            {/* Funding Requirements */}
-            {analysisData.fundingRequirements && (
+            {/* Funding Requirements (Pro+ feature) */}
+            {analysisData.fundingRequirements ? (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -609,10 +611,19 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <PremiumFeatureOverlay
+                  title="Funding Requirements"
+                  description="Upgrade to Pro or Unicorn plan to see detailed funding requirements."
+                  icon={<Coins className="w-12 h-12 text-primary/50" />}
+                  requiredPlan="pro"
+                />
+              </motion.div>
             )}
             
-            {/* Go-to-Market Strategy */}
-            {analysisData.goToMarketStrategy && (
+            {/* Go-to-Market Strategy (Pro+ feature) */}
+            {analysisData.goToMarketStrategy ? (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -627,6 +638,15 @@ export default function AnalysisPage() {
                     />
                   </CardContent>
                 </Card>
+              </motion.div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <PremiumFeatureOverlay
+                  title="Go-to-Market Strategy"
+                  description="Upgrade to Pro or Unicorn plan to see a detailed go-to-market strategy."
+                  icon={<Compass className="w-12 h-12 text-primary/50" />}
+                  requiredPlan="pro"
+                />
               </motion.div>
             )}
           </motion.div>
@@ -707,6 +727,11 @@ export default function AnalysisPage() {
             <CardTitle className="text-xl text-white">Plan Your Execution Budget</CardTitle>
             <CardDescription className="text-white/70">
               Enter your available budget to get a detailed execution plan
+              {!user?.planType || user.planType !== "unicorn" ? (
+                <span className="block mt-2 font-medium text-amber-400">
+                  This is a Unicorn-only feature. You'll need to upgrade your plan.
+                </span>
+              ) : null}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -842,49 +867,6 @@ export default function AnalysisPage() {
                 </CardContent>
               </Card>
             </motion.div>
-            
-            {/* Feasibility Analysis */}
-            {budgetAnalysisData.feasibilityAnalysis && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Gauge className="w-5 h-5 mr-2 text-primary" />
-                      Feasibility Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <FeasibilityAnalysis
-                      overallScore={budgetAnalysisData.feasibilityAnalysis.overallScore}
-                      scalabilityTrajectory={budgetAnalysisData.feasibilityAnalysis.scalabilityTrajectory}
-                      breakEvenPoint={budgetAnalysisData.feasibilityAnalysis.breakEvenPoint}
-                      message={budgetAnalysisData.feasibilityAnalysis.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-
-            {/* Risk Analysis */}
-            {budgetAnalysisData.riskAnalysis && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
-                      Risk Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RiskAnalysis
-                      overallRiskScore={budgetAnalysisData.riskAnalysis.overallRiskScore}
-                      riskFactors={budgetAnalysisData.riskAnalysis.riskFactors}
-                      message={budgetAnalysisData.riskAnalysis.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
             
             {/* Execution Roadmap */}
             <motion.div variants={itemVariants} className="md:col-span-2">

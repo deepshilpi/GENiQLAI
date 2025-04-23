@@ -32,23 +32,16 @@ export async function analyzeStartupIdea(
     const systemPrompt = `You are a startup analysis expert. Analyze the startup idea for ${country} market and provide detailed insights in JSON format.
     
     Your analysis should contain the following blocks:
-    1. successRate: Object with percentage (number from a scale of 0-100), message (string), positivePoint (string), negativePoint (string)
-    2. competitors: Object with competitors array (each with name, marketShare as number, and website as string) and message (string) and totalMarketSize (number)
-    3. targetAudienceFit: Object with segments array (each with name, score, maxScore), message (string), and overallFit (number from 0-1)
-    4. marketSize: Object with total (number), segments array (each with name, value, percentage), cagr (number), and message (string)
-    5. businessModelStrength: Object with overallScore (number 0-100), categories array (each with name, score, maxScore, description), and message (string)
-    6. fundingRequirements: Object with seedRound (min/max), seriesA (min/max/timeframe), allocation (productDevelopment, marketing, operations percentages), and message (string)
-    7. swotAnalysis: Object with strengths (string array), weaknesses (string array), opportunities (string array), threats (string array), and message (string)
-    8. previousFailedExecutions: Object with failures array (each with name, year, reason, and relevance as number 0-100) and message (string)
+    1. successRate: Object with percentage (number from 0-100) and a message (string) about the likelihood of success
+    2. competitors: Object with competitors array (each with name and marketShare as number) and a message
+    3. marketViability: Object with points array (each with title, subtitle, and type - one of: 'success', 'warning', 'danger')
+    4. uniqueValueProposition: Object with differentiator (string) and strengths (array of strings)
     
     ${includeProBlocks ? `Additionally, include these blocks:
-    9. relatedIdeas: Array of objects (each with title, description, similarityScore 0-100, potentialScore 0-100)
-    10. feasibilityAnalysis: Object with overallScore (number 0-100), scalabilityTrajectory array (milestone, score, description), breakEvenPoint (timeframe, investment), and message (string)
-    11. riskAnalysis: Object with overallRiskScore (number 0-100, higher means riskier), riskFactors array (name, probability 0-100, impact 0-100, mitigation), and message (string)
-    12. goToMarketStrategy: Object with stages array (name, timeframe, tasks array, budget), totalTimeEstimate (string), and message (string)
-    13. longTermVision: Object with milestones array (title, timeframe, description, targetMetric with name and value), and message (string)
-    14. teamStructure: Object with coreRoles array (title, priority as 'high'/'medium'/'low', skills array, estimatedCost), recommendedTeamSize (initial, yearOne, yearThree), and message (string)
-    15. potentialInvestors: Object with investors array (name, firm, focusAreas array, typicalInvestment with min/max, portfolioFit 0-100, country, and optional contactInfo and crunchbaseLink), and message (string)` : ""}
+    5. cagr: Object with industryAverage (number), potential (number), and data object containing years (array of strings), industryAverageData (array of numbers), potentialData (array of numbers)
+    6. previousFailedExecutions: Object with failures array (each with name, year, reason) and a message
+    7. fundingRequirements: Object with seedRound (min/max), seriesA (min/max/timeframe), allocation (percentages)
+    8. goToMarketStrategy: Object with steps array (each with name and timeframe)` : ""}
     
     Follow the exact format specified. Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`;
 
@@ -79,11 +72,8 @@ export async function analyzeStartupIdea(
       // Validate the basic structure of the response
       if (!analysisContent.successRate || 
           !analysisContent.competitors || 
-          !analysisContent.targetAudienceFit || 
-          !analysisContent.marketSize ||
-          !analysisContent.businessModelStrength ||
-          !analysisContent.fundingRequirements ||
-          !analysisContent.swotAnalysis) {
+          !analysisContent.marketViability || 
+          !analysisContent.uniqueValueProposition) {
         console.error("Missing required fields in response:", analysisContent);
         throw new Error("Invalid response structure from AI service");
       }
@@ -181,7 +171,7 @@ export async function generateExecutionPlan(
 export async function findInvestors(
   startupIdea: string,
   country: string
-): Promise<AnalysisResults["potentialInvestors"]> {
+): Promise<AnalysisResults["findingInvestors"]> {
   try {
     console.log("Starting OpenAI investors search...");
     
@@ -207,7 +197,7 @@ export async function findInvestors(
           - tags: array of 2-3 strings (industry focus, stage preference, etc.)
           - crunchbaseLink: fictional but realistic looking Crunchbase URL (string)
           
-          Format your response as a JSON object that would fit the 'potentialInvestors' field in a larger analysis structure.
+          Format your response as a JSON object that would fit the 'findingInvestors' field in a larger analysis structure.
           Return ONLY a valid JSON object without any explanations, text, or markdown before or after.
           
           IMPORTANT DISCLAIMER: The investor information is AI-generated and for illustration purposes only. Always verify manually before contacting.`
@@ -239,7 +229,7 @@ export async function findInvestors(
         throw new Error("Invalid investors response structure");
       }
       
-      return investorsContent as AnalysisResults["potentialInvestors"];
+      return investorsContent as AnalysisResults["findingInvestors"];
     } catch (parseError) {
       console.error("Failed to parse OpenAI investors response:", parseError);
       console.error("Response content:", response.choices[0].message.content);
