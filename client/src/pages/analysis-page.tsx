@@ -750,16 +750,16 @@ export default function AnalysisPage() {
             </CardContent>
           </Card>
           
-          {/* The 8 Analysis Blocks Grid */}
+          {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
-            className="grid gap-8 md:grid-cols-2"
+            className="grid gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
             {/* 1. Success Rate */}
             {analysisData.successRate && (
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="md:col-span-2">
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -805,7 +805,7 @@ export default function AnalysisPage() {
             
             {/* 3. Target Audience Fit */}
             {analysisData.targetAudienceFit && (
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="md:col-span-2">
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -922,7 +922,7 @@ export default function AnalysisPage() {
             
             {/* 7. SWOT Analysis */}
             {analysisData.swotAnalysis && (
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="md:col-span-2 md:row-span-2">
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -1086,11 +1086,6 @@ export default function AnalysisPage() {
             <CardTitle className="text-xl text-white">Plan Your Execution Budget</CardTitle>
             <CardDescription className="text-white/70">
               Enter your available budget to get a detailed execution plan
-              {!user?.planType || user.planType !== "unicorn" ? (
-                <span className="block mt-2 font-medium text-amber-400">
-                  This is a Unicorn-only feature. You'll need to upgrade your plan.
-                </span>
-              ) : null}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1174,9 +1169,9 @@ export default function AnalysisPage() {
             </CardHeader>
           </Card>
           
-          {/* 6 Budget Analysis Results Blocks */}
+          {/* 6 Budget Analysis Results Blocks - Bento Grid Layout */}
           <motion.div 
-            className="grid gap-6 md:grid-cols-2"
+            className="grid gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
