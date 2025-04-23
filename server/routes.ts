@@ -316,18 +316,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { title, description, tags } = req.body;
+    const { title, content } = req.body;
     
-    if (!title || !description) {
-      return res.status(400).json({ message: "Title and description are required" });
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
     }
     
     try {
       const newPost: InsertPost = {
         authorId: req.user.id,
         title,
-        description,
-        tags: Array.isArray(tags) ? tags : []
+        content,
+        pumpCount: 0,
+        dumpCount: 0
       };
       
       const post = await storage.createPost(newPost);
