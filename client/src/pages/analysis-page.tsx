@@ -857,6 +857,7 @@ export default function AnalysisPage() {
                       segments={analysisData.marketSize.segments}
                       totalSize={analysisData.marketSize.totalSize}
                       message={analysisData.marketSize.message}
+                      country={ideaForm.getValues().country || "United States"}
                     />
                   </CardContent>
                 </Card>

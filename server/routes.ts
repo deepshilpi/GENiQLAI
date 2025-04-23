@@ -285,9 +285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    if (req.user.planType !== "unicorn") {
-      return res.status(403).json({ message: "Unicorn plan required for this feature" });
-    }
+    // All features now available to all users
+    // Premium plan check removed
     
     const { startupIdea, initialBudget } = req.body;
     
@@ -338,15 +337,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Find investors (Unicorn feature)
+  // Find investors (Previously Unicorn feature, now available to all)
   app.post("/api/investors", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    if (req.user.planType !== "unicorn") {
-      return res.status(403).json({ message: "Unicorn plan required for this feature" });
-    }
+    // All features now available to all users
+    // Premium plan check removed
     
     const { startupIdea } = req.body;
     
