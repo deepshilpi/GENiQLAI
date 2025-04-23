@@ -71,6 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Refresh other queries that might depend on authentication
       queryClient.invalidateQueries();
       
+      // Redirect to home page
+      navigate("/");
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
@@ -107,6 +110,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Refresh other queries that might depend on authentication
       queryClient.invalidateQueries();
+      
+      // Redirect to home page
+      navigate("/");
       
       toast({
         title: "Registration successful",
