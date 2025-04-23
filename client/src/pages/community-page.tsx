@@ -54,7 +54,8 @@ import {
   HelpCircle,
   Hash,
   ChevronRight,
-  BellPlus
+  BellPlus,
+  Award
 } from "lucide-react";
 
 export default function CommunityPage() {
@@ -551,7 +552,6 @@ export default function CommunityPage() {
                         <div key={i} className="flex items-center gap-2">
                           <div className="relative">
                             <Avatar className="h-8 w-8 border border-primary/20">
-                              <AvatarImage src={`/avatars/0${i}.png`} />
                               <AvatarFallback>{["JD", "AS", "MK"][i-1]}</AvatarFallback>
                             </Avatar>
                             <div className="absolute -bottom-1 -right-1 bg-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold text-white">
