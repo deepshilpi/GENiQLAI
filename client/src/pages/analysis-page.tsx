@@ -21,12 +21,14 @@ import {
   BarChart3,
   Brain,
   ChevronRight,
+  CheckCircle,
   Cog,
   Coins,
   Compass,
   Eye,
   FileDown,
   Gauge,
+  Lightbulb,
   LineChart,
   PieChart,
   PlusCircle,
@@ -38,6 +40,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 import { AuthDialog } from "@/components/auth-dialog";
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";

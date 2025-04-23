@@ -58,40 +58,51 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
   };
 
   return (
-    <div className="space-y-5">
-      <div className="relative h-64 w-full flex items-center justify-center">
+    <div className="space-y-6">
+      <div className="relative h-72 w-full flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center">
           {totalSize && (
-            <div className="text-center z-10 pointer-events-none">
-              <p className="text-xs font-medium text-white/60">Total Market</p>
-              <p className="text-xl font-bold text-white">{formatCurrency(totalSize)}</p>
+            <div className="text-center z-10 pointer-events-none p-4 bg-vision-purple-200/10 backdrop-blur-md rounded-full border border-vision-purple-200/30">
+              <div className="absolute inset-0 bg-vision-primary-gradient/10 rounded-full blur-xl"></div>
+              <p className="text-xs font-medium text-white/70 mb-1">Total Available Market</p>
+              <p className="text-2xl font-bold text-white relative">{formatCurrency(totalSize)}</p>
             </div>
           )}
         </div>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
+            <defs>
+              {normalizedData.map((entry, index) => (
+                <linearGradient key={`gradient-${index}`} id={`marketSizeGradient-${index}`} x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor={entry.fill} stopOpacity={0.8} />
+                  <stop offset="100%" stopColor={entry.fill} stopOpacity={1} />
+                </linearGradient>
+              ))}
+            </defs>
             <Pie
               data={normalizedData}
               cx="50%"
               cy="50%"
-              innerRadius={70}
-              outerRadius={90}
-              paddingAngle={3}
+              innerRadius={80}
+              outerRadius={110}
+              paddingAngle={4}
               dataKey="value"
               onMouseEnter={onPieEnter}
               onMouseLeave={onPieLeave}
-              animationDuration={1500}
-              strokeWidth={0}
+              animationDuration={1800}
+              animationBegin={300}
+              strokeWidth={1}
+              stroke="rgba(255,255,255,0.1)"
             >
               {normalizedData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={entry.fill} 
-                  stroke={activeIndex === index ? "#fff" : "transparent"} 
-                  strokeWidth={activeIndex === index ? 2 : 0}
+                  fill={`url(#marketSizeGradient-${index})`} 
+                  stroke={activeIndex === index ? "#fff" : "rgba(255,255,255,0.1)"} 
+                  strokeWidth={activeIndex === index ? 2 : 1}
                   className="transition-all duration-300"
                   style={{
-                    filter: activeIndex === index ? "brightness(1.2) drop-shadow(0 0 8px rgba(167, 139, 250, 0.5))" : "none",
+                    filter: activeIndex === index ? "brightness(1.2) drop-shadow(0 0 12px rgba(167, 139, 250, 0.6))" : "none",
                     transform: activeIndex === index ? "scale(1.05)" : "none",
                     opacity: activeIndex === null || activeIndex === index ? 1 : 0.7,
                   }}
@@ -107,17 +118,17 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
               align="center" 
               layout="horizontal" 
               iconType="circle" 
-              iconSize={8}
-              wrapperStyle={{ paddingTop: '15px' }}
+              iconSize={10}
+              wrapperStyle={{ paddingTop: '20px' }}
               formatter={(value: string) => (
-                <span className="text-xs text-white/80">{value}</span>
+                <span className="text-sm text-white/90 font-medium">{value}</span>
               )}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="p-4 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm">
+      <div className="p-5 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
         <p className="text-sm text-white/90 leading-relaxed">{message}</p>
       </div>
       
@@ -125,16 +136,32 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
         {segments.map((segment, i) => (
           <div 
             key={i}
-            className="flex flex-col p-3 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/10 backdrop-blur-sm hover:bg-vision-purple-200/20 transition-colors duration-200"
-            style={{ borderLeftColor: COLORS[i % COLORS.length], borderLeftWidth: '3px' }}
+            className={`flex flex-col p-4 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-all duration-200 ${
+              activeIndex === i ? 'ring-2 ring-offset-2 ring-offset-background ring-' + COLORS[i % COLORS.length].replace('#', '') : ''
+            }`}
+            style={{ 
+              boxShadow: `0 4px 12px -2px ${COLORS[i % COLORS.length]}33`,
+              borderLeftColor: COLORS[i % COLORS.length], 
+              borderLeftWidth: '4px' 
+            }}
+            onMouseEnter={() => setActiveIndex(i)}
+            onMouseLeave={() => setActiveIndex(null)}
           >
-            <span className="text-xs font-medium text-white/80 mb-1">{segment.name}</span>
-            <span className="font-semibold text-lg text-white">{segment.percentage}%</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-white truncate" title={segment.name}>{segment.name}</span>
+              <span className="text-xs font-medium bg-vision-purple-200/20 px-2 py-0.5 rounded-full text-white/80">
+                {segment.percentage}%
+              </span>
+            </div>
             {segment.value && (
-              <span className="text-xs text-white/60 mt-1">
+              <span className="text-lg font-semibold text-white mt-1">
                 {formatCurrency(segment.value)}
               </span>
             )}
+            <div 
+              className="w-full h-1 mt-3 rounded-full opacity-60"
+              style={{ background: `linear-gradient(to right, ${COLORS[i % COLORS.length]}80, ${COLORS[i % COLORS.length]})` }}
+            ></div>
           </div>
         ))}
       </div>
