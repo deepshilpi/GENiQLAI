@@ -61,6 +61,13 @@ import { CAGRChart } from "@/components/analysis/cagr-chart";
 import { FailedExecutionsCard } from "@/components/analysis/failed-executions-card";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
 import { GTMStrategyCard } from "@/components/analysis/gtm-strategy-card";
+import { TargetAudienceFit } from "@/components/analysis/target-audience-fit";
+import { MarketSizeChart } from "@/components/analysis/market-size-chart";
+import { BusinessModelStrength } from "@/components/analysis/business-model-strength";
+import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
+import { RelatedIdeas } from "@/components/analysis/related-ideas";
+import { RiskAnalysis } from "@/components/analysis/risk-analysis";
+import { FeasibilityAnalysis } from "@/components/analysis/feasibility-analysis";
 
 // Define the phases of the analysis
 type AnalysisPhase = "input" | "loading" | "results" | "budget-input" | "budget-loading" | "budget-results";
@@ -476,8 +483,8 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* Market Viability */}
-            {analysisData.marketViability && (
+            {/* Target Audience Fit */}
+            {analysisData.targetAudienceFit && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -487,49 +494,76 @@ export default function AnalysisPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <MarketViabilityCard 
-                      points={analysisData.marketViability.points} 
+                    <TargetAudienceFit 
+                      segments={analysisData.targetAudienceFit.segments}
+                      message={analysisData.targetAudienceFit.message}
+                      overallFit={analysisData.targetAudienceFit.overallFit}
                     />
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* Unique Value Proposition */}
-            {analysisData.uniqueValueProposition && (
+            {/* Business Model Strength */}
+            {analysisData.businessModelStrength && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Lightbulb className="w-5 h-5 mr-2 text-primary" />
-                      Unique Value Proposition
+                      <BarChart3 className="w-5 h-5 mr-2 text-primary" />
+                      Business Model Strength
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <UVPCard 
-                      differentiator={analysisData.uniqueValueProposition.differentiator} 
-                      strengths={analysisData.uniqueValueProposition.strengths} 
+                    <BusinessModelStrength 
+                      overallScore={analysisData.businessModelStrength.overallScore}
+                      categories={analysisData.businessModelStrength.categories}
+                      message={analysisData.businessModelStrength.message}
                     />
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* CAGR feature */}
-            {analysisData.cagr && (
+            {/* SWOT Analysis */}
+            {analysisData.swotAnalysis && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                      Growth Projection (CAGR)
+                      <Activity className="w-5 h-5 mr-2 text-primary" />
+                      SWOT Analysis
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CAGRChart
-                      industryAverage={analysisData.cagr.industryAverage}
-                      potential={analysisData.cagr.potential}
-                      data={analysisData.cagr.data}
+                    <SWOTAnalysis 
+                      strengths={analysisData.swotAnalysis.strengths}
+                      weaknesses={analysisData.swotAnalysis.weaknesses}
+                      opportunities={analysisData.swotAnalysis.opportunities}
+                      threats={analysisData.swotAnalysis.threats}
+                      message={analysisData.swotAnalysis.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Market Size */}
+            {analysisData.marketSize && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <PieChart className="w-5 h-5 mr-2 text-primary" />
+                      Market Size Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MarketSizeChart
+                      total={analysisData.marketSize.total}
+                      segments={analysisData.marketSize.segments}
+                      cagr={analysisData.marketSize.cagr}
+                      message={analysisData.marketSize.message}
                     />
                   </CardContent>
                 </Card>
@@ -808,6 +842,49 @@ export default function AnalysisPage() {
                 </CardContent>
               </Card>
             </motion.div>
+            
+            {/* Feasibility Analysis */}
+            {budgetAnalysisData.feasibilityAnalysis && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <Gauge className="w-5 h-5 mr-2 text-primary" />
+                      Feasibility Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <FeasibilityAnalysis
+                      overallScore={budgetAnalysisData.feasibilityAnalysis.overallScore}
+                      scalabilityTrajectory={budgetAnalysisData.feasibilityAnalysis.scalabilityTrajectory}
+                      breakEvenPoint={budgetAnalysisData.feasibilityAnalysis.breakEvenPoint}
+                      message={budgetAnalysisData.feasibilityAnalysis.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Risk Analysis */}
+            {budgetAnalysisData.riskAnalysis && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
+                      Risk Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RiskAnalysis
+                      overallRiskScore={budgetAnalysisData.riskAnalysis.overallRiskScore}
+                      riskFactors={budgetAnalysisData.riskAnalysis.riskFactors}
+                      message={budgetAnalysisData.riskAnalysis.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
             
             {/* Execution Roadmap */}
             <motion.div variants={itemVariants} className="md:col-span-2">
