@@ -548,6 +548,91 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
+            {/* Market Size */}
+            {analysisData.marketSize && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <PieChart className="w-5 h-5 mr-2 text-primary" />
+                      Market Size Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MarketSizeChart 
+                      segments={analysisData.marketSize.segments}
+                      totalSize={analysisData.marketSize.totalSize}
+                      message={analysisData.marketSize.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Business Model Strength */}
+            {analysisData.businessModelStrength && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <BarChart3 className="w-5 h-5 mr-2 text-primary" />
+                      Business Model Strength
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <BusinessModelStrengthChart 
+                      overall={analysisData.businessModelStrength.overall}
+                      components={analysisData.businessModelStrength.components}
+                      message={analysisData.businessModelStrength.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* SWOT Analysis */}
+            {analysisData.swotAnalysis && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <Activity className="w-5 h-5 mr-2 text-primary" />
+                      SWOT Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SWOTAnalysis 
+                      strengths={analysisData.swotAnalysis.strengths}
+                      weaknesses={analysisData.swotAnalysis.weaknesses}
+                      opportunities={analysisData.swotAnalysis.opportunities}
+                      threats={analysisData.swotAnalysis.threats}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Funding Requirements */}
+            {analysisData.fundingRequired && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <Coins className="w-5 h-5 mr-2 text-primary" />
+                      Funding Requirements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <FundingRequirementsCard 
+                      total={analysisData.fundingRequired.total}
+                      breakdown={analysisData.fundingRequired.breakdown}
+                      message={analysisData.fundingRequired.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
             {/* Unique Value Proposition */}
             {analysisData.uniqueValueProposition && (
               <motion.div variants={itemVariants}>
@@ -622,36 +707,6 @@ export default function AnalysisPage() {
                   title="Previous Failed Executions"
                   description="Upgrade to Pro or Unicorn plan to see similar ideas that failed and why."
                   icon={<AlertTriangle className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
-            )}
-            
-            {/* Funding Requirements (Pro+ feature) */}
-            {analysisData.fundingRequirements ? (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Coins className="w-5 h-5 mr-2 text-primary" />
-                      Funding Requirements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <FundingRequirementsCard
-                      seedRound={analysisData.fundingRequirements.seedRound}
-                      seriesA={analysisData.fundingRequirements.seriesA}
-                      allocation={analysisData.fundingRequirements.allocation}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Funding Requirements"
-                  description="Upgrade to Pro or Unicorn plan to see detailed funding requirements."
-                  icon={<Coins className="w-12 h-12 text-primary/50" />}
                   requiredPlan="pro"
                 />
               </motion.div>
