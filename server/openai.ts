@@ -28,34 +28,106 @@ export async function analyzeStartupIdea(
     // Determine which blocks to include based on the user's plan
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
-    // Build the system prompt with instructions
-    const systemPrompt = `You are a startup analysis expert. Analyze the startup idea for ${country} market and provide detailed insights in JSON format.
+    // Build the system prompt with instructions for the enhanced analysis
+    const systemPrompt = `You are a startup analysis expert. Analyze the startup idea for the ${country} market and provide comprehensive insights in JSON format.
     
-    Your analysis should contain the following blocks:
-    1. successRate: Object with percentage (number from 0-100) and a message (string) about the likelihood of success
-    2. competitors: Object with competitors array (each with name and marketShare as number) and a message
-    3. marketViability: Object with points array (each with title, subtitle, and type - one of: 'success', 'warning', 'danger')
-    4. uniqueValueProposition: Object with differentiator (string) and strengths (array of strings)
+    Your analysis MUST contain the following 8 interactive blocks in this exact JSON structure:
     
-    ${includeProBlocks ? `Additionally, include these blocks:
-    5. cagr: Object with industryAverage (number), potential (number), and data object containing years (array of strings), industryAverageData (array of numbers), potentialData (array of numbers)
-    6. previousFailedExecutions: Object with failures array (each with name, year, reason) and a message
-    7. fundingRequirements: Object with seedRound (min/max), seriesA (min/max/timeframe), allocation (percentages)
-    8. goToMarketStrategy: Object with steps array (each with name and timeframe)` : ""}
+    1. successRate: Object with {
+       percentage: number from 0-100,
+       goodPoints: array of 2-3 strings explaining positive factors,
+       badPoints: array of 2-3 strings explaining negative factors,
+       message: string summarizing the overall success likelihood
+    }
     
-    Follow the exact format specified. Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`;
+    2. competitors: Object with {
+       competitors: array of objects, each with {
+         name: string (company name),
+         marketShare: number (percentage of market),
+         websiteUrl: string (fictional but realistic URL)
+       },
+       message: string summarizing the competitive landscape
+    }
+    
+    3. targetAudienceFit: Object with {
+       segments: array of objects, each with {
+         name: string (demographic or segment name),
+         score: number from 0-100 (how well idea fits this segment)
+       },
+       message: string explaining audience alignment
+    }
+    
+    4. marketSize: Object with {
+       segments: array of objects, each with {
+         name: string (e.g., "local", "national", "global"),
+         percentage: number,
+         value: number (estimated dollar size in millions)
+       },
+       totalSize: number (total market size in millions),
+       message: string explaining market size impact
+    }
+    
+    5. businessModelStrength: Object with {
+       overall: number from 0-100,
+       components: array of objects, each with {
+         name: string (revenue model component),
+         score: number from 0-100,
+         description: string explaining this aspect
+       },
+       message: string summarizing overall business model
+    }
+    
+    6. fundingRequired: Object with {
+       total: number (total funding needed in USD),
+       breakdown: array of objects, each with {
+         category: string (e.g., "Product Development", "Marketing"),
+         amount: number (USD amount),
+         percentage: number (of total funding)
+       },
+       message: string explaining funding needs
+    }
+    
+    7. swotAnalysis: Object with {
+       strengths: array of strings (4-5 items),
+       weaknesses: array of strings (4-5 items),
+       opportunities: array of strings (4-5 items),
+       threats: array of strings (4-5 items)
+    }
+    
+    8. previousFailedExecutions: Object with {
+       failures: array of objects, each with {
+         name: string (company name),
+         year: string (year of failure),
+         reason: string (primary reason for failure)
+       },
+       message: string explaining what can be learned
+    }
+    
+    ${includeProBlocks ? `
+    9. relatedIdeas: Array of objects, each with {
+       title: string (related startup idea),
+       description: string (brief explanation),
+       potentialScore: number from 0-100 (potential success)
+    }
+    ` : ''}
+    
+    All blocks must follow the exact schema specified. Make sure all arrays have at least 3-5 items for richness. All numerical values must be realistic.
+    
+    Use appropriate categories and metrics for the specific startup industry. Make the analysis interesting, insightful, and actionable.
+    
+    Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`;
 
-    console.log("Sending request to OpenAI API...");
+    console.log("Sending enhanced analysis request to OpenAI API...");
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Analyze this startup idea for the ${country} market: ${startupIdea}` }
+        { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
       ],
       response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 3000
+      max_tokens: 4000
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -63,29 +135,33 @@ export async function analyzeStartupIdea(
       throw new Error("Invalid response from AI service");
     }
 
-    console.log("Received response from OpenAI API");
+    console.log("Received enhanced analysis response from OpenAI API");
     
     try {
       const content = response.choices[0].message.content.trim();
       const analysisContent = JSON.parse(content);
       
-      // Validate the basic structure of the response
+      // Validate the basic structure of the enhanced response
       if (!analysisContent.successRate || 
           !analysisContent.competitors || 
-          !analysisContent.marketViability || 
-          !analysisContent.uniqueValueProposition) {
-        console.error("Missing required fields in response:", analysisContent);
+          !analysisContent.targetAudienceFit ||
+          !analysisContent.marketSize ||
+          !analysisContent.businessModelStrength ||
+          !analysisContent.fundingRequired ||
+          !analysisContent.swotAnalysis ||
+          !analysisContent.previousFailedExecutions) {
+        console.error("Missing required fields in enhanced analysis response:", analysisContent);
         throw new Error("Invalid response structure from AI service");
       }
       
       return analysisContent as AnalysisResults;
     } catch (parseError) {
-      console.error("Failed to parse OpenAI response:", parseError);
+      console.error("Failed to parse OpenAI enhanced analysis response:", parseError);
       console.error("Response content:", response.choices[0].message.content);
       throw new Error("Failed to parse analysis results");
     }
   } catch (error) {
-    console.error("OpenAI analysis error:", error);
+    console.error("OpenAI enhanced analysis error:", error);
     if (error instanceof Error) {
       throw error;
     } else {
@@ -94,7 +170,176 @@ export async function analyzeStartupIdea(
   }
 }
 
-// Generate execution plan with budget and roadmap (Unicorn feature)
+// Generate comprehensive budget-based analysis (Enhanced feature for paid plans)
+export async function generateBudgetAnalysis(
+  startupIdea: string,
+  initialBudget: number,
+  country: string
+): Promise<AnalysisResults["budgetAnalysis"]> {
+  try {
+    console.log("Starting OpenAI budget analysis generation...");
+    
+    // Verify the API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is missing");
+      throw new Error("OpenAI API key is not configured");
+    }
+    
+    console.log("Sending request to OpenAI API for budget analysis...");
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are a startup execution planning and financial analysis expert. Create a comprehensive budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
+          
+          Return a JSON object with exactly the following structure:
+          
+          {
+            "initialBudget": ${initialBudget},
+            
+            "feasibilityAndScalability": {
+              "initialFeasibility": number from 0-100,
+              "scalingPoints": [
+                {
+                  "milestone": string (clear business milestone),
+                  "investment": number (additional investment needed),
+                  "potentialReturns": number (estimated ROI),
+                  "feasibilityScore": number from 0-100
+                },
+                ... at least 3 scaling points
+              ],
+              "message": string (explaining feasibility and scaling path)
+            },
+            
+            "riskAnalysis": {
+              "overallRisk": number from 0-100 (higher means more risky),
+              "risks": [
+                {
+                  "category": string (risk category),
+                  "likelihood": number from 0-100,
+                  "impact": number from 0-100,
+                  "mitigationStrategy": string (clear explanation)
+                },
+                ... at least 4-5 different risks
+              ],
+              "message": string (summarizing risk profile)
+            },
+            
+            "goToMarketStrategy": {
+              "timeline": [
+                {
+                  "phase": string (phase name),
+                  "duration": string (e.g., "3 months"),
+                  "activities": array of strings (major activities),
+                  "estimatedCost": number (cost for this phase)
+                },
+                ... at least 3-4 phases
+              ],
+              "message": string (explaining GTM approach)
+            },
+            
+            "longTermVision": {
+              "milestones": [
+                {
+                  "year": string (e.g., "Year 1"),
+                  "goals": array of strings (3-4 key objectives),
+                  "projectedMetrics": {
+                    "revenue": number (projected revenue),
+                    "users": number (projected user count if applicable),
+                    "marketShare": number (projected market share percentage)
+                  }
+                },
+                ... at least 3 years of milestones
+              ],
+              "message": string (explaining long-term vision)
+            },
+            
+            "teamExecutionCapability": {
+              "requiredRoles": [
+                {
+                  "title": string (role title),
+                  "skills": array of strings (required skills),
+                  "importance": number from 0-100,
+                  "estimatedCost": number (annual salary or cost)
+                },
+                ... at least 4-5 key roles
+              ],
+              "hiringTimeline": string (hiring sequence),
+              "message": string (explaining talent requirements)
+            },
+            
+            "fundingAndInvestmentPotential": {
+              "investors": [
+                {
+                  "name": string (investor name),
+                  "firm": string (investment firm),
+                  "investmentFocus": array of strings (focus areas),
+                  "location": string (country/region),
+                  "contactInfo": string (fictional contact method),
+                  "portfolioFit": number from 0-100
+                },
+                ... exactly 5 investors
+              ],
+              "message": string (explaining funding approach)
+            }
+          }
+          
+          Make sure all monetary values are realistic for the startup type and scale in ${country}.
+          All data should be detailed, specific, and actionable.
+          Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`
+        },
+        {
+          role: "user",
+          content: `Create a comprehensive budget analysis for this startup idea in ${country} with an initial budget of $${initialBudget}: ${startupIdea}`
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 4000
+    });
+
+    if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
+      console.error("Empty or invalid response from OpenAI for budget analysis:", response);
+      throw new Error("Invalid response from AI service");
+    }
+    
+    console.log("Received budget analysis response from OpenAI API");
+    
+    try {
+      const content = response.choices[0].message.content.trim();
+      const budgetAnalysisContent = JSON.parse(content);
+      
+      // Validate the basic structure
+      if (!budgetAnalysisContent.initialBudget || 
+          !budgetAnalysisContent.feasibilityAndScalability ||
+          !budgetAnalysisContent.riskAnalysis ||
+          !budgetAnalysisContent.goToMarketStrategy ||
+          !budgetAnalysisContent.longTermVision ||
+          !budgetAnalysisContent.teamExecutionCapability ||
+          !budgetAnalysisContent.fundingAndInvestmentPotential) {
+        console.error("Missing required fields in budget analysis response:", budgetAnalysisContent);
+        throw new Error("Invalid budget analysis structure");
+      }
+      
+      return budgetAnalysisContent as AnalysisResults["budgetAnalysis"];
+    } catch (parseError) {
+      console.error("Failed to parse OpenAI budget analysis response:", parseError);
+      console.error("Response content:", response.choices[0].message.content);
+      throw new Error("Failed to parse budget analysis results");
+    }
+  } catch (error) {
+    console.error("OpenAI budget analysis error:", error);
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error("Failed to generate budget analysis");
+    }
+  }
+}
+
+// Legacy function kept for backward compatibility
 export async function generateExecutionPlan(
   startupIdea: string,
   initialBudget: number

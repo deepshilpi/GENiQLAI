@@ -281,17 +281,151 @@ export const messageReadsRelations = relations(messageReads, ({ one }) => ({
 }));
 
 export type AnalysisResults = {
-  successRate?: {
+  // Initial 8 interactive blocks
+  successRate: {
     percentage: number;
+    goodPoints: string[];
+    badPoints: string[];
     message: string;
   };
-  competitors?: {
+  competitors: {
     competitors: Array<{
       name: string;
       marketShare: number;
+      websiteUrl?: string;
     }>;
     message: string;
   };
+  targetAudienceFit: {
+    segments: Array<{
+      name: string;
+      score: number; // 0-100 for radar chart
+    }>;
+    message: string;
+  };
+  marketSize: {
+    segments: Array<{
+      name: string; // local, national, global
+      percentage: number;
+      value?: number; // optional monetary value
+    }>;
+    totalSize?: number;
+    message: string;
+  };
+  businessModelStrength: {
+    overall: number; // 0-100
+    components: Array<{
+      name: string; // e.g., "Revenue Streams", "Cost Structure"
+      score: number; // 0-100
+      description: string;
+    }>;
+    message: string;
+  };
+  fundingRequired: {
+    total: number;
+    breakdown: Array<{
+      category: string;
+      amount: number;
+      percentage: number;
+    }>;
+    message: string;
+  };
+  swotAnalysis: {
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    threats: string[];
+  };
+  previousFailedExecutions: {
+    failures: Array<{
+      name: string;
+      year: string;
+      reason: string;
+    }>;
+    message: string;
+  };
+  
+  // Related ideas suggestion
+  relatedIdeas?: Array<{
+    title: string;
+    description: string;
+    potentialScore: number; // 0-100
+  }>;
+  
+  // Budget-based analysis (6 additional blocks)
+  budgetAnalysis?: {
+    initialBudget: number;
+    
+    feasibilityAndScalability: {
+      initialFeasibility: number; // 0-100
+      scalingPoints: Array<{
+        milestone: string;
+        investment: number;
+        potentialReturns: number;
+        feasibilityScore: number; // 0-100
+      }>;
+      message: string;
+    };
+    
+    riskAnalysis: {
+      overallRisk: number; // 0-100, higher means more risky
+      risks: Array<{
+        category: string;
+        likelihood: number; // 0-100
+        impact: number; // 0-100
+        mitigationStrategy: string;
+      }>;
+      message: string;
+    };
+    
+    goToMarketStrategy: {
+      timeline: Array<{
+        phase: string;
+        duration: string;
+        activities: string[];
+        estimatedCost: number;
+      }>;
+      message: string;
+    };
+    
+    longTermVision: {
+      milestones: Array<{
+        year: string;
+        goals: string[];
+        projectedMetrics: {
+          revenue?: number;
+          users?: number;
+          marketShare?: number;
+        };
+      }>;
+      message: string;
+    };
+    
+    teamExecutionCapability: {
+      requiredRoles: Array<{
+        title: string;
+        skills: string[];
+        importance: number; // 0-100
+        estimatedCost: number;
+      }>;
+      hiringTimeline: string;
+      message: string;
+    };
+    
+    fundingAndInvestmentPotential: {
+      investors: Array<{
+        name: string;
+        firm: string;
+        investmentFocus: string[];
+        location: string;
+        contactInfo?: string;
+        portfolioFit: number; // 0-100
+      }>;
+      message: string;
+    };
+  };
+  
+  // Original fields preserved for compatibility
   marketViability?: {
     points: Array<{
       title: string;
@@ -310,30 +444,6 @@ export type AnalysisResults = {
       years: string[];
       industryAverageData: number[];
       potentialData: number[];
-    };
-  };
-  previousFailedExecutions?: {
-    failures: Array<{
-      name: string;
-      year: string;
-      reason: string;
-    }>;
-    message: string;
-  };
-  fundingRequirements?: {
-    seedRound: {
-      min: number;
-      max: number;
-    };
-    seriesA: {
-      min: number;
-      max: number;
-      timeframe: string;
-    };
-    allocation: {
-      productDevelopment: number;
-      marketing: number;
-      operations: number;
     };
   };
   goToMarketStrategy?: {
