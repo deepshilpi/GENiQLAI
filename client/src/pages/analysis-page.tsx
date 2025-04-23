@@ -200,6 +200,8 @@ export default function AnalysisPage() {
         throw new Error(data.message || "Failed to generate execution plan");
       }
       
+      console.log("Execution plan API response:", data);
+      
       // Also get investor recommendations
       const investorsResponse = await apiRequest("POST", "/api/investors", {
         startupIdea: ideaForm.getValues().idea,
@@ -810,6 +812,15 @@ export default function AnalysisPage() {
       {/* BUDGET RESULTS PHASE */}
       {phase === "budget-results" && budgetAnalysisData && (
         <div className="space-y-6">
+          {/* Debug information - will be hidden in production */}
+          <div className="p-4 mb-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
+            <h3 className="mb-2 text-lg font-medium text-white">Debug Info</h3>
+            <p className="text-white/80">budgetAnalysis exists: {budgetAnalysisData.budgetAnalysis ? "Yes" : "No"}</p>
+            <p className="text-white/80">Object keys: {Object.keys(budgetAnalysisData).join(", ")}</p>
+            {budgetAnalysisData.budgetAnalysis && (
+              <p className="text-white/80">budgetAnalysis keys: {Object.keys(budgetAnalysisData.budgetAnalysis).join(", ")}</p>
+            )}
+          </div>
           {/* Budget Result Header */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>

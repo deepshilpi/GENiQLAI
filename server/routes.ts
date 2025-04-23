@@ -238,17 +238,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the user's country for context
       const userCountry = req.user.country || "United States"; // Default if not specified
       
+      // Log request data
+      console.log("Execution plan request:", { startupIdea, initialBudget, userCountry });
+      
       // First, get the basic execution plan (used mainly for the budget breakdown)
       const executionPlan = await generateExecutionPlan(startupIdea, initialBudget);
+      console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
       
       // Then, get the comprehensive budget analysis
       const budgetAnalysis = await generateBudgetAnalysis(startupIdea, initialBudget, userCountry);
+      console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
-      // Return the combined data
-      return res.status(200).json({
+      // Combine the data
+      const responseData = {
         ...executionPlan,
         budgetAnalysis
-      });
+      };
+      
+      console.log("Full response structure:", Object.keys(responseData));
+      
+      // Return the combined data
+      return res.status(200).json(responseData);
     } catch (error) {
       console.error("Error generating execution plan:", error);
       return res.status(500).json({ message: "Failed to generate execution plan" });
