@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
@@ -393,109 +393,191 @@ export default function CommunityPage() {
             {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
             <div className="lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                {/* Community Card - Modern Style */}
-                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-9 h-9 bg-primary/20 rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-base">GENIQL Community</h3>
-                      <p className="text-xs text-muted-foreground">Founded April 2025</p>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    A place to share and discuss startup ideas, get feedback, and connect with other founders.
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-accent/30 rounded-md p-2.5 text-center">
-                      <div className="font-semibold text-lg">{posts?.length || 0}</div>
-                      <div className="text-xs text-muted-foreground">Members</div>
-                    </div>
-                    <div className="bg-accent/30 rounded-md p-2.5 text-center">
-                      <div className="font-semibold text-lg">
-                        {Math.min(Math.floor((posts?.length || 10) / 3) + 1, 50)}
+                {/* Community Card - Modern Vision UI Style */}
+                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                        <Users className="w-6 h-6 text-white" />
                       </div>
-                      <div className="text-xs text-muted-foreground">Online</div>
+                      <div>
+                        <CardTitle className="text-lg tracking-tight">GENIQL Community</CardTitle>
+                        <CardDescription>Founded April 2025</CardDescription>
+                      </div>
                     </div>
-                  </div>
+                  </CardHeader>
                   
-                  <Button 
-                    className="w-full rounded-md" 
-                    onClick={handleNewPost}
-                    variant="default"
-                  >
-                    <ImageIcon className="w-4 h-4 mr-2" /> 
-                    <span className="hidden xs:inline">Create Post</span>
-                    <span className="xs:hidden">Post</span>
-                  </Button>
-                </div>
-                
-                {/* Popular Tags Card - Enhanced Design */}
-                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-base flex items-center">
-                      <Filter className="w-4 h-4 mr-2 text-primary" />
-                      Popular Tags
-                    </h3>
+                  <CardContent className="pb-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      A place to share and discuss startup ideas, get feedback, and connect with other founders.
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="bg-primary/10 rounded-md p-2.5 text-center backdrop-blur-sm">
+                        <div className="font-semibold text-lg">{posts?.length || 0}</div>
+                        <div className="text-xs text-muted-foreground">Members</div>
+                      </div>
+                      <div className="bg-primary/10 rounded-md p-2.5 text-center backdrop-blur-sm">
+                        <div className="font-semibold text-lg">
+                          {Math.min(Math.floor((posts?.length || 10) / 3) + 1, 50)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Online</div>
+                      </div>
+                    </div>
+                    
                     <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                      onClick={() => {
-                        setSearchType("tags");
-                        setSearchQuery("");
-                      }}
+                      className="w-full rounded-md shadow-md border border-primary/20 bg-primary/90 hover:bg-primary" 
+                      onClick={handleNewPost}
                     >
-                      View All
+                      <ImageIcon className="w-4 h-4 mr-2" /> 
+                      Create Post
                     </Button>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {['AI', 'SaaS', 'Fintech', 'E-commerce', 'Health', 'Marketplace', 'Mobile', 'Education'].map((tag) => (
-                      <div 
-                        key={tag} 
-                        className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs cursor-pointer hover:bg-primary/20 transition-colors flex items-center"
-                        onClick={() => {
-                          setSearchType("tags");
-                          setSearchQuery(tag);
-                        }}
-                      >
-                        #{tag}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
                 
-                {/* Community Rules - Only visible on desktop */}
-                <div className="hidden lg:block bg-card border border-border rounded-lg p-4 shadow-sm">
-                  <h3 className="font-semibold text-base mb-3 flex items-center">
-                    <Clock className="w-4 h-4 mr-2 text-primary" />
-                    Getting Started
-                  </h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</div>
-                      <span>Share your innovative startup idea with the community</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</div>
-                      <span>Get constructive feedback from experienced founders</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</div>
-                      <span>Use the AI analysis tool to evaluate market potential</span>
-                    </li>
-                  </ul>
-                </div>
+                {/* Popular Tags Card */}
+                <Card className="border-primary/20 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center">
+                      <Hash className="h-4 w-4 mr-2 text-primary" />
+                      Trending Tags
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("ai")}>
+                        #ai
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("saas")}>
+                        #saas
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("marketplace")}>
+                        #marketplace
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("fintech")}>
+                        #fintech
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("mobile")}>
+                        #mobile
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("sustainability")}>
+                        #sustainability
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Community Resources */}
+                <Card className="border-primary/20 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center">
+                      <HelpCircle className="h-4 w-4 mr-2 text-primary" />
+                      Community Resources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <MessageSquare className="h-4 w-4 text-blue-500" />
+                          </div>
+                          <span className="text-sm">Discussion Guidelines</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                            <RefreshCcw className="h-4 w-4 text-green-500" />
+                          </div>
+                          <span className="text-sm">Iterating on Ideas</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                            <Flame className="h-4 w-4 text-amber-500" />
+                          </div>
+                          <span className="text-sm">Finding Co-Founders</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Getting Started Card */}
+                <Card className="border-primary/20 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-primary" />
+                      Getting Started
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</div>
+                        <span>Share your innovative startup idea with the community</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</div>
+                        <span>Get constructive feedback from experienced founders</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</div>
+                        <span>Use the AI analysis tool to evaluate market potential</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                
+                {/* Top Contributors Card */}
+                <Card className="border-primary/20 overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center">
+                      <Award className="h-4 w-4 mr-2 text-primary" />
+                      Top Contributors
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="relative">
+                            <Avatar className="h-8 w-8 border border-primary/20">
+                              <AvatarImage src={`/avatars/0${i}.png`} />
+                              <AvatarFallback>{["JD", "AS", "MK"][i-1]}</AvatarFallback>
+                            </Avatar>
+                            <div className="absolute -bottom-1 -right-1 bg-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold text-white">
+                              {i}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium truncate">{["JaneDoe", "AlexSmith", "MikeKhan"][i-1]}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {[52, 47, 36][i-1]} posts
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="bg-primary/10 h-5 text-[10px]">
+                            <span className="text-primary">+{[12, 9, 7][i-1]}</span>
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
         </main>
         
-        <Footer />
+        {/* Footer removed */}
       </div>
     </div>
   );
