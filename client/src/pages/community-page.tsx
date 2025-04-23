@@ -394,48 +394,6 @@ export default function CommunityPage() {
             {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
             <div className="lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                {/* Community Card - Modern Vision UI Style */}
-                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-                        <Users className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg tracking-tight">GENIQL Community</CardTitle>
-                        <CardDescription>Founded April 2025</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pb-4">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      A place to share and discuss startup ideas, get feedback, and connect with other founders.
-                    </p>
-                    
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <div className="bg-primary/10 rounded-md p-2.5 text-center backdrop-blur-sm">
-                        <div className="font-semibold text-lg">{posts?.length || 0}</div>
-                        <div className="text-xs text-muted-foreground">Members</div>
-                      </div>
-                      <div className="bg-primary/10 rounded-md p-2.5 text-center backdrop-blur-sm">
-                        <div className="font-semibold text-lg">
-                          {Math.min(Math.floor((posts?.length || 10) / 3) + 1, 50)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Online</div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      className="w-full rounded-md shadow-md border border-primary/20 bg-primary/90 hover:bg-primary" 
-                      onClick={handleNewPost}
-                    >
-                      <ImageIcon className="w-4 h-4 mr-2" /> 
-                      Create Post
-                    </Button>
-                  </CardContent>
-                </Card>
                 
                 {/* Popular Tags Card */}
                 <Card className="border-primary/20 overflow-hidden">
