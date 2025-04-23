@@ -380,9 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authorId: req.user.id,
         title,
         description,
-        tags: tags || [],
-        pumpCount: 0,
-        dumpCount: 0
+        tags: tags || []
       };
       
       const post = await storage.createPost(newPost);

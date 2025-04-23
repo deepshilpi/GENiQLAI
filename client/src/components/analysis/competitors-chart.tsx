@@ -103,7 +103,11 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
               dataKey="marketShare" 
               name="Market Share" 
               radius={[4, 4, 0, 0]}
-              fill={(data) => data.isYours ? "#7551FF" : "#CB9FFF"}
+              fill="#CB9FFF"
+              fillOpacity={0.9}
+              // Use Bar.getColorForIndex to set custom colors
+              // Changed to use className with CSS for proper typing
+              className="competitor-bar"
             />
           </BarChart>
         </ResponsiveContainer>

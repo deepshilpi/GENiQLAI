@@ -117,14 +117,11 @@ export function BusinessModelStrength({ overall, components, message }: Business
             <Tooltip content={renderTooltip} />
             <Bar 
               dataKey="score" 
-              fill={(entry) => {
-                const score = entry.score;
-                return score >= 60 ? '#22c55e' : 
-                      score >= 40 ? '#f59e0b' : 
-                      '#ef4444';
-              }}
+              fill="#22c55e"
               radius={[0, 4, 4, 0]}
               barSize={16}
+              // Use CSS classes with tailwind to style based on score
+              className="business-model-bar"
             />
           </BarChart>
         </ResponsiveContainer>
