@@ -150,7 +150,7 @@ export function FeasibilityAnalysis({
                   stroke: '#A163F7', 
                   strokeWidth: 2, 
                   fill: '#7551FF',
-                  onMouseOver: (data) => setHoveredMilestone(data.payload.index),
+                  onMouseOver: (data: any) => setHoveredMilestone(data.payload.index),
                   onMouseLeave: () => setHoveredMilestone(null)
                 }}
                 dot={{ 
