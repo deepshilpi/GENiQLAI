@@ -87,7 +87,7 @@ export default function AnalysisPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
-  const searchParams = new URLSearchParams(location.search);
+  const searchParams = new URLSearchParams(location.search || "");
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("");
   

@@ -82,7 +82,8 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
               dataKey="marketShare" 
               name="Market Share" 
               radius={[4, 4, 0, 0]}
-              fill={(data) => data.isYours ? "#7551FF" : "#CB9FFF"}
+              fill="#CB9FFF"
+              fillOpacity={0.8}
             />
           </BarChart>
         </ResponsiveContainer>
