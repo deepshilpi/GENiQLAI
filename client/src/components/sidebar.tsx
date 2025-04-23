@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Menu,
   Bell,
-  Mail
+  Mail,
+  Database
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -189,6 +190,19 @@ export function Sidebar() {
             >
               <BarChart3 className="w-5 h-5" />
               {!collapsed && <span>Analytics</span>}
+            </div>
+          </li>
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/database") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/database")}
+            >
+              <Database className="w-5 h-5" />
+              {!collapsed && <span>Database</span>}
             </div>
           </li>
           {(user?.planType === "pro" || user?.planType === "unicorn") && (
