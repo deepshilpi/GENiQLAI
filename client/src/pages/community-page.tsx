@@ -160,13 +160,13 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-background">
       <Sidebar />
       
-      <div className="ml-0 md:ml-64 flex-1 flex flex-col w-full transition-all duration-300">
+      <div className="ml-0 md:ml-64 flex-1 flex flex-col w-full max-w-full transition-all duration-300">
         <Header />
         
-        <main className="p-4 md:p-6 flex-1 overflow-y-auto">
+        <main className="p-3 sm:p-4 md:p-6 flex-1 overflow-y-auto w-full">
           {/* Page Header with Responsive Design */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
@@ -190,6 +190,7 @@ export default function CommunityPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-card border-border max-w-3xl">
+                <DialogTitle className="sr-only">Create New Post</DialogTitle>
                 <PostForm onComplete={() => setShowPostForm(false)} />
               </DialogContent>
             </Dialog>
@@ -241,9 +242,9 @@ export default function CommunityPage() {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full max-w-full">
             {/* Main Content Area - Responsive Grid (9/12 on desktop, full on mobile) */}
-            <div className="lg:col-span-8 xl:col-span-9 order-2 lg:order-1">
+            <div className="w-full lg:col-span-8 xl:col-span-9 order-2 lg:order-1">
               <Tabs defaultValue="latest" className="mb-6">
                 <TabsList className="mb-4 bg-card w-full rounded-lg shadow-sm overflow-hidden">
                   <TabsTrigger value="latest" className="flex-1 py-3">
@@ -392,11 +393,12 @@ export default function CommunityPage() {
             </div>
             
             {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
-            <div className="lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <div className="w-full lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-w-full">
                 
                 {/* Popular Tags Card */}
-                <Card className="border-primary/20 overflow-hidden">
+                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center">
                       <Hash className="h-4 w-4 mr-2 text-primary" />
@@ -428,7 +430,8 @@ export default function CommunityPage() {
                 </Card>
                 
                 {/* Getting Started Card */}
-                <Card className="border-primary/20 overflow-hidden">
+                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center">
                       <Clock className="h-4 w-4 mr-2 text-primary" />
@@ -454,7 +457,8 @@ export default function CommunityPage() {
                 </Card>
                 
                 {/* Top Contributors Card */}
-                <Card className="border-primary/20 overflow-hidden">
+                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center">
                       <Award className="h-4 w-4 mr-2 text-primary" />
