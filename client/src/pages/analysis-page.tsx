@@ -62,6 +62,12 @@ import { CAGRChart } from "@/components/analysis/cagr-chart";
 import { FailedExecutionsCard } from "@/components/analysis/failed-executions-card";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
 import { GTMStrategyCard } from "@/components/analysis/gtm-strategy-card";
+import { FeasibilityScalability } from "@/components/analysis/feasibility-scalability";
+import { RiskAnalysis } from "@/components/analysis/risk-analysis";
+import { GoToMarketStrategy } from "@/components/analysis/go-to-market-strategy";
+import { LongTermVision } from "@/components/analysis/long-term-vision";
+import { TeamExecution } from "@/components/analysis/team-execution";
+import { FundingInvestors } from "@/components/analysis/funding-investors";
 
 // Define the phases of the analysis
 type AnalysisPhase = "input" | "loading" | "results" | "budget-input" | "budget-loading" | "budget-results";
