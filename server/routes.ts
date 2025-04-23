@@ -52,6 +52,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupWebSocketServer(httpServer);
   
   // API routes
+  // Check remaining free analyses for anonymous users
+  app.get("/api/check-free-analyses", (req, res) => {
+    // For authenticated users, no limit
+    if (req.isAuthenticated()) {
+      return res.json({ remainingFreeAnalyses: Infinity });
+    }
+    
+    // For anonymous users, check session
+    const MAX_FREE_ANALYSES = 2;
+    const anonymousAnalysisCount = req.session.anonymousAnalysisCount || 0;
+    const remainingFreeAnalyses = Math.max(0, MAX_FREE_ANALYSES - anonymousAnalysisCount);
+    
+    return res.json({ remainingFreeAnalyses });
+  });
+  
   // Analyze startup idea - allow limited free usage for anonymous users
   app.post("/api/analyze", async (req, res) => {
     const { startupIdea } = req.body;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -248,6 +248,35 @@ export default function AnalysisPage() {
       });
     }
   };
+  
+  // Check for pending analysis from sessionStorage (populated by home page)
+  useEffect(() => {
+    const pendingIdea = sessionStorage.getItem('pendingStartupIdea');
+    const userCountry = sessionStorage.getItem('userCountry');
+    
+    if (pendingIdea) {
+      // Clear sessionStorage to prevent resubmission
+      sessionStorage.removeItem('pendingStartupIdea');
+      sessionStorage.removeItem('userCountry');
+      
+      // Set form values
+      ideaForm.setValue('idea', pendingIdea);
+      if (userCountry) {
+        ideaForm.setValue('country', userCountry);
+      }
+      
+      // Auto-submit the form with the current values
+      const formValues = ideaForm.getValues();
+      const timer = setTimeout(() => {
+        onIdeaSubmit({
+          idea: formValues.idea,
+          country: formValues.country
+        });
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
   
   // Handle budget submission
   const onBudgetSubmit = async (values: z.infer<typeof budgetSchema>) => {
