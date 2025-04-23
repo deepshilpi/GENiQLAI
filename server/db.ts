@@ -2,6 +2,7 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
+import { Logger } from 'drizzle-orm';
 
 neonConfig.webSocketConstructor = ws;
 
@@ -11,10 +12,22 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Create a custom query logger
+class CustomQueryLogger implements Logger {
+  logQuery(query: string, params: unknown[]): void {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Query:', query);
+      if (params && params.length > 0) {
+        console.log('Params:', params);
+      }
+    }
+  }
+}
+
 // Create a function to set up the connection pool with resilient retry logic
-const createPool = () => {
+const createPool = (connectionString: string, poolName: string = 'default') => {
   const newPool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     max: 20,             // Maximum number of clients in the pool
     idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
     connectionTimeoutMillis: 5000, // Extended timeout for connections
@@ -24,12 +37,12 @@ const createPool = () => {
   
   // Log pool events for monitoring
   newPool.on('connect', (client) => {
-    console.log('New database connection established');
+    console.log(`New database connection established for pool: ${poolName}`);
   });
 
   // Handle connection errors with retry logic
   newPool.on('error', (err, client) => {
-    console.error('Unexpected database error on client:', err);
+    console.error(`Unexpected database error on client (pool: ${poolName}):`, err);
     
     // Don't propagate the error which would crash the server
     // The connection will be automatically retried on next query
@@ -38,8 +51,13 @@ const createPool = () => {
   return newPool;
 };
 
-// Configure connection pool with retry capability
-export const pool = createPool();
+// Configure connection pool with retry capability for main database
+export const pool = createPool(process.env.DATABASE_URL, 'main');
+
+// Create and export a function to generate additional connection pools
+export function createAdditionalPool(connectionString: string, poolName: string) {
+  return createPool(connectionString, poolName);
+}
 
 // Test the connection and retry on startup if needed
 (async () => {
@@ -65,8 +83,16 @@ export const pool = createPool();
   }
 })();
 
-// Create Drizzle ORM instance with prepared statements
+// Create Drizzle ORM instance with prepared statements for main database
 export const db = drizzle(pool, { 
   schema,
-  logger: process.env.NODE_ENV === 'development' // Enable query logging in development
+  logger: new CustomQueryLogger()
 });
+
+// Create and export a function to generate additional Drizzle instances
+export function createDrizzleInstance(pool: Pool, name: string = 'additional') {
+  return drizzle(pool, {
+    schema,
+    logger: new CustomQueryLogger()
+  });
+}
