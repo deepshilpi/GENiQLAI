@@ -115,20 +115,16 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </Button>
 
               {user && (
-                <div className="relative">
-                  <Button 
-                    variant="ghost" 
-                    className={`w-full justify-start px-3 py-2 text-sm ${isActive('/saved-ideas') 
-                      ? 'bg-vision-primary-gradient text-white' 
-                      : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                  >
-                    <BookmarkIcon className="mr-2 h-4 w-4" />
-                    Saved Ideas
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <SavedIdeasDropdown trigger={null} asMenuItem />
-                    </div>
-                  </Button>
-                </div>
+                <Button 
+                  variant="ghost" 
+                  className={`w-full justify-start px-3 py-2 text-sm ${isActive('/saved-ideas') 
+                    ? 'bg-vision-primary-gradient text-white' 
+                    : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
+                  onClick={() => handleNavigation('/saved-ideas')}
+                >
+                  <BookmarkIcon className="mr-2 h-4 w-4" />
+                  Saved Ideas
+                </Button>
               )}
               </nav>
           </div>

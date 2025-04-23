@@ -161,13 +161,6 @@ export function SavedIdeasDropdown({ className, trigger, asMenuItem = false }: S
         </ScrollArea>
       )}
       
-      <DropdownMenuSeparator />
-      <DropdownMenuItem asChild>
-        <a href="/analysis" className="cursor-pointer">
-          <PlusIcon className="h-4 w-4 mr-2" />
-          New Analysis
-        </a>
-      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 
