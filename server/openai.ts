@@ -29,7 +29,9 @@ export async function analyzeStartupIdea(
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
     // Build the system prompt with instructions for the enhanced analysis
-    const systemPrompt = `You are a startup analysis expert. Analyze the startup idea for the ${country} market and provide comprehensive insights in JSON format.
+    const systemPrompt = `You are a startup analysis expert with extensive experience in venture capital and market analysis. Analyze the startup idea for the ${country} market and provide comprehensive, detailed insights in JSON format.
+    
+    FOCUS ON SPEED AND EFFICIENCY while maintaining high quality and detail. Your analysis must be thorough but produced quickly.
     
     Your analysis MUST contain the following 8 interactive blocks in this exact JSON structure:
     
@@ -126,8 +128,11 @@ export async function analyzeStartupIdea(
         { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 4000
+      temperature: 0.5, // Lower temperature for more focused and faster responses
+      max_tokens: 4000,
+      top_p: 0.9,
+      frequency_penalty: 0.2, // Slightly reduce repetition
+      presence_penalty: 0.1 // Slightly encourage topic variety
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -296,8 +301,11 @@ export async function generateBudgetAnalysis(
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 4000
+      temperature: 0.5, // Lower temperature for more focused and faster responses
+      max_tokens: 4000,
+      top_p: 0.9,
+      frequency_penalty: 0.2, // Slightly reduce repetition
+      presence_penalty: 0.1 // Slightly encourage topic variety
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
