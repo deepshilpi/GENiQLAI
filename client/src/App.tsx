@@ -16,6 +16,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog";
+import { AuthProvider } from "@/hooks/use-auth";
 import { PremiumFeaturesProvider } from "@/hooks/use-premium-features";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -62,12 +63,14 @@ function Router() {
 function App() {
   return (
     <>
-      <AuthDialogProvider>
-        <PremiumFeaturesProvider>
-          <Toaster />
-          <Router />
-        </PremiumFeaturesProvider>
-      </AuthDialogProvider>
+      <AuthProvider>
+        <AuthDialogProvider>
+          <PremiumFeaturesProvider>
+            <Toaster />
+            <Router />
+          </PremiumFeaturesProvider>
+        </AuthDialogProvider>
+      </AuthProvider>
     </>
   );
 }

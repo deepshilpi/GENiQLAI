@@ -88,9 +88,10 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
       if (!loginMutation) {
+        console.error("Login error: AuthContext or loginMutation is not available");
         toast({
           title: "Login Error",
-          description: "Authentication service is not available",
+          description: "Authentication service is not available. Please try refreshing the page.",
           variant: "destructive"
         });
         return;
@@ -107,6 +108,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
       });
     } catch (error) {
       // Error is already handled by the mutation's onError
+      console.error("Login error caught:", error);
     }
   };
 
