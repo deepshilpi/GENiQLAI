@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
+import { ArrowUp, ArrowDown, MessageSquare, Image as ImageIcon } from "lucide-react";
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -66,6 +66,20 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
         <p className="text-muted-foreground text-sm mb-3">
           {truncateText(post.description, 120)}
         </p>
+        
+        {post.imageUrl && (
+          <div className="mb-4 rounded-lg overflow-hidden">
+            <img 
+              src={post.imageUrl} 
+              alt={post.title} 
+              className="w-full h-auto max-h-[300px] object-cover"
+              onError={(e) => {
+                e.currentTarget.src = ""; 
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        )}
         
         <div className="flex flex-wrap gap-2 mb-3">
           {post.tags.map((tag, index) => (

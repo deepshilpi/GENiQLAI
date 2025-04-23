@@ -1,4 +1,4 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import path from "path";
@@ -46,6 +46,21 @@ const activeConnections = new Map<number, Set<UserWebSocket>>();
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
+  
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    // Only allow image files
+    if (!req.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      return res.status(403).send('Forbidden');
+    }
+    next();
+  }, (req, res, next) => {
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    next();
+  });
+  
+  // Serve static files from the uploads directory
+  app.use('/uploads', express.static(path.resolve('./uploads')));
   
   // Create HTTP server
   const httpServer = createServer(app);
@@ -318,19 +333,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { title, content } = req.body;
+    const { title, description, tags, imageUrl } = req.body;
     
-    if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+    if (!title || !description || !tags || !Array.isArray(tags)) {
+      return res.status(400).json({ message: "Title, description, and tags array are required" });
     }
     
     try {
       const newPost: InsertPost = {
         authorId: req.user.id,
         title,
-        content,
-        pumpCount: 0,
-        dumpCount: 0
+        description,
+        tags,
+        imageUrl: imageUrl || null,
       };
       
       const post = await storage.createPost(newPost);
@@ -338,6 +353,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating post:", error);
       return res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+  
+  // Upload an image
+  app.post("/api/uploads", upload.single('image'), async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+    
+    try {
+      // Get the URL for the uploaded file
+      const imageUrl = getUploadUrl(req.file.filename, req);
+      
+      return res.status(201).json({ 
+        imageUrl,
+        message: "Image uploaded successfully" 
+      });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return res.status(500).json({ message: "Failed to upload image" });
     }
   });
   
