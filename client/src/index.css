@@ -4,6 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes dash {
+  from {
+    stroke-dasharray: 0, 1000;
+  }
+  to {
+    stroke-dasharray: var(--dash-value, 0, 1000);
+  }
+}
+
+@keyframes progressWidth {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width, 0%);
+  }
+}
+
 @layer base {
   :root {
     --background: 260 83% 11%; /* Vision UI dark purple background */

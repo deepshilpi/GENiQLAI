@@ -68,17 +68,11 @@ export function BusinessModelStrengthChart({ overall, components, message }: Bus
               strokeDasharray={`${overall * 2.89}, 1000`} 
               strokeLinecap="round"
               transform="rotate(-90 50 50)"
-            >
-              <animate 
-                attributeName="stroke-dasharray" 
-                from="0, 1000" 
-                to={`${overall * 2.89}, 1000`} 
-                dur="1.5s" 
-                fill="freeze" 
-                calcMode="spline"
-                keySplines="0.4 0 0.2 1"
-              />
-            </circle>
+              className="animate-[dash_1.5s_ease-out_forwards]"
+              style={{
+                '--dash-value': `${overall * 2.89}, 1000`,
+              } as React.CSSProperties}
+            />
           </svg>
           <div className="text-center z-10">
             <span className="text-3xl font-bold text-white">{overall}</span>
@@ -122,23 +116,16 @@ export function BusinessModelStrengthChart({ overall, components, message }: Bus
             
             <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-vision-purple-200/10 mt-2">
               <div 
-                className={`h-full transition-all ${
+                className={`h-full transition-all animate-[progressWidth_1s_ease-out_forwards] ${
                   component.score >= 70 ? "bg-gradient-to-r from-green-500/80 to-green-400" : 
                   component.score >= 50 ? "bg-gradient-to-r from-amber-500/80 to-amber-400" : 
                   "bg-gradient-to-r from-red-500/80 to-red-400"
                 }`}
-                style={{ width: '0%' }}
-              >
-                <animate 
-                  attributeName="width" 
-                  from="0%" 
-                  to={`${component.score}%`} 
-                  dur="1s" 
-                  fill="freeze" 
-                  calcMode="spline"
-                  keySplines="0.4 0 0.2 1"
-                />
-              </div>
+                style={{ 
+                  width: '0%',
+                  '--target-width': `${component.score}%` 
+                } as React.CSSProperties}
+              ></div>
             </div>
             
             <p className="text-sm text-white/70 mt-3 leading-relaxed">{component.description}</p>
