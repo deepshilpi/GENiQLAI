@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
+import { analyzeStartupIdea, generateBudgetAnalysis, generateExecutionPlan, findInvestors } from "./openai";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
 import { 
@@ -166,6 +166,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Generate execution plan (Unicorn feature)
+  // Budget analysis endpoint (Enhanced feature for paid plans)
+  app.post("/api/budget-analysis", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    if (req.user.planType === "free") {
+      return res.status(403).json({ message: "Pro or Unicorn plan required for this feature" });
+    }
+    
+    const { startupIdea, initialBudget } = req.body;
+    
+    if (!startupIdea || !initialBudget) {
+      return res.status(400).json({ message: "Startup idea and initial budget are required" });
+    }
+    
+    // Detect country from IP or use provided country
+    const country = req.body.country || detectCountryFromIP(req.ip || '');
+    
+    try {
+      // Add timeout to prevent long-running requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 30000);
+      });
+      
+      // Race between the analysis and the timeout
+      const budgetAnalysis = await Promise.race([
+        generateBudgetAnalysis(startupIdea, initialBudget, country),
+        timeoutPromise
+      ]);
+      
+      return res.status(200).json(budgetAnalysis);
+    } catch (error) {
+      console.error("Error generating budget analysis:", error);
+      
+      // Provide more specific error messages
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("timeout")) {
+        return res.status(504).json({ 
+          message: "Analysis is taking too long. Please try again later.",
+          error: "timeout"
+        });
+      } else {
+        return res.status(500).json({ 
+          message: "Failed to generate budget analysis",
+          error: "analysis_error"
+        });
+      }
+    }
+  });
+  
+  // Legacy execution plan endpoint (kept for backward compatibility)
   app.post("/api/execution-plan", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
@@ -316,17 +369,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { title, content } = req.body;
+    const { title, description, tags } = req.body;
     
-    if (!title || !content) {
-      return res.status(400).json({ message: "Title and content are required" });
+    if (!title || !description) {
+      return res.status(400).json({ message: "Title and description are required" });
     }
     
     try {
       const newPost: InsertPost = {
         authorId: req.user.id,
         title,
-        content,
+        description,
+        tags: tags || [],
         pumpCount: 0,
         dumpCount: 0
       };
