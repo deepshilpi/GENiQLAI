@@ -165,7 +165,7 @@ export default function CommunityPage() {
     <div className="flex h-screen w-full max-w-full overflow-hidden bg-background">
       <Sidebar />
       
-      <div className="ml-0 md:ml-64 flex-1 flex flex-col w-full max-w-full transition-all duration-300">
+      <div className="flex-1 flex flex-col w-full max-w-full transition-all duration-300">
         <Header />
         
         <main className="p-3 sm:p-4 md:p-6 flex-1 overflow-y-auto w-full">

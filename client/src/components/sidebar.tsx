@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
+import Logo from "@/assets/logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,8 +123,8 @@ export function Sidebar() {
       {/* Logo section */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center flex-shrink-0">
-            <BrainCircuit className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+            <Logo width={40} height={40} />
           </div>
           {!collapsed && (
             <div className="ml-3">

@@ -27,6 +27,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { MobileMenu } from "@/components/mobile-menu";
+import Logo from "@/assets/logo";
 
 export function Header() {
   const [location, navigate] = useLocation();
@@ -94,7 +95,7 @@ export function Header() {
                 <Menu className="w-5 h-5" />
               </Button>
               <div className="w-9 h-9 flex items-center justify-center">
-                <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
+                <Logo width={36} height={36} />
               </div>
               <span className="font-heading font-bold text-lg text-white">GENIQL</span>
             </div>
