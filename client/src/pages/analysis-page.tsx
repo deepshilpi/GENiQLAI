@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -136,7 +138,113 @@ const startupIdeaSchema = z.object({
     .min(10, "Your idea must be at least 10 characters long")
     .max(1000, "Your idea is too long, please summarize it"),
   country: z.string().optional(),
+  category: z.string().optional(),
 });
+
+// List of popular countries for the dropdown
+const countries = [
+  { value: "United States", label: "United States" },
+  { value: "China", label: "China" },
+  { value: "India", label: "India" },
+  { value: "United Kingdom", label: "United Kingdom" },
+  { value: "Germany", label: "Germany" },
+  { value: "France", label: "France" },
+  { value: "Japan", label: "Japan" },
+  { value: "Canada", label: "Canada" },
+  { value: "Australia", label: "Australia" },
+  { value: "Brazil", label: "Brazil" },
+  { value: "Singapore", label: "Singapore" },
+  { value: "Israel", label: "Israel" },
+  { value: "Global", label: "Global / International" },
+];
+
+// Startup idea templates by category
+const startupTemplates = {
+  "Technology": [
+    {
+      title: "AI Assistant",
+      description: "An AI-powered virtual assistant that helps users with scheduling, email management, and task automation through natural language processing."
+    },
+    {
+      title: "Blockchain for Supply Chain",
+      description: "A blockchain platform that provides end-to-end transparency and traceability for global supply chains, reducing fraud and improving efficiency."
+    },
+    {
+      title: "AR Navigation",
+      description: "An augmented reality navigation app that overlays directions onto the real world through smartphone cameras, making navigation more intuitive."
+    }
+  ],
+  "Healthcare": [
+    {
+      title: "Remote Patient Monitoring",
+      description: "A wearable device and companion app that continuously monitors vital signs and alerts healthcare providers about concerning changes."
+    },
+    {
+      title: "Mental Health Platform",
+      description: "An AI-driven mental health platform that provides personalized therapy recommendations and tracks progress over time."
+    },
+    {
+      title: "Medical Translation",
+      description: "A real-time medical translation service that helps doctors communicate with patients who speak different languages."
+    }
+  ],
+  "Sustainability": [
+    {
+      title: "Plastic Alternative",
+      description: "A biodegradable alternative to single-use plastics made from agricultural waste that breaks down completely within 90 days."
+    },
+    {
+      title: "Carbon Footprint Tracker",
+      description: "A mobile app that tracks individual carbon footprints and provides actionable recommendations to reduce environmental impact."
+    },
+    {
+      title: "Clean Energy Marketplace",
+      description: "A platform connecting consumers directly with renewable energy producers, allowing users to purchase clean energy at competitive prices."
+    }
+  ],
+  "Finance": [
+    {
+      title: "Micro-Investment Platform",
+      description: "An app that automatically rounds up everyday purchases and invests the spare change in diversified portfolios tailored to user goals."
+    },
+    {
+      title: "Freelancer Banking",
+      description: "A specialized banking platform for freelancers and gig workers that handles invoicing, tax preparation, and retirement planning."
+    },
+    {
+      title: "Financial Literacy Game",
+      description: "An educational mobile game that teaches financial literacy concepts through engaging gameplay and real-world simulations."
+    }
+  ],
+  "Education": [
+    {
+      title: "Personalized Learning Platform",
+      description: "An adaptive learning platform that customizes educational content based on individual student progress and learning styles."
+    },
+    {
+      title: "Vocational Training VR",
+      description: "Virtual reality training modules for vocational skills that simulate real-world working environments and scenarios."
+    },
+    {
+      title: "Peer Teaching Marketplace",
+      description: "A platform connecting students who excel in certain subjects with peers who need help, creating a marketplace for knowledge exchange."
+    }
+  ],
+  "E-commerce": [
+    {
+      title: "AR Shopping Experience",
+      description: "An augmented reality platform that allows shoppers to visualize products in their own space before purchasing."
+    },
+    {
+      title: "Sustainable Marketplace",
+      description: "An online marketplace exclusively for sustainable and ethically-produced goods with transparent supply chains."
+    },
+    {
+      title: "Local Business Delivery",
+      description: "A same-day delivery service that partners with local businesses to compete with large e-commerce platforms."
+    }
+  ]
+};
 
 // Schema for validating budget form
 const budgetSchema = z.object({
@@ -184,6 +292,8 @@ export default function AnalysisPage() {
   const [budgetAnalysisData, setBudgetAnalysisData] = useState<any>(null);
   const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number | null>(null);
   const [relatedIdeasData, setRelatedIdeasData] = useState<any[]>([]);
+  const [selectedCategoryTemplates, setSelectedCategoryTemplates] = useState<Array<{title: string, description: string}>>([]);
+  const [activeTab, setActiveTab] = useState<string>("custom");
   
   // Forms setup
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
@@ -439,40 +549,151 @@ export default function AnalysisPage() {
           <CardContent>
             <Form {...ideaForm}>
               <form onSubmit={ideaForm.handleSubmit(onIdeaSubmit)} className="space-y-6">
-                <FormField
-                  control={ideaForm.control}
-                  name="idea"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Your Startup Idea</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Describe your startup idea in detail..."
-                          className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={ideaForm.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Target Market (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. United States, Global, etc."
-                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={ideaForm.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Target Market</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
+                              <SelectValue placeholder="Select a country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
+                            {countries.map((country) => (
+                              <SelectItem 
+                                key={country.value} 
+                                value={country.value}
+                                className="text-white hover:bg-vision-purple-200/20"
+                              >
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={ideaForm.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Idea Category</FormLabel>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            
+                            // Display category templates when a category is selected
+                            setSelectedCategoryTemplates(
+                              startupTemplates[value as keyof typeof startupTemplates] || []
+                            );
+                            
+                            // Switch to templates tab if a category with templates is selected
+                            if (startupTemplates[value as keyof typeof startupTemplates]) {
+                              setActiveTab("templates");
+                            }
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
+                            {Object.keys(startupTemplates).map((category) => (
+                              <SelectItem 
+                                key={category} 
+                                value={category}
+                                className="text-white hover:bg-vision-purple-200/20"
+                              >
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <Tabs 
+                  value={activeTab} 
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="w-full bg-vision-purple-100/10 border-vision-purple-200/20">
+                    <TabsTrigger 
+                      value="custom" 
+                      className="text-white data-[state=active]:bg-vision-purple-200/20"
+                    >
+                      Custom Idea
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="templates"
+                      disabled={selectedCategoryTemplates.length === 0}
+                      className="text-white data-[state=active]:bg-vision-purple-200/20"
+                    >
+                      Idea Templates
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="custom" className="mt-4">
+                    <FormField
+                      control={ideaForm.control}
+                      name="idea"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Your Startup Idea</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe your startup idea in detail..."
+                              className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="templates" className="mt-4">
+                    <div className="space-y-4">
+                      <FormLabel className="text-white">Select a Template</FormLabel>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {selectedCategoryTemplates.map((template, index) => (
+                          <Card 
+                            key={index}
+                            className="cursor-pointer border-vision-purple-200/20 bg-vision-purple-100/10 backdrop-blur-md hover:bg-vision-purple-200/20 transition"
+                            onClick={() => {
+                              ideaForm.setValue('idea', template.description);
+                              setActiveTab("custom");
+                            }}
+                          >
+                            <CardHeader className="py-3">
+                              <CardTitle className="text-sm font-medium text-white">{template.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="py-2">
+                              <p className="text-xs text-white/70">{template.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+                
                 <Button 
                   type="submit" 
                   className="w-full bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
