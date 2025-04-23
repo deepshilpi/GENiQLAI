@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query"; 
 import { AuthProvider } from "@/hooks/use-auth";
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog";
-import { PremiumFeaturesProvider } from "@/hooks/use-premium-features";
 import { queryClient } from "@/lib/queryClient";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
@@ -59,11 +58,9 @@ function AppProviders({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AuthDialogProvider>
-          <PremiumFeaturesProvider>
-            <TooltipProvider>
-              {children}
-            </TooltipProvider>
-          </PremiumFeaturesProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </AuthDialogProvider>
       </AuthProvider>
     </QueryClientProvider>

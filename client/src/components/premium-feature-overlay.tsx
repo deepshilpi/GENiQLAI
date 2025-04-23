@@ -1,77 +1,37 @@
-import { ReactNode, useState } from "react";
-import { Lock, Crown } from "lucide-react";
+import { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 
-interface PremiumFeatureOverlayProps {
+interface FeatureCardProps {
   title: string;
   description: string;
   icon: ReactNode;
-  requiredPlan: "pro" | "unicorn";
+  onClick: () => void;
 }
 
-export function PremiumFeatureOverlay({
+export function FeatureCard({
   title,
   description,
   icon,
-  requiredPlan,
-}: PremiumFeatureOverlayProps) {
-  const { user } = useAuth();
+  onClick,
+}: FeatureCardProps) {
   const { toast } = useToast();
-  const [upgrading, setUpgrading] = useState(false);
   
-  // Handle upgrade
-  const handleUpgrade = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to upgrade your plan.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setUpgrading(true);
-    
-    try {
-      const response = await apiRequest("POST", "/api/user/plan", {
-        planType: requiredPlan,
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to upgrade plan");
-      }
-      
-      toast({
-        title: "Plan Upgraded",
-        description: `You've been upgraded to the ${requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)} plan!`,
-      });
-      
-      // Reload to update UI
-      window.location.reload();
-    } catch (error) {
-      console.error("Error upgrading plan:", error);
-      toast({
-        title: "Upgrade Failed",
-        description: "There was a problem upgrading your plan. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpgrading(false);
-    }
+  // Handle button click
+  const handleClick = () => {
+    onClick();
+    toast({
+      title: "Feature Activated",
+      description: "This feature is now available for use.",
+    });
   };
 
   return (
-    <Card className="h-full flex flex-col items-center justify-center p-6 text-center border border-dashed border-vision-purple-200/30 bg-vision-card/50 backdrop-blur-sm">
+    <Card className="h-full flex flex-col items-center justify-center p-6 text-center border border-vision-purple-200/30 bg-vision-card/50 backdrop-blur-sm">
       <CardContent className="pt-6 flex flex-col items-center">
         <div className="relative mb-4">
-          <div className="opacity-50">{icon}</div>
-          <div className="absolute -bottom-2 -right-2 bg-vision-primary-gradient rounded-full p-1.5">
-            <Lock className="w-3.5 h-3.5 text-white" />
-          </div>
+          <div>{icon}</div>
         </div>
         
         <h3 className="text-lg font-medium text-white mb-2">{title}</h3>
@@ -83,17 +43,9 @@ export function PremiumFeatureOverlay({
           variant="outline"
           size="sm"
           className="gap-1.5 bg-vision-primary-gradient/10 border-primary/30 hover:bg-vision-primary-gradient/20 text-white"
-          onClick={handleUpgrade}
-          disabled={upgrading}
+          onClick={handleClick}
         >
-          {upgrading ? (
-            <>Upgrading...</>
-          ) : (
-            <>
-              <Crown className="w-3.5 h-3.5" />
-              Upgrade to {requiredPlan === "pro" ? "Pro" : "Unicorn"}
-            </>
-          )}
+          Activate Feature
         </Button>
       </CardContent>
     </Card>

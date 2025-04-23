@@ -9,7 +9,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   bio: text("bio"),
-  planType: text("plan_type").notNull().default("free"), // "free", "pro", "unicorn"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   followersCount: integer("followers_count").notNull().default(0),
   followingCount: integer("following_count").notNull().default(0),

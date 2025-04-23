@@ -53,7 +53,6 @@ import {
   X,
 } from "lucide-react";
 import { AuthDialog } from "@/components/auth-dialog";
-import { PremiumFeatureOverlay } from "@/components/premium-feature-overlay";
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";
 import { CompetitorsChart } from "@/components/analysis/competitors-chart";
 import { MarketViabilityCard } from "@/components/analysis/market-viability-card";
@@ -168,15 +167,6 @@ export default function AnalysisPage() {
       return;
     }
     
-    if (user.planType !== "unicorn") {
-      toast({
-        title: "Unicorn Plan Required",
-        description: "This feature is only available to users on the Unicorn plan. Please upgrade to unlock it.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setPhase("budget-loading");
     setError(null);
     
@@ -242,15 +232,6 @@ export default function AnalysisPage() {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
-      return;
-    }
-    
-    if (user.planType === "free") {
-      toast({
-        title: "Pro Plan Required",
-        description: "Exporting to PDF is a premium feature. Please upgrade to Pro or Unicorn plan to use it.",
-        variant: "destructive",
-      });
       return;
     }
     
@@ -534,8 +515,8 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* CAGR (Pro+ feature) */}
-            {analysisData.cagr ? (
+            {/* CAGR feature */}
+            {analysisData.cagr && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -553,19 +534,10 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Growth Projection (CAGR)"
-                  description="Upgrade to Pro or Unicorn plan to see detailed growth projections for your industry."
-                  icon={<TrendingUp className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
             )}
             
-            {/* Previous Failed Executions (Pro+ feature) */}
-            {analysisData.previousFailedExecutions ? (
+            {/* Previous Failed Executions */}
+            {analysisData.previousFailedExecutions && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -582,19 +554,10 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Previous Failed Executions"
-                  description="Upgrade to Pro or Unicorn plan to see similar ideas that failed and why."
-                  icon={<AlertTriangle className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
             )}
             
-            {/* Funding Requirements (Pro+ feature) */}
-            {analysisData.fundingRequirements ? (
+            {/* Funding Requirements */}
+            {analysisData.fundingRequirements && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -612,19 +575,10 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Funding Requirements"
-                  description="Upgrade to Pro or Unicorn plan to see detailed funding requirements."
-                  icon={<Coins className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
             )}
             
-            {/* Go-to-Market Strategy (Pro+ feature) */}
-            {analysisData.goToMarketStrategy ? (
+            {/* Go-to-Market Strategy */}
+            {analysisData.goToMarketStrategy && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -639,15 +593,6 @@ export default function AnalysisPage() {
                     />
                   </CardContent>
                 </Card>
-              </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Go-to-Market Strategy"
-                  description="Upgrade to Pro or Unicorn plan to see a detailed go-to-market strategy."
-                  icon={<Compass className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
               </motion.div>
             )}
           </motion.div>
@@ -728,11 +673,6 @@ export default function AnalysisPage() {
             <CardTitle className="text-xl text-white">Plan Your Execution Budget</CardTitle>
             <CardDescription className="text-white/70">
               Enter your available budget to get a detailed execution plan
-              {!user?.planType || user.planType !== "unicorn" ? (
-                <span className="block mt-2 font-medium text-amber-400">
-                  This is a Unicorn-only feature. You'll need to upgrade your plan.
-                </span>
-              ) : null}
             </CardDescription>
           </CardHeader>
           <CardContent>
