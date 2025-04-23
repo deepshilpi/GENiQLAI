@@ -3,7 +3,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { CommunityPost } from "@/components/community-post";
 import { PostForm } from "@/components/post-form";
 import { useAuth } from "@/hooks/use-auth";
@@ -17,12 +16,17 @@ import {
 } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Post } from "@shared/schema";
-import { isPlanAllowed } from "@/lib/utils";
 import { 
   Dialog, 
   DialogContent, 
   DialogTrigger 
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 // Extended post type for UI with author and current user vote
 interface ExtendedPost extends Omit<Post, 'tags'> {
@@ -32,15 +36,25 @@ interface ExtendedPost extends Omit<Post, 'tags'> {
   currentUserVote?: 'pump' | 'dump' | null;
   tags: string[];
 }
-import { PricingPlans } from "@/components/pricing-plans";
-import { useToast } from "@/hooks/use-toast";
+
 import { 
   Search, 
   TrendingUp, 
   Clock, 
   Users,
   Filter,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Pin,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Flame,
+  BarChart,
+  RefreshCcw,
+  HelpCircle,
+  Hash,
+  ChevronRight,
+  BellPlus
 } from "lucide-react";
 
 export default function CommunityPage() {

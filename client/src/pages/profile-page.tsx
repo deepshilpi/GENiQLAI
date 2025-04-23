@@ -3,7 +3,6 @@ import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
