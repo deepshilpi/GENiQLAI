@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
@@ -19,6 +19,10 @@ import {
   InsertSavedIdea
 } from "@shared/schema";
 import session from "express-session";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import express from "express";
 
 // Extend express-session types to include our custom properties
 declare module "express-session" {
@@ -45,6 +49,40 @@ const activeConnections = new Map<number, Set<UserWebSocket>>();
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
+  
+  // Create upload directory if it doesn't exist
+  const uploadDir = path.join(process.cwd(), "uploads");
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  
+  // Set up storage for profile pictures
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = path.extname(file.originalname);
+      cb(null, 'profile-' + uniqueSuffix + ext);
+    }
+  });
+  
+  // Create the multer upload instance
+  const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max file size
+    fileFilter: function (req, file, cb) {
+      // Accept images only
+      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+      }
+      cb(null, true);
+    }
+  });
+  
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   
   // Create HTTP server
   const httpServer = createServer(app);
@@ -318,6 +356,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Upload profile picture (Authentication required)
+  app.post("/api/profile-picture", upload.single('profilePicture'), async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      // Create URL for the uploaded file
+      const fileUrl = `/uploads/${req.file.filename}`;
+      
+      // Update user's profile picture URL
+      const updatedUser = await storage.updateUserProfilePicture(req.user.id, fileUrl);
+      
+      return res.status(200).json({ 
+        message: "Profile picture updated successfully",
+        user: updatedUser 
+      });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      return res.status(500).json({ message: "Failed to update profile picture" });
+    }
+  });
+
   // Get news articles (Authentication required)
   app.get("/api/news", async (req, res) => {
     // Only authenticated users can access news articles

@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfilePicture = useMutation<User, Error, FormData>({
     mutationFn: async (formData) => {
-      const res = await fetch('/api/user/profile-picture', {
+      const res = await fetch('/api/profile-picture', {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -192,7 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(errorData.message || 'Failed to upload profile picture');
       }
       
-      return await res.json();
+      const responseData = await res.json();
+      return responseData.user;
     },
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(["/api/user"], updatedUser);
