@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -51,7 +51,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SettingsPage() {
-  const { user, logoutMutation } = useAuth();
+  const { user, logoutMutation, updateProfilePicture } = useAuth();
   const { toast } = useToast();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -63,6 +63,10 @@ export default function SettingsPage() {
   const [notificationsApp, setNotificationsApp] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [language, setLanguage] = useState("english");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // File input reference for profile picture uploads
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update password mutation
   const updatePasswordMutation = useMutation({
@@ -178,6 +182,37 @@ export default function SettingsPage() {
   const handleLogout = () => {
     logoutMutation.mutate();
   };
+  
+  // Handle profile picture selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+  
+  // Handle profile picture upload
+  const handleProfilePictureUpload = () => {
+    if (!selectedFile) {
+      toast({
+        title: "Error",
+        description: "Please select an image file first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('profilePicture', selectedFile);
+    
+    updateProfilePicture.mutate(formData);
+  };
+  
+  // Trigger file input click
+  const triggerFileUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   if (!user) {
     return (
@@ -259,6 +294,74 @@ export default function SettingsPage() {
             
             {/* Profile Tab */}
             <TabsContent value="profile" className="mt-0 space-y-6">
+              {/* Profile Picture Card */}
+              <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative w-36 h-36 rounded-full bg-vision-purple-100/5 flex items-center justify-center overflow-hidden border-2 border-vision-purple-200/30">
+                        {user.profilePictureUrl ? (
+                          <img 
+                            src={user.profilePictureUrl} 
+                            alt={user.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-16 h-16 text-white/40" />
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-vision-purple-200/20 text-white hover:border-primary"
+                          onClick={triggerFileUpload}
+                        >
+                          Select Image
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleProfilePictureUpload}
+                          disabled={!selectedFile || updateProfilePicture.isPending}
+                        >
+                          {updateProfilePicture.isPending ? "Uploading..." : "Upload"}
+                        </Button>
+                      </div>
+                      {selectedFile && (
+                        <p className="text-xs text-white/70">
+                          Selected: {selectedFile.name}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <h3 className="text-lg font-medium text-white">{user.username}</h3>
+                      <p className="text-sm text-white/70">{user.bio || "No bio available"}</p>
+                      <div className="flex gap-4">
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-white">{user.followersCount || 0}</p>
+                          <p className="text-xs text-white/50">Followers</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-white">{user.followingCount || 0}</p>
+                          <p className="text-xs text-white/50">Following</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-white">0</p>
+                          <p className="text-xs text-white/50">Posts</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-6">
                   {/* Basic Info Card */}
@@ -349,7 +452,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-white/70">Posts</div>
                         <div className="text-sm text-white">
-                          {user.postsCount || 0}
+                          0
                         </div>
                       </div>
                       
