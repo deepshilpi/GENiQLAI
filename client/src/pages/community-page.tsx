@@ -427,49 +427,6 @@ export default function CommunityPage() {
                   </CardContent>
                 </Card>
                 
-                {/* Community Resources */}
-                <Card className="border-primary/20 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center">
-                      <HelpCircle className="h-4 w-4 mr-2 text-primary" />
-                      Community Resources
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <MessageSquare className="h-4 w-4 text-blue-500" />
-                          </div>
-                          <span className="text-sm">Discussion Guidelines</span>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      
-                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                            <RefreshCcw className="h-4 w-4 text-green-500" />
-                          </div>
-                          <span className="text-sm">Iterating on Ideas</span>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      
-                      <div className="flex items-center justify-between hover:bg-muted/30 p-2 rounded-md transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                            <Flame className="h-4 w-4 text-amber-500" />
-                          </div>
-                          <span className="text-sm">Finding Co-Founders</span>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
                 {/* Getting Started Card */}
                 <Card className="border-primary/20 overflow-hidden">
                   <CardHeader className="pb-3">
