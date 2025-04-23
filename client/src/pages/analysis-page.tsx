@@ -1,45 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Link } from "wouter";
 import {
   Activity,
   AlertTriangle,
   BarChart3,
   Brain,
   ChevronRight,
-  CircleDot,
-  Clock,
   Cog,
   Coins,
   Compass,
-  Download,
-  ExternalLink,
   Eye,
   FileDown,
   Gauge,
-  Hourglass,
-  Lightbulb,
   LineChart,
-  ListChecks,
-  Loader2,
-  Map,
   PieChart,
   PlusCircle,
   Save,
@@ -47,21 +33,15 @@ import {
   Target,
   ThumbsDown,
   ThumbsUp,
-  Timer,
   TrendingUp,
   Users,
-  X,
 } from "lucide-react";
+
 import { AuthDialog } from "@/components/auth-dialog";
-import { PremiumFeatureOverlay } from "@/components/premium-feature-overlay";
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";
 import { CompetitorsChart } from "@/components/analysis/competitors-chart";
-import { MarketViabilityCard } from "@/components/analysis/market-viability-card";
-import { UVPCard } from "@/components/analysis/uvp-card";
-import { CAGRChart } from "@/components/analysis/cagr-chart";
-import { FailedExecutionsCard } from "@/components/analysis/failed-executions-card";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
-import { GTMStrategyCard } from "@/components/analysis/gtm-strategy-card";
+import { FailedExecutionsCard } from "@/components/analysis/failed-executions-card";
 import { FeasibilityScalability } from "@/components/analysis/feasibility-scalability";
 import { RiskAnalysis } from "@/components/analysis/risk-analysis";
 import { GoToMarketStrategy } from "@/components/analysis/go-to-market-strategy";
@@ -72,16 +52,24 @@ import { MarketSizeChart } from "@/components/analysis/market-size-chart";
 import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
 import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
 
-// Define the phases of the analysis
-type AnalysisPhase = "input" | "loading" | "results" | "budget-input" | "budget-loading" | "budget-results";
+// Define the phases of the analysis process
+type AnalysisPhase = 
+  | "input"        // Initial idea input
+  | "loading"      // Processing analysis
+  | "results"      // Showing analysis results
+  | "budget-input" // Budget entry
+  | "budget-loading" // Processing budget analysis
+  | "budget-results"; // Showing budget-based results
 
-// Define schema for the startup idea form
+// Schema for validating startup idea form
 const startupIdeaSchema = z.object({
-  idea: z.string().min(10, "Your idea must be at least 10 characters long").max(1000, "Your idea is too long, please summarize it"),
+  idea: z.string()
+    .min(10, "Your idea must be at least 10 characters long")
+    .max(1000, "Your idea is too long, please summarize it"),
   country: z.string().optional(),
 });
 
-// Define schema for the budget form
+// Schema for validating budget form
 const budgetSchema = z.object({
   budget: z.string().refine(
     (val) => {
@@ -92,22 +80,43 @@ const budgetSchema = z.object({
   ),
 });
 
+// Animation variants for the results grid
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100
+    }
+  }
+};
+
 export default function AnalysisPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
-  const searchParams = new URLSearchParams(location.search);
+  const searchParams = new URLSearchParams(location.search.toString());
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("");
   
-  // State for analysis phases and data
+  // State management
   const [phase, setPhase] = useState<AnalysisPhase>("input");
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [budgetAnalysisData, setBudgetAnalysisData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number | null>(null);
+  const [relatedIdeasData, setRelatedIdeasData] = useState<any[]>([]);
   
-  // Create form for startup idea input
+  // Forms setup
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
     resolver: zodResolver(startupIdeaSchema),
     defaultValues: {
@@ -116,7 +125,6 @@ export default function AnalysisPage() {
     },
   });
   
-  // Create form for budget input
   const budgetForm = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -127,7 +135,6 @@ export default function AnalysisPage() {
   // Handle startup idea submission
   const onIdeaSubmit = async (values: z.infer<typeof startupIdeaSchema>) => {
     setPhase("loading");
-    setError(null);
     
     try {
       const response = await apiRequest("POST", "/api/analyze", {
@@ -154,11 +161,15 @@ export default function AnalysisPage() {
         setRemainingFreeAnalyses(data.meta.remainingFreeAnalyses);
       }
       
+      // Store related ideas separately
+      if (data.relatedIdeas && data.relatedIdeas.length > 0) {
+        setRelatedIdeasData(data.relatedIdeas);
+      }
+      
       setAnalysisData(data);
       setPhase("results");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error analyzing startup idea:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
       setPhase("input");
       
       toast({
@@ -177,6 +188,7 @@ export default function AnalysisPage() {
       return;
     }
     
+    // Premium plan check
     if (user.planType !== "unicorn") {
       toast({
         title: "Unicorn Plan Required",
@@ -187,7 +199,6 @@ export default function AnalysisPage() {
     }
     
     setPhase("budget-loading");
-    setError(null);
     
     try {
       const budgetValue = parseFloat(values.budget.replace(/[^0-9.-]+/g, ""));
@@ -203,54 +214,20 @@ export default function AnalysisPage() {
         throw new Error(data.message || "Failed to generate execution plan");
       }
       
-      console.log("Execution plan API response:", data);
-      
       // Also get investor recommendations
       const investorsResponse = await apiRequest("POST", "/api/investors", {
         startupIdea: ideaForm.getValues().idea,
       });
       
-      const investorsData = await investorsResponse.json();
-      
-      if (!investorsResponse.ok) {
-        toast({
-          title: "Investor Data Unavailable",
-          description: "We couldn't retrieve investor recommendations at this time.",
-          variant: "destructive",
-        });
-      } else {
-        // Combine execution plan with investor data
+      if (investorsResponse.ok) {
+        const investorsData = await investorsResponse.json();
         data.investorsData = investorsData;
       }
       
-      // Add additional console logs to diagnose the issue
-      console.log("Budget analysis data structure:", JSON.stringify(data).substring(0, 200) + "...");
-      
-      // Force the proper structure when setting the state
-      if (data && !data.budgetAnalysis && data.initialBudget) {
-        // The API is returning the budget analysis directly without the budgetAnalysis wrapper
-        setBudgetAnalysisData({
-          ...data,
-          // Create the expected nested structure if it doesn't exist
-          budgetAnalysis: {
-            initialBudget: data.initialBudget,
-            feasibilityAndScalability: data.feasibilityAndScalability,
-            riskAnalysis: data.riskAnalysis,
-            goToMarketStrategy: data.goToMarketStrategy,
-            longTermVision: data.longTermVision,
-            teamExecutionCapability: data.teamExecutionCapability,
-            fundingAndInvestmentPotential: data.fundingAndInvestmentPotential
-          }
-        });
-      } else {
-        // The API is returning the proper structure
-        setBudgetAnalysisData(data);
-      }
-      
+      setBudgetAnalysisData(data);
       setPhase("budget-results");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error generating execution plan:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
       setPhase("results"); // Go back to initial results
       
       toast({
@@ -261,17 +238,16 @@ export default function AnalysisPage() {
     }
   };
   
-  // Handle reset to check another idea
+  // Action handlers
   const handleReset = () => {
     ideaForm.reset();
     budgetForm.reset();
     setPhase("input");
     setAnalysisData(null);
     setBudgetAnalysisData(null);
-    setError(null);
+    setRelatedIdeasData([]);
   };
   
-  // Handle export to PDF
   const handleExportPDF = () => {
     if (!user) {
       setReturnTo(window.location.pathname);
@@ -293,7 +269,6 @@ export default function AnalysisPage() {
       description: "Your PDF is being generated and will download shortly.",
     });
     
-    // PDF generation would go here
     setTimeout(() => {
       toast({
         title: "Export Complete",
@@ -302,7 +277,6 @@ export default function AnalysisPage() {
     }, 2000);
   };
   
-  // Handle share to community
   const handleShareToCommunity = () => {
     if (!user) {
       setReturnTo(window.location.pathname);
@@ -310,14 +284,12 @@ export default function AnalysisPage() {
       return;
     }
     
-    // Would navigate to community post form with idea pre-filled
     toast({
       title: "Ready to Share",
       description: "You'll be redirected to create a community post with your idea.",
     });
   };
   
-  // Handle save analysis
   const handleSaveAnalysis = () => {
     if (!user) {
       setReturnTo(window.location.pathname);
@@ -331,29 +303,6 @@ export default function AnalysisPage() {
     });
   };
 
-  // Animation variants for the results
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  };
-
   return (
     <div className="container px-4 py-6 mx-auto max-w-7xl">
       <AuthDialog 
@@ -362,14 +311,15 @@ export default function AnalysisPage() {
         returnTo={returnTo}
       />
       
+      {/* Header */}
       <Card className="mb-6 border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl text-white">
             <Brain className="w-6 h-6 mr-2 text-primary" />
-            GENIQL Startup Analysis - Updated App
+            GENIQL Startup Analysis
           </CardTitle>
           <CardDescription className="text-white/70">
-            Analyze your startup idea with our advanced AI to understand its potential, challenges, and required execution steps.
+            Analyze your startup idea with our advanced AI to understand its potential, challenges, and execution requirements.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -396,11 +346,11 @@ export default function AnalysisPage() {
                   name="idea"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Startup Idea</FormLabel>
+                      <FormLabel className="text-white">Your Startup Idea</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Describe your startup idea in detail... (e.g., 'A mobile app that connects pet owners with certified pet sitters in their area...')"
-                          className="h-40 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                          placeholder="Describe your startup idea in detail..."
+                          className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
                           {...field}
                         />
                       </FormControl>
@@ -413,10 +363,10 @@ export default function AnalysisPage() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Target Country (Optional)</FormLabel>
+                      <FormLabel className="text-white">Target Market (Optional)</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Country (e.g., United States, India, etc.)"
+                          placeholder="e.g. United States, Global, etc."
                           className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
                           {...field}
                         />
@@ -429,7 +379,7 @@ export default function AnalysisPage() {
                   type="submit" 
                   className="w-full bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
                 >
-                  Analyze Startup Idea
+                  Analyze My Idea
                 </Button>
               </form>
             </Form>
@@ -443,7 +393,7 @@ export default function AnalysisPage() {
           <CardHeader>
             <CardTitle className="text-xl text-white">Analyzing Your Startup Idea</CardTitle>
             <CardDescription className="text-white/70">
-              Please wait while our AI analyzes your startup concept...
+              Please wait while our AI evaluates your idea's potential...
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -454,9 +404,9 @@ export default function AnalysisPage() {
               </div>
             </div>
             <div className="w-64 mt-8">
-              <Progress value={65} className="h-2 bg-vision-purple-200/20" />
+              <Progress value={45} className="h-2 bg-vision-purple-200/20" />
             </div>
-            <p className="mt-4 text-sm text-white/70">Examining market viability and potential...</p>
+            <p className="mt-4 text-sm text-white/70">Performing comprehensive market analysis...</p>
           </CardContent>
         </Card>
       )}
@@ -482,14 +432,14 @@ export default function AnalysisPage() {
             </CardContent>
           </Card>
           
-          {/* Analysis Results Grid */}
+          {/* The 8 Analysis Blocks Grid */}
           <motion.div 
             className="grid gap-6 md:grid-cols-2"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            {/* Success Rate */}
+            {/* 1. Success Rate */}
             {analysisData.successRate && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
@@ -501,15 +451,17 @@ export default function AnalysisPage() {
                   </CardHeader>
                   <CardContent>
                     <SuccessRateChart 
-                      percentage={analysisData.successRate.percentage} 
-                      message={analysisData.successRate.message} 
+                      percentage={analysisData.successRate.percentage}
+                      goodPoints={analysisData.successRate.goodPoints}
+                      badPoints={analysisData.successRate.badPoints}
+                      message={analysisData.successRate.message}
                     />
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* Competitors & Market Share */}
+            {/* 2. Competitors & Market Share */}
             {analysisData.competitors && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
@@ -529,8 +481,8 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* Market Viability */}
-            {analysisData.marketViability && (
+            {/* 3. Target Audience Fit */}
+            {analysisData.targetAudienceFit && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -540,15 +492,35 @@ export default function AnalysisPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <MarketViabilityCard 
-                      points={analysisData.marketViability.points} 
-                    />
+                    <div className="space-y-4">
+                      <div className="h-64">
+                        {/* Radar chart will go here */}
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <div className="p-4 text-center border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
+                            <p className="text-white/80">{analysisData.targetAudienceFit.message}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {analysisData.targetAudienceFit.segments.map((segment: {name: string, score: number}, i: number) => (
+                          <div key={i} className="p-3 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
+                            <p className="text-sm font-medium text-white">{segment.name}</p>
+                            <div className="flex items-center mt-2">
+                              <div className="flex-1 h-2 mr-2 rounded-full bg-vision-purple-200/20">
+                                <div className="h-2 rounded-full bg-primary" style={{ width: `${segment.score}%` }}></div>
+                              </div>
+                              <span className="text-xs text-white/70">{segment.score}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
             )}
             
-            {/* Market Size */}
+            {/* 4. Market Size */}
             {analysisData.marketSize && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
@@ -569,7 +541,7 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* Business Model Strength */}
+            {/* 5. Business Model Strength */}
             {analysisData.businessModelStrength && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
@@ -590,7 +562,28 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* SWOT Analysis */}
+            {/* 6. Funding Requirements */}
+            {analysisData.fundingRequired && (
+              <motion.div variants={itemVariants}>
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-lg text-white">
+                      <Coins className="w-5 h-5 mr-2 text-primary" />
+                      Funding Requirements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <FundingRequirementsCard 
+                      total={analysisData.fundingRequired.total}
+                      breakdown={analysisData.fundingRequired.breakdown}
+                      message={analysisData.fundingRequired.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* 7. SWOT Analysis */}
             {analysisData.swotAnalysis && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
@@ -612,79 +605,8 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* Funding Requirements */}
-            {analysisData.fundingRequired && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Coins className="w-5 h-5 mr-2 text-primary" />
-                      Funding Requirements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <FundingRequirementsCard 
-                      total={analysisData.fundingRequired.total}
-                      breakdown={analysisData.fundingRequired.breakdown}
-                      message={analysisData.fundingRequired.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Unique Value Proposition */}
-            {analysisData.uniqueValueProposition && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Lightbulb className="w-5 h-5 mr-2 text-primary" />
-                      Unique Value Proposition
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UVPCard 
-                      differentiator={analysisData.uniqueValueProposition.differentiator} 
-                      strengths={analysisData.uniqueValueProposition.strengths} 
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* CAGR (Pro+ feature) */}
-            {analysisData.cagr ? (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <TrendingUp className="w-5 h-5 mr-2 text-primary" />
-                      Growth Projection (CAGR)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CAGRChart
-                      industryAverage={analysisData.cagr.industryAverage}
-                      potential={analysisData.cagr.potential}
-                      data={analysisData.cagr.data}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Growth Projection (CAGR)"
-                  description="Upgrade to Pro or Unicorn plan to see detailed growth projections for your industry."
-                  icon={<TrendingUp className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
-            )}
-            
-            {/* Previous Failed Executions (Pro+ feature) */}
-            {analysisData.previousFailedExecutions ? (
+            {/* 8. Previous Failed Executions */}
+            {analysisData.previousFailedExecutions && (
               <motion.div variants={itemVariants}>
                 <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                   <CardHeader className="pb-2">
@@ -701,47 +623,51 @@ export default function AnalysisPage() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Previous Failed Executions"
-                  description="Upgrade to Pro or Unicorn plan to see similar ideas that failed and why."
-                  icon={<AlertTriangle className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
-            )}
-            
-            {/* Go-to-Market Strategy (Pro+ feature) */}
-            {analysisData.goToMarketStrategy ? (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Compass className="w-5 h-5 mr-2 text-primary" />
-                      Go-to-Market Strategy
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <GTMStrategyCard
-                      steps={analysisData.goToMarketStrategy.steps}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              <motion.div variants={itemVariants}>
-                <PremiumFeatureOverlay
-                  title="Go-to-Market Strategy"
-                  description="Upgrade to Pro or Unicorn plan to see a detailed go-to-market strategy."
-                  icon={<Compass className="w-12 h-12 text-primary/50" />}
-                  requiredPlan="pro"
-                />
-              </motion.div>
             )}
           </motion.div>
           
-          {/* Options after analysis */}
+          {/* Related Ideas Section */}
+          {relatedIdeasData.length > 0 && (
+            <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-xl text-white">Related Ideas</CardTitle>
+                <CardDescription className="text-white/70">
+                  You might also be interested in these similar startup concepts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  {relatedIdeasData.slice(0, 3).map((idea, index) => (
+                    <Card key={index} className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md text-white flex items-center">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/20 text-primary mr-2">
+                            {index + 1}
+                          </div>
+                          {idea.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-white/70 mb-3">{idea.description}</p>
+                        <div className="flex items-center">
+                          <span className="text-xs text-white/50 mr-2">Potential Score:</span>
+                          <div className="h-2 flex-1 rounded-full bg-vision-purple-200/20">
+                            <div 
+                              className="h-2 rounded-full bg-primary" 
+                              style={{ width: `${idea.potentialScore}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs text-white/80 ml-2">{idea.potentialScore}%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Three Option Buttons */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-xl text-white">What's Next?</CardTitle>
@@ -785,6 +711,7 @@ export default function AnalysisPage() {
                 </Button>
               </div>
               
+              {/* Additional Action Buttons */}
               <div className="flex flex-wrap gap-2 mt-4 justify-end">
                 <Button 
                   variant="ghost" 
@@ -795,6 +722,7 @@ export default function AnalysisPage() {
                   <Save className="w-4 h-4 mr-2" />
                   Save Analysis
                 </Button>
+                
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -893,18 +821,6 @@ export default function AnalysisPage() {
       {/* BUDGET RESULTS PHASE */}
       {phase === "budget-results" && budgetAnalysisData && (
         <div className="space-y-6">
-          {/* Debug information - will be hidden in production */}
-          <div className="p-4 mb-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-            <h3 className="mb-2 text-lg font-medium text-white">Debug Info</h3>
-            <p className="text-white/80">budgetAnalysis exists: {budgetAnalysisData.budgetAnalysis ? "Yes" : "No"}</p>
-            <p className="text-white/80">Object keys: {Object.keys(budgetAnalysisData).join(", ")}</p>
-            {budgetAnalysisData.budgetAnalysis && (
-              <p className="text-white/80">budgetAnalysis keys: {Object.keys(budgetAnalysisData.budgetAnalysis).join(", ")}</p>
-            )}
-            <p className="text-white/80">feasibilityAndScalability exists: {budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability ? "Yes" : "No"}</p>
-            <p className="text-white/80">riskAnalysis exists: {budgetAnalysisData.budgetAnalysis?.riskAnalysis ? "Yes" : "No"}</p>
-            <p className="text-white/80">goToMarketStrategy exists: {budgetAnalysisData.budgetAnalysis?.goToMarketStrategy ? "Yes" : "No"}</p>
-          </div>
           {/* Budget Result Header */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
@@ -917,252 +833,132 @@ export default function AnalysisPage() {
             </CardHeader>
           </Card>
           
-          {/* Budget Analysis Results Grid */}
+          {/* 6 Budget Analysis Results Blocks */}
           <motion.div 
             className="grid gap-6 md:grid-cols-2"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            {/* Budget and Allocation */}
+            {/* 1. Feasibility and Scalability */}
             <motion.div variants={itemVariants} className="md:col-span-2">
+              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <LineChart className="w-5 h-5 mr-2 text-primary" />
+                    Feasibility & Scalability
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FeasibilityScalability
+                    data={budgetAnalysisData.feasibilityAndScalability}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            {/* 2. Risk Analysis */}
+            <motion.div variants={itemVariants}>
+              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
+                    Risk Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RiskAnalysis
+                    data={budgetAnalysisData.riskAnalysis}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            {/* 3. Go-to-Market Strategy */}
+            <motion.div variants={itemVariants}>
+              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <Compass className="w-5 h-5 mr-2 text-primary" />
+                    Go-to-Market Strategy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <GoToMarketStrategy
+                    data={budgetAnalysisData.goToMarketStrategy}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            {/* 4. Long Term Vision */}
+            <motion.div variants={itemVariants}>
+              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <Eye className="w-5 h-5 mr-2 text-primary" />
+                    Long-Term Vision
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LongTermVision
+                    data={budgetAnalysisData.longTermVision}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            {/* 5. Team Execution Capability */}
+            <motion.div variants={itemVariants}>
+              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <Users className="w-5 h-5 mr-2 text-primary" />
+                    Team Execution Capability
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TeamExecution
+                    data={budgetAnalysisData.teamExecutionCapability}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            {/* 6. Funding & Investment Potential */}
+            <motion.div variants={itemVariants}>
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center text-lg text-white">
                     <Coins className="w-5 h-5 mr-2 text-primary" />
-                    Budget Allocation
+                    Funding & Investment Potential
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-3">
-                    <div className="p-4 text-center border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                      <p className="mb-1 text-sm text-white/70">Product Development</p>
-                      <p className="text-2xl font-semibold text-white">${budgetAnalysisData.budget.development.toLocaleString()}</p>
-                      <p className="mt-1 text-sm text-white/70">
-                        {Math.round((budgetAnalysisData.budget.development / 
-                          (budgetAnalysisData.budget.development + 
-                           budgetAnalysisData.budget.marketing + 
-                           budgetAnalysisData.budget.operations)) * 100)}%
-                      </p>
-                    </div>
-                    <div className="p-4 text-center border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                      <p className="mb-1 text-sm text-white/70">Marketing</p>
-                      <p className="text-2xl font-semibold text-white">${budgetAnalysisData.budget.marketing.toLocaleString()}</p>
-                      <p className="mt-1 text-sm text-white/70">
-                        {Math.round((budgetAnalysisData.budget.marketing / 
-                          (budgetAnalysisData.budget.development + 
-                           budgetAnalysisData.budget.marketing + 
-                           budgetAnalysisData.budget.operations)) * 100)}%
-                      </p>
-                    </div>
-                    <div className="p-4 text-center border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                      <p className="mb-1 text-sm text-white/70">Operations</p>
-                      <p className="text-2xl font-semibold text-white">${budgetAnalysisData.budget.operations.toLocaleString()}</p>
-                      <p className="mt-1 text-sm text-white/70">
-                        {Math.round((budgetAnalysisData.budget.operations / 
-                          (budgetAnalysisData.budget.development + 
-                           budgetAnalysisData.budget.marketing + 
-                           budgetAnalysisData.budget.operations)) * 100)}%
-                      </p>
-                    </div>
-                  </div>
+                  <FundingInvestors
+                    data={budgetAnalysisData.fundingAndInvestmentPotential}
+                  />
                 </CardContent>
               </Card>
             </motion.div>
-            
-            {/* Execution Roadmap */}
-            <motion.div variants={itemVariants} className="md:col-span-2">
-              <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-lg text-white">
-                    <Map className="w-5 h-5 mr-2 text-primary" />
-                    Execution Roadmap
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative pl-8 mt-4 ml-3 border-l border-dashed border-primary/40">
-                    {budgetAnalysisData.roadmap.map((item, index) => (
-                      <div key={index} className="relative mb-8">
-                        <div className="absolute w-6 h-6 bg-vision-primary-gradient rounded-full -left-11 flex items-center justify-center text-white">
-                          {index + 1}
-                        </div>
-                        <div className="mb-1 text-lg font-medium text-white">{item.step}</div>
-                        <div className="flex items-center mb-2">
-                          <Clock className="w-4 h-4 mr-1 text-primary/80" />
-                          <span className="text-sm text-white/70">{item.timeframe}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Coins className="w-4 h-4 mr-1 text-primary/80" />
-                          <span className="text-sm text-white/70">Budget: ${item.cost.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            {/* Feasibility & Scalability */}
-            {budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <FeasibilityScalability 
-                      initialFeasibility={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.initialFeasibility} 
-                      scalingPoints={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.scalingPoints}
-                      message={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Risk Analysis */}
-            {budgetAnalysisData.budgetAnalysis?.riskAnalysis && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <RiskAnalysis 
-                      overallRisk={budgetAnalysisData.budgetAnalysis.riskAnalysis.overallRisk}
-                      risks={budgetAnalysisData.budgetAnalysis.riskAnalysis.risks}
-                      message={budgetAnalysisData.budgetAnalysis.riskAnalysis.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Go To Market Strategy */}
-            {budgetAnalysisData.budgetAnalysis?.goToMarketStrategy && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <GoToMarketStrategy 
-                      timeline={budgetAnalysisData.budgetAnalysis.goToMarketStrategy.timeline}
-                      message={budgetAnalysisData.budgetAnalysis.goToMarketStrategy.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Long Term Vision */}
-            {budgetAnalysisData.budgetAnalysis?.longTermVision && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <LongTermVision 
-                      milestones={budgetAnalysisData.budgetAnalysis.longTermVision.milestones}
-                      message={budgetAnalysisData.budgetAnalysis.longTermVision.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Team Execution */}
-            {budgetAnalysisData.budgetAnalysis?.teamExecutionCapability && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <TeamExecution 
-                      requiredRoles={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.requiredRoles}
-                      hiringTimeline={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.hiringTimeline}
-                      message={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Funding and Investment Potential */}
-            {budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardContent className="p-6">
-                    <FundingInvestors 
-                      investors={budgetAnalysisData.budgetAnalysis.fundingAndInvestmentPotential.investors}
-                      message={budgetAnalysisData.budgetAnalysis.fundingAndInvestmentPotential.message}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-            
-            {/* Potential Investors */}
-            {budgetAnalysisData.investorsData && budgetAnalysisData.investorsData.investors && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <Users className="w-5 h-5 mr-2 text-primary" />
-                      Potential Investors
-                    </CardTitle>
-                    <CardDescription className="text-xs text-white/50 italic">
-                      Note: The investor information is AI-generated and for illustration purposes only. Always verify manually.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-3">
-                      {budgetAnalysisData.investorsData.investors.map((investor, index) => (
-                        <div 
-                          key={index} 
-                          className="p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10 hover:bg-vision-purple-100/10 transition"
-                        >
-                          <h4 className="mb-1 text-base font-medium text-white">{investor.name}</h4>
-                          <p className="mb-2 text-sm text-white/70">{investor.firm}</p>
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {investor.tags.map((tag, tagIndex) => (
-                              <Badge key={tagIndex} className="bg-vision-primary-gradient/30 text-white text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          <a 
-                            href={investor.crunchbaseLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="flex items-center text-xs text-primary hover:underline"
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" /> Crunchbase Profile
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
           </motion.div>
           
-          {/* Final Options after budget analysis */}
+          {/* Final Three Options */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
-              <CardTitle className="text-xl text-white">Final Steps</CardTitle>
+              <CardTitle className="text-xl text-white">Take Action</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3">
                 <Button 
                   variant="outline" 
                   className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                  onClick={() => setPhase("results")}
+                  onClick={handleSaveAnalysis}
                 >
-                  <ChevronRight className="w-5 h-5 mr-2 rotate-180" />
+                  <Save className="w-5 h-5 mr-2" />
                   <div className="text-left">
-                    <div className="text-sm font-medium">Back to Analysis</div>
-                    <div className="text-xs text-white/70">Return to initial analysis results</div>
-                  </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                  onClick={handleReset}
-                >
-                  <PlusCircle className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="text-sm font-medium">Analyze New Idea</div>
-                    <div className="text-xs text-white/70">Start a fresh analysis with a new concept</div>
+                    <div className="text-sm font-medium">Save This Analysis</div>
+                    <div className="text-xs text-white/70">Store for future reference</div>
                   </div>
                 </Button>
                 
@@ -1171,37 +967,39 @@ export default function AnalysisPage() {
                   className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
                   onClick={handleExportPDF}
                 >
-                  <Download className="w-5 h-5 mr-2" />
+                  <FileDown className="w-5 h-5 mr-2" />
                   <div className="text-left">
-                    <div className="text-sm font-medium">Export Full Report</div>
-                    <div className="text-xs text-white/70">Download analysis and execution plan</div>
+                    <div className="text-sm font-medium">Export Analysis to PDF</div>
+                    <div className="text-xs text-white/70">Download complete report</div>
                   </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                  onClick={handleShareToCommunity}
+                >
+                  <Share2 className="w-5 h-5 mr-2" />
+                  <div className="text-left">
+                    <div className="text-sm font-medium">Share to Community</div>
+                    <div className="text-xs text-white/70">Get feedback on your idea</div>
+                  </div>
+                </Button>
+              </div>
+              
+              <div className="flex justify-center mt-6">
+                <Button 
+                  variant="outline" 
+                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                  onClick={() => setPhase("results")}
+                >
+                  <ChevronRight className="w-4 h-4 mr-2 transform rotate-180" />
+                  Back to Initial Analysis
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
-      )}
-      
-      {/* ERROR STATE */}
-      {error && (
-        <Card className="border-destructive/50 bg-vision-card/90 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="flex items-center text-xl text-white">
-              <X className="w-5 h-5 mr-2 text-destructive" />
-              Analysis Error
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-white/80">{error}</p>
-            <Button 
-              className="mt-4 bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
-              onClick={handleReset}
-            >
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
       )}
     </div>
   );
