@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
+import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 import { 
   LayoutDashboard, 
   BrainCircuit, 
@@ -18,7 +19,8 @@ import {
   ChevronRight,
   Menu,
   Bell,
-  Mail
+  Mail,
+  BookmarkIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -183,6 +185,26 @@ export function Sidebar() {
               {!collapsed && <span>Messages</span>}
             </div>
           </li>
+          
+          {user && (
+            <li>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div 
+                    className={cn(
+                      "vision-sidebar-item cursor-pointer",
+                      isActive("/saved-ideas") && "active",
+                      collapsed && "justify-center px-2"
+                    )}
+                  >
+                    <BookmarkIcon className="w-5 h-5" />
+                    {!collapsed && <span>Saved Ideas</span>}
+                  </div>
+                </DropdownMenuTrigger>
+                <SavedIdeasDropdown asMenuItem />
+              </DropdownMenu>
+            </li>
+          )}
 
           
         </ul>

@@ -9,7 +9,8 @@ import {
   Settings, 
   CreditCard,
   User,
-  X
+  X,
+  BookmarkIcon
 } from "lucide-react";
 import { 
   Sheet, 
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 
 interface MobileMenuProps {
   isOpen: boolean;
