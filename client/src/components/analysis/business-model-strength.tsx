@@ -87,11 +87,16 @@ export function BusinessModelStrengthChart({ overall, components, message }: Bus
                 {component.score}
               </span>
             </div>
-            <Progress 
-              value={component.score} 
-              className="h-2 bg-primary/10" 
-              indicatorClassName={component.score >= 70 ? "bg-green-500" : component.score >= 50 ? "bg-amber-500" : "bg-red-500"}
-            />
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/10">
+              <div 
+                className={`h-full transition-all ${
+                  component.score >= 70 ? "bg-green-500" : 
+                  component.score >= 50 ? "bg-amber-500" : 
+                  "bg-red-500"
+                }`}
+                style={{ width: `${component.score}%` }}
+              ></div>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">{component.description}</p>
           </div>
         ))}

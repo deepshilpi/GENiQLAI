@@ -68,6 +68,9 @@ import { GoToMarketStrategy } from "@/components/analysis/go-to-market-strategy"
 import { LongTermVision } from "@/components/analysis/long-term-vision";
 import { TeamExecution } from "@/components/analysis/team-execution";
 import { FundingInvestors } from "@/components/analysis/funding-investors";
+import { MarketSizeChart } from "@/components/analysis/market-size-chart";
+import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
+import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
 
 // Define the phases of the analysis
 type AnalysisPhase = "input" | "loading" | "results" | "budget-input" | "budget-loading" | "budget-results";
