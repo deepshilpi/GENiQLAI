@@ -512,7 +512,7 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="container px-4 py-6 mx-auto max-w-7xl">
+    <div className="container px-4 py-8 mx-auto max-w-7xl">
       <AuthDialog 
         isOpen={authDialogOpen} 
         onClose={() => setAuthDialogOpen(false)} 
@@ -520,13 +520,15 @@ export default function AnalysisPage() {
       />
       
       {/* Header */}
-      <Card className="mb-6 border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-        <CardHeader>
-          <CardTitle className="flex items-center text-2xl text-white">
-            <Brain className="w-6 h-6 mr-2 text-primary" />
+      <Card className="mb-8 border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-xl shadow-vision-purple-200/5">
+        <CardHeader className="py-6">
+          <CardTitle className="flex items-center text-3xl text-white font-medium">
+            <div className="w-10 h-10 rounded-lg bg-vision-primary-gradient flex items-center justify-center mr-3">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
             GENIQL Startup Analysis
           </CardTitle>
-          <CardDescription className="text-white/70">
+          <CardDescription className="text-white/70 text-lg mt-2 max-w-3xl">
             Analyze your startup idea with our advanced AI to understand its potential, challenges, and execution requirements.
           </CardDescription>
         </CardHeader>
@@ -732,28 +734,43 @@ export default function AnalysisPage() {
       
       {/* RESULTS PHASE */}
       {phase === "results" && analysisData && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Result Header */}
-          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="text-xl text-white">
-                Analysis Results
-              </CardTitle>
-              <CardDescription className="text-white/70">
-                Here's our AI-powered analysis of your startup idea
-              </CardDescription>
+          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg shadow-vision-purple-200/5">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl text-white flex items-center">
+                    <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center mr-3">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    Analysis Results
+                  </CardTitle>
+                  <CardDescription className="text-white/70 mt-2">
+                    AI-powered insights to help you make informed decisions
+                  </CardDescription>
+                </div>
+                <div>
+                  <Badge variant="outline" className="text-white/90 border-vision-purple-200/30 bg-vision-purple-100/10 px-3 py-1">
+                    {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </Badge>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                <h3 className="mb-2 text-lg font-medium text-white">Your Idea</h3>
-                <p className="text-white/80">{ideaForm.getValues().idea}</p>
+              <div className="p-5 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm shadow-inner">
+                <h3 className="mb-3 text-lg font-medium text-white flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5 text-amber-400" />
+                  Your Idea
+                </h3>
+                <p className="text-white/90 leading-relaxed">{ideaForm.getValues().idea}</p>
               </div>
             </CardContent>
           </Card>
           
           {/* The 8 Analysis Blocks Grid */}
           <motion.div 
-            className="grid gap-6 md:grid-cols-2"
+            className="grid gap-8 md:grid-cols-2"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -761,14 +778,16 @@ export default function AnalysisPage() {
             {/* 1. Success Rate */}
             {analysisData.successRate && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Gauge className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3">
+                        <Gauge className="w-5 h-5 text-blue-400" />
+                      </div>
                       Success Rate Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <SuccessRateChart 
                       percentage={analysisData.successRate.percentage}
                       goodPoints={analysisData.successRate.goodPoints}
@@ -783,14 +802,16 @@ export default function AnalysisPage() {
             {/* 2. Competitors & Market Share */}
             {analysisData.competitors && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Users className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center mr-3">
+                        <Users className="w-5 h-5 text-orange-400" />
+                      </div>
                       Competitors & Market Share
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <CompetitorsChart 
                       competitors={analysisData.competitors.competitors} 
                       message={analysisData.competitors.message} 
@@ -803,32 +824,41 @@ export default function AnalysisPage() {
             {/* 3. Target Audience Fit */}
             {analysisData.targetAudienceFit && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Target className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center mr-3">
+                        <Target className="w-5 h-5 text-green-400" />
+                      </div>
                       Target Audience Fit
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                  <CardContent className="p-5">
+                    <div className="space-y-5">
                       <div className="h-64">
                         {/* Radar chart will go here */}
                         <div className="flex flex-col items-center justify-center h-full">
-                          <div className="p-4 text-center border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                            <p className="text-white/80">{analysisData.targetAudienceFit.message}</p>
+                          <div className="p-5 text-center border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
+                            <p className="text-white/90 leading-relaxed">{analysisData.targetAudienceFit.message}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         {analysisData.targetAudienceFit.segments.map((segment: {name: string, score: number}, i: number) => (
-                          <div key={i} className="p-3 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/10">
-                            <p className="text-sm font-medium text-white">{segment.name}</p>
+                          <div key={i} className="p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-colors duration-200">
+                            <p className="text-sm font-medium text-white mb-2">{segment.name}</p>
                             <div className="flex items-center mt-2">
-                              <div className="flex-1 h-2 mr-2 rounded-full bg-vision-purple-200/20">
-                                <div className="h-2 rounded-full bg-primary" style={{ width: `${segment.score}%` }}></div>
+                              <div className="flex-1 h-2.5 mr-2 rounded-full bg-vision-purple-200/20 overflow-hidden">
+                                <div className="h-full rounded-full bg-gradient-to-r from-green-500/80 to-green-400" 
+                                  style={{ 
+                                    width: `${segment.score}%`,
+                                    transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                                  }}>
+                                </div>
                               </div>
-                              <span className="text-xs text-white/70">{segment.score}%</span>
+                              <span className="text-xs font-medium bg-vision-purple-200/20 px-2 py-0.5 rounded-full text-white/80">
+                                {segment.score}%
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -842,14 +872,16 @@ export default function AnalysisPage() {
             {/* 4. Market Size */}
             {analysisData.marketSize && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <PieChart className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3">
+                        <PieChart className="w-5 h-5 text-purple-400" />
+                      </div>
                       Market Size Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <MarketSizeChart 
                       segments={analysisData.marketSize.segments}
                       totalSize={analysisData.marketSize.totalSize}
@@ -863,14 +895,16 @@ export default function AnalysisPage() {
             {/* 5. Business Model Strength */}
             {analysisData.businessModelStrength && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <BarChart3 className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3">
+                        <BarChart3 className="w-5 h-5 text-blue-400" />
+                      </div>
                       Business Model Strength
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <BusinessModelStrengthChart 
                       overall={analysisData.businessModelStrength.overall}
                       components={analysisData.businessModelStrength.components}
@@ -884,14 +918,16 @@ export default function AnalysisPage() {
             {/* 6. Funding Requirements */}
             {analysisData.fundingRequired && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Coins className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center mr-3">
+                        <Coins className="w-5 h-5 text-amber-400" />
+                      </div>
                       Funding Requirements
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <FundingRequirementsCard 
                       total={analysisData.fundingRequired.total}
                       breakdown={analysisData.fundingRequired.breakdown}
@@ -905,14 +941,16 @@ export default function AnalysisPage() {
             {/* 7. SWOT Analysis */}
             {analysisData.swotAnalysis && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <Activity className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center mr-3">
+                        <Activity className="w-5 h-5 text-teal-400" />
+                      </div>
                       SWOT Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <SWOTAnalysis 
                       strengths={analysisData.swotAnalysis.strengths}
                       weaknesses={analysisData.swotAnalysis.weaknesses}
@@ -927,14 +965,16 @@ export default function AnalysisPage() {
             {/* 8. Previous Failed Executions */}
             {analysisData.previousFailedExecutions && (
               <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                  <CardHeader className="pb-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
-                      <AlertTriangle className="w-5 h-5 mr-2 text-primary" />
+                      <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center mr-3">
+                        <AlertTriangle className="w-5 h-5 text-red-400" />
+                      </div>
                       Previous Failed Executions
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-5">
                     <FailedExecutionsCard
                       failures={analysisData.previousFailedExecutions.failures}
                       message={analysisData.previousFailedExecutions.message}
