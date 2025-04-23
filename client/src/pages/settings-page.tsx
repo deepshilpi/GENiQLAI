@@ -277,7 +277,7 @@ export default function SettingsPage() {
                             id="username" 
                             value={user.username}
                             disabled
-                            className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90"
+                            className="bg-transparent border-vision-purple-200/20 text-white/90 placeholder:text-white/40"
                           />
                           <p className="text-xs text-white/50">Username cannot be changed</p>
                         </div>
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                               id="email" 
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
-                              className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 flex-1"
+                              className="bg-transparent border-vision-purple-200/20 text-white/90 flex-1 placeholder:text-white/40"
                             />
                             <Button 
                               onClick={handleEmailUpdate}
@@ -308,7 +308,7 @@ export default function SettingsPage() {
                           placeholder="Tell us about yourself"
                           defaultValue={user.bio || ""}
                           rows={4}
-                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90"
+                          className="bg-transparent border-vision-purple-200/20 text-white/90 placeholder:text-white/40"
                         />
                         <div className="flex justify-end">
                           <Button>Save Bio</Button>
@@ -403,7 +403,7 @@ export default function SettingsPage() {
                             type={showCurrentPassword ? "text" : "password"}
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 pr-10"
+                            className="bg-transparent border-vision-purple-200/20 text-white/90 pr-10 placeholder:text-white/40"
                           />
                           <button
                             type="button"
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                             type={showNewPassword ? "text" : "password"}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 pr-10"
+                            className="bg-transparent border-vision-purple-200/20 text-white/90 pr-10 placeholder:text-white/40"
                           />
                           <button
                             type="button"
@@ -443,7 +443,7 @@ export default function SettingsPage() {
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90"
+                          className="bg-transparent border-vision-purple-200/20 text-white/90 placeholder:text-white/40"
                         />
                       </div>
                     </CardContent>
@@ -624,7 +624,7 @@ export default function SettingsPage() {
                           id="language"
                           value="English"
                           disabled
-                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 flex-1"
+                          className="bg-transparent border-vision-purple-200/20 text-white/90 flex-1 placeholder:text-white/40"
                         />
                         <Button variant="outline" className="border-vision-purple-200/20 text-white">
                           Change
