@@ -8,9 +8,12 @@ import ProfilePage from "@/pages/profile-page";
 import MessagesPage from "@/pages/messages-page";
 import AnalysisPage from "@/pages/analysis-page";
 import SettingsPage from "@/pages/settings-page";
+import TermsPage from "@/pages/terms-page";
+import PrivacyPage from "@/pages/privacy-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog";
 import { PremiumFeaturesProvider } from "@/hooks/use-premium-features";
@@ -20,16 +23,19 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   
   // Show the full UI to all users, regardless of authentication status
   return (
-    <div className="app-container">
+    <div className="app-container min-h-screen flex flex-col">
       {/* Always show sidebar on desktop for all users */}
       {!isMobile && <Sidebar />}
       
       {/* Header shown for all pages, but transforms for mobile */}
       <Header />
       
-      <main className={`main-content ${isMobile ? 'pt-16' : ''}`}>
+      <main className={`main-content flex-1 ${isMobile ? 'pt-16' : ''}`}>
         {children}
       </main>
+      
+      {/* Footer always shown at bottom */}
+      <Footer />
     </div>
   );
 }

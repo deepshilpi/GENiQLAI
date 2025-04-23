@@ -1,9 +1,9 @@
 
 import { Route, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { AuthContext } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 export function ProtectedRoute({
   path,
@@ -12,7 +12,9 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  const { user, isLoading } = useAuth();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const isLoading = auth?.isLoading || false;
   const { openAuthDialog } = useAuthDialog();
   const [location] = useLocation();
   
