@@ -60,7 +60,7 @@ import {
 export default function CommunityPage() {
   const { user } = useAuth();
   const [showPostForm, setShowPostForm] = useState(false);
-  const [showPlanDialog, setShowPlanDialog] = useState(false);
+  // No longer using plan dialog
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState<"posts" | "users" | "tags">("posts");
   const [filteredPosts, setFilteredPosts] = useState<ExtendedPost[] | null>(null);
@@ -146,11 +146,8 @@ export default function CommunityPage() {
       return;
     }
     
-    if (isPlanAllowed(user?.planType || "free", "pro")) {
-      setShowPostForm(true);
-    } else {
-      setShowPlanDialog(true);
-    }
+    // Allow all users to post
+    setShowPostForm(true);
   };
   
   const handleSearchTypeChange = (type: "posts" | "users" | "tags") => {
@@ -197,15 +194,7 @@ export default function CommunityPage() {
             </Dialog>
           </div>
           
-          <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
-            <DialogContent className="bg-card border-border max-w-3xl">
-              <h2 className="text-xl font-bold mb-4">Upgrade to Post</h2>
-              <p className="text-muted-foreground mb-6">
-                You need at least a Pro subscription to create posts in the community.
-              </p>
-              <PricingPlans />
-            </DialogContent>
-          </Dialog>
+          {/* Plan dialog removed - all users can post now */}
           
           {/* Enhanced Search Bar with Better Mobile Support */}
           <div className="bg-card border border-border rounded-lg p-3 md:p-4 mb-6 shadow-sm">

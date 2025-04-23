@@ -202,7 +202,6 @@ export default function ProfilePage() {
               <div className="h-48 bg-card rounded-xl"></div>
             </div>
           </main>
-          <Footer />
         </div>
       </div>
     );
@@ -220,7 +219,6 @@ export default function ProfilePage() {
               <p className="text-muted-foreground">The user you're looking for doesn't exist.</p>
             </div>
           </main>
-          <Footer />
         </div>
       </div>
     );
@@ -645,7 +643,7 @@ export default function ProfilePage() {
           </Tabs>
         </main>
         
-        <Footer />
+        {/* Footer removed */}
       </div>
     </div>
   );
