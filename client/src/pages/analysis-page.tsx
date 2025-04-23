@@ -128,21 +128,8 @@ export default function AnalysisPage() {
       
       const data = await response.json();
       
-      if (response.status === 403 && data.error === "free_limit_reached") {
-        // Show auth dialog if free limit is reached
-        setReturnTo(window.location.pathname + (values.idea ? `?idea=${encodeURIComponent(values.idea)}` : ""));
-        setAuthDialogOpen(true);
-        setPhase("input");
-        return;
-      }
-      
       if (!response.ok) {
         throw new Error(data.message || "Failed to analyze startup idea");
-      }
-      
-      // Set remaining free analyses for anonymous users
-      if (data.meta && data.meta.remainingFreeAnalyses !== null) {
-        setRemainingFreeAnalyses(data.meta.remainingFreeAnalyses);
       }
       
       setAnalysisData(data);
@@ -162,20 +149,6 @@ export default function AnalysisPage() {
   
   // Handle budget submission
   const onBudgetSubmit = async (values: z.infer<typeof budgetSchema>) => {
-    if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
-      return;
-    }
-    
-    if (user.planType !== "unicorn") {
-      toast({
-        title: "Unicorn Plan Required",
-        description: "This feature is only available to users on the Unicorn plan. Please upgrade to unlock it.",
-        variant: "destructive",
-      });
-      return;
-    }
     
     setPhase("budget-loading");
     setError(null);
@@ -239,20 +212,6 @@ export default function AnalysisPage() {
   
   // Handle export to PDF
   const handleExportPDF = () => {
-    if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
-      return;
-    }
-    
-    if (user.planType === "free") {
-      toast({
-        title: "Pro Plan Required",
-        description: "Exporting to PDF is a premium feature. Please upgrade to Pro or Unicorn plan to use it.",
-        variant: "destructive",
-      });
-      return;
-    }
     
     toast({
       title: "Export Started",
@@ -270,12 +229,6 @@ export default function AnalysisPage() {
   
   // Handle share to community
   const handleShareToCommunity = () => {
-    if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
-      return;
-    }
-    
     // Would navigate to community post form with idea pre-filled
     toast({
       title: "Ready to Share",
@@ -285,15 +238,9 @@ export default function AnalysisPage() {
   
   // Handle save analysis
   const handleSaveAnalysis = () => {
-    if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
-      return;
-    }
-    
     toast({
       title: "Analysis Saved",
-      description: "Your startup analysis has been saved to your account.",
+      description: "Your startup analysis has been saved.",
     });
   };
 
@@ -347,11 +294,6 @@ export default function AnalysisPage() {
             <CardTitle className="text-xl text-white">Enter Your Startup Idea</CardTitle>
             <CardDescription className="text-white/70">
               Provide a detailed description of your startup idea for comprehensive analysis
-              {!user && remainingFreeAnalyses !== null && (
-                <span className="block mt-2 font-medium">
-                  You have {remainingFreeAnalyses} free analyses remaining
-                </span>
-              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
