@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "@/hooks/use-auth";
@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
@@ -300,6 +300,25 @@ export default function AnalysisPage() {
   const [selectedCategoryTemplates, setSelectedCategoryTemplates] = useState<Array<{title: string, description: string}>>([]);
   const [activeTab, setActiveTab] = useState<string>("custom");
   
+  // Progressive loading states
+  const [visibleBlocks, setVisibleBlocks] = useState<string[]>([]);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Analysis blocks to be loaded progressively
+  const analysisBlocks = [
+    "header",           // Analysis header with the user's idea
+    "successRate",      // Success rate analysis
+    "competitors",      // Competitors analysis
+    "targetAudience",   // Target audience fit
+    "marketSize",       // Market size analysis
+    "businessModel",    // Business model strength
+    "fundingRequired",  // Funding requirements
+    "swotAnalysis",     // SWOT analysis
+    "failedExecutions", // Previous failed executions
+    "actions"           // Action buttons (save, export, etc.)
+  ];
+  
   // Forms setup
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
     resolver: zodResolver(startupIdeaSchema),
@@ -316,9 +335,63 @@ export default function AnalysisPage() {
     },
   });
   
+  // Progressive loading function
+  const startProgressiveLoading = () => {
+    // Reset visible blocks and progress
+    setVisibleBlocks([]);
+    setLoadingProgress(0);
+    
+    // Clear any existing timer
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+    }
+    
+    // Start progress animation
+    progressTimerRef.current = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 100) {
+          if (progressTimerRef.current) {
+            clearInterval(progressTimerRef.current);
+          }
+          return 100;
+        }
+        return prev + 5;
+      });
+    }, 200);
+  };
+  
+  // Effect for progressive loading of blocks
+  useEffect(() => {
+    if (phase === "results" && analysisData) {
+      // Clear any existing timers
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+      }
+      
+      setLoadingProgress(100); // Complete the loading progress bar
+      
+      // Progressive loading of blocks with staggered timing
+      const blockTimers: NodeJS.Timeout[] = [];
+      
+      analysisBlocks.forEach((block, index) => {
+        const timer = setTimeout(() => {
+          setVisibleBlocks(prev => [...prev, block]);
+        }, 300 + (index * 200)); // 300ms initial delay, then 200ms between each block
+        
+        blockTimers.push(timer);
+      });
+      
+      // Cleanup timers
+      return () => {
+        blockTimers.forEach(timer => clearTimeout(timer));
+      };
+    }
+  }, [phase, analysisData]);
+  
   // Handle startup idea submission
   const onIdeaSubmit = async (values: z.infer<typeof startupIdeaSchema>) => {
     setPhase("loading");
+    startProgressiveLoading(); // Start the progressive loading animation
     
     try {
       const response = await apiRequest("POST", "/api/analyze", {
@@ -353,6 +426,11 @@ export default function AnalysisPage() {
     } catch (err: any) {
       console.error("Error analyzing startup idea:", err);
       setPhase("input");
+      
+      // Clear any loading animations
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+      }
       
       toast({
         title: "Analysis Failed",
@@ -694,9 +772,14 @@ export default function AnalysisPage() {
               </div>
             </div>
             <div className="w-64 mt-8">
-              <Progress value={45} className="h-2 bg-vision-purple-200/20" />
+              <Progress value={loadingProgress} className="h-2 bg-vision-purple-200/20" />
             </div>
-            <p className="mt-4 text-sm text-white/70">Performing comprehensive market analysis...</p>
+            <p className="mt-4 text-sm text-white/70">
+              {loadingProgress < 30 && "Gathering market data..."}
+              {loadingProgress >= 30 && loadingProgress < 60 && "Analyzing competitors..."}
+              {loadingProgress >= 60 && loadingProgress < 85 && "Evaluating business model..."}
+              {loadingProgress >= 85 && "Finalizing insights..."}
+            </p>
           </CardContent>
         </Card>
       )}
