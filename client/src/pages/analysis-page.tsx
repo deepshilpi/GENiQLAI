@@ -363,7 +363,7 @@ export default function AnalysisPage() {
         <CardHeader>
           <CardTitle className="flex items-center text-2xl text-white">
             <Brain className="w-6 h-6 mr-2 text-primary" />
-            GENIQL Startup Analysis
+            GENIQL Startup Analysis - Updated App
           </CardTitle>
           <CardDescription className="text-white/70">
             Analyze your startup idea with our advanced AI to understand its potential, challenges, and required execution steps.
