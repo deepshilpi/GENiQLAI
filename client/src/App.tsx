@@ -13,7 +13,6 @@ import CommunityPage from "@/pages/community-page";
 import ProfilePage from "@/pages/profile-page";
 import MessagesPage from "@/pages/messages-page";
 import AnalysisPage from "@/pages/analysis-page";
-import DatabasePage from "@/pages/database-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -49,7 +48,6 @@ function Router() {
         <ProtectedRoute path="/dashboard" component={DashboardPage} />
         <ProtectedRoute path="/messages" component={MessagesPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
-        <ProtectedRoute path="/database" component={DatabasePage} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>

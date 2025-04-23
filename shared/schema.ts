@@ -9,7 +9,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   bio: text("bio"),
-  avatarUrl: text("avatar_url"),
   planType: text("plan_type").notNull().default("free"), // "free", "pro", "unicorn"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   followersCount: integer("followers_count").notNull().default(0),
@@ -30,19 +29,16 @@ export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  imageUrl: text("image_url"),
   tags: text("tags").array().notNull(),
   authorId: integer("author_id").notNull().references(() => users.id),
   pumpCount: integer("pump_count").notNull().default(0),
   dumpCount: integer("dump_count").notNull().default(0),
-  commentCount: integer("comment_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertPostSchema = createInsertSchema(posts).pick({
   title: true,
   description: true,
-  imageUrl: true,
   tags: true,
   authorId: true,
 });

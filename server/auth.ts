@@ -53,25 +53,15 @@ export function setupAuth(app: Express) {
       createTableIfMissing: true,
     });
 
-    // Testing the connection synchronously before proceeding
-    try {
-      // Use a synchronous test to avoid async issues
-      console.log('Using PostgreSQL session store');
-    } catch (connErr) {
-      console.warn('PostgreSQL session store setup error:', connErr);
-      // Just throw to trigger the catch block below
-      throw new Error('PostgreSQL session store setup failed');
-    }
-    
-    // Also set up a background verification that won't crash the app
-    pool.query('SELECT NOW()')
-      .then(() => {
-        console.log('PostgreSQL connection verified successfully');
-      })
-      .catch(connErr => {
-        console.warn('PostgreSQL connection verification failed (non-fatal):', connErr);
-        // Don't throw here as it would be an unhandled promise rejection
-      });
+    // Verify the connection works
+    pool.query('SELECT NOW()', (err) => {
+      if (err) {
+        console.warn('PostgreSQL session store connection check failed:', err);
+        throw new Error('PostgreSQL connection check failed');
+      }
+    });
+
+    console.log('Using PostgreSQL session store');
   } catch (error) {
     // If PostgreSQL fails, fallback to memory store
     console.warn('PostgreSQL session store failed, falling back to memory store:', error);

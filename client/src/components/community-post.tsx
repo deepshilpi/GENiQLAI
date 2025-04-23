@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUp, ArrowDown, MessageSquare, Image as ImageIcon } from "lucide-react";
+import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -12,36 +12,10 @@ interface CommunityPostProps {
 }
 
 export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps) {
-  const [authorUsername, setAuthorUsername] = useState<string>("");
+  const authorUsername = useMemo(() => "Username", []);
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  
-  // Fetch the author's username
-  useEffect(() => {
-    async function fetchAuthor() {
-      try {
-        const response = await fetch(`/api/users/${post.authorId}`);
-        if (response.ok) {
-          const author = await response.json();
-          setAuthorUsername(author.username || "User");
-        } else {
-          // Use fallback if server returns error
-          setAuthorUsername("User");
-        }
-      } catch (error) {
-        console.error("Error fetching author:", error);
-        // Use fallback if request fails
-        setAuthorUsername("User");
-      }
-    }
-    
-    if (post.authorId) {
-      fetchAuthor();
-    } else {
-      setAuthorUsername("User");
-    }
-  }, [post.authorId]);
   
   const handlePump = () => {
     if (!currentUser) {
@@ -93,20 +67,6 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
           {truncateText(post.description, 120)}
         </p>
         
-        {post.imageUrl && (
-          <div className="mb-4 rounded-lg overflow-hidden">
-            <img 
-              src={post.imageUrl} 
-              alt={post.title} 
-              className="w-full h-auto max-h-[300px] object-cover"
-              onError={(e) => {
-                e.currentTarget.src = ""; 
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          </div>
-        )}
-        
         <div className="flex flex-wrap gap-2 mb-3">
           {post.tags.map((tag, index) => (
             <span key={index} className="text-xs bg-accent text-muted-foreground px-2 py-1 rounded">
@@ -133,7 +93,7 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
           <Link href={`/post/${post.id}`}>
             <a className="flex items-center text-muted-foreground text-sm ml-auto">
               <MessageSquare className="mr-1 w-4 h-4" />
-              <span>{post.commentCount || 0}</span>
+              <span>15</span>
             </a>
           </Link>
         </div>

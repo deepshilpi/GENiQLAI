@@ -1,14 +1,11 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import path from "path";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { setupDatabaseRoutes } from "./database-routes";
 import { analyzeStartupIdea, generateExecutionPlan, findInvestors } from "./openai";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
-import { upload, getUploadUrl } from "./uploads";
 import { 
   InsertPost, 
   InsertComment, 
@@ -47,24 +44,6 @@ const activeConnections = new Map<number, Set<UserWebSocket>>();
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
-  
-  // Setup database management routes
-  setupDatabaseRoutes(app);
-  
-  // Serve uploaded files
-  app.use('/uploads', (req, res, next) => {
-    // Only allow image files
-    if (!req.path.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      return res.status(403).send('Forbidden');
-    }
-    next();
-  }, (req, res, next) => {
-    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
-    next();
-  });
-  
-  // Serve static files from the uploads directory
-  app.use('/uploads', express.static(path.resolve('./uploads')));
   
   // Create HTTP server
   const httpServer = createServer(app);
@@ -297,39 +276,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Failed to update bio" });
     }
   });
-  
-  // Get user by ID
-  app.get("/api/users/:id", async (req, res) => {
-    const userId = parseInt(req.params.id);
-    
-    if (isNaN(userId)) {
-      return res.status(400).json({ message: "Invalid user ID" });
-    }
-    
-    try {
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Return only safe user data (no password)
-      const safeUser = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        planType: user.planType,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        createdAt: user.createdAt
-      };
-      
-      return res.status(200).json(safeUser);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      return res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
 
   // Get all community posts
   app.get("/api/posts", async (req, res) => {
@@ -370,19 +316,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    const { title, description, tags, imageUrl } = req.body;
+    const { title, content } = req.body;
     
-    if (!title || !description || !tags || !Array.isArray(tags)) {
-      return res.status(400).json({ message: "Title, description, and tags array are required" });
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
     }
     
     try {
       const newPost: InsertPost = {
         authorId: req.user.id,
         title,
-        description,
-        tags,
-        imageUrl: imageUrl || null,
+        content,
+        pumpCount: 0,
+        dumpCount: 0
       };
       
       const post = await storage.createPost(newPost);
@@ -390,30 +336,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating post:", error);
       return res.status(500).json({ message: "Failed to create post" });
-    }
-  });
-  
-  // Upload an image
-  app.post("/api/uploads", upload.single('image'), async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-    
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file provided" });
-    }
-    
-    try {
-      // Get the URL for the uploaded file
-      const imageUrl = getUploadUrl(req.file.filename, req);
-      
-      return res.status(201).json({ 
-        imageUrl,
-        message: "Image uploaded successfully" 
-      });
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return res.status(500).json({ message: "Failed to upload image" });
     }
   });
   
