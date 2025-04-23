@@ -68,26 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
-    // Track free analysis usage for anonymous users
-    if (!req.isAuthenticated()) {
-      // Initialize the session counter if not already present
-      if (req.session.anonymousAnalysisCount === undefined) {
-        req.session.anonymousAnalysisCount = 0;
-      }
-      
-      // Check if user has exceeded the free limit (2 analyses)
-      if (req.session.anonymousAnalysisCount >= 2) {
-        return res.status(403).json({ 
-          message: "Free analysis limit reached. Please sign up to continue analyzing startup ideas.",
-          error: "free_limit_reached",
-          remainingFreeAnalyses: 0,
-          totalFreeAnalyses: 2
-        });
-      }
-      
-      // Increment the counter for anonymous users
-      req.session.anonymousAnalysisCount++;
-    }
+    // No limits on analysis for any users
     
     // Detect country from IP (simplified for demo)
     const country = req.body.country || detectCountryFromIP(req.ip || '');
