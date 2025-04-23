@@ -5,11 +5,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(amount: number, currency: string = "USD", country?: string): string {
+  // Map of countries to their locale codes for proper formatting
+  const countryToLocale: Record<string, string> = {
+    "United States": "en-US",
+    "United Kingdom": "en-GB",
+    "Canada": "en-CA",
+    "Australia": "en-AU",
+    "India": "en-IN",
+    "China": "zh-CN",
+    "Japan": "ja-JP",
+    "Germany": "de-DE",
+    "France": "fr-FR",
+    "Brazil": "pt-BR",
+    "Singapore": "en-SG",
+    "Israel": "he-IL",
+    // Default to US format for other countries
+  };
+  
+  // Get the appropriate locale based on country
+  const locale = country && countryToLocale[country] ? countryToLocale[country] : "en-US";
+  
+  // Format with locale-specific settings
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currency,
     maximumFractionDigits: 0,
+    currencyDisplay: "symbol"
   }).format(amount);
 }
 

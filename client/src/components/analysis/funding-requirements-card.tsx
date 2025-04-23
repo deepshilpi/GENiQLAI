@@ -1,6 +1,6 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getCountryCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface FundingRequirementsProps {
@@ -11,11 +11,15 @@ interface FundingRequirementsProps {
     percentage: number;
   }>;
   message: string;
+  country?: string;
 }
 
-const COLORS = ['#7551FF', '#A163F7', '#CB9FFF', '#0075FF', '#56ABFF', '#8884d8'];
+const COLORS = ['#7551FF', '#A163F7', '#CB9FFF', '#0075FF', '#56ABFF', '#94C9FF'];
 
-export function FundingRequirementsCard({ total, breakdown, message }: FundingRequirementsProps) {
+export function FundingRequirementsCard({ total, breakdown, message, country = "United States" }: FundingRequirementsProps) {
+  // Get currency based on country
+  const currency = getCountryCurrency(country);
+  
   // Format data for recharts
   const chartData = breakdown.map((item, index) => ({
     name: item.category,
@@ -51,7 +55,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
       return (
         <div className="p-3 backdrop-blur-md border border-border/40 rounded-lg bg-card/90 shadow-lg">
           <p className="font-medium text-sm">{data.name}</p>
-          <p className="text-xs text-primary">{formatCurrency(data.amount)}</p>
+          <p className="text-xs text-primary">{formatCurrency(data.amount, currency, country)}</p>
           <p className="text-xs text-muted-foreground">{data.value.toFixed(1)}%</p>
         </div>
       );
@@ -66,7 +70,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
           <h3 className="text-sm font-medium text-white/70 mb-1">Total Funding Required</h3>
           <div className="relative">
             <div className="absolute inset-0 bg-vision-primary-gradient/20 rounded-full blur-xl"></div>
-            <p className="text-3xl font-bold text-white relative">{formatCurrency(total)}</p>
+            <p className="text-3xl font-bold text-white relative">{formatCurrency(total, currency, country)}</p>
           </div>
         </CardContent>
       </Card>
@@ -145,7 +149,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
                 </h4>
               </div>
               <div className="flex justify-between items-end mt-1.5">
-                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount)}</p>
+                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount, currency, country)}</p>
                 <span className="text-xs font-medium bg-vision-purple-200/20 px-2 py-0.5 rounded-full text-white/70">
                   {item.percentage}%
                 </span>
@@ -155,7 +159,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
         ))}
       </div>
 
-      <div className="p-4 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm">
+      <div className="p-5 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm shadow-inner">
         <p className="text-sm text-white/90 leading-relaxed">{message}</p>
       </div>
     </div>

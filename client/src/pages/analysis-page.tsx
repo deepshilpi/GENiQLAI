@@ -739,7 +739,7 @@ export default function AnalysisPage() {
           
           {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
-            className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
+            className="grid gap-5 sm:gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
