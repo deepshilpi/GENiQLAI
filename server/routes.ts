@@ -68,7 +68,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
     
-    // No limits on analysis for any users
+    // Track free analysis usage for anonymous users
+    if (!req.isAuthenticated()) {
+      // Initialize the session counter if not already present
+      if (req.session.anonymousAnalysisCount === undefined) {
+        req.session.anonymousAnalysisCount = 0;
+      }
+      
+      // Check if user has exceeded the free limit (2 analyses)
+      if (req.session.anonymousAnalysisCount >= 2) {
+        return res.status(403).json({ 
+          message: "Free analysis limit reached. Please sign up to continue analyzing startup ideas.",
+          error: "free_limit_reached",
+          remainingFreeAnalyses: 0,
+          totalFreeAnalyses: 2
+        });
+      }
+      
+      // Increment the counter for anonymous users
+      req.session.anonymousAnalysisCount++;
+    }
     
     // Detect country from IP (simplified for demo)
     const country = req.body.country || detectCountryFromIP(req.ip || '');
@@ -103,11 +122,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Add metadata about usage
+      // Add metadata about free analysis usage for anonymous users
       const responseData = {
         ...analysisResults,
         meta: {
-          isAuthenticated: req.isAuthenticated()
+          isAuthenticated: req.isAuthenticated(),
+          remainingFreeAnalyses: req.isAuthenticated() ? 
+            null : 
+            Math.max(0, 2 - (req.session.anonymousAnalysisCount || 0)),
+          totalFreeAnalyses: 2
         }
       };
       
@@ -142,10 +165,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Generate execution plan
+  // Generate execution plan (Unicorn feature)
   app.post("/api/execution-plan", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    if (req.user.planType !== "unicorn") {
+      return res.status(403).json({ message: "Unicorn plan required for this feature" });
     }
     
     const { startupIdea, initialBudget } = req.body;
@@ -163,10 +190,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Find investors
+  // Find investors (Unicorn feature)
   app.post("/api/investors", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    if (req.user.planType !== "unicorn") {
+      return res.status(403).json({ message: "Unicorn plan required for this feature" });
     }
     
     const { startupIdea } = req.body;
