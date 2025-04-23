@@ -11,10 +11,10 @@ export function Footer() {
         </div>
         <div className="flex space-x-6">
           <Link href="/terms">
-            <a className="hover:text-white hover:underline transition-colors">Terms of Service</a>
+            <span className="hover:text-white hover:underline transition-colors cursor-pointer">Terms of Service</span>
           </Link>
           <Link href="/privacy">
-            <a className="hover:text-white hover:underline transition-colors">Privacy Policy</a>
+            <span className="hover:text-white hover:underline transition-colors cursor-pointer">Privacy Policy</span>
           </Link>
         </div>
       </div>

@@ -124,11 +124,20 @@ export function setupAuth(app: Express) {
     try {
       const { username, email, password } = req.body;
 
+      // Validate required fields
+      if (!username || !email || !password) {
+        return res.status(400).json({ 
+          message: "Username, email, and password are required" 
+        });
+      }
+
+      // Check if username or email already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
+      // Hash password and create user
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
         username,
@@ -136,26 +145,54 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
+      // Log the user in after successful registration
       req.login(user, (err: Error | null) => {
         if (err) {
-          return res.status(500).json({ message: "Login failed after registration" });
+          console.error("Login after registration failed:", err);
+          return res.status(500).json({ 
+            message: "Registration succeeded but automatic login failed. Please log in manually." 
+          });
         }
-        return res.status(201).json(user);
+        // Return the user without the password
+        const { password, ...userWithoutPassword } = user;
+        return res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
+      res.status(500).json({ 
+        message: "Registration failed: " + (error instanceof Error ? error.message : "Unknown error") 
+      });
     }
   });
 
   app.post("/api/login", (req: Request, res: Response, next: NextFunction) => {
+    // Validate required fields
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ 
+        message: "Username and password are required" 
+      });
+    }
+
     passport.authenticate("local", (err: Error | null, user: User | false, info: { message: string } | undefined) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: info?.message || "Authentication failed" });
+      if (err) {
+        console.error("Login error:", err);
+        return res.status(500).json({ message: "Login error: " + err.message });
+      }
+      
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Invalid username or password" });
+      }
 
       req.login(user, (loginErr: Error | null) => {
-        if (loginErr) return next(loginErr);
-        return res.json(user);
+        if (loginErr) {
+          console.error("Session login error:", loginErr);
+          return res.status(500).json({ message: "Session creation failed" });
+        }
+        
+        // Return the user without the password
+        const { password, ...userWithoutPassword } = user as any;
+        return res.json(userWithoutPassword);
       });
     })(req, res, next);
   });
@@ -173,6 +210,9 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    res.json(req.user);
+    
+    // Return user without password
+    const { password, ...userWithoutPassword } = req.user as any;
+    res.json(userWithoutPassword);
   });
 }
