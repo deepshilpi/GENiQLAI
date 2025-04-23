@@ -629,6 +629,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get analyses history for authenticated user
+  app.get("/api/analyses", async (req, res) => {
+    // Only authenticated users can access their analysis history
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view analyses history",
+        error: "auth_required"
+      });
+    }
+    
+    try {
+      const analyses = await storage.getAnalysesByUserId(req.user.id);
+      return res.status(200).json(analyses);
+    } catch (error) {
+      console.error("Error fetching analysis history:", error);
+      return res.status(500).json({ message: "Failed to fetch analysis history" });
+    }
+  });
+  
+  // Saved Ideas API endpoints
+  // Get all saved ideas for the authenticated user
+  app.get("/api/saved-ideas", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        message: "Authentication required to view saved ideas",
+        error: "auth_required"
+      });
+    }
+    
+    try {
+      const savedIdeas = await storage.getSavedIdeasByUserId(req.user.id);
+      return res.status(200).json(savedIdeas);
+    } catch (error) {
+      console.error("Error fetching saved ideas:", error);
+      return res.status(500).json({ message: "Failed to fetch saved ideas" });
+    }
+  });
+  
+  // Get a single saved idea by ID
+  app.get("/api/saved-ideas/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    
+    try {
+      const savedIdea = await storage.getSavedIdeaById(id);
+      
+      if (!savedIdea) {
+        return res.status(404).json({ message: "Saved idea not found" });
+      }
+      
+      // Check if the saved idea belongs to the authenticated user
+      if (savedIdea.userId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      return res.status(200).json(savedIdea);
+    } catch (error) {
+      console.error("Error fetching saved idea:", error);
+      return res.status(500).json({ message: "Failed to fetch saved idea" });
+    }
+  });
+  
+  // Create a new saved idea
+  app.post("/api/saved-ideas", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const { title, description, ideaType, notes, resultsSnapshot } = req.body;
+    
+    if (!title || !description) {
+      return res.status(400).json({ message: "Title and description are required" });
+    }
+    
+    try {
+      const newSavedIdea: InsertSavedIdea = {
+        userId: req.user.id,
+        title,
+        description,
+        ideaType: ideaType || "general",
+        notes: notes || "",
+        resultsSnapshot: resultsSnapshot || null,
+        createdAt: new Date()
+      };
+      
+      const savedIdea = await storage.createSavedIdea(newSavedIdea);
+      return res.status(201).json(savedIdea);
+    } catch (error) {
+      console.error("Error creating saved idea:", error);
+      return res.status(500).json({ message: "Failed to create saved idea" });
+    }
+  });
+  
+  // Update an existing saved idea
+  app.put("/api/saved-ideas/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    
+    try {
+      const existingSavedIdea = await storage.getSavedIdeaById(id);
+      
+      if (!existingSavedIdea) {
+        return res.status(404).json({ message: "Saved idea not found" });
+      }
+      
+      // Check if the saved idea belongs to the authenticated user
+      if (existingSavedIdea.userId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Only update fields that are provided
+      const updates: Partial<InsertSavedIdea> = {};
+      
+      if (req.body.title !== undefined) updates.title = req.body.title;
+      if (req.body.description !== undefined) updates.description = req.body.description;
+      if (req.body.ideaType !== undefined) updates.ideaType = req.body.ideaType;
+      if (req.body.notes !== undefined) updates.notes = req.body.notes;
+      if (req.body.resultsSnapshot !== undefined) updates.resultsSnapshot = req.body.resultsSnapshot;
+      
+      const updatedSavedIdea = await storage.updateSavedIdea(id, updates);
+      return res.status(200).json(updatedSavedIdea);
+    } catch (error) {
+      console.error("Error updating saved idea:", error);
+      return res.status(500).json({ message: "Failed to update saved idea" });
+    }
+  });
+  
+  // Delete a saved idea
+  app.delete("/api/saved-ideas/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    
+    try {
+      const existingSavedIdea = await storage.getSavedIdeaById(id);
+      
+      if (!existingSavedIdea) {
+        return res.status(404).json({ message: "Saved idea not found" });
+      }
+      
+      // Check if the saved idea belongs to the authenticated user
+      if (existingSavedIdea.userId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await storage.deleteSavedIdea(id);
+      return res.status(200).json({ message: "Saved idea deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting saved idea:", error);
+      return res.status(500).json({ message: "Failed to delete saved idea" });
+    }
+  });
+
   // Return the HTTP server
   return httpServer;
 }
