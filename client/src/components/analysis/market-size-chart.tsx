@@ -58,8 +58,8 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
   };
 
   return (
-    <div className="space-y-6">
-      <div className="relative h-72 w-full flex items-center justify-center">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="relative h-64 sm:h-72 w-full flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center">
           {totalSize && (
             <div className="text-center z-10 pointer-events-none p-4 bg-vision-purple-200/10 backdrop-blur-md rounded-full border border-vision-purple-200/30">
@@ -83,8 +83,8 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
               data={normalizedData}
               cx="50%"
               cy="50%"
-              innerRadius={80}
-              outerRadius={110}
+              innerRadius={70}
+              outerRadius={100}
               paddingAngle={4}
               dataKey="value"
               onMouseEnter={onPieEnter}
@@ -118,26 +118,26 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProp
               align="center" 
               layout="horizontal" 
               iconType="circle" 
-              iconSize={10}
-              wrapperStyle={{ paddingTop: '20px' }}
+              iconSize={8}
+              wrapperStyle={{ paddingTop: '16px' }}
               formatter={(value: string) => (
-                <span className="text-sm text-white/90 font-medium">{value}</span>
+                <span className="text-xs sm:text-sm text-white/90 font-medium">{value}</span>
               )}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="p-5 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
+      <div className="p-4 rounded-lg border border-vision-purple-200/20 bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 backdrop-blur-sm shadow-inner">
         <p className="text-sm text-white/90 leading-relaxed">{message}</p>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {segments.map((segment, i) => (
           <div 
             key={i}
-            className={`flex flex-col p-4 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-all duration-200 ${
-              activeIndex === i ? 'ring-2 ring-offset-2 ring-offset-background ring-' + COLORS[i % COLORS.length].replace('#', '') : ''
+            className={`flex flex-col p-3 sm:p-4 rounded-lg border border-vision-purple-200/20 bg-vision-purple-100/5 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-all duration-200 ${
+              activeIndex === i ? 'ring-1 ring-' + COLORS[i % COLORS.length] : ''
             }`}
             style={{ 
               boxShadow: `0 4px 12px -2px ${COLORS[i % COLORS.length]}33`,

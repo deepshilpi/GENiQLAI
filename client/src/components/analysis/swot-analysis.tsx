@@ -40,7 +40,7 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
   return (
     <div>
       {/* Desktop Version - Grid Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-4">
+      <div className="hidden md:grid grid-cols-2 gap-3 sm:gap-4">
         <motion.div 
           className="col-span-1"
           variants={quadrantVariants}
@@ -49,14 +49,14 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
           custom={0}
         >
           <Card className="h-full border-0 bg-gradient-to-br from-green-500/30 to-green-500/5 backdrop-blur-sm hover:from-green-500/40 hover:to-green-500/10 transition-all duration-300 shadow-lg shadow-green-500/10">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-3 mb-4 bg-green-500/10 p-2 rounded-lg">
-                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
-                  <ThumbsUp className="h-5 w-5 text-green-400" />
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 bg-green-500/10 p-2 rounded-lg">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                  <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
                 </div>
-                <h3 className="font-semibold text-white text-lg">Strengths</h3>
+                <h3 className="font-semibold text-white text-base sm:text-lg">Strengths</h3>
               </div>
-              <div className="space-y-3 pl-2">
+              <div className="space-y-2 sm:space-y-3 pl-2">
                 {strengths.map((strength, i) => (
                   <motion.div 
                     key={i}
@@ -64,10 +64,10 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
                     initial="hidden"
                     animate="visible"
                     custom={i}
-                    className="flex items-start gap-3 group"
+                    className="flex items-start gap-2 sm:gap-3 group"
                     whileHover={{ x: 5, transition: { duration: 0.2 } }}
                   >
-                    <span className="rounded-full bg-green-500/20 text-green-400 flex items-center justify-center h-6 w-6 text-xs font-bold mt-0.5 group-hover:bg-green-500/40 transition-colors">
+                    <span className="rounded-full bg-green-500/20 text-green-400 flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 text-xs font-bold mt-0.5 group-hover:bg-green-500/40 transition-colors">
                       {i + 1}
                     </span>
                     <p className="text-sm text-white/90 leading-tight">{strength}</p>
@@ -86,7 +86,7 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
           custom={1}
         >
           <Card className="h-full border-0 bg-gradient-to-br from-red-500/30 to-red-500/5 backdrop-blur-sm hover:from-red-500/40 hover:to-red-500/10 transition-all duration-300 shadow-lg shadow-red-500/10">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3 mb-4 bg-red-500/10 p-2 rounded-lg">
                 <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
                   <ThumbsDown className="h-5 w-5 text-red-400" />
@@ -123,7 +123,7 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
           custom={2}
         >
           <Card className="h-full border-0 bg-gradient-to-br from-primary/30 to-primary/5 backdrop-blur-sm hover:from-primary/40 hover:to-primary/10 transition-all duration-300 shadow-lg shadow-primary/10">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3 mb-4 bg-primary/10 p-2 rounded-lg">
                 <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-primary" />
@@ -160,7 +160,7 @@ export function SWOTAnalysis({ strengths, weaknesses, opportunities, threats }: 
           custom={3}
         >
           <Card className="h-full border-0 bg-gradient-to-br from-amber-500/30 to-amber-500/5 backdrop-blur-sm hover:from-amber-500/40 hover:to-amber-500/10 transition-all duration-300 shadow-lg shadow-amber-500/10">
-            <CardContent className="p-5">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3 mb-4 bg-amber-500/10 p-2 rounded-lg">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
                   <AlertTriangle className="h-5 w-5 text-amber-400" />
