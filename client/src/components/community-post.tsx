@@ -24,15 +24,22 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
         const response = await fetch(`/api/users/${post.authorId}`);
         if (response.ok) {
           const author = await response.json();
-          setAuthorUsername(author.username);
+          setAuthorUsername(author.username || "User");
+        } else {
+          // Use fallback if server returns error
+          setAuthorUsername("User");
         }
       } catch (error) {
         console.error("Error fetching author:", error);
+        // Use fallback if request fails
+        setAuthorUsername("User");
       }
     }
     
     if (post.authorId) {
       fetchAuthor();
+    } else {
+      setAuthorUsername("User");
     }
   }, [post.authorId]);
   
