@@ -54,17 +54,21 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Enhanced QueryClient configuration for better performance and caching
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      refetchOnWindowFocus: true, // Enable selective refetching on window focus for fresh data
+      staleTime: 5 * 60 * 1000, // 5 minutes stale time instead of Infinity for balance between caching and freshness
+      retry: 1, // Allow one retry for better resilience and user experience
+      retryDelay: 1000 // Wait 1 second before retry
+      // Note: TanStack Query v5 doesn't use keepPreviousData or placeholderData in defaultOptions
     },
     mutations: {
-      retry: false,
+      retry: 1, // Allow one retry for better resilience
+      retryDelay: 1000 // Wait 1 second before retry
     },
   },
 });

@@ -147,9 +147,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
+      // Simple in-memory cache for analysis results (lasts for current server session)
+      const analysisCache = (req.app.locals.analysisCache = req.app.locals.analysisCache || new Map());
+      
+      // Create a unique cache key based on idea and country
+      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${country}`;
+      
+      // Check if we have a cached result (cache lasts 60 minutes)
+      const cachedResult = analysisCache.get(cacheKey);
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
+        console.log("Using cached analysis result");
+        return res.json(cachedResult.data);
+      }
+      
       // Add timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 30000);
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // Increased to 60 seconds for better analysis
       });
       
       // Determine plan type (free for anonymous users)
@@ -160,6 +173,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analyzeStartupIdea(startupIdea, country, planType),
         timeoutPromise
       ]) as AnalysisResults;
+      
+      // Cache the successful result
+      analysisCache.set(cacheKey, {
+        data: analysisResults,
+        timestamp: Date.now()
+      });
       
       // Validate the response structure
       if (!analysisResults || !analysisResults.successRate) {
@@ -247,9 +266,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
+      // Simple in-memory cache for budget analysis results (lasts for current server session)
+      const budgetCache = (req.app.locals.budgetCache = req.app.locals.budgetCache || new Map());
+      
+      // Create a unique cache key based on idea, budget, and country
+      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${initialBudget}_${country}`;
+      
+      // Check if we have a cached result (cache lasts 60 minutes)
+      const cachedResult = budgetCache.get(cacheKey);
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
+        console.log("Using cached budget analysis result");
+        return res.json(cachedResult.data);
+      }
+      
       // Add timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 30000);
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // Increased to 60 seconds for better analysis
       });
       
       // Race between the analysis and the timeout
@@ -257,6 +289,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         generateBudgetAnalysis(startupIdea, initialBudget, country),
         timeoutPromise
       ]);
+      
+      // Cache the successful result
+      budgetCache.set(cacheKey, {
+        data: budgetAnalysis,
+        timestamp: Date.now()
+      });
       
       return res.status(200).json(budgetAnalysis);
     } catch (error) {
@@ -353,7 +391,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const investors = await findInvestors(startupIdea, detectCountryFromIP(req.ip || ''));
+      // Simple in-memory cache for investors results
+      const investorsCache = (req.app.locals.investorsCache = req.app.locals.investorsCache || new Map());
+      
+      // Create a unique cache key based on idea and country
+      const country = detectCountryFromIP(req.ip || '');
+      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${country}`;
+      
+      // Check if we have a cached result (cache lasts 60 minutes)
+      const cachedResult = investorsCache.get(cacheKey);
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
+        console.log("Using cached investors result");
+        return res.json(cachedResult.data);
+      }
+      
+      // Add timeout to prevent long-running requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout
+      });
+      
+      // Race between the investors search and the timeout
+      const investors = await Promise.race([
+        findInvestors(startupIdea, country),
+        timeoutPromise
+      ]);
+      
+      // Cache the successful result
+      investorsCache.set(cacheKey, {
+        data: investors,
+        timestamp: Date.now()
+      });
+      
       return res.status(200).json(investors);
     } catch (error) {
       console.error("Error finding investors:", error);

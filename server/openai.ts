@@ -383,8 +383,11 @@ export async function generateExecutionPlan(
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 2000
+      temperature: 0.5, // Lower temperature for more focused and faster responses
+      max_tokens: 2000,
+      top_p: 0.9,
+      frequency_penalty: 0.2, // Slightly reduce repetition
+      presence_penalty: 0.1 // Slightly encourage topic variety
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -461,8 +464,11 @@ export async function findInvestors(
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 1500
+      temperature: 0.5, // Lower temperature for more focused and faster responses
+      max_tokens: 1500,
+      top_p: 0.9,
+      frequency_penalty: 0.2, // Slightly reduce repetition
+      presence_penalty: 0.1 // Slightly encourage topic variety
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
