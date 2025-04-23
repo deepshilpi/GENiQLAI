@@ -99,10 +99,10 @@ export const savedIdeas = pgTable("saved_ideas", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
-  startupIdea: text("startup_idea").notNull(),
-  country: text("country").notNull(),
-  category: text("category"),
-  isFavorite: boolean("is_favorite").notNull().default(false),
+  description: text("description").notNull(),
+  ideaType: text("idea_type").notNull().default("general"),
+  notes: text("notes").default(""),
+  resultsSnapshot: json("results_snapshot"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -148,10 +148,10 @@ export const insertAnalysisSchema = createInsertSchema(analyses).pick({
 export const insertSavedIdeaSchema = createInsertSchema(savedIdeas).pick({
   userId: true,
   title: true,
-  startupIdea: true,
-  country: true,
-  category: true,
-  isFavorite: true,
+  description: true,
+  ideaType: true,
+  notes: true,
+  resultsSnapshot: true,
 });
 
 // Create insert schemas for messaging tables
