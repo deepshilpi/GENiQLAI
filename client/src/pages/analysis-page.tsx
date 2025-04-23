@@ -788,37 +788,47 @@ export default function AnalysisPage() {
       {phase === "results" && analysisData && (
         <div className="space-y-8">
           {/* Result Header */}
-          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg shadow-vision-purple-200/5">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl text-white flex items-center">
-                    <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center mr-3">
-                      <CheckCircle className="w-5 h-5 text-white" />
+          <AnimatePresence>
+            {visibleBlocks.includes("header") && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg shadow-vision-purple-200/5">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-2xl text-white flex items-center">
+                          <div className="w-8 h-8 rounded-lg bg-vision-primary-gradient flex items-center justify-center mr-3">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                          Analysis Results
+                        </CardTitle>
+                        <CardDescription className="text-white/70 mt-2">
+                          AI-powered insights to help you make informed decisions
+                        </CardDescription>
+                      </div>
+                      <div>
+                        <Badge variant="outline" className="text-white/90 border-vision-purple-200/30 bg-vision-purple-100/10 px-3 py-1">
+                          {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </Badge>
+                      </div>
                     </div>
-                    Analysis Results
-                  </CardTitle>
-                  <CardDescription className="text-white/70 mt-2">
-                    AI-powered insights to help you make informed decisions
-                  </CardDescription>
-                </div>
-                <div>
-                  <Badge variant="outline" className="text-white/90 border-vision-purple-200/30 bg-vision-purple-100/10 px-3 py-1">
-                    {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="p-5 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm shadow-inner">
-                <h3 className="mb-3 text-lg font-medium text-white flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-amber-400" />
-                  Your Idea
-                </h3>
-                <p className="text-white/90 leading-relaxed">{ideaForm.getValues().idea}</p>
-              </div>
-            </CardContent>
-          </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="p-5 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm shadow-inner">
+                      <h3 className="mb-3 text-lg font-medium text-white flex items-center gap-2">
+                        <Lightbulb className="w-5 h-5 text-amber-400" />
+                        Your Idea
+                      </h3>
+                      <p className="text-white/90 leading-relaxed">{ideaForm.getValues().idea}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
@@ -829,8 +839,14 @@ export default function AnalysisPage() {
             style={{ gridAutoRows: "minmax(auto, auto)" }}
           >
             {/* 1. Success Rate */}
-            {analysisData.successRate && (
-              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2">
+            {analysisData.successRate && visibleBlocks.includes("successRate") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="md:col-span-2 lg:col-span-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -854,8 +870,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 2. Competitors & Market Share */}
-            {analysisData.competitors && (
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+            {analysisData.competitors && visibleBlocks.includes("competitors") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="lg:col-span-1"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -876,8 +898,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 3. Target Audience Fit */}
-            {analysisData.targetAudienceFit && (
-              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2">
+            {analysisData.targetAudienceFit && visibleBlocks.includes("targetAudience") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="md:col-span-2 lg:col-span-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -924,8 +952,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 4. Market Size */}
-            {analysisData.marketSize && (
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+            {analysisData.marketSize && visibleBlocks.includes("marketSize") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="lg:col-span-1"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -948,8 +982,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 5. Business Model Strength */}
-            {analysisData.businessModelStrength && (
-              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-3">
+            {analysisData.businessModelStrength && visibleBlocks.includes("businessModel") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="md:col-span-2 lg:col-span-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -972,8 +1012,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 6. Funding Requirements */}
-            {analysisData.fundingRequired && (
-              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-3">
+            {analysisData.fundingRequired && visibleBlocks.includes("fundingRequired") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="md:col-span-2 lg:col-span-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -996,8 +1042,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 7. SWOT Analysis */}
-            {analysisData.swotAnalysis && (
-              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2 md:row-span-2">
+            {analysisData.swotAnalysis && visibleBlocks.includes("swotAnalysis") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="md:col-span-2 lg:col-span-2 md:row-span-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -1020,8 +1072,14 @@ export default function AnalysisPage() {
             )}
             
             {/* 8. Previous Failed Executions */}
-            {analysisData.previousFailedExecutions && (
-              <motion.div variants={itemVariants} className="lg:col-span-1">
+            {analysisData.previousFailedExecutions && visibleBlocks.includes("failedExecutions") && (
+              <motion.div 
+                variants={itemVariants} 
+                className="lg:col-span-1"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
@@ -1043,121 +1101,135 @@ export default function AnalysisPage() {
           </motion.div>
           
           {/* Related Ideas Section */}
-          {relatedIdeasData.length > 0 && (
-            <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle className="text-xl text-white">Related Ideas</CardTitle>
-                <CardDescription className="text-white/70">
-                  You might also be interested in these similar startup concepts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                  {relatedIdeasData.slice(0, 3).map((idea, index) => (
-                    <Card key={index} className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-md text-white flex items-center">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/20 text-primary mr-2">
-                            {index + 1}
+          {relatedIdeasData.length > 0 && visibleBlocks.includes("relatedIdeas") && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white">Related Ideas</CardTitle>
+                  <CardDescription className="text-white/70">
+                    You might also be interested in these similar startup concepts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {relatedIdeasData.slice(0, 3).map((idea, index) => (
+                      <Card key={index} className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-md text-white flex items-center">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/20 text-primary mr-2">
+                              {index + 1}
+                            </div>
+                            {idea.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-white/70 mb-3">{idea.description}</p>
+                          <div className="flex items-center">
+                            <span className="text-xs text-white/50 mr-2">Potential Score:</span>
+                            <div className="h-2 flex-1 rounded-full bg-vision-purple-200/20">
+                              <div 
+                                className="h-2 rounded-full bg-primary" 
+                                style={{ width: `${idea.potentialScore}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-white/80 ml-2">{idea.potentialScore}%</span>
                           </div>
-                          {idea.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-white/70 mb-3">{idea.description}</p>
-                        <div className="flex items-center">
-                          <span className="text-xs text-white/50 mr-2">Potential Score:</span>
-                          <div className="h-2 flex-1 rounded-full bg-vision-purple-200/20">
-                            <div 
-                              className="h-2 rounded-full bg-primary" 
-                              style={{ width: `${idea.potentialScore}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs text-white/80 ml-2">{idea.potentialScore}%</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
           
           {/* Four Option Buttons */}
-          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="text-xl text-white">What's Next?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-4">
-                <Button 
-                  variant="outline" 
-                  className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                  onClick={handleReset}
-                >
-                  <PlusCircle className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="text-sm font-medium">Check Another Idea</div>
-                    <div className="text-xs text-white/70">Analyze a different startup concept</div>
+          {visibleBlocks.includes("actionButtons") && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white">What's Next?</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                      onClick={handleReset}
+                    >
+                      <PlusCircle className="w-5 h-5 mr-2" />
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Check Another Idea</div>
+                        <div className="text-xs text-white/70">Analyze a different startup concept</div>
+                      </div>
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                      onClick={() => setPhase("budget-input")}
+                    >
+                      <Coins className="w-5 h-5 mr-2" />
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Plan to Execute</div>
+                        <div className="text-xs text-white/70">Get detailed execution plan based on budget</div>
+                      </div>
+                    </Button>
+                    
+                    {/* Save Idea Button - Only shown to logged in users */}
+                    <SaveIdeaButton
+                      startupIdea={ideaForm.getValues().idea}
+                      analysisResults={analysisData}
+                      className="h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 hover:bg-vision-purple-200/20"
+                    />
+                    
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                      onClick={handleShareToCommunity}
+                    >
+                      <Share2 className="w-5 h-5 mr-2" />
+                      <div className="text-left">
+                        <div className="text-sm font-medium">Share to Community</div>
+                        <div className="text-xs text-white/70">Get feedback from other entrepreneurs</div>
+                      </div>
+                    </Button>
                   </div>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                  onClick={() => setPhase("budget-input")}
-                >
-                  <Coins className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="text-sm font-medium">Plan to Execute</div>
-                    <div className="text-xs text-white/70">Get detailed execution plan based on budget</div>
+                  
+                  {/* Additional Action Buttons */}
+                  <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
+                      onClick={handleSaveAnalysis}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Analysis
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
+                      onClick={handleExportPDF}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Export PDF
+                    </Button>
                   </div>
-                </Button>
-                
-                {/* Save Idea Button - Only shown to logged in users */}
-                <SaveIdeaButton
-                  startupIdea={ideaForm.getValues().idea}
-                  analysisResults={analysisData}
-                  className="h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 hover:bg-vision-purple-200/20"
-                />
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                  onClick={handleShareToCommunity}
-                >
-                  <Share2 className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="text-sm font-medium">Share to Community</div>
-                    <div className="text-xs text-white/70">Get feedback from other entrepreneurs</div>
-                  </div>
-                </Button>
-              </div>
-              
-              {/* Additional Action Buttons */}
-              <div className="flex flex-wrap gap-2 mt-4 justify-end">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
-                  onClick={handleSaveAnalysis}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Analysis
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
-                  onClick={handleExportPDF}
-                >
-                  <FileDown className="w-4 h-4 mr-2" />
-                  Export PDF
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </div>
       )}
       
