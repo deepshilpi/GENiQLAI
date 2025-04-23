@@ -42,8 +42,8 @@ function Router() {
   return (
     <MainLayout>
       <Switch>
-        <Route path="/" component={HomePage} />
-        <Route path="/analysis" component={AnalysisPage} />
+        <Route path="/" component={AnalysisPage} />
+        <Route path="/home" component={HomePage} />
         <ProtectedRoute path="/community" component={CommunityPage} />
         <ProtectedRoute path="/dashboard" component={DashboardPage} />
         <ProtectedRoute path="/messages" component={MessagesPage} />

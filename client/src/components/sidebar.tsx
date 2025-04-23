@@ -149,7 +149,7 @@ export function Sidebar() {
               onClick={() => navigate("/")}
             >
               <BrainCircuit className="w-5 h-5" />
-              {!collapsed && <span>AI Analysis</span>}
+              {!collapsed && <span>Startup Analysis</span>}
             </div>
           </li>
           <li>
