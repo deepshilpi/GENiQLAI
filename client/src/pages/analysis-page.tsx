@@ -739,7 +739,7 @@ export default function AnalysisPage() {
           
           {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
-            className="grid gap-5 sm:gap-6 grid-cols-1 md:grid-cols-4 auto-rows-auto"
+            className="grid gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -747,8 +747,8 @@ export default function AnalysisPage() {
           >
             {/* 1. Success Rate */}
             {analysisData.successRate && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3">
@@ -771,8 +771,8 @@ export default function AnalysisPage() {
             
             {/* 2. Competitors & Market Share */}
             {analysisData.competitors && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+              <motion.div variants={itemVariants} className="lg:col-span-1">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
                       <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center mr-3">
@@ -793,8 +793,8 @@ export default function AnalysisPage() {
             
             {/* 3. Target Audience Fit */}
             {analysisData.targetAudienceFit && (
-              <motion.div variants={itemVariants} className="md:col-span-2">
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
                       <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center mr-3">
@@ -841,8 +841,8 @@ export default function AnalysisPage() {
             
             {/* 4. Market Size */}
             {analysisData.marketSize && (
-              <motion.div variants={itemVariants}>
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+              <motion.div variants={itemVariants} className="lg:col-span-1">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
                       <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3">
@@ -910,8 +910,8 @@ export default function AnalysisPage() {
             
             {/* 7. SWOT Analysis */}
             {analysisData.swotAnalysis && (
-              <motion.div variants={itemVariants} className="md:col-span-2 md:row-span-2">
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition">
+              <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-2 md:row-span-2">
+                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
                   <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
                     <CardTitle className="flex items-center text-lg text-white">
                       <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center mr-3">
