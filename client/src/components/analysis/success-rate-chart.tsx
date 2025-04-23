@@ -1,11 +1,13 @@
-import { Gauge, Sparkles, AlertTriangle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Gauge, Check, X, AlertTriangle, ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface SuccessRateChartProps {
   percentage: number;
+  goodPoints: string[];
+  badPoints: string[];
   message: string;
 }
 
-export function SuccessRateChart({ percentage, message }: SuccessRateChartProps) {
+export function SuccessRateChart({ percentage, goodPoints, badPoints, message }: SuccessRateChartProps) {
   // Determine success level and colors
   const successLevel = 
     percentage >= 70 ? "high" :
@@ -26,51 +28,88 @@ export function SuccessRateChart({ percentage, message }: SuccessRateChartProps)
   const rotation = (percentage / 100) * 180;
   
   return (
-    <div className="flex flex-col items-center">
-      {/* Gauge visualization */}
-      <div className="relative w-48 h-24 mb-4">
-        {/* Semi-circle background */}
-        <div className="absolute w-full h-full overflow-hidden">
-          <div className="absolute bottom-0 w-full h-full rounded-t-full bg-vision-purple-100/5 border-t border-x border-vision-purple-200/20"></div>
+    <div className="flex flex-col">
+      <div className="flex flex-col sm:flex-row gap-6">
+        {/* Left column: Gauge visualization */}
+        <div className="flex flex-col items-center sm:w-1/2">
+          <div className="relative w-48 h-24 mb-4">
+            {/* Semi-circle background */}
+            <div className="absolute w-full h-full overflow-hidden">
+              <div className="absolute bottom-0 w-full h-full rounded-t-full bg-vision-purple-100/5 border-t border-x border-vision-purple-200/20"></div>
+            </div>
+            
+            {/* Gauge indicator */}
+            <div 
+              className="absolute bottom-0 left-1/2 w-1 h-[50%] bg-white origin-bottom -translate-x-1/2"
+              style={{ transform: `translateX(-50%) rotate(${rotation}deg)` }}
+            >
+              <div className="absolute top-0 left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ backgroundColor: gaugeColor }}></div>
+            </div>
+            
+            {/* Gauge center */}
+            <div className="absolute bottom-0 left-1/2 w-6 h-6 -translate-x-1/2 translate-y-1/2 rounded-full bg-vision-purple-100/20 border border-vision-purple-200/30"></div>
+            
+            {/* Gauge labels */}
+            <div className="absolute bottom-0 left-0 text-xs text-white/60">0%</div>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1 text-xs text-white/60">50%</div>
+            <div className="absolute bottom-0 right-0 text-xs text-white/60">100%</div>
+          </div>
+          
+          {/* Percentage display */}
+          <div className={`p-3 rounded-full ${bgColor} mb-3`}>
+            <span className="text-2xl font-semibold text-white">{percentage}%</span>
+          </div>
+          
+          {/* Success level indicator */}
+          <div className="flex items-center mb-2">
+            {successLevel === "high" && <ThumbsUp className="w-5 h-5 mr-2 text-green-400" />}
+            {successLevel === "medium" && <AlertTriangle className="w-5 h-5 mr-2 text-amber-400" />}
+            {successLevel === "low" && <ThumbsDown className="w-5 h-5 mr-2 text-red-400" />}
+            
+            <span className="text-sm font-medium text-white">
+              {successLevel === "high" ? "High Potential" : 
+               successLevel === "medium" ? "Moderate Potential" : 
+               "Challenging Prospect"}
+            </span>
+          </div>
         </div>
-        
-        {/* Gauge indicator */}
-        <div 
-          className="absolute bottom-0 left-1/2 w-1 h-[50%] bg-white origin-bottom -translate-x-1/2"
-          style={{ transform: `translateX(-50%) rotate(${rotation}deg)` }}
-        >
-          <div className="absolute top-0 left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ backgroundColor: gaugeColor }}></div>
+
+        {/* Right column: Good and bad points */}
+        <div className="sm:w-1/2 space-y-4">
+          {/* Good points */}
+          <div className="space-y-2">
+            <h4 className="flex items-center text-sm font-medium text-green-400">
+              <Check className="w-4 h-4 mr-2" /> Positive Factors
+            </h4>
+            <ul className="space-y-1">
+              {goodPoints.map((point, index) => (
+                <li key={index} className="text-sm pl-6 relative text-white/80">
+                  <Check className="absolute left-0 top-1 w-4 h-4 text-green-400" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Bad points */}
+          <div className="space-y-2">
+            <h4 className="flex items-center text-sm font-medium text-red-400">
+              <X className="w-4 h-4 mr-2" /> Challenging Factors
+            </h4>
+            <ul className="space-y-1">
+              {badPoints.map((point, index) => (
+                <li key={index} className="text-sm pl-6 relative text-white/80">
+                  <X className="absolute left-0 top-1 w-4 h-4 text-red-400" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        
-        {/* Gauge center */}
-        <div className="absolute bottom-0 left-1/2 w-6 h-6 -translate-x-1/2 translate-y-1/2 rounded-full bg-vision-purple-100/20 border border-vision-purple-200/30"></div>
-        
-        {/* Gauge labels */}
-        <div className="absolute bottom-0 left-0 text-xs text-white/60">0%</div>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-1 text-xs text-white/60">50%</div>
-        <div className="absolute bottom-0 right-0 text-xs text-white/60">100%</div>
-      </div>
-      
-      {/* Percentage display */}
-      <div className={`p-3 rounded-full ${bgColor} mb-3`}>
-        <span className="text-2xl font-semibold text-white">{percentage}%</span>
-      </div>
-      
-      {/* Success level indicator */}
-      <div className="flex items-center mb-2">
-        {successLevel === "high" && <ThumbsUp className="w-5 h-5 mr-2 text-green-400" />}
-        {successLevel === "medium" && <AlertTriangle className="w-5 h-5 mr-2 text-amber-400" />}
-        {successLevel === "low" && <ThumbsDown className="w-5 h-5 mr-2 text-red-400" />}
-        
-        <span className="text-sm font-medium text-white">
-          {successLevel === "high" ? "High Potential" : 
-           successLevel === "medium" ? "Moderate Potential" : 
-           "Challenging Prospect"}
-        </span>
       </div>
       
       {/* Success message */}
-      <div className={`p-3 text-sm rounded-md mt-2 text-white/80 ${
+      <div className={`p-3 text-sm rounded-md mt-4 text-white/80 ${
         successLevel === "high" ? "bg-green-500/5 border border-green-500/20" :
         successLevel === "medium" ? "bg-amber-500/5 border border-amber-500/20" :
         "bg-red-500/5 border border-red-500/20"

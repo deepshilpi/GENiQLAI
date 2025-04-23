@@ -1,10 +1,11 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
-import { Crown, Target } from 'lucide-react';
+import { Crown, Target, Globe, ExternalLink } from 'lucide-react';
 
 interface CompetitorsChartProps {
   competitors: Array<{
     name: string;
     marketShare: number;
+    websiteUrl?: string;
   }>;
   message: string;
 }
@@ -27,6 +28,12 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
         <div className="p-2 bg-vision-card/95 border border-vision-purple-200/20 rounded-md shadow-md">
           <p className="font-medium text-white">{data.name}</p>
           <p className="text-white/80">Market Share: {data.marketShare}%</p>
+          {data.websiteUrl && (
+            <p className="text-primary text-xs mt-1 flex items-center">
+              <Globe className="w-3 h-3 mr-1" />
+              {data.websiteUrl}
+            </p>
+          )}
           {data.isYours && (
             <p className="text-primary text-xs mt-1">Your potential entry point</p>
           )}
@@ -49,6 +56,20 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
             <span className="text-sm text-white/80">{sortedCompetitors[0].name}</span>
             <span className="text-sm font-medium text-white">{sortedCompetitors[0].marketShare}% Market Share</span>
           </div>
+          {sortedCompetitors[0].websiteUrl && (
+            <div className="mt-2 text-xs">
+              <a 
+                href={sortedCompetitors[0].websiteUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary flex items-center hover:underline"
+              >
+                <Globe className="w-3 h-3 mr-1" />
+                {sortedCompetitors[0].websiteUrl}
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </a>
+            </div>
+          )}
         </div>
       )}
       
@@ -86,6 +107,25 @@ export function CompetitorsChart({ competitors, message }: CompetitorsChartProps
             />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+      
+      {/* Competitor websites list */}
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+        {sortedCompetitors.filter(comp => comp.websiteUrl).map((comp, index) => (
+          <a 
+            key={index}
+            href={comp.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 text-xs flex items-center justify-between rounded-md bg-vision-purple-100/5 border border-vision-purple-200/10 hover:bg-vision-purple-100/10 transition-colors"
+          >
+            <span className="flex items-center">
+              <Globe className="w-3 h-3 mr-2 text-primary" />
+              {comp.name}
+            </span>
+            <ExternalLink className="w-3 h-3 text-primary" />
+          </a>
+        ))}
       </div>
       
       {/* Market opportunity summary */}
