@@ -249,13 +249,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const budgetAnalysis = await generateBudgetAnalysis(startupIdea, initialBudget, userCountry);
       console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
-      // Combine the data
+      // Combine the data in the correct structure - use the same structure expected by the client
       const responseData = {
         ...executionPlan,
         budgetAnalysis
       };
       
       console.log("Full response structure:", Object.keys(responseData));
+      console.log("Budget analysis (budgetAnalysis) exists:", !!responseData.budgetAnalysis);
       
       // Return the combined data
       return res.status(200).json(responseData);
