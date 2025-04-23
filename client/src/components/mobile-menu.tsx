@@ -111,27 +111,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Community
               </Button>
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start px-3 py-2 text-sm ${isActive('/analytics') 
-                  ? 'bg-vision-primary-gradient text-white' 
-                  : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                onClick={() => handleNavigation('/analytics')}
-              >
-                <LineChart className="mr-2 h-4 w-4" />
-                Analytics
-              </Button>
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start px-3 py-2 text-sm ${isActive('/market-news') 
-                  ? 'bg-vision-primary-gradient text-white' 
-                  : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                onClick={() => handleNavigation('/market-news')}
-              >
-                <Newspaper className="mr-2 h-4 w-4" />
-                Market News
-              </Button>
-            </nav>
+              </nav>
           </div>
           
           <div className="px-3 pt-4 pb-2">
@@ -159,31 +139,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Button>
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start px-3 py-2 text-sm ${isActive('/subscription') 
-                  ? 'bg-vision-primary-gradient text-white' 
-                  : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                onClick={() => handleNavigation('/subscription')}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Plans
-              </Button>
             </nav>
-          </div>
-        </div>
-        
-        <div className="px-4 mt-auto border-t border-vision-purple-200/10 py-4">
-          <div className="px-3 rounded-xl bg-vision-card/30 border border-vision-purple-200/10 p-4">
-            <p className="text-sm font-medium text-white mb-1">New Vision Features</p>
-            <p className="text-xs text-white/70 mb-3">Explore the latest updates in our Vision UI theme.</p>
-            <Button 
-              variant="outline" 
-              className="w-full bg-vision-primary-gradient/20 border-vision-purple-200/20 text-white hover:bg-vision-primary-gradient/30 hover:border-vision-purple-200/30"
-              onClick={() => handleNavigation('/whatsnew')}
-            >
-              Learn More
-            </Button>
           </div>
         </div>
       </SheetContent>
