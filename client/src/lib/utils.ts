@@ -5,10 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency: string = "USD"): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: currency,
     maximumFractionDigits: 0,
   }).format(amount);
 }
@@ -57,6 +57,28 @@ export function detectUserCountry(): string {
   // In a real application, we would use an IP geolocation service
   // For demo purposes, returning a default value
   return "United States";
+}
+
+export function getCountryCurrency(country: string): string {
+  const countryToCurrency: Record<string, string> = {
+    "United States": "USD",
+    "Canada": "CAD",
+    "United Kingdom": "GBP",
+    "Australia": "AUD",
+    "India": "INR",
+    "Japan": "JPY",
+    "China": "CNY",
+    "Brazil": "BRL",
+    "European Union": "EUR",
+    "Mexico": "MXN",
+    "Singapore": "SGD",
+    "South Korea": "KRW",
+    "South Africa": "ZAR",
+    "Nigeria": "NGN",
+    "Kenya": "KES"
+  };
+  
+  return countryToCurrency[country] || "USD";
 }
 
 export function isPlanAllowed(userPlan: string, requiredPlan: string): boolean {

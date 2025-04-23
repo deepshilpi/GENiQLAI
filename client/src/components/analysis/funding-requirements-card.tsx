@@ -66,7 +66,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
           <h3 className="text-sm font-medium text-white/70 mb-1">Total Funding Required</h3>
           <div className="relative">
             <div className="absolute inset-0 bg-vision-primary-gradient/20 rounded-full blur-xl"></div>
-            <p className="text-3xl font-bold text-white relative">{formatCurrency(total, 'USD')}</p>
+            <p className="text-3xl font-bold text-white relative">{formatCurrency(total)}</p>
           </div>
         </CardContent>
       </Card>
@@ -145,7 +145,7 @@ export function FundingRequirementsCard({ total, breakdown, message }: FundingRe
                 </h4>
               </div>
               <div className="flex justify-between items-end mt-1.5">
-                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount, 'USD')}</p>
+                <p className="text-lg font-semibold text-white">{formatCurrency(item.amount)}</p>
                 <span className="text-xs font-medium bg-vision-purple-200/20 px-2 py-0.5 rounded-full text-white/70">
                   {item.percentage}%
                 </span>
