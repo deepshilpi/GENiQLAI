@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -13,10 +13,17 @@ import { User, Post, Analysis } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Edit, Activity, BarChart } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Camera, Edit, Activity, BarChart, 
+  ThumbsUp, MessageSquare, Users, Star,
+  Calendar, TrendingUp, ChevronRight
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -350,6 +357,7 @@ export default function ProfilePage() {
           <Tabs defaultValue="posts">
             <TabsList>
               <TabsTrigger value="posts">Posts</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             
@@ -379,6 +387,178 @@ export default function ProfilePage() {
                   )}
                 </div>
               )}
+            </TabsContent>
+            
+            <TabsContent value="activity" className="mt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5" />
+                        <span>Recent Activity</span>
+                      </CardTitle>
+                      <CardDescription>
+                        See what {isOwnProfile ? "you've" : `${username} has`} been up to.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[400px] pr-4">
+                        {/* Activity Items - This would be populated from real data in a production app */}
+                        <div className="space-y-6">
+                          {/* Post Activity */}
+                          <div className="relative pl-6 border-l border-border">
+                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
+                              <MessageSquare className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Created a post
+                                <span className="text-muted-foreground font-normal ml-2">2 hours ago</span>
+                              </div>
+                              <Link href="/community" className="block text-sm p-3 bg-accent/50 rounded-md hover:bg-accent transition-colors">
+                                "AI-powered dog walking service that automates scheduling and payments while optimizing routes."
+                              </Link>
+                            </div>
+                          </div>
+                          
+                          {/* Vote Activity */}
+                          <div className="relative pl-6 border-l border-border">
+                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
+                              <ThumbsUp className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Pumped a post
+                                <span className="text-muted-foreground font-normal ml-2">4 hours ago</span>
+                              </div>
+                              <Link href="/community" className="block text-sm p-3 bg-accent/50 rounded-md hover:bg-accent transition-colors">
+                                "On-demand marketplace connecting home chefs with hungry customers for authentic, home-cooked meals."
+                              </Link>
+                            </div>
+                          </div>
+                          
+                          {/* Analysis Activity */}
+                          <div className="relative pl-6 border-l border-border">
+                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
+                              <BarChart className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Analyzed a startup idea
+                                <span className="text-muted-foreground font-normal ml-2">1 day ago</span>
+                              </div>
+                              <div className="text-sm p-3 bg-accent/50 rounded-md">
+                                "Subscription box for exotic spices with recipe cards and cultural information for home cooks."
+                                <div className="mt-2">
+                                  <Badge variant="outline">Success Rate: 76%</Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Follow Activity */}
+                          <div className="relative pl-6 border-l border-border">
+                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
+                              <Users className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Started following
+                                <span className="text-muted-foreground font-normal ml-2">2 days ago</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback>SV</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="text-sm font-medium">SarahV</div>
+                                  <div className="text-xs text-muted-foreground">Fintech Entrepreneur</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Comment Activity */}
+                          <div className="relative pl-6 border-l border-border">
+                            <div className="absolute -left-2 top-0 bg-primary rounded-full p-1">
+                              <MessageSquare className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium">
+                                Commented on a post
+                                <span className="text-muted-foreground font-normal ml-2">3 days ago</span>
+                              </div>
+                              <div className="text-sm p-3 bg-accent/50 rounded-md">
+                                "I think this has huge potential. Have you considered how you'll handle logistics for perishable items?"
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div>
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Star className="h-4 w-4" />
+                        <span>Top Categories</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {['AI', 'SaaS', 'Marketplace', 'EdTech', 'Fintech'].map((category, i) => (
+                          <div key={i} className="flex justify-between items-center">
+                            <span>{category}</span>
+                            <Progress value={100 - i * 15} className="w-24 h-2" />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>Activity Overview</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+                          <div>
+                            <div className="text-2xl font-bold">{posts?.length || 0}</div>
+                            <div className="text-xs text-muted-foreground">Total Posts</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold">{user.analysisCount || 0}</div>
+                            <div className="text-xs text-muted-foreground">Analyses Run</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold">{user.followersCount}</div>
+                            <div className="text-xs text-muted-foreground">Followers</div>
+                          </div>
+                        </div>
+                        <Separator />
+                        <div>
+                          <div className="text-sm font-medium mb-2">Activity Level</div>
+                          <div className="flex items-center gap-2">
+                            <Progress value={65} className="h-2 flex-1" />
+                            <span className="text-xs font-medium">65%</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            More active than 65% of users
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </TabsContent>
             
             <TabsContent value="analytics" className="mt-4">
