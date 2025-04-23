@@ -1,52 +1,55 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Globe, BarChart3, DollarSign } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { formatCurrency } from "@/lib/utils";
 
-interface MarketSizeChartProps {
+interface MarketSizeProps {
   segments: Array<{
     name: string;
     percentage: number;
-    value?: number; // In millions
+    value?: number;
   }>;
-  totalSize?: number; // In millions
+  totalSize?: number;
   message: string;
 }
 
-export function MarketSizeChart({ segments, totalSize, message }: MarketSizeChartProps) {
-  // Format data for pie chart
-  const pieData = segments.map((segment) => ({
+const COLORS = ['#A163F7', '#7551FF', '#CB9FFF', '#0075FF', '#56ABFF'];
+
+export function MarketSizeChart({ segments, totalSize, message }: MarketSizeProps) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const onPieLeave = () => {
+    setActiveIndex(null);
+  };
+
+  // Format data for Recharts
+  const chartData = segments.map((segment, index) => ({
     name: segment.name,
     value: segment.percentage,
+    actualValue: segment.value,
+    fill: COLORS[index % COLORS.length],
   }));
 
-  // Colors for pie segments
-  const COLORS = ['#7551FF', '#A163F7', '#CB9FFF', '#0075FF', '#56ABFF'];
-  
-  // Format currency function
-  const formatCurrency = (value: number | undefined): string => {
-    if (value === undefined) return 'N/A';
-    
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(1)}B`;
-    } else {
-      return `$${value.toFixed(0)}M`;
-    }
-  };
-  
+  const totalPercentage = segments.reduce((acc, segment) => acc + segment.percentage, 0);
+  const normalizedData = chartData.map(item => ({
+    ...item,
+    value: (item.value / totalPercentage) * 100, // Normalize to make sure it adds up to 100%
+  }));
+
   // Custom tooltip
-  const renderTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      // Find original segment data with value
-      const segmentData = segments.find(segment => segment.name === data.name);
-      
       return (
-        <div className="p-2 bg-vision-card/95 border border-vision-purple-200/20 rounded-md shadow-md">
-          <p className="font-medium text-white">{data.name}</p>
-          <p className="text-white/80">{data.value}% of Market</p>
-          {segmentData?.value !== undefined && (
-            <p className="text-primary text-xs mt-1">
-              Est. Value: {formatCurrency(segmentData.value)}
-            </p>
+        <div className="p-3 backdrop-blur-md border border-border/40 rounded-lg bg-card/90 shadow-lg">
+          <p className="font-medium text-sm">{data.name}</p>
+          <p className="text-xs text-primary">{data.value.toFixed(1)}%</p>
+          {data.actualValue && (
+            <p className="text-xs text-muted-foreground">{formatCurrency(data.actualValue)}</p>
           )}
         </div>
       );
@@ -55,79 +58,77 @@ export function MarketSizeChart({ segments, totalSize, message }: MarketSizeChar
   };
 
   return (
-    <div className="flex flex-col">
-      {/* Total market size highlight */}
-      {totalSize !== undefined && (
-        <div className="p-3 mb-4 border rounded-md bg-vision-purple-100/5 border-vision-purple-200/10">
-          <div className="flex items-center mb-2">
-            <BarChart3 className="w-4 h-4 mr-2 text-primary" />
-            <h4 className="text-sm font-medium text-white">Total Addressable Market</h4>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-white/80">Estimated Market Size</span>
-            <span className="text-lg font-medium text-primary">{formatCurrency(totalSize)}</span>
-          </div>
-        </div>
-      )}
-      
-      {/* Pie chart */}
-      <div className="h-56 w-full mb-6">
+    <div className="space-y-4">
+      <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={pieData}
+              data={normalizedData}
               cx="50%"
               cy="50%"
+              innerRadius={60}
               outerRadius={80}
-              fill="#8884d8"
+              paddingAngle={2}
               dataKey="value"
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              labelLine={false}
+              onMouseEnter={onPieEnter}
+              onMouseLeave={onPieLeave}
+              animationDuration={1000}
             >
-              {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {normalizedData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.fill} 
+                  stroke={activeIndex === index ? "#fff" : "transparent"} 
+                  strokeWidth={activeIndex === index ? 2 : 0}
+                  className="transition-all duration-200"
+                  style={{
+                    filter: activeIndex === index ? "brightness(1.2)" : "none",
+                    transform: activeIndex === index ? "scale(1.05)" : "none",
+                  }}
+                />
               ))}
             </Pie>
-            <Tooltip content={renderTooltip} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              verticalAlign="bottom" 
+              align="center" 
+              layout="horizontal" 
+              iconType="circle" 
+              iconSize={8}
+              formatter={(value: string) => (
+                <span className="text-xs text-foreground/80">{value}</span>
+              )}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+      {totalSize && (
+        <Card className="bg-primary/10 border-primary/20">
+          <CardContent className="p-3 text-center">
+            <p className="text-sm text-white/80">Total Market Size</p>
+            <p className="text-xl font-bold text-white">{formatCurrency(totalSize)}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <p className="text-sm text-white/70">{message}</p>
       
-      {/* Market segments list */}
-      <div className="mb-4 space-y-2">
-        {segments.map((segment, index) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+        {segments.map((segment, i) => (
           <div 
-            key={index}
-            className="p-2 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/10"
+            key={i}
+            className="flex flex-col p-2 rounded-md border border-border/50 bg-accent/20"
           >
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <span className="mr-2 h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                <span className="text-sm text-white/80">{segment.name}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-sm text-white mr-3">{segment.percentage}%</span>
-                {segment.value !== undefined && (
-                  <span className="text-xs text-primary flex items-center">
-                    <DollarSign className="w-3 h-3 mr-1" />
-                    {formatCurrency(segment.value)}
-                  </span>
-                )}
-              </div>
-            </div>
+            <span className="text-xs text-muted-foreground">{segment.name}</span>
+            <span className="font-medium text-sm">{segment.percentage}%</span>
+            {segment.value && (
+              <span className="text-xs text-primary">
+                {formatCurrency(segment.value)}
+              </span>
+            )}
           </div>
         ))}
-      </div>
-      
-      {/* Market size insight */}
-      <div className="p-3 border rounded-md bg-vision-primary-gradient/10 border-primary/30">
-        <div className="flex items-center mb-2">
-          <Globe className="w-4 h-4 mr-2 text-primary" />
-          <h4 className="text-sm font-medium text-white">Market Size Insight</h4>
-        </div>
-        <p className="text-sm text-white/80">
-          {message}
-        </p>
       </div>
     </div>
   );
