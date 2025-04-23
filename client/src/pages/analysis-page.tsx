@@ -907,6 +907,93 @@ export default function AnalysisPage() {
               </Card>
             </motion.div>
             
+            {/* Feasibility & Scalability */}
+            {budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <FeasibilityScalability 
+                      initialFeasibility={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.initialFeasibility} 
+                      scalingPoints={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.scalingPoints}
+                      message={budgetAnalysisData.budgetAnalysis.feasibilityAndScalability.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Risk Analysis */}
+            {budgetAnalysisData.budgetAnalysis?.riskAnalysis && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <RiskAnalysis 
+                      overallRisk={budgetAnalysisData.budgetAnalysis.riskAnalysis.overallRisk}
+                      risks={budgetAnalysisData.budgetAnalysis.riskAnalysis.risks}
+                      message={budgetAnalysisData.budgetAnalysis.riskAnalysis.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Go To Market Strategy */}
+            {budgetAnalysisData.budgetAnalysis?.goToMarketStrategy && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <GoToMarketStrategy 
+                      timeline={budgetAnalysisData.budgetAnalysis.goToMarketStrategy.timeline}
+                      message={budgetAnalysisData.budgetAnalysis.goToMarketStrategy.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Long Term Vision */}
+            {budgetAnalysisData.budgetAnalysis?.longTermVision && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <LongTermVision 
+                      milestones={budgetAnalysisData.budgetAnalysis.longTermVision.milestones}
+                      message={budgetAnalysisData.budgetAnalysis.longTermVision.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Team Execution */}
+            {budgetAnalysisData.budgetAnalysis?.teamExecutionCapability && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <TeamExecution 
+                      requiredRoles={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.requiredRoles}
+                      hiringTimeline={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.hiringTimeline}
+                      message={budgetAnalysisData.budgetAnalysis.teamExecutionCapability.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
+            {/* Funding and Investment Potential */}
+            {budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential && (
+              <motion.div variants={itemVariants} className="md:col-span-2">
+                <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
+                  <CardContent className="p-6">
+                    <FundingInvestors 
+                      investors={budgetAnalysisData.budgetAnalysis.fundingAndInvestmentPotential.investors}
+                      message={budgetAnalysisData.budgetAnalysis.fundingAndInvestmentPotential.message}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+            
             {/* Potential Investors */}
             {budgetAnalysisData.investorsData && budgetAnalysisData.investorsData.investors && (
               <motion.div variants={itemVariants} className="md:col-span-2">

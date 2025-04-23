@@ -235,8 +235,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      // Get the user's country for context
+      const userCountry = req.user.country || "United States"; // Default if not specified
+      
+      // First, get the basic execution plan (used mainly for the budget breakdown)
       const executionPlan = await generateExecutionPlan(startupIdea, initialBudget);
-      return res.status(200).json(executionPlan);
+      
+      // Then, get the comprehensive budget analysis
+      const budgetAnalysis = await generateBudgetAnalysis(startupIdea, initialBudget, userCountry);
+      
+      // Return the combined data
+      return res.status(200).json({
+        ...executionPlan,
+        budgetAnalysis
+      });
     } catch (error) {
       console.error("Error generating execution plan:", error);
       return res.status(500).json({ message: "Failed to generate execution plan" });
