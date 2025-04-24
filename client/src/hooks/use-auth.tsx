@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
 import { User, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
@@ -15,7 +15,7 @@ type AuthContextType = {
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<User, Error, LoginCredentials>;
-  logoutMutation: UseMutationResult<any, Error, void>;
+  logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, InsertUser>;
   updatePlanMutation: UseMutationResult<User, Error, { planType: string }>;
   updateProfilePicture: UseMutationResult<User, Error, FormData>;
@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [location, navigate] = useLocation();
 
+  // Force immediate validation and smaller stale time for auth data
   const {
     data: user,
     error,
@@ -35,34 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch,
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
-    // Use a proper query function that handles auth errors correctly
-    queryFn: async () => {
-      try {
-        const res = await fetch('/api/user', {
-          credentials: 'include'
-        });
-        
-        // Handle 401 by returning null (user not logged in)
-        if (res.status === 401) {
-          return null;
-        }
-        
-        // For other errors, throw
-        if (!res.ok) {
-          throw new Error(`Authentication error: ${res.statusText}`);
-        }
-        
-        // Return the user data
-        return await res.json();
-      } catch (error) {
-        // Just return null on any error - we'll handle this as "not logged in"
-        return null;
-      }
-    },
-    // Simple settings that work well
-    staleTime: 60000, // 1 minute
-    retry: false,     // Don't retry auth failures
-    refetchOnWindowFocus: true
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
+    staleTime: 10000, // 10 seconds - keep user data fresh
+    refetchOnWindowFocus: true, // Refetch when window focuses to ensure auth state is current
   });
 
   // Simple refetch method that just calls the query's refetch
@@ -75,14 +52,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Clean up any stale auth flags when the provider mounts
+  useEffect(() => {
+    const cleanupOldAuthFlags = () => {
+      // Clear any stale auth flags
+      if (sessionStorage.getItem('auth_login_success')) {
+        console.log("[Auth] Cleaning up stale login success flag");
+        sessionStorage.removeItem('auth_login_success');
+      }
+      
+      if (sessionStorage.getItem('auth_logout_requested')) {
+        console.log("[Auth] Cleaning up stale logout requested flag");
+        sessionStorage.removeItem('auth_logout_requested');
+      }
+    };
+    
+    cleanupOldAuthFlags();
+  }, []);
+
   const loginMutation = useMutation<User, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
     onSuccess: (userData) => {
-      // Update the auth data in cache
+      // Update the auth data in cache immediately
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Invalidate the query to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
       // Redirect to home page
       navigate("/");
@@ -92,6 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
+      
+      // Force refresh other dependent queries
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
@@ -108,8 +109,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (userData) => {
-      // Update the auth data in cache
+      // Update the auth data in cache immediately
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Invalidate the query to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       
       // Redirect to home page
       navigate("/");
@@ -119,6 +123,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Registration successful",
         description: `Welcome to GENIQL, ${userData.username}!`,
       });
+      
+      // Force refresh other dependent queries
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
@@ -133,9 +140,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutationFn: async () => {
       await apiRequest("POST", "/api/logout");
     },
-    onSuccess: () => {
-      // Clear user data in cache
+    onMutate: async () => {
+      // Set up optimistic update - clear user data immediately
+      // for faster UI response
+      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
+      
+      // Save the previous user value in case we need to roll back
+      const previousUser = queryClient.getQueryData<User | null>(["/api/user"]);
+      
+      // Optimistically update the cache
       queryClient.setQueryData(["/api/user"], null);
+      
+      return { previousUser };
+    },
+    onSuccess: () => {
+      // Clear user data in cache (again, to ensure consistency)
+      queryClient.setQueryData(["/api/user"], null);
+      
+      // Invalidate all queries to refresh data without user context
+      queryClient.invalidateQueries();
       
       // Redirect to login page
       navigate("/auth");
@@ -145,9 +168,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logged out successfully",
       });
     },
-    onError: () => {
-      // Even if the server call fails, we'll clear the user from the client
+    onError: (error, _, context) => {
+      // If there was an error logging out, we don't want to revert the UI
+      // as it's better to show logged out state even if the server had issues
+      console.error("Logout error:", error);
+      
+      // Clear user data in cache anyway
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Redirect to auth page
       navigate("/auth");
       
       toast({
@@ -155,6 +184,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "You've been logged out but there was a server error.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Refetch auth state after logout is settled
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
   });
 

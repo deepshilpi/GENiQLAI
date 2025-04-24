@@ -33,16 +33,24 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   // Add timestamp to auth-related endpoints to prevent caching
-  const finalUrl = url.includes("/api/login") || url.includes("/api/logout") || url.includes("/api/user") || url.includes("/api/register")
+  const isAuthRelated = url.includes("/api/login") || url.includes("/api/logout") || url.includes("/api/user") || url.includes("/api/register");
+  const finalUrl = isAuthRelated
     ? `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`
     : url;
+
+  // For logout, we need to add a special flag to handle post-logout UI updates
+  if (url.includes("/api/logout")) {
+    console.log("[Auth] Logout requested - preparing cache invalidation");
+    // This will be checked before the actual logout request is made
+    sessionStorage.setItem('auth_logout_requested', 'true');
+  }
     
   const res = await fetch(finalUrl, {
     method,
     headers: {
       ...(data ? { "Content-Type": "application/json" } : {}),
       // Add cache control headers for all auth-related requests
-      ...(url.includes("/api/login") || url.includes("/api/logout") || url.includes("/api/user") || url.includes("/api/register") 
+      ...(isAuthRelated 
         ? {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
@@ -53,6 +61,12 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+
+  // For login success, ensure we add a marker for post-login behavior
+  if ((url.includes("/api/login") || url.includes("/api/register")) && res.ok) {
+    console.log("[Auth] Login/register successful - flagging for UI refresh");
+    sessionStorage.setItem('auth_login_success', 'true');
+  }
 
   await throwIfResNotOk(res);
   return res;
@@ -72,14 +86,33 @@ export const getQueryFn: <T>(options: {
       ? `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`
       : url;
     
-    // Only log auth requests when debugging is needed
+    // Track auth state for debugging and cache management
     const isAuthRequest = url.includes("/api/user");
-    if (isAuthRequest && queryKey.length > 1) {
-      // Only log non-standard auth requests for debugging (those with additional params)
-      console.log(`[Auth] Fetching user data with queryKey:`, queryKey);
-    }
     
     try {
+      // Check for auth state transitions
+      if (isAuthRequest) {
+        // For user data fetches, check if we've just logged in/out to force fresh data
+        const loginSuccess = sessionStorage.getItem('auth_login_success');
+        const logoutRequested = sessionStorage.getItem('auth_logout_requested');
+
+        if (loginSuccess) {
+          console.log("[Analysis] Login success detected or no user, refreshing auth state");
+          // Clear login flag after using it
+          sessionStorage.removeItem('auth_login_success');
+        }
+
+        if (logoutRequested) {
+          console.log("[Analysis] Logout detected, updating auth state");
+          // Clear logout flag after using it
+          sessionStorage.removeItem('auth_logout_requested');
+          // Clear cache for next load
+          queryClient.setQueryData(["/api/user"], null);
+          // Return null immediately to update UI faster
+          return null;
+        }
+      }
+
       const res = await fetch(finalUrl, {
         credentials: "include",
         // Add cache busting for auth-related endpoints to prevent browser caching
@@ -91,7 +124,9 @@ export const getQueryFn: <T>(options: {
       });
   
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        // Don't log every 401 error as it's expected behavior when not logged in
+        if (isAuthRequest) {
+          console.log("[Analysis] Auth refresh complete, user:", "Not found");
+        }
         return null;
       }
   
@@ -99,19 +134,26 @@ export const getQueryFn: <T>(options: {
       
       const data = await res.json();
       
-      // Only log successful auth responses for debugging
-      if (isAuthRequest && data && 'username' in data) {
-        console.log(`[Auth] User fetch successful:`, data.username);
+      // Track auth state for debugging
+      if (isAuthRequest) {
+        if (data && 'username' in data) {
+          console.log("[Analysis] Checking auth status, current user:", `Logged in as ${data.username}`);
+          console.log("[Analysis] Auth refresh complete, user:", "Found");
+        } else {
+          console.log("[Analysis] Checking auth status, current user:", "Not logged in");
+        }
       }
       
       return data;
     } catch (error: any) {
       // For auth requests, we want to handle errors differently
       if (isAuthRequest) {
+        // Log more descriptive error
         console.error(`[Auth] Error fetching user:`, error);
         
         // For 401s with returnNull behavior, we should return null
         if (unauthorizedBehavior === "returnNull" && error.status === 401) {
+          console.log("[Analysis] Auth refresh rejected with 401, clearing user data");
           return null;
         }
       }
@@ -133,9 +175,9 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false, // Disable automatic refetching on window focus for better performance
+      refetchOnWindowFocus: true, // Enable focus refetching to sync state across browser tabs
       refetchOnMount: 'always', // Always refetch when component mounts for consistency
-      staleTime: 30000, // Keep data fresh for 30 seconds before refetching
+      staleTime: 5000, // Keep data fresh for 5 seconds before refetching (reduced for auth state)
       retry: (failureCount, error: any) => {
         // Don't retry on 401 or 403 errors
         if (error.status === 401 || error.status === 403) {
@@ -144,8 +186,8 @@ export const queryClient = new QueryClient({
         // Only retry other errors once
         return failureCount < 1;
       },
-      retryDelay: 2000, // Wait 2 seconds before retry
-      gcTime: 1000 * 60 * 60, // Keep unused data in the cache for 1 hour
+      retryDelay: 1000, // Wait 1 second before retry (reduced for faster response)
+      gcTime: 1000 * 60 * 5, // Keep unused data in the cache for 5 minutes (reduced for auth state)
     },
     mutations: {
       retry: false, // No automatic retries for mutations (handled manually in auth system)
