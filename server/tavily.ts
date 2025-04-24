@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 });
 
-// Function to search for news articles about successful startups in other countries using OpenAI
+// Function to search for real news articles about successful startups using OpenAI
 export async function searchStartupNews(userCountry: string): Promise<NewsArticle[]> {
   try {
     // Check if OpenAI API key is available
@@ -15,31 +15,32 @@ export async function searchStartupNews(userCountry: string): Promise<NewsArticl
       return getDummyNewsArticles(userCountry);
     }
 
-    console.log("Generating startup news using OpenAI...");
+    console.log("Finding real startup news using OpenAI...");
 
-    // Craft a detailed prompt for GPT to generate realistic startup news
-    const systemPrompt = `You are an expert on global startups and business intelligence. Generate 3 realistic news articles about successful startups outside of ${userCountry} that could expand to ${userCountry} or be inspirational for entrepreneurs in ${userCountry}.`;
+    // Use OpenAI to find real news articles
+    const systemPrompt = `You are an expert business analyst specialized in startups and growth companies. 
+    Find 3 real, recent news articles about successful startups outside of ${userCountry}. The startups should have significant growth, funding, or innovation.`;
     
-    const userPrompt = `Create 3 very specific, detailed and realistic news articles about startups outside ${userCountry} that are growing rapidly. Each article should have a compelling title, detailed description (150-200 words), realistic source (like TechCrunch, Forbes, etc.), a URL, a realistic publication date within the last 30 days, and country of origin.
-
-The articles should:
-1. Focus on innovative startups in different industries 
-2. Mention real growth metrics and funding amounts
-3. Include realistic founder names and company details
-4. Have plausible expansion plans
-5. Use domain geniql.com in URLs
-6. Specifically focus on startups from different countries excluding ${userCountry}
-7. Include realistic dates in the last 30 days
-
-Return your response as a properly formatted JSON array of 3 articles with these exact fields:
-[{
-  "title": "string",
-  "description": "string",
-  "url": "string with geniql.com domain",
-  "source": "string",
-  "date": "ISO date string within last 30 days",
-  "country": "string (not ${userCountry})"
-}]`;
+    const userPrompt = `Search for 3 real, recent news articles about successful startups from countries other than ${userCountry}. 
+    These must be actual news articles from reputable sources published in the last few months about real startups.
+    
+    For each article:
+    1. Include the exact original article title
+    2. Provide a brief summary/excerpt (100-150 words) from the actual article
+    3. Include the actual article URL (must be a real working URL to the news article)
+    4. The source name (e.g., TechCrunch, Forbes)
+    5. The actual publication date
+    6. The country where the startup is based (not ${userCountry})
+    
+    Return your findings as a properly formatted JSON array with these exact fields:
+    [{
+      "title": "Exact original article title",
+      "description": "Brief excerpt from the article (100-150 words)",
+      "url": "Full URL to the original article",
+      "source": "Publication name",
+      "date": "Publication date as ISO string",
+      "country": "Country where startup is based"
+    }]`;
 
     // Send request to OpenAI
     const response = await openai.chat.completions.create({
@@ -49,7 +50,7 @@ Return your response as a properly formatted JSON array of 3 articles with these
         { role: "user", content: userPrompt }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7, // Somewhat creative but still factual
+      temperature: 0.2, // Lower temperature for factual information
       max_tokens: 1500,
     });
 
@@ -64,8 +65,10 @@ Return your response as a properly formatted JSON array of 3 articles with these
       
       // Check if we got an array of articles
       if (Array.isArray(parsedData)) {
+        console.log(`Found ${parsedData.length} real news articles`);
         return parsedData;
       } else if (parsedData.articles && Array.isArray(parsedData.articles)) {
+        console.log(`Found ${parsedData.articles.length} real news articles (in 'articles' property)`);
         return parsedData.articles;
       } else {
         // If OpenAI didn't return the expected format, use our fallback
@@ -78,7 +81,7 @@ Return your response as a properly formatted JSON array of 3 articles with these
       return getDummyNewsArticles(userCountry);
     }
   } catch (error) {
-    console.error("Error generating startup news with OpenAI:", error);
+    console.error("Error finding startup news with OpenAI:", error);
     
     // For demo purposes, return dummy data if API call fails
     if (process.env.NODE_ENV !== "production") {
