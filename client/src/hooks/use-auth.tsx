@@ -136,158 +136,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     refetch,
   } = useQuery<User | null, Error>({
-    queryKey: ["/api/user", forceAuthUpdate], // Include forceAuthUpdate in query key
-    queryFn: async (context) => {
-      console.log("[Auth] Fetching user data with queryKey:", context.queryKey);
-      
-      // In Replit environment, we'll just make the request regardless of cookie presence
-      // This is more reliable in iframe environments where cookie detection can be unreliable
+    queryKey: ["/api/user"],
+    // Use a proper query function that handles auth errors correctly
+    queryFn: async () => {
       try {
-        // Add a cache-busting timestamp to the URL
-        const timestamp = new Date().getTime();
-        const response = await fetch(`/api/user?_t=${timestamp}`, {
-          credentials: 'include', // Always include credentials
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
+        const res = await fetch('/api/user', {
+          credentials: 'include'
         });
         
-        if (!response.ok) {
-          if (response.status === 401) {
-            console.log("[Auth] User not authenticated (401)");
-            return null;
-          }
-          throw new Error(`User fetch failed: ${response.statusText}`);
+        // Handle 401 by returning null (user not logged in)
+        if (res.status === 401) {
+          return null;
         }
         
-        const result = await response.json();
-        console.log("[Auth] User fetch successful:", result.username);
-        return result as User;
-      } catch (err) {
-        console.error("[Auth] Error fetching user:", err);
+        // For other errors, throw
+        if (!res.ok) {
+          throw new Error(`Authentication error: ${res.statusText}`);
+        }
+        
+        // Return the user data
+        return await res.json();
+      } catch (error) {
+        // Just return null on any error - we'll handle this as "not logged in"
         return null;
       }
     },
-    // Override the default queryClient settings for this specific query
-    staleTime: 0, // Set to 0 to allow refetching when needed
-    retry: 1, // Try once more on failure
-    refetchOnWindowFocus: true, // Enable refetching on window focus for better state sync
-    refetchOnMount: true, // Refetch when component mounts to ensure fresh data
+    // Simple settings that work well
+    staleTime: 60000, // 1 minute
+    retry: false,     // Don't retry auth failures
+    refetchOnWindowFocus: true
   });
 
-  // Expose refetch method for use elsewhere
+  // Simple refetch method that just calls the query's refetch
   const refetchUser = async (): Promise<User | null> => {
-    setForceAuthUpdate(prev => prev + 1); // Force a refetch by updating the state
     try {
       const result = await refetch();
       return result.data as User | null;
-    } catch (err) {
-      console.error("[Auth] Error in refetchUser:", err);
+    } catch {
       return null;
     }
   };
 
   const loginMutation = useMutation<User, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
-      try {
-        // Before even attempting to log in, set a temporary loading state
-        // This helps UI elements update immediately while the request is processing
-        queryClient.cancelQueries({ queryKey: ["/api/user"] });
-        
-        // Add a special timestamp to prevent caching
-        // Use fetch directly instead of apiRequest for more reliable session handling
-        const timestamp = new Date().getTime();
-        const res = await fetch(`/api/login?_t=${timestamp}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          },
-          credentials: 'include', // Important: include cookies for session
-          body: JSON.stringify(credentials)
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.message || `Login failed with status ${res.status}`);
-        }
-        
-        const userData = await res.json();
-        return userData;
-      } catch (err: any) {
-        console.error("Login API error:", err);
-        throw new Error(err.message || "Login failed");
-      }
-    },
-    onMutate: async (credentials) => {
-      // Optimistically show loading state
-      console.log("Login attempt started for:", credentials.username);
-      
-      // Cancel any ongoing queries
-      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
-      
-      // Force a refresh of the auth state immediately 
-      setForceAuthUpdate(prev => prev + 1);
+      const res = await apiRequest("POST", "/api/login", credentials);
+      return await res.json();
     },
     onSuccess: (userData) => {
-      console.log("Login successful, setting user data:", userData);
-      
-      // Check if we need to handle this as a production environment login
-      // This will return true if production handling was applied 
-      if (handleProductionLogin(userData)) {
-        // If production login was handled, skip the rest of this function
-        return;
-      }
-      
-      // For non-production environments, continue with standard login flow:
-      
-      // 1. Direct cache update - single operation to prevent multiple renders
+      // Update the auth data in cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // 2. Set a timestamp for the auth update to force a single state change
-      setForceAuthUpdate(Date.now());
+      // Redirect to home page
+      navigate("/");
       
-      // 3. Reset auth-dependent queries once
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          return [
-            "/api/saved-ideas", 
-            "/api/analyses", 
-            "/api/posts",
-            "/api/notifications",
-            "/api/user"
-          ].some(key => String(queryKey).includes(key));
-        }
-      });
-      
-      // 4. Perform a single refetch after a short delay to ensure state is stabilized
-      setTimeout(() => {
-        console.log("Refetching user data to confirm auth state");
-        refetch();
-      }, 300);
-      
-      // For development environment, regular navigation is fine
-      // Close any auth dialogs and redirect
-      if (location !== "/") {
-        navigate("/");
-      }
-      
+      // Show success message
       toast({
         title: "Login successful",
         description: `Welcome back, ${userData.username}!`,
       });
     },
     onError: (error: Error) => {
-      console.error("Login error:", error);
-      
-      // Force refresh of auth state on error too
-      setForceAuthUpdate(prev => prev + 1);
-      
       toast({
         title: "Login failed",
         description: error.message || "Invalid username or password",
@@ -298,95 +206,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation<User, Error, InsertUser>({
     mutationFn: async (credentials) => {
-      try {
-        // Use fetch directly instead of apiRequest for more reliable session handling
-        const timestamp = new Date().getTime();
-        const res = await fetch(`/api/register?_t=${timestamp}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          },
-          credentials: 'include', // Important: include cookies for session
-          body: JSON.stringify(credentials)
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.message || `Registration failed with status ${res.status}`);
-        }
-        
-        const userData = await res.json();
-        return userData;
-      } catch (err: any) {
-        console.error("Registration API error:", err);
-        throw new Error(err.message || "Registration failed");
-      }
-    },
-    onMutate: async () => {
-      // Cancel any ongoing queries
-      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
-      
-      // Force a refresh of the auth state immediately
-      setForceAuthUpdate(prev => prev + 1);
+      const res = await apiRequest("POST", "/api/register", credentials);
+      return await res.json();
     },
     onSuccess: (userData) => {
-      console.log("Registration successful, setting user data:", userData);
-      
-      // Check if we need to handle this as a production environment login
-      // This will return true if production handling was applied 
-      if (handleProductionLogin(userData)) {
-        // Show a more engaging welcome toast for new users
-        toast({
-          title: "Registration successful",
-          description: `Welcome to GENIQL, ${userData.username}! Setting up your account...`,
-        });
-        // If production login was handled, skip the rest of this function
-        return;
-      }
-      
-      // For non-production environments, continue with standard login flow:
-      
-      // 1. Direct cache update - single operation to prevent multiple renders
+      // Update the auth data in cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // 2. Set a timestamp for the auth update to force a single state change
-      setForceAuthUpdate(Date.now());
+      // Redirect to home page
+      navigate("/");
       
-      // 3. Reset auth-dependent queries once
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          return [
-            "/api/saved-ideas", 
-            "/api/analyses", 
-            "/api/posts",
-            "/api/notifications",
-            "/api/user"
-          ].some(key => String(queryKey).includes(key));
-        }
-      });
-      
-      // 4. Perform a single refetch after a short delay to ensure state is stabilized
-      setTimeout(() => {
-        console.log("Refetching user data to confirm auth state");
-        refetch();
-      }, 300);
-      
-      // For development environment, regular navigation is fine
-      if (location !== "/") {
-        navigate("/");
-      }
-      
+      // Show success message
       toast({
         title: "Registration successful",
         description: `Welcome to GENIQL, ${userData.username}!`,
       });
     },
     onError: (error: Error) => {
-      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: error.message || "Could not create account. Please try again.",
@@ -395,145 +231,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const logoutMutation = useMutation<any, Error, void>({
+  const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
-      try {
-        // Before attempting logout, cancel current user queries
-        queryClient.cancelQueries({ queryKey: ["/api/user"] });
-        
-        // Send logout request with a timestamp to avoid caching
-        // Use fetch directly instead of apiRequest for more reliable session handling
-        const timestamp = new Date().getTime();
-        const res = await fetch(`/api/logout?_t=${timestamp}`, {
-          method: 'POST',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          },
-          credentials: 'include' // Important: include cookies for session
-        });
-        
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.message || `Logout failed with status ${res.status}`);
-        }
-        
-        // After successful logout, clear any cookies by setting them to expired
-        document.cookie = "connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
-        
-        return true;
-      } catch (err: any) {
-        console.error("Logout API error:", err);
-        throw new Error(err.message || "Logout failed");
-      }
-    },
-    onMutate: async () => {
-      // Optimistically update UI
-      console.log("Logout attempt started");
-      
-      // Cancel any ongoing queries 
-      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
-      
-      // Save the previous user value
-      const previousUser = queryClient.getQueryData<User | null>(["/api/user", forceAuthUpdate]);
-      
-      // Immediately set user to null to update UI elements
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
-      queryClient.setQueryData(["/api/user"], null);
-      
-      // Force a refresh of the auth state immediately
-      setForceAuthUpdate(prev => prev + 1);
-      
-      // Return properly typed context
-      return { previousUser: previousUser };
+      await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      console.log("Logout successful, clearing user data");
-      
-      // Clear any localStorage backup auth data
-      try {
-        localStorage.removeItem('geniql_auth_user');
-        sessionStorage.removeItem('auth_just_logged_in');
-        sessionStorage.removeItem('auth_username');
-        console.log("[Auth] Cleared auth data from local/session storage");
-      } catch (err) {
-        console.error("[Auth] Failed to clear storage auth data:", err);
-      }
-      
-      // Update the cache efficiently
-      // 1. Direct cache update - set to null
+      // Clear user data in cache
       queryClient.setQueryData(["/api/user"], null);
       
-      // 2. Use a timestamp for forceAuthUpdate to ensure a single state change
-      setForceAuthUpdate(Date.now());
+      // Redirect to login page
+      navigate("/auth");
       
-      // 3. Reset auth-related queries in one operation
-      queryClient.resetQueries({ 
-        predicate: (query) => {
-          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          return [
-            "/api/saved-ideas", 
-            "/api/analyses", 
-            "/api/posts",
-            "/api/notifications",
-            "/api/user"
-          ].some(key => String(queryKey).includes(key));
-        }
+      // Show success message
+      toast({
+        title: "Logged out successfully",
       });
-      
-      // 4. Perform a single refetch after a short delay to confirm logout state
-      setTimeout(() => {
-        console.log("Confirming logout state");
-        refetch();
-      }, 300);
-      
-      // For production environment, we need special handling
-      if (isProduction) {
-        // Show toast immediately so user gets immediate feedback
-        toast({
-          title: "Logged out successfully",
-          description: "Redirecting to home page...",
-        });
-        
-        // Force a home page redirect with clean state
-        console.log("[Auth] Forcing page navigation for production environment");
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 800);
-        
-        return; // Skip the rest of the function
-      } else {
-        // In development, just navigate
-        navigate("/");
-        
-        toast({
-          title: "Logged out successfully",
-        });
-      }
     },
-    onError: (error: Error, variables: void, context: unknown) => {
-      console.error("Logout error:", error);
-      
-      // Type-check and cast the context
-      const typedContext = context as { previousUser: User | null } | undefined;
-      
-      // Restore previous user data if available
-      if (typedContext?.previousUser) {
-        queryClient.setQueryData(["/api/user", forceAuthUpdate], typedContext.previousUser);
-      }
-      
-      // Force a refresh of auth state
-      setForceAuthUpdate(prev => prev + 1);
+    onError: () => {
+      // Even if the server call fails, we'll clear the user from the client
+      queryClient.setQueryData(["/api/user"], null);
+      navigate("/auth");
       
       toast({
-        title: "Logout failed",
-        description: "There was a problem logging out. Please try again.",
+        title: "Logout issue",
+        description: "You've been logged out but there was a server error.",
         variant: "destructive",
       });
-      
-      // Force refetch user data to ensure consistent state
-      refetchUser();
     },
   });
 
