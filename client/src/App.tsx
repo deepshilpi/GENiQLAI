@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import CommunityPage from "@/pages/community-page";
+import ThreadsCommunityPage from "@/pages/threads-community-page";
 import ProfilePage from "@/pages/profile-page";
 import MessagesPage from "@/pages/messages-page";
 import AnalysisPage from "@/pages/analysis-page";
@@ -56,7 +57,11 @@ function Router() {
           <Switch>
             <Route path="/" component={AnalysisPage} />
             <Route path="/home" component={HomePage} />
+            <Route path="/community/threads" component={ThreadsCommunityPage} />
             <Route path="/community" component={CommunityPage} />
+            <Route path="/community/post/:id">
+              {(params) => <ThreadsCommunityPage postId={params.id} />}
+            </Route>
             <ProtectedRoute path="/messages" component={MessagesPage} />
             <ProtectedRoute path="/profile/:username" component={ProfilePage} />
             <ProtectedRoute path="/settings" component={SettingsPage} />

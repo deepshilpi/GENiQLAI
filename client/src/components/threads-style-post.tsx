@@ -200,8 +200,8 @@ export function ThreadsStylePost({
       return;
     }
     
-    if (onFollow && post.author_id) {
-      onFollow(post.author_id);
+    if (onFollow && post.authorId) {
+      onFollow(post.authorId);
     }
   };
 
@@ -220,8 +220,8 @@ export function ThreadsStylePost({
       return;
     }
     
-    if (onSendMessage && post.author_id) {
-      onSendMessage(post.author_id);
+    if (onSendMessage && post.authorId) {
+      onSendMessage(post.authorId);
     }
   };
 
@@ -252,7 +252,7 @@ export function ThreadsStylePost({
   };
 
   // Calculate post date
-  const postDate = new Date(post.created_at || Date.now());
+  const postDate = new Date(post.createdAt || Date.now());
   const formattedDate = timeAgo(postDate);
   
   // Process post description and tags
@@ -415,7 +415,7 @@ export function ThreadsStylePost({
                   <TooltipContent side="top">Pump</TooltipContent>
                 </Tooltip>
                 
-                <span className="text-gray-600 dark:text-gray-400 mx-0.5">{post.pump_count || 0}</span>
+                <span className="text-gray-600 dark:text-gray-400 mx-0.5">{post.pumpCount || 0}</span>
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -490,8 +490,8 @@ export function ThreadsStylePost({
                   {/* Comment input */}
                   <div className="flex gap-2">
                     <Avatar className="h-8 w-8">
-                      {currentUser?.profile_picture_url ? (
-                        <AvatarImage src={currentUser.profile_picture_url} alt={currentUser.username} />
+                      {currentUser?.profilePictureUrl ? (
+                        <AvatarImage src={currentUser.profilePictureUrl} alt={currentUser.username} />
                       ) : (
                         <AvatarFallback className="bg-gradient-to-br from-purple-400 to-violet-500 text-white text-xs">
                           {currentUser?.username ? currentUser.username.substring(0, 2).toUpperCase() : "?"}

@@ -32,14 +32,15 @@ import {
   Loader2,
   Sparkles,
   Filter,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ArrowLeft
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Extended post type for UI with author and current user vote
 interface ExtendedPost extends Omit<Post, 'tags'> {
@@ -66,7 +67,11 @@ interface ExtendedPost extends Omit<Post, 'tags'> {
   }>;
 }
 
-export default function ThreadsCommunityPage() {
+interface ThreadsCommunityPageProps {
+  postId?: string;
+}
+
+export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPageProps = {}) {
   // Context and state
   const auth = useContext(AuthContext);
   const user = auth?.user;
@@ -161,15 +166,35 @@ export default function ThreadsCommunityPage() {
     };
   }, [user]);
 
-  // Query posts with pagination
+  // Query a single post when postId is provided
+  const { 
+    data: singlePostData,
+    isLoading: isSinglePostLoading
+  } = useQuery<ExtendedPost>({
+    queryKey: ['/api/posts', postId],
+    queryFn: async () => {
+      if (!postId) return null;
+      
+      const res = await fetch(`/api/posts/${postId}`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch post');
+      
+      return res.json();
+    },
+    enabled: !!postId,
+  });
+
+  // Query posts with pagination when not viewing a single post
   const { 
     data: postsData, 
-    isLoading, 
+    isLoading: isPostsLoading, 
     isFetching,
     refetch 
   } = useQuery<ExtendedPost[]>({
     queryKey: ['/api/posts', page, activeTab, searchQuery, searchType],
     queryFn: async () => {
+      // Don't fetch list if viewing a single post
+      if (postId) return [];
+      
       // Construct the URL based on the filters
       let url = `/api/posts?page=${page}&limit=10`;
       
@@ -190,7 +215,7 @@ export default function ThreadsCommunityPage() {
       
       return res.json();
     },
-    keepPreviousData: true,
+    enabled: !postId,
   });
 
   // Infinite scroll loading logic
@@ -531,42 +556,38 @@ export default function ThreadsCommunityPage() {
                     </SheetHeader>
                     <div className="py-4">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input
-                          type="text"
+                          className="pr-10"
                           placeholder="Search..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-9 pr-4 py-2"
                         />
-                        {searchQuery && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                            onClick={() => setSearchQuery("")}
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                          onClick={() => setSearchQuery("")}
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
                       </div>
                       
-                      <div className="flex items-center gap-2 mt-3">
-                        <Button
+                      <div className="flex gap-2 mt-4">
+                        <Button 
                           variant={searchType === "posts" ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("posts")}
                         >
                           Posts
                         </Button>
-                        <Button
+                        <Button 
                           variant={searchType === "users" ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("users")}
                         >
                           Users
                         </Button>
-                        <Button
+                        <Button 
                           variant={searchType === "tags" ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("tags")}
@@ -574,307 +595,94 @@ export default function ThreadsCommunityPage() {
                           Tags
                         </Button>
                       </div>
-                      
-                      <div className="mt-4">
-                        <h3 className="text-sm font-medium mb-2">Trending topics</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {["ai", "saas", "fintech", "web3", "mobile", "marketplace"].map((tag) => (
-                            <Badge 
-                              key={tag}
-                              variant="outline"
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setSearchQuery(tag);
-                                setSearchType("tags");
-                              }}
-                            >
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   </SheetContent>
                 </Sheet>
-                
-                <Button onClick={handleNewPost} size="sm" className="rounded-full">
-                  <PlusSquare className="h-4 w-4 mr-2" />
-                  <span>Create</span>
-                </Button>
               </div>
             </div>
             
-            {/* Post Creation Sheet */}
-            <Sheet open={showPostForm} onOpenChange={setShowPostForm}>
-              <SheetContent className="sm:max-w-md h-[90%] overflow-auto">
-                <SheetHeader>
-                  <SheetTitle>Create a post</SheetTitle>
-                  <SheetDescription>
-                    Share your startup idea with the community
-                  </SheetDescription>
-                </SheetHeader>
-                
-                <div className="mt-6 space-y-6">
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Title (Optional)</h3>
-                    <Input
-                      placeholder="Add a title to your idea..."
-                      value={postTitle}
-                      onChange={(e) => setPostTitle(e.target.value)}
-                      maxLength={100}
-                    />
-                    <div className="text-xs text-right text-gray-500">
-                      {postTitle.length}/100
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Description</h3>
-                    <Textarea
-                      placeholder="Describe your startup idea in detail..."
-                      value={postInput}
-                      onChange={(e) => setPostInput(e.target.value)}
-                      className="min-h-[150px]"
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Tags</h3>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add tags..."
-                        value={currentTag}
-                        onChange={(e) => setCurrentTag(e.target.value)}
-                        className="flex-1"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddTag();
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleAddTag}
-                        disabled={!currentTag}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                    
-                    {tagsArray.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {tagsArray.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                            #{tag}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-4 w-4 rounded-full p-0"
-                              onClick={() => handleRemoveTag(tag)}
-                            >
-                              <XCircle className="h-3 w-3" />
-                            </Button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="mt-6 flex justify-end">
-                  <Button
-                    onClick={handleSubmitPost}
-                    disabled={!postInput.trim() || isSubmitting}
-                    className="w-full sm:w-auto"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Posting...
-                      </>
-                    ) : (
-                      <>Post</>
-                    )}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Back button for single post view */}
+            {postId && (
+              <div className="border-b border-gray-200 dark:border-gray-800">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/community/threads')}
+                  className="flex items-center gap-2 px-4 py-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to all posts</span>
+                </Button>
+              </div>
+            )}
             
-            {/* Feed Tabs */}
-            <Tabs defaultValue="latest" className="bg-white dark:bg-gray-950" onValueChange={handleTabChange}>
-              <TabsList className="w-full grid grid-cols-3 rounded-none bg-transparent h-12 border-b border-gray-200 dark:border-gray-800">
-                <TabsTrigger 
-                  value="latest" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
-                >
-                  <Clock className="h-4 w-4 mr-2" />
-                  Latest
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="trending" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Trending
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="following" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Following
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="latest" className="mt-0 p-0">
-                {/* Display search results or normal feed */}
-                {searchQuery && (
-                  <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-500">
-                        Results for <span className="font-medium text-gray-700 dark:text-gray-300">"{searchQuery}"</span> in {searchType}
-                      </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setFilteredPosts(null);
-                        }}
-                      >
-                        Clear
-                      </Button>
-                    </div>
-                  </div>
-                )}
+            {/* Feed Tabs - only shown when not viewing a single post */}
+            {!postId && (
+              <Tabs defaultValue="latest" className="bg-white dark:bg-gray-950" onValueChange={handleTabChange}>
+                <TabsList className="w-full grid grid-cols-3 rounded-none bg-transparent h-12 border-b border-gray-200 dark:border-gray-800">
+                  <TabsTrigger 
+                    value="latest" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    Latest
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="trending" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Trending
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="following" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Following
+                  </TabsTrigger>
+                </TabsList>
                 
-                {/* Post List */}
-                {isLoading && page === 1 ? (
-                  // Loading skeletons for initial load
-                  <>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
-                        <div className="flex items-start gap-3">
-                          <Skeleton className="h-10 w-10 rounded-full" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                ) : posts.length > 0 ? (
-                  <div>
-                    <AnimatePresence initial={false}>
-                      {posts.map((post) => (
-                        <ThreadsStylePost
-                          key={post.id}
-                          post={post}
-                          onVote={handleVote}
-                          onLike={handleLike}
-                          onComment={handleComment}
-                          onFollow={handleFollow}
-                          onShareProfile={handleShareProfile}
-                          onSendMessage={handleSendMessage}
-                          currentUser={user}
-                        />
-                      ))}
-                    </AnimatePresence>
-                    
-                    {/* Load more indicator */}
-                    {hasMore && (
-                      <div 
-                        ref={loadMoreRef} 
-                        className="py-4 flex justify-center"
-                      >
-                        {isFetching && page > 1 ? (
-                          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                        ) : (
-                          <p className="text-sm text-gray-500">Loading more posts...</p>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* End of feed indicator */}
-                    {!hasMore && posts.length > 0 && (
-                      <div className="py-8 text-center">
-                        <p className="text-sm text-gray-500">You've seen all posts</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => {
-                            window.scrollTo(0, 0);
-                            setPage(1);
-                            setHasMore(true);
-                            refetch();
-                          }}
-                        >
-                          Refresh
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    {searchQuery ? (
-                      <>
-                        <p className="text-gray-500 mb-4">No results found for "{searchQuery}"</p>
+                <TabsContent value="latest" className="mt-0 p-0">
+                  {/* Display search results or normal feed */}
+                  {searchQuery && (
+                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500">
+                          Results for <span className="font-medium text-gray-700 dark:text-gray-300">"{searchQuery}"</span> in {searchType}
+                        </p>
                         <Button
-                          variant="outline"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             setSearchQuery("");
                             setFilteredPosts(null);
                           }}
                         >
-                          Clear search
+                          Clear
                         </Button>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-gray-500 mb-4">No posts yet. Be the first to share an idea!</p>
-                        <Button onClick={handleNewPost}>
-                          <PlusSquare className="h-4 w-4 mr-2" />
-                          Create Post
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-              
-              {/* Other tabs share the same content logic but are filtered differently on the server */}
-              <TabsContent value="trending" className="mt-0 p-0">
-                {/* Same structure as "latest" tab, with different data from the query */}
-                {/* The filtering logic is handled in the query parameters */}
-                {isLoading && page === 1 ? (
-                  // Loading skeletons
-                  <>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
-                        <div className="flex items-start gap-3">
-                          <Skeleton className="h-10 w-10 rounded-full" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Single Post View */}
+                  {postId && (
+                    <>
+                      {isSinglePostLoading ? (
+                        // Loading skeleton for single post
+                        <div className="border-b border-gray-200 dark:border-gray-800 p-4">
+                          <div className="flex items-start gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-3/4" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </>
-                ) : posts.length > 0 ? (
-                  <div>
-                    <AnimatePresence initial={false}>
-                      {posts.map((post) => (
+                      ) : singlePostData ? (
                         <ThreadsStylePost
-                          key={post.id}
-                          post={post}
+                          post={singlePostData}
                           onVote={handleVote}
                           onLike={handleLike}
                           onComment={handleComment}
@@ -882,145 +690,298 @@ export default function ThreadsCommunityPage() {
                           onShareProfile={handleShareProfile}
                           onSendMessage={handleSendMessage}
                           currentUser={user}
+                          isDetailView={true}
                         />
-                      ))}
-                    </AnimatePresence>
-                    
-                    {/* Load more indicator */}
-                    {hasMore && (
-                      <div 
-                        ref={loadMoreRef} 
-                        className="py-4 flex justify-center"
-                      >
-                        {isFetching && page > 1 ? (
-                          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                        ) : (
-                          <p className="text-sm text-gray-500">Loading more posts...</p>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* End of feed indicator */}
-                    {!hasMore && posts.length > 0 && (
-                      <div className="py-8 text-center">
-                        <p className="text-sm text-gray-500">You've seen all trending posts</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => {
-                            window.scrollTo(0, 0);
-                            setPage(1);
-                            setHasMore(true);
-                            refetch();
-                          }}
-                        >
-                          Refresh
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-gray-500 mb-4">No trending posts right now</p>
-                    <Button onClick={handleNewPost}>
-                      <PlusSquare className="h-4 w-4 mr-2" />
-                      Create the first trending post
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="following" className="mt-0 p-0">
-                {!user ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-gray-500 mb-4">Sign in to see posts from people you follow</p>
-                    <Button onClick={() => navigate('/auth')}>
-                      Sign In
-                    </Button>
-                  </div>
-                ) : isLoading && page === 1 ? (
-                  // Loading skeletons
-                  <>
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
-                        <div className="flex items-start gap-3">
-                          <Skeleton className="h-10 w-10 rounded-full" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-3/4" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <p className="text-gray-500 mb-4">Post not found</p>
+                          <Button 
+                            variant="outline"
+                            onClick={() => navigate('/community/threads')}
+                          >
+                            Back to community
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Post List - only shown when not viewing a single post */}
+                  {!postId && (
+                    <>
+                      {isPostsLoading && page === 1 ? (
+                        // Loading skeletons for initial load
+                        <>
+                          {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                              <div className="flex items-start gap-3">
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <div className="flex-1 space-y-2">
+                                  <Skeleton className="h-4 w-32" />
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-3/4" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      ) : posts.length > 0 ? (
+                        <div>
+                          <AnimatePresence initial={false}>
+                            {posts.map((post) => (
+                              <ThreadsStylePost
+                                key={post.id}
+                                post={post}
+                                onVote={handleVote}
+                                onLike={handleLike}
+                                onComment={handleComment}
+                                onFollow={handleFollow}
+                                onShareProfile={handleShareProfile}
+                                onSendMessage={handleSendMessage}
+                                currentUser={user}
+                              />
+                            ))}
+                          </AnimatePresence>
+                          
+                          {/* Load more indicator */}
+                          {hasMore && (
+                            <div 
+                              ref={loadMoreRef} 
+                              className="py-4 flex justify-center"
+                            >
+                              {isFetching && page > 1 ? (
+                                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                              ) : (
+                                <p className="text-sm text-gray-500">Loading more posts...</p>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* End of feed indicator */}
+                          {!hasMore && posts.length > 0 && (
+                            <div className="py-8 text-center">
+                              <p className="text-sm text-gray-500">You've seen all posts</p>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="mt-2"
+                                onClick={() => {
+                                  window.scrollTo(0, 0);
+                                  setPage(1);
+                                  setHasMore(true);
+                                  refetch();
+                                }}
+                              >
+                                Refresh
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          {searchQuery ? (
+                            <>
+                              <p className="text-gray-500 mb-4">No results found for "{searchQuery}"</p>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setSearchQuery("");
+                                  setFilteredPosts(null);
+                                }}
+                              >
+                                Clear search
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-gray-500 mb-4">No posts yet. Be the first to share an idea!</p>
+                              <Button onClick={handleNewPost}>
+                                <PlusSquare className="h-4 w-4 mr-2" />
+                                Create Post
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="trending" className="mt-0 p-0">
+                  {/* Same structure as "latest" tab, with different data from the query */}
+                  {/* The filtering logic is handled in the query parameters */}
+                  {isPostsLoading && page === 1 ? (
+                    // Loading skeletons
+                    <>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                          <div className="flex items-start gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-3/4" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </>
-                ) : posts.length > 0 ? (
-                  <div>
-                    <AnimatePresence initial={false}>
-                      {posts.map((post) => (
-                        <ThreadsStylePost
-                          key={post.id}
-                          post={post}
-                          onVote={handleVote}
-                          onLike={handleLike}
-                          onComment={handleComment}
-                          onFollow={handleFollow}
-                          onShareProfile={handleShareProfile}
-                          onSendMessage={handleSendMessage}
-                          currentUser={user}
-                        />
                       ))}
-                    </AnimatePresence>
-                    
-                    {/* Load more indicator */}
-                    {hasMore && (
-                      <div 
-                        ref={loadMoreRef} 
-                        className="py-4 flex justify-center"
-                      >
-                        {isFetching && page > 1 ? (
-                          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                        ) : (
-                          <p className="text-sm text-gray-500">Loading more posts...</p>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* End of feed indicator */}
-                    {!hasMore && posts.length > 0 && (
-                      <div className="py-8 text-center">
-                        <p className="text-sm text-gray-500">You've seen all posts from people you follow</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => {
-                            window.scrollTo(0, 0);
-                            setPage(1);
-                            setHasMore(true);
-                            refetch();
-                          }}
+                    </>
+                  ) : posts.length > 0 ? (
+                    <div>
+                      <AnimatePresence initial={false}>
+                        {posts.map((post) => (
+                          <ThreadsStylePost
+                            key={post.id}
+                            post={post}
+                            onVote={handleVote}
+                            onLike={handleLike}
+                            onComment={handleComment}
+                            onFollow={handleFollow}
+                            onShareProfile={handleShareProfile}
+                            onSendMessage={handleSendMessage}
+                            currentUser={user}
+                          />
+                        ))}
+                      </AnimatePresence>
+                      
+                      {/* Load more indicator */}
+                      {hasMore && (
+                        <div 
+                          ref={loadMoreRef} 
+                          className="py-4 flex justify-center"
                         >
-                          Refresh
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-gray-500 mb-4">You're not following anyone yet or they haven't posted</p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setActiveTab('latest')}
-                    >
-                      Discover people to follow
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                          {isFetching && page > 1 ? (
+                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                          ) : (
+                            <p className="text-sm text-gray-500">Loading more posts...</p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* End of feed indicator */}
+                      {!hasMore && posts.length > 0 && (
+                        <div className="py-8 text-center">
+                          <p className="text-sm text-gray-500">You've seen all trending posts</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => {
+                              window.scrollTo(0, 0);
+                              setPage(1);
+                              setHasMore(true);
+                              refetch();
+                            }}
+                          >
+                            Refresh
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <p className="text-gray-500 mb-4">No trending posts right now</p>
+                      <Button onClick={handleNewPost}>
+                        <PlusSquare className="h-4 w-4 mr-2" />
+                        Create the first trending post
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="following" className="mt-0 p-0">
+                  {!user ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <p className="text-gray-500 mb-4">Sign in to see posts from people you follow</p>
+                      <Button onClick={() => navigate('/auth')}>
+                        Sign In
+                      </Button>
+                    </div>
+                  ) : isPostsLoading && page === 1 ? (
+                    // Loading skeletons
+                    <>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                          <div className="flex items-start gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-3/4" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : posts.length > 0 ? (
+                    <div>
+                      <AnimatePresence initial={false}>
+                        {posts.map((post) => (
+                          <ThreadsStylePost
+                            key={post.id}
+                            post={post}
+                            onVote={handleVote}
+                            onLike={handleLike}
+                            onComment={handleComment}
+                            onFollow={handleFollow}
+                            onShareProfile={handleShareProfile}
+                            onSendMessage={handleSendMessage}
+                            currentUser={user}
+                          />
+                        ))}
+                      </AnimatePresence>
+                      
+                      {/* Load more indicator */}
+                      {hasMore && (
+                        <div 
+                          ref={loadMoreRef} 
+                          className="py-4 flex justify-center"
+                        >
+                          {isFetching && page > 1 ? (
+                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                          ) : (
+                            <p className="text-sm text-gray-500">Loading more posts...</p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* End of feed indicator */}
+                      {!hasMore && posts.length > 0 && (
+                        <div className="py-8 text-center">
+                          <p className="text-sm text-gray-500">You've seen all posts from people you follow</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => {
+                              window.scrollTo(0, 0);
+                              setPage(1);
+                              setHasMore(true);
+                              refetch();
+                            }}
+                          >
+                            Refresh
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <p className="text-gray-500 mb-4">You're not following anyone yet or they haven't posted</p>
+                      <Button
+                        variant="outline"
+                        onClick={() => setActiveTab('latest')}
+                      >
+                        Discover people to follow
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
         </main>
       </div>
