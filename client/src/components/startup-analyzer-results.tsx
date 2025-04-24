@@ -4,13 +4,18 @@ import { CompetitorChart } from "./competitor-chart";
 import { CagrChart } from "./cagr-chart";
 import { BlurOverlay } from "./ui/blur-overlay";
 import { formatCurrency } from "@/lib/utils";
+import { MarketSizeBlock } from "./market-size-block";
+import { TargetAudienceBlock } from "./target-audience-block";
+import { SwotAnalysisBlock } from "./swot-analysis-block";
+import { FundingRequirementsBlock } from "./funding-requirements-block";
 
 interface StartupAnalyzerResultsProps {
   results: AnalysisResults;
   userPlan: string;
+  country: string;
 }
 
-export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerResultsProps) {
+export function StartupAnalyzerResults({ results, userPlan, country }: StartupAnalyzerResultsProps) {
   const needsProPlan = userPlan === "free";
   
   return (
@@ -70,8 +75,18 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
             </div>
           </div>
         )}
+
+        {/* Block 3: Market Size */}
+        {results.marketSize && (
+          <MarketSizeBlock marketSize={results.marketSize} country={country} />
+        )}
         
-        {/* Block 3: Market Viability */}
+        {/* Block 4: Target Audience Fit */}
+        {results.targetAudienceFit && (
+          <TargetAudienceBlock targetAudienceFit={results.targetAudienceFit} />
+        )}
+        
+        {/* Block 5: Market Viability */}
         {results.marketViability && (
           <div className="bg-card rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
@@ -97,7 +112,69 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
           </div>
         )}
         
-        {/* Block 4: Unique Value Proposition */}
+        {/* Block 6: Business Model Strength */}
+        {results.businessModelStrength && (
+          <div className="bg-card rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Business Model</h3>
+              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                <i className="fas fa-building text-primary"></i>
+              </div>
+            </div>
+            
+            <div className="flex justify-center items-center mb-4">
+              <div className="relative w-32 h-32">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-3xl font-bold">{results.businessModelStrength.overall}%</div>
+                </div>
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="45" 
+                    fill="none" 
+                    stroke="rgba(117, 81, 255, 0.2)" 
+                    strokeWidth="8" 
+                  />
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="45" 
+                    fill="none" 
+                    stroke="rgba(117, 81, 255, 0.8)" 
+                    strokeWidth="8" 
+                    strokeDasharray={`${2 * Math.PI * 45 * results.businessModelStrength.overall / 100} ${2 * Math.PI * 45 * (1 - results.businessModelStrength.overall / 100)}`}
+                    strokeDashoffset={Math.PI * 45 / 2}
+                    transform="rotate(-90 50 50)"
+                  />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {results.businessModelStrength.components.slice(0, 3).map((component, index) => (
+                <div key={index} className="bg-accent/20 rounded-lg p-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="text-sm font-medium">{component.name}</div>
+                    <div className="text-sm font-bold">{component.score}%</div>
+                  </div>
+                  <div className="w-full bg-accent rounded-full h-1">
+                    <div 
+                      className="bg-primary h-1 rounded-full" 
+                      style={{ width: `${component.score}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-3 text-sm text-muted-foreground">
+              {results.businessModelStrength.message}
+            </div>
+          </div>
+        )}
+        
+        {/* Block 7: Unique Value Proposition */}
         {results.uniqueValueProposition && (
           <div className="bg-card rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
@@ -125,7 +202,17 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
           </div>
         )}
         
-        {/* Block 5: CAGR (Pro) */}
+        {/* Block 8: SWOT Analysis */}
+        {results.swotAnalysis && (
+          <SwotAnalysisBlock swotAnalysis={results.swotAnalysis} />
+        )}
+        
+        {/* Block 9: Funding Requirements */}
+        {results.fundingRequired && (
+          <FundingRequirementsBlock fundingRequired={results.fundingRequired} />
+        )}
+        
+        {/* Block 10: CAGR (Pro) */}
         {results.cagr && (
           <div className="bg-card rounded-xl p-5 relative">
             {needsProPlan && (
@@ -160,17 +247,9 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
           </div>
         )}
         
-        {/* Block 6: Previous Failed Executions (Pro) */}
+        {/* Block 11: Previous Failed Executions */}
         {results.previousFailedExecutions && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && (
-              <BlurOverlay 
-                feature="Failed Executions Analysis" 
-                requiredPlan="pro"
-                description="Learn from past mistakes - access data on similar startups that failed"
-              />
-            )}
-            
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Previous Failed Executions</h3>
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
@@ -196,85 +275,9 @@ export function StartupAnalyzerResults({ results, userPlan }: StartupAnalyzerRes
           </div>
         )}
         
-        {/* Block 7: Funding Requirements (Pro) */}
-        {results.fundingRequirements && (
-          <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && (
-              <BlurOverlay 
-                feature="Funding Requirements" 
-                requiredPlan="pro"
-                description="Get detailed funding requirements and capital allocation recommendations"
-              />
-            )}
-            
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Funding Requirements</h3>
-              <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                <i className="fas fa-dollar-sign text-primary"></i>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="text-sm">Seed Round</div>
-                <div className="text-sm font-bold">
-                  {formatCurrency(results.fundingRequirements.seedRound.min)} - 
-                  {formatCurrency(results.fundingRequirements.seedRound.max)}
-                </div>
-              </div>
-              <div className="w-full bg-accent rounded-full h-1.5">
-                <div className="bg-primary h-1.5 rounded-full" style={{ width: "30%" }}></div>
-              </div>
-              
-              <div className="flex items-center justify-between mt-3">
-                <div className="text-sm">Series A ({results.fundingRequirements.seriesA.timeframe})</div>
-                <div className="text-sm font-bold">
-                  {formatCurrency(results.fundingRequirements.seriesA.min)} - 
-                  {formatCurrency(results.fundingRequirements.seriesA.max)}
-                </div>
-              </div>
-              <div className="w-full bg-accent rounded-full h-1.5">
-                <div className="bg-primary h-1.5 rounded-full" style={{ width: "60%" }}></div>
-              </div>
-              
-              <div className="bg-accent rounded-lg p-3 mt-3">
-                <div className="text-sm font-medium">Capital Allocation</div>
-                <div className="grid grid-cols-3 gap-3 mt-2">
-                  <div className="text-center">
-                    <div className="text-xs text-muted-foreground">Product Dev</div>
-                    <div className="text-sm font-bold">
-                      {results.fundingRequirements.allocation.productDevelopment}%
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-muted-foreground">Marketing</div>
-                    <div className="text-sm font-bold">
-                      {results.fundingRequirements.allocation.marketing}%
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-muted-foreground">Operations</div>
-                    <div className="text-sm font-bold">
-                      {results.fundingRequirements.allocation.operations}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Block 8: Go-to-Market Strategy (Pro) */}
+        {/* Block 12: Go-to-Market Strategy */}
         {results.goToMarketStrategy && (
           <div className="bg-card rounded-xl p-5 relative">
-            {needsProPlan && (
-              <BlurOverlay 
-                feature="Go-to-Market Strategy" 
-                requiredPlan="pro"
-                description="Access a detailed execution roadmap with timelines and action steps"
-              />
-            )}
-            
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Go-to-Market Strategy</h3>
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">

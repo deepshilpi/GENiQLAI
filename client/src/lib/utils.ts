@@ -183,6 +183,31 @@ interface CountryMarketData {
   investmentActivity: string;
 }
 
+// Function to get country flag emoji
+export function getCountryFlag(country: string): string {
+  const countryToFlag: Record<string, string> = {
+    "United States": "🇺🇸",
+    "United Kingdom": "🇬🇧",
+    "Canada": "🇨🇦",
+    "Australia": "🇦🇺",
+    "India": "🇮🇳",
+    "China": "🇨🇳",
+    "Japan": "🇯🇵",
+    "Germany": "🇩🇪",
+    "France": "🇫🇷",
+    "Brazil": "🇧🇷",
+    "Singapore": "🇸🇬",
+    "Israel": "🇮🇱",
+    "South Korea": "🇰🇷",
+    "Nigeria": "🇳🇬",
+    "Kenya": "🇰🇪",
+    "Mexico": "🇲🇽",
+    "South Africa": "🇿🇦",
+  };
+  
+  return countryToFlag[country] || "🌐"; // Default to globe if country not found
+}
+
 // Country-specific market data with consistent values
 export function getCountryMarketData(country: string): CountryMarketData {
   const marketData: Record<string, CountryMarketData> = {
