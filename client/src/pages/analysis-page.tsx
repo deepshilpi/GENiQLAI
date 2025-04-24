@@ -310,18 +310,44 @@ export default function AnalysisPage() {
   
   // Effect to refresh user data when component mounts
   useEffect(() => {
-    // Refresh user data when analysis page loads
-    refetchUser();
+    // Create a function to check login status
+    const checkAuthStatus = async () => {
+      console.log("[Analysis] Checking auth status, current user:", user ? `Logged in as ${user.username}` : "Not logged in");
+      
+      // Only refetch if we can see the login success message (which indicates a recent login)
+      const loginElement = document.querySelector('.login-success-toast');
+      if (loginElement || !user) {
+        console.log("[Analysis] Login success detected or no user, refreshing auth state");
+        try {
+          const updatedUser = await refetchUser();
+          console.log("[Analysis] Auth refresh complete, user:", updatedUser ? "Found" : "Not found");
+        } catch (err) {
+          console.error("[Analysis] Error refreshing auth state:", err);
+        }
+      }
+    };
     
-    // Set an interval to periodically refresh user data
+    // Call immediately
+    checkAuthStatus();
+    
+    // Set an interval with exponential backoff timing
+    // 200ms, 500ms, 1000ms, 2000ms, then every 5s
+    const timeouts = [200, 500, 1000, 2000];
+    
+    const timeoutIds = timeouts.map(delay => 
+      setTimeout(() => checkAuthStatus(), delay)
+    );
+    
+    // Regular interval after initial quick checks
     const refreshInterval = setInterval(() => {
-      refetchUser();
-    }, 5000); // Check every 5 seconds
+      checkAuthStatus();
+    }, 5000);
     
     return () => {
+      timeoutIds.forEach(id => clearTimeout(id));
       clearInterval(refreshInterval);
     };
-  }, [refetchUser]);
+  }, [user, refetchUser]);
 
   // Effect for progressive loading of blocks
   useEffect(() => {

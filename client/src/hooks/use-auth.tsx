@@ -38,7 +38,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetch,
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user", forceAuthUpdate], // Include forceAuthUpdate in query key
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async (context) => {
+      console.log("[Auth] Fetching user data with queryKey:", context.queryKey);
+      // Check for valid session cookie before making the request
+      if (document.cookie.indexOf('connect.sid') === -1) {
+        console.log("[Auth] No session cookie found, returning null");
+        return null;
+      }
+      try {
+        const result = await getQueryFn({ on401: "returnNull" })(context);
+        console.log("[Auth] User fetch result:", result ? "User found" : "No user");
+        return result as User | null;
+      } catch (err) {
+        console.error("[Auth] Error fetching user:", err);
+        return null;
+      }
+    },
     // Override the default queryClient settings for this specific query
     staleTime: 0, // Set to 0 to allow refetching when needed
     retry: 0, // Don't retry on failure - reduces queries
@@ -47,10 +62,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   // Expose refetch method for use elsewhere
-  const refetchUser = async () => {
+  const refetchUser = async (): Promise<User | null> => {
     setForceAuthUpdate(prev => prev + 1); // Force a refetch by updating the state
-    const result = await refetch();
-    return result.data ?? null;
+    try {
+      const result = await refetch();
+      return result.data as User | null;
+    } catch (err) {
+      console.error("[Auth] Error in refetchUser:", err);
+      return null;
+    }
   };
 
   const loginMutation = useMutation<User, Error, LoginCredentials>({
