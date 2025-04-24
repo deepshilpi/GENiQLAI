@@ -71,17 +71,31 @@ export function setupAuth(app: Express) {
     console.log('Using in-memory session store');
   }
 
+  // Configure cookie settings for both development and production environments
+  const cookieSettings: session.CookieOptions = {
+    // Always use httpOnly and set proper sameSite for security
+    httpOnly: true,
+    sameSite: 'lax', // Use one of the allowed literal values
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    
+    // In production, we need to set secure and possibly domain
+    secure: process.env.NODE_ENV === 'production'
+  };
+  
+  // Add domain in production if configured
+  if (process.env.NODE_ENV === 'production' && process.env.DOMAIN) {
+    cookieSettings.domain = process.env.DOMAIN.replace(/^https?:\/\//, ''); // Remove protocol if present
+  }
+
+  // Log cookie settings for debugging
+  console.log('Session cookie settings:', cookieSettings);
+
   app.use(session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // This fixes cross-site cookie issues in modern browsers
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      httpOnly: true // Security best practice to prevent JS access to cookies
-    }
+    cookie: cookieSettings
   }));
 
   app.use(passport.initialize());

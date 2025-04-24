@@ -60,7 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // This helps UI elements update immediately while the request is processing
         queryClient.cancelQueries({ queryKey: ["/api/user"] });
         
-        const res = await apiRequest("POST", "/api/login", credentials);
+        // Add a special timestamp to prevent caching
+        const res = await apiRequest("POST", `/api/login?_t=${Date.now()}`, credentials);
         const userData = await res.json();
         return userData;
       } catch (err: any) {
@@ -75,20 +76,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Cancel any ongoing queries
       await queryClient.cancelQueries({ queryKey: ["/api/user"] });
       
-      // Force a refresh of the auth state immediately
+      // Force a refresh of the auth state immediately 
       setForceAuthUpdate(prev => prev + 1);
     },
     onSuccess: (userData) => {
       console.log("Login successful, setting user data:", userData);
       
-      // Update all instances of user data in the cache
+      // The most important part: Aggressively update the cache with multiple methods
+      // 1. Direct cache update
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Force a rerender of the auth context (increment twice for certainty)
-      setForceAuthUpdate(prev => prev + 2);
+      // 2. Force multiple rerenders of the auth context
+      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
       
-      // Immediately refresh data that depends on auth status
+      // 3. Reset the entire cache for auth-related queries
+      queryClient.resetQueries({ queryKey: ["/api/user"] });
+      
+      // 4. Invalidate all auth-dependent queries
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -96,15 +101,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "/api/saved-ideas", 
             "/api/analyses", 
             "/api/posts",
-            "/api/notifications"
+            "/api/notifications",
+            "/api/user"
           ].some(key => String(queryKey).includes(key));
         }
       });
       
-      // Ensure the login status is immediately available by refetching
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      }, 100);
+      // 5. Force multiple refetches with increasing delays
+      const refetchDelays = [100, 500, 1000, 2000];
+      refetchDelays.forEach(delay => {
+        setTimeout(() => {
+          console.log(`Refetching user data after ${delay}ms`);
+          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+          // Also directly call refetch
+          refetch();
+        }, delay);
+      });
+      
+      // 6. In case this is a production environment, also force a page data refetch
+      if (window.location.hostname.includes('.com') || 
+          window.location.hostname.includes('.org') || 
+          window.location.hostname.includes('.app')) {
+        console.log("Production environment detected, applying aggressive refresh strategy");
+        // Force a window reload in 500ms to make sure the browser knows we're logged in
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
       
       // Close any auth dialogs and redirect
       if (location !== "/") {
@@ -133,7 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation<User, Error, InsertUser>({
     mutationFn: async (credentials) => {
       try {
-        const res = await apiRequest("POST", "/api/register", credentials);
+        // Add timestamp to avoid caching
+        const res = await apiRequest("POST", `/api/register?_t=${Date.now()}`, credentials);
         const userData = await res.json();
         return userData;
       } catch (err: any) {
@@ -151,14 +175,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (userData) => {
       console.log("Registration successful, setting user data:", userData);
       
-      // Update user data in all caches
+      // The most important part: Aggressively update the cache with multiple methods
+      // 1. Direct cache update
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Force a rerender of the auth context
-      setForceAuthUpdate(prev => prev + 2);
+      // 2. Force multiple rerenders of the auth context
+      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
       
-      // Immediately refresh data that depends on auth status
+      // 3. Reset the entire cache for auth-related queries
+      queryClient.resetQueries({ queryKey: ["/api/user"] });
+      
+      // 4. Invalidate all auth-dependent queries
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -166,14 +194,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "/api/saved-ideas", 
             "/api/analyses", 
             "/api/posts",
-            "/api/notifications"
+            "/api/notifications",
+            "/api/user"
           ].some(key => String(queryKey).includes(key));
         }
       });
       
-      // Close any auth dialogs and redirect
-      if (location !== "/") {
-        navigate("/");
+      // 5. Force multiple refetches with increasing delays
+      const refetchDelays = [100, 500, 1000];
+      refetchDelays.forEach(delay => {
+        setTimeout(() => {
+          console.log(`Refetching user data after ${delay}ms`);
+          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+          // Also directly call refetch
+          refetch();
+        }, delay);
+      });
+      
+      // 6. In case this is a production environment, also force a page data refetch
+      if (window.location.hostname.includes('.com') || 
+          window.location.hostname.includes('.org') || 
+          window.location.hostname.includes('.app')) {
+        console.log("Production environment detected, applying aggressive refresh strategy");
+        // Force a window reload in 500ms to make sure the browser knows we're logged in
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // In development, just navigate
+        if (location !== "/") {
+          navigate("/");
+        }
       }
       
       toast({
@@ -228,13 +279,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       console.log("Logout successful, clearing user data");
       
-      // Clear user data from all caches
+      // The most important part: Aggressively update the cache with multiple methods
+      // 1. Direct cache update - set to null
       queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
+      queryClient.setQueryData(["/api/user"], null);
       
-      // Force a double rerender of the auth context for certainty
-      setForceAuthUpdate(prev => prev + 2);
+      // 2. Force multiple rerenders of the auth context
+      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
       
-      // Reset all auth-dependent queries to their initial state
+      // 3. Reset the entire cache for auth-related queries
+      queryClient.resetQueries({ queryKey: ["/api/user"] });
+      
+      // 4. Reset all auth-dependent queries to their initial state
       queryClient.resetQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -242,18 +298,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "/api/saved-ideas", 
             "/api/analyses", 
             "/api/posts",
-            "/api/notifications"
+            "/api/notifications",
+            "/api/user"
           ].some(key => String(queryKey).includes(key));
         }
       });
       
-      // Ensure the logout status is immediately available
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      }, 100);
+      // 5. Force multiple refetches with increasing delays
+      const refetchDelays = [100, 500, 1000];
+      refetchDelays.forEach(delay => {
+        setTimeout(() => {
+          console.log(`Refetching user data after ${delay}ms`);
+          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+          // Also directly call refetch
+          refetch();
+        }, delay);
+      });
       
-      // Use navigation to avoid full page reload
-      navigate("/");
+      // 6. In case this is a production environment, also force a page data refetch
+      if (window.location.hostname.includes('.com') || 
+          window.location.hostname.includes('.org') || 
+          window.location.hostname.includes('.app')) {
+        console.log("Production environment detected, applying aggressive refresh strategy");
+        // Force a window reload in 500ms to make sure the browser knows we're logged out
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // In development, just navigate
+        navigate("/");
+      }
       
       toast({
         title: "Logged out successfully",
