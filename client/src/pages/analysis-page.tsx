@@ -1037,7 +1037,7 @@ export default function AnalysisPage() {
         }
         
         // Add top investor recommendations if available
-        if (budgetAnalysisData.fundingInvestors?.investors && budgetAnalysisData.fundingInvestors.investors.length > 0) {
+        if (budgetAnalysisData.investorsData?.investors && budgetAnalysisData.investorsData.investors.length > 0) {
           pdf.setFontSize(14);
           pdf.setTextColor(0, 0, 0);
           pdf.text('Potential Investors:', 14, currentY);
@@ -1046,7 +1046,7 @@ export default function AnalysisPage() {
           pdf.setFontSize(12);
           pdf.setTextColor(80, 80, 80);
           
-          for (const investor of budgetAnalysisData.fundingInvestors.investors) {
+          for (const investor of budgetAnalysisData.investorsData.investors) {
             pdf.setTextColor(117, 81, 255); // Vision purple
             pdf.text(`${investor.name} (${investor.firm})`, 14, currentY);
             currentY += 6;
@@ -1116,16 +1116,16 @@ export default function AnalysisPage() {
 
 ### SWOT Analysis:
 **Strengths:**
-${analysisData.swotAnalysis.strengths.map(s => `- ${s}`).join('\n')}
+${analysisData.swotAnalysis.strengths.map((s: string) => `- ${s}`).join('\n')}
 
 **Weaknesses:**
-${analysisData.swotAnalysis.weaknesses.map(w => `- ${w}`).join('\n')}
+${analysisData.swotAnalysis.weaknesses.map((w: string) => `- ${w}`).join('\n')}
 
 **Opportunities:**
-${analysisData.swotAnalysis.opportunities.map(o => `- ${o}`).join('\n')}
+${analysisData.swotAnalysis.opportunities.map((o: string) => `- ${o}`).join('\n')}
 
 **Threats:**
-${analysisData.swotAnalysis.threats.map(t => `- ${t}`).join('\n')}
+${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
 *Analysis performed on ${new Date().toLocaleDateString()} for ${country} market using GENIQL AI*
       `;
@@ -1190,7 +1190,8 @@ ${analysisData.swotAnalysis.threats.map(t => `- ${t}`).join('\n')}
         businessModelStrength: analysisData.businessModelStrength,
         fundingRequired: analysisData.fundingRequired,
         swotAnalysis: analysisData.swotAnalysis,
-        ...(budgetAnalysisData?.budgetAnalysis && { budgetAnalysis: budgetAnalysisData.budgetAnalysis })
+        ...(budgetAnalysisData?.budgetAnalysis && { budgetAnalysis: budgetAnalysisData.budgetAnalysis }),
+        ...(budgetAnalysisData?.investorsData && { investorsData: budgetAnalysisData.investorsData })
       };
       
       // Make API call to save the idea
@@ -2226,8 +2227,8 @@ ${analysisData.swotAnalysis.threats.map(t => `- ${t}`).join('\n')}
                 </CardHeader>
                 <CardContent className="pt-0">
                   <FundingInvestors
-                    investors={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.investors || []}
-                    message={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.message || "Funding and investment recommendations not available"}
+                    investors={budgetAnalysisData.investorsData?.investors || []}
+                    message={budgetAnalysisData.investorsData?.message || "Funding and investment recommendations not available"}
                   />
                 </CardContent>
               </Card>
