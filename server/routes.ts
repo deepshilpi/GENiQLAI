@@ -180,11 +180,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Step 1: Get core analysis using the new step-by-step approach
         console.log("Step 1: Requesting core analysis data with step-by-step analysis");
-        const analysisResult = await Promise.race([
+        analysisResults = await Promise.race([
           analyzeStartupIdeaStepByStep(startupIdea, country, planType),
-          timeoutPromise
+          timeoutPromise as Promise<never>
         ]);
-        analysisResults = analysisResult as AnalysisResults;
         
         console.log("Core analysis completed successfully");
         
@@ -212,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             const planToExecute = await Promise.race([
               generateExecutionPlan(startupIdea, initialBudget, country),
-              planningPromise
+              planningPromise as Promise<never>
             ]);
             
             // Add planning data if available, but don't fail if this step fails
@@ -342,11 +341,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save the analysis to storage only if user is authenticated
       if (req.isAuthenticated()) {
         try {
+          // Need to convert results to JSON-safe format before saving
+          const jsonResults = JSON.parse(JSON.stringify(analysisResults));
+          
           const savedAnalysis = await storage.createAnalysis({
             userId: req.user.id,
             startupIdea,
             country,
-            results: analysisResults
+            results: jsonResults
           });
           console.log("Successfully saved analysis with ID:", savedAnalysis.id);
         } catch (saveError) {
@@ -461,7 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Race between the analysis and the timeout
       const budgetAnalysis = await Promise.race([
         generateBudgetAnalysis(startupIdea, initialBudget, country, teamInfo),
-        timeoutPromise
+        timeoutPromise as Promise<never>
       ]);
       
       // Cache the successful result
