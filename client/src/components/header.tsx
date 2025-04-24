@@ -101,10 +101,8 @@ export function Header() {
         {/* Mobile Menu */}
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         
-        {/* Auth Debugger for development */}
-        <div className="p-2 mb-16">
-          <AuthDebugger />
-        </div>
+        {/* Header spacing for fixed positioning */}
+        <div className="p-2 mb-16"></div>
 
         <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-40 vision-card shadow-lg">
           {/* Logo section with menu toggle */}
@@ -326,10 +324,8 @@ export function Header() {
   // Desktop Header
   return (
     <div>
-      {/* Auth Debugger for development */}
-      <div className="p-2 mb-4">
-        <AuthDebugger />
-      </div>
+      {/* Header spacing */}
+      <div className="p-2 mb-4"></div>
       
       <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
         <div className="flex items-center gap-3">
