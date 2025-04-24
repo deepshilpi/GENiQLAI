@@ -245,17 +245,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // For non-production environments, continue with standard login flow:
       
-      // 1. Direct cache update
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+      // 1. Direct cache update - single operation to prevent multiple renders
       queryClient.setQueryData(["/api/user"], userData);
       
-      // 2. Force multiple rerenders of the auth context
-      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
+      // 2. Set a timestamp for the auth update to force a single state change
+      setForceAuthUpdate(Date.now());
       
-      // 3. Reset the entire cache for auth-related queries
-      queryClient.resetQueries({ queryKey: ["/api/user"] });
-      
-      // 4. Invalidate all auth-dependent queries
+      // 3. Reset auth-dependent queries once
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -269,16 +265,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // 5. Force multiple refetches with increasing delays
-      const refetchDelays = [100, 500, 1000, 2000];
-      refetchDelays.forEach(delay => {
-        setTimeout(() => {
-          console.log(`Refetching user data after ${delay}ms`);
-          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-          // Also directly call refetch
-          refetch();
-        }, delay);
-      });
+      // 4. Perform a single refetch after a short delay to ensure state is stabilized
+      setTimeout(() => {
+        console.log("Refetching user data to confirm auth state");
+        refetch();
+      }, 300);
       
       // For development environment, regular navigation is fine
       // Close any auth dialogs and redirect
@@ -358,17 +349,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // For non-production environments, continue with standard login flow:
       
-      // 1. Direct cache update
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+      // 1. Direct cache update - single operation to prevent multiple renders
       queryClient.setQueryData(["/api/user"], userData);
       
-      // 2. Force multiple rerenders of the auth context
-      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
+      // 2. Set a timestamp for the auth update to force a single state change
+      setForceAuthUpdate(Date.now());
       
-      // 3. Reset the entire cache for auth-related queries
-      queryClient.resetQueries({ queryKey: ["/api/user"] });
-      
-      // 4. Invalidate all auth-dependent queries
+      // 3. Reset auth-dependent queries once
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -382,16 +369,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // 5. Force multiple refetches with increasing delays
-      const refetchDelays = [100, 500, 1000];
-      refetchDelays.forEach(delay => {
-        setTimeout(() => {
-          console.log(`Refetching user data after ${delay}ms`);
-          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-          // Also directly call refetch
-          refetch();
-        }, delay);
-      });
+      // 4. Perform a single refetch after a short delay to ensure state is stabilized
+      setTimeout(() => {
+        console.log("Refetching user data to confirm auth state");
+        refetch();
+      }, 300);
       
       // For development environment, regular navigation is fine
       if (location !== "/") {
@@ -479,18 +461,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("[Auth] Failed to clear storage auth data:", err);
       }
       
-      // The most important part: Aggressively update the cache with multiple methods
+      // Update the cache efficiently
       // 1. Direct cache update - set to null
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
       queryClient.setQueryData(["/api/user"], null);
       
-      // 2. Force multiple rerenders of the auth context
-      setForceAuthUpdate(prev => prev + 10); // Make a bigger jump to ensure state change
+      // 2. Use a timestamp for forceAuthUpdate to ensure a single state change
+      setForceAuthUpdate(Date.now());
       
-      // 3. Reset the entire cache for auth-related queries
-      queryClient.resetQueries({ queryKey: ["/api/user"] });
-      
-      // 4. Reset all auth-dependent queries to their initial state
+      // 3. Reset auth-related queries in one operation
       queryClient.resetQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
@@ -504,16 +482,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // 5. Force multiple refetches with increasing delays
-      const refetchDelays = [100, 500, 1000];
-      refetchDelays.forEach(delay => {
-        setTimeout(() => {
-          console.log(`Refetching user data after ${delay}ms`);
-          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-          // Also directly call refetch
-          refetch();
-        }, delay);
-      });
+      // 4. Perform a single refetch after a short delay to confirm logout state
+      setTimeout(() => {
+        console.log("Confirming logout state");
+        refetch();
+      }, 300);
       
       // For production environment, we need special handling
       if (isProduction) {
@@ -570,8 +543,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], updatedUser);
-      setForceAuthUpdate(prev => prev + 1);
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      setForceAuthUpdate(Date.now());
       
       toast({
         title: "Subscription updated",
@@ -604,8 +577,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return responseData.user;
     },
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["/api/user", forceAuthUpdate], updatedUser);
-      setForceAuthUpdate(prev => prev + 1);
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      setForceAuthUpdate(Date.now());
       
       toast({
         title: "Profile updated",
@@ -637,18 +610,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("[AuthProvider] Found login redirect state in sessionStorage:", sessionUsername);
         
         // We'll keep the session data for now, it will be cleared in App.tsx post-reload
-        console.log("[AuthProvider] Login redirect detected, applying aggressive cache fetch");
+        console.log("[AuthProvider] Login redirect detected, applying controlled cache fetch");
         
-        // Force multiple fetch attempts at short intervals before giving up
-        const urgentDelays = [50, 150, 300, 600, 1000];
-        urgentDelays.forEach(delay => {
-          setTimeout(() => {
-            refetchUser().then(userData => {
+        // Use a limited number of fetch attempts with proper error handling
+        let fetchAttempts = 0;
+        const maxAttempts = 3;
+        const attemptFetch = () => {
+          fetchAttempts++;
+          refetchUser()
+            .then(userData => {
               if (userData) {
-                console.log(`[AuthProvider] Urgent auth check at ${delay}ms successful, user:`, userData.username);
+                console.log(`[AuthProvider] Auth check attempt ${fetchAttempts} successful, user:`, userData.username);
+              } else if (fetchAttempts < maxAttempts) {
+                setTimeout(attemptFetch, 300 * fetchAttempts); // Increasing delays between attempts
+              }
+            })
+            .catch(err => {
+              console.error(`[AuthProvider] Auth check attempt ${fetchAttempts} failed:`, err);
+              if (fetchAttempts < maxAttempts) {
+                setTimeout(attemptFetch, 300 * fetchAttempts);
               }
             });
-          }, delay);
+        };
+        
+        // Start the first attempt
+        attemptFetch();
+      } else {
+        // For regular sessions, just do a single refetch
+        refetchUser().catch(err => {
+          console.error("[AuthProvider] Initial auth check failed:", err);
         });
       }
       
@@ -683,7 +673,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isProduction, authChecked, refetchUser]);
   
-  // Effect to periodically check auth state in Replit environment
+  // Effect to periodically check auth state in Replit environment, but with less frequency
   useEffect(() => {
     // Skip if user is already loaded
     if (user) {
@@ -691,12 +681,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    // Replit-specific: Force check user state periodically
+    // Track the number of attempts to avoid excessive API calls
+    let checkAttempts = 0;
+    const maxAttempts = 3;
+    
+    // Replit-specific: Force check user state periodically, but with a longer interval
     const checkInterval = setInterval(() => {
-      console.log("[AuthProvider] Scheduled auth check running");
-      // Only run this check if we don't have a user yet
-      if (!user) {
-        // Hard fetch for auth state
+      // Only run if we don't have a user yet AND we haven't exceeded attempt limit
+      if (!user && checkAttempts < maxAttempts) {
+        checkAttempts++;
+        console.log(`[AuthProvider] Scheduled auth check running (attempt ${checkAttempts}/${maxAttempts})`);
+        
+        // Hard fetch for auth state with a unique timestamp to prevent caching
         fetch('/api/user?_t=' + Date.now(), {
           credentials: 'include',
           headers: {
@@ -717,17 +713,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Force update with this userData
             queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
             queryClient.setQueryData(["/api/user"], userData);
-            setForceAuthUpdate(prev => prev + 1);
             
-            // Also explicitly refetch via React Query
+            // Generate a single state update instead of incrementing
+            setForceAuthUpdate(Date.now());
+            
+            // Also explicitly refetch via React Query, but only once
             refetch();
+            
+            // Clear interval since we've found a user
+            clearInterval(checkInterval);
+          } else if (checkAttempts >= maxAttempts) {
+            console.log("[AuthProvider] Max auth check attempts reached, stopping scheduled checks");
+            clearInterval(checkInterval);
           }
         })
         .catch(err => {
           console.error("[AuthProvider] Direct auth check error:", err);
+          if (checkAttempts >= maxAttempts) {
+            clearInterval(checkInterval);
+          }
         });
+      } else if (checkAttempts >= maxAttempts) {
+        console.log("[AuthProvider] Max auth check attempts reached, stopping scheduled checks");
+        clearInterval(checkInterval);
       }
-    }, 5000); // Check every 5 seconds
+    }, 10000); // Increased interval to 10 seconds to reduce API calls
     
     return () => clearInterval(checkInterval);
   }, [user, forceAuthUpdate, refetch]);
