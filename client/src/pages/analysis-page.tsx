@@ -326,7 +326,7 @@ export default function AnalysisPage() {
     "successRate",      // Success rate analysis
     "competitors",      // Competitors analysis
     "targetAudience",   // Target audience fit
-    "marketSize",       // Market size analysis
+    // "marketSize" removed as requested
     "businessModel",    // Business model strength
     "fundingRequired",  // Funding requirements
     "swotAnalysis",     // SWOT analysis
