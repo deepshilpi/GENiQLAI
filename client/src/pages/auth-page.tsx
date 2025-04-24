@@ -1,17 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Quote } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+// Entrepreneur quotes with their images for the right column
+const entrepreneurQuotes = [
+  {
+    quote: "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.",
+    author: "Steve Jobs",
+    company: "Apple",
+    image: "https://images.unsplash.com/photo-1603069989831-9fab04484d9f?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "The biggest risk is not taking any risk. In a world that's changing quickly, the only strategy that is guaranteed to fail is not taking risks.",
+    author: "Mark Zuckerberg",
+    company: "Meta",
+    image: "https://images.unsplash.com/photo-1633409361618-c73427e4e206?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "If you are not embarrassed by the first version of your product, you've launched too late.",
+    author: "Reid Hoffman",
+    company: "LinkedIn",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "The way to get started is to quit talking and begin doing.",
+    author: "Walt Disney",
+    company: "Disney",
+    image: "https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "Your most unhappy customers are your greatest source of learning.",
+    author: "Bill Gates",
+    company: "Microsoft",
+    image: "https://images.unsplash.com/photo-1558900934-4b1a983aceb6?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "It's not about ideas. It's about making ideas happen.",
+    author: "Scott Belsky",
+    company: "Behance",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop"
+  },
+  {
+    quote: "The only limit to our realization of tomorrow will be our doubts of today.",
+    author: "Franklin D. Roosevelt",
+    company: "Former US President",
+    image: "https://images.unsplash.com/photo-1531599020532-5f0d3f932623?q=80&w=1000&auto=format&fit=crop"
+  }
+];
 
 // Auth form schemas
 const loginSchema = z.object({
@@ -33,6 +79,9 @@ export default function AuthPage() {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
   const { user, loginMutation, registerMutation } = useAuth();
+  
+  // Select a random quote to display
+  const [randomQuote, setRandomQuote] = useState(entrepreneurQuotes[Math.floor(Math.random() * entrepreneurQuotes.length)]);
   
   // If user is already logged in, redirect to home
   if (user) {
@@ -302,54 +351,43 @@ export default function AuthPage() {
         </motion.div>
       </div>
 
-      {/* Right Column - Hero Image/Text (hidden on mobile) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-r from-[#190f42] to-[#150c3b] flex-col justify-center items-center p-10">
-        <div className="max-w-md">
+      {/* Right Column - Entrepreneur Quote with Background (hidden on mobile) */}
+      <div 
+        className="hidden md:flex md:w-1/2 flex-col justify-center items-center p-10 relative overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(17, 8, 60, 0.85), rgba(21, 12, 59, 0.9)), url(${randomQuote.image})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Subtle overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#190f42]/60 to-[#150c3b]/70 backdrop-blur-sm"></div>
+        
+        <div className="max-w-lg z-10 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="p-6 rounded-xl bg-black/20 backdrop-blur-md border border-purple-500/20"
           >
-            <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-200">
-              GENIQL Startup Analysis
-            </h1>
-            <p className="text-xl mb-6 text-gray-300">
-              Get comprehensive analysis for your startup ideas with our AI-powered platform.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="rounded-full bg-purple-800/30 p-2 mr-4">
-                  <svg className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-white">In-depth SWOT Analysis</h3>
-                  <p className="text-gray-400">Detailed breakdown of strengths, weaknesses, opportunities and threats</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="rounded-full bg-purple-800/30 p-2 mr-4">
-                  <svg className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-white">Market Size Estimation</h3>
-                  <p className="text-gray-400">Real-time data to understand your addressable market</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="rounded-full bg-purple-800/30 p-2 mr-4">
-                  <svg className="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-white">Funding Requirement Analysis</h3>
-                  <p className="text-gray-400">Accurate estimations for how much capital you need</p>
-                </div>
-              </div>
+            <Quote className="h-8 w-8 text-purple-400 mb-4 opacity-80" />
+            
+            <h2 className="text-2xl font-medium mb-6 text-white leading-relaxed">
+              "{randomQuote.quote}"
+            </h2>
+            
+            <div className="mt-6">
+              <p className="text-xl font-bold text-purple-300">{randomQuote.author}</p>
+              <p className="text-gray-400">{randomQuote.company}</p>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-purple-500/20">
+              <h3 className="text-xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-200">
+                GENIQL Startup Analysis
+              </h3>
+              <p className="text-gray-300 mb-4">
+                Join thousands of entrepreneurs using our AI-powered platform to validate and refine their startup ideas.
+              </p>
             </div>
           </motion.div>
         </div>
