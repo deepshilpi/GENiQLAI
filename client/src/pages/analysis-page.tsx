@@ -58,6 +58,8 @@ import { GoToMarketStrategy } from "@/components/analysis/go-to-market-strategy"
 import { LongTermVision } from "@/components/analysis/long-term-vision";
 import { TeamExecution } from "@/components/analysis/team-execution";
 import { FundingInvestors } from "@/components/analysis/funding-investors";
+import { WeatherWidget } from "@/components/weather-widget";
+import { StartupNews } from "@/components/startup-news";
 import { MarketSizeChart } from "@/components/analysis/market-size-chart";
 import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
 import { SWOTAnalysis } from "@/components/analysis/swot-analysis";
@@ -1149,6 +1151,16 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         onClose={() => setAuthDialogOpen(false)} 
         returnTo={returnTo}
       />
+      
+      {/* Weather and News section - Added to fill the blank space */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="md:col-span-1">
+          <WeatherWidget />
+        </div>
+        <div className="md:col-span-2">
+          <StartupNews />
+        </div>
+      </div>
       
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (

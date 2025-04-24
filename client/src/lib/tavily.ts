@@ -1,31 +1,31 @@
-// Interface for news articles returned from Tavily API
+import { apiRequest } from "./queryClient";
+
 export interface NewsArticle {
   title: string;
-  url: string;
   description: string;
-  date: string;
+  url: string;
   source: string;
+  date: string;
   country: string;
 }
 
-// Function to fetch news articles from backend which uses Tavily API
 export async function fetchNewsArticles(): Promise<NewsArticle[]> {
   try {
-    const response = await fetch("/api/news", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-
+    // This endpoint is authenticated but we'll handle the error gracefully
+    const response = await apiRequest("GET", "/api/news");
+    
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.json();
+      if (errorData.error === "auth_required") {
+        // For unauthenticated users, return empty array (handled in UI)
+        return [];
+      }
+      throw new Error(errorData.message || "Failed to fetch news");
     }
-
+    
     return await response.json();
   } catch (error) {
     console.error("Error fetching news articles:", error);
-    throw error;
+    return [];
   }
 }
