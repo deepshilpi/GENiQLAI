@@ -1,8 +1,8 @@
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { AuthContext } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -214,8 +214,7 @@ const itemVariants = {
 };
 
 export default function AnalysisPage() {
-  const auth = useContext(AuthContext);
-  const user = auth?.user;
+  const { user, refetchUser } = useAuth();
   const { toast } = useToast();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.search.toString());
@@ -309,6 +308,21 @@ export default function AnalysisPage() {
     }, 200);
   };
   
+  // Effect to refresh user data when component mounts
+  useEffect(() => {
+    // Refresh user data when analysis page loads
+    refetchUser();
+    
+    // Set an interval to periodically refresh user data
+    const refreshInterval = setInterval(() => {
+      refetchUser();
+    }, 5000); // Check every 5 seconds
+    
+    return () => {
+      clearInterval(refreshInterval);
+    };
+  }, [refetchUser]);
+
   // Effect for progressive loading of blocks
   useEffect(() => {
     if (phase === "results" && analysisData) {
