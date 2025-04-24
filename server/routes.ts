@@ -892,11 +892,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get news articles (No authentication required)
   app.get("/api/news", async (req, res) => {
     try {
-      const country = detectCountryFromIP(req.ip || '');
+      console.log("Received request for startup news");
+      
+      // Detect user's country from IP or use India as default
+      const country = detectCountryFromIP(req.ip || '') || "India";
+      console.log(`Detected country: ${country}, fetching relevant startup news`);
+      
+      // Use OpenAI instead of Tavily as per user request
+      const startTime = Date.now();
       const articles = await searchStartupNews(country);
+      const elapsedTime = Date.now() - startTime;
+      
+      console.log(`Generated ${articles.length} news articles using OpenAI in ${elapsedTime}ms`);
       return res.status(200).json(articles);
     } catch (error) {
-      console.error("Error searching startup news:", error);
+      console.error("Error generating startup news:", error);
       return res.status(200).json([]); // Return empty array to gracefully handle API issues
     }
   });

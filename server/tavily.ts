@@ -1,54 +1,84 @@
 import { NewsArticle } from "../client/src/lib/tavily";
+import OpenAI from "openai";
 
-// Function to search for news articles about successful startups in other countries
+// Create OpenAI client
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
+
+// Function to search for news articles about successful startups in other countries using OpenAI
 export async function searchStartupNews(userCountry: string): Promise<NewsArticle[]> {
   try {
-    const apiKey = process.env.TAVILY_API_KEY;
-    if (!apiKey) {
-      console.error("Missing TAVILY_API_KEY environment variable");
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("Missing OPENAI_API_KEY environment variable");
       return getDummyNewsArticles(userCountry);
     }
-    const url = "https://api.tavily.com/search";
+
+    console.log("Generating startup news using OpenAI...");
+
+    // Craft a detailed prompt for GPT to generate realistic startup news
+    const systemPrompt = `You are an expert on global startups and business intelligence. Generate 3 realistic news articles about successful startups outside of ${userCountry} that could expand to ${userCountry} or be inspirational for entrepreneurs in ${userCountry}.`;
     
-    const query = `successful startups outside of ${userCountry} that could expand to ${userCountry}`;
-    
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": apiKey
-      },
-      body: JSON.stringify({
-        query: query,
-        search_depth: "advanced",
-        include_domains: ["techcrunch.com", "forbes.com", "entrepreneur.com", "inc.com", "bloomberg.com"],
-        include_answer: false,
-        include_images: false,
-        include_raw_content: false,
-        max_results: 5,
-        published_time: "30d" // Last 30 days
-      })
+    const userPrompt = `Create 3 very specific, detailed and realistic news articles about startups outside ${userCountry} that are growing rapidly. Each article should have a compelling title, detailed description (150-200 words), realistic source (like TechCrunch, Forbes, etc.), a URL, a realistic publication date within the last 30 days, and country of origin.
+
+The articles should:
+1. Focus on innovative startups in different industries 
+2. Mention real growth metrics and funding amounts
+3. Include realistic founder names and company details
+4. Have plausible expansion plans
+5. Use domain geniql.com in URLs
+6. Specifically focus on startups from different countries excluding ${userCountry}
+7. Include realistic dates in the last 30 days
+
+Return your response as a properly formatted JSON array of 3 articles with these exact fields:
+[{
+  "title": "string",
+  "description": "string",
+  "url": "string with geniql.com domain",
+  "source": "string",
+  "date": "ISO date string within last 30 days",
+  "country": "string (not ${userCountry})"
+}]`;
+
+    // Send request to OpenAI
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7, // Somewhat creative but still factual
+      max_tokens: 1500,
     });
+
+    // Parse the response
+    const content = response.choices[0].message.content || "";
     
-    if (!response.ok) {
-      throw new Error(`Tavily API error: ${response.statusText}`);
+    // Sometimes GPT wraps the response in ```json``` code blocks, so handle that
+    const jsonContent = content.replace(/```json|```/g, "").trim();
+    
+    try {
+      const parsedData = JSON.parse(jsonContent);
+      
+      // Check if we got an array of articles
+      if (Array.isArray(parsedData)) {
+        return parsedData;
+      } else if (parsedData.articles && Array.isArray(parsedData.articles)) {
+        return parsedData.articles;
+      } else {
+        // If OpenAI didn't return the expected format, use our fallback
+        console.error("OpenAI response doesn't contain articles array:", parsedData);
+        return getDummyNewsArticles(userCountry);
+      }
+    } catch (parseError) {
+      console.error("Failed to parse OpenAI response:", parseError);
+      console.log("Raw response:", content);
+      return getDummyNewsArticles(userCountry);
     }
-    
-    const data = await response.json();
-    
-    // Transform Tavily results to our NewsArticle format
-    const articles: NewsArticle[] = data.results.map((result: any) => ({
-      title: result.title,
-      url: result.url,
-      description: result.content.substring(0, 200) + "...",
-      date: result.published_date || new Date().toISOString(),
-      source: result.source || getDomainFromUrl(result.url),
-      country: detectCountryFromArticle(result.content, userCountry)
-    }));
-    
-    return articles;
   } catch (error) {
-    console.error("Error searching startup news:", error);
+    console.error("Error generating startup news with OpenAI:", error);
     
     // For demo purposes, return dummy data if API call fails
     if (process.env.NODE_ENV !== "production") {
