@@ -36,7 +36,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       </main>
       
       {/* Footer always shown at bottom */}
-      <Footer />
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 }

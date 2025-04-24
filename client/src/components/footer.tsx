@@ -1,22 +1,18 @@
-import { Link } from "wouter";
+import { Heart } from "lucide-react";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-  
   return (
-    <footer className="w-full border-t border-vision-purple-200/30 mt-auto py-4 px-4 text-white/70 text-sm bg-gradient-to-r from-vision-purple-900/50 to-vision-purple-800/50 backdrop-blur-sm shadow-lg">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
-        <div className="mb-2 md:mb-0 font-semibold">
-          &copy; {currentYear} Geniql.com
-        </div>
-        <div className="flex space-x-6">
-          <Link href="/terms">
-            <span className="hover:text-white hover:underline transition-colors cursor-pointer">Terms of Service</span>
-          </Link>
-          <Link href="/privacy">
-            <span className="hover:text-white hover:underline transition-colors cursor-pointer">Privacy Policy</span>
-          </Link>
-        </div>
+    <footer className="w-full bg-vision-dark/70 backdrop-blur-md border-t border-vision-purple-200/10 py-3 px-4 flex flex-col sm:flex-row items-center justify-between text-white/60 text-xs">
+      <div className="mb-2 sm:mb-0">
+        © 2025 Geniql.com • All rights reserved
+      </div>
+      
+      <div className="flex items-center space-x-4">
+        <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+        <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+        <span className="flex items-center">
+          Made with <Heart className="h-3 w-3 mx-1 text-red-400" /> for founders
+        </span>
       </div>
     </footer>
   );
