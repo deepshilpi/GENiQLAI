@@ -514,23 +514,23 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
   };
 
   return (
-    <div className="flex h-screen w-full max-w-full overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-vision-dark">
       <Sidebar />
       
       <div className="flex-1 flex flex-col w-full max-w-full transition-all duration-300">
         <Header />
         
         <main className="overflow-y-auto w-full h-full">
-          <div className="max-w-screen-sm mx-auto">
+          <div className="max-w-screen-md mx-auto">
             {/* Header Bar */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-between items-center backdrop-blur-sm bg-opacity-80 dark:bg-opacity-80">
-              <h1 className="text-xl font-semibold dark:text-white">Startup Community</h1>
+            <div className="sticky top-0 z-10 bg-vision-card/90 backdrop-blur-xl border-b border-vision-purple-200/10 px-4 py-3 flex justify-between items-center">
+              <h1 className="text-xl font-semibold text-white">Startup Community</h1>
               
               <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full"
+                  className="rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
                   onClick={() => {
                     setSearchQuery("");
                     setFilteredPosts(null);
@@ -538,26 +538,30 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     refetch();
                   }}
                 >
-                  <Sparkles className="h-5 w-5 text-primary" />
+                  <Sparkles className="h-5 w-5" />
                 </Button>
                 
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
+                    >
                       <Search className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="top" className="max-w-screen-sm mx-auto">
+                  <SheetContent side="top" className="max-w-screen-md mx-auto bg-vision-card/90 backdrop-blur-xl border-vision-purple-200/10 text-white">
                     <SheetHeader>
-                      <SheetTitle>Search</SheetTitle>
-                      <SheetDescription>
+                      <SheetTitle className="text-white">Search</SheetTitle>
+                      <SheetDescription className="text-vision-purple-300">
                         Find startup ideas, founders, and topics
                       </SheetDescription>
                     </SheetHeader>
                     <div className="py-4">
                       <div className="relative">
                         <Input
-                          className="pr-10"
+                          className="pr-10 bg-vision-card border-vision-purple-200/20 focus:border-vision-purple-500"
                           placeholder="Search..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
@@ -565,7 +569,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-vision-purple-300 hover:text-white"
                           onClick={() => setSearchQuery("")}
                         >
                           <XCircle className="h-4 w-4" />
@@ -575,6 +579,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       <div className="flex gap-2 mt-4">
                         <Button 
                           variant={searchType === "posts" ? "default" : "outline"}
+                          className={searchType === "posts" ? "bg-vision-primary-gradient text-white" : 
+                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("posts")}
                         >
@@ -582,6 +588,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         </Button>
                         <Button 
                           variant={searchType === "users" ? "default" : "outline"}
+                          className={searchType === "users" ? "bg-vision-primary-gradient text-white" : 
+                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("users")}
                         >
@@ -589,6 +597,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         </Button>
                         <Button 
                           variant={searchType === "tags" ? "default" : "outline"}
+                          className={searchType === "tags" ? "bg-vision-primary-gradient text-white" : 
+                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("tags")}
                         >
@@ -603,11 +613,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
             
             {/* Back button for single post view */}
             {postId && (
-              <div className="border-b border-gray-200 dark:border-gray-800">
+              <div className="border-b border-vision-purple-200/10 bg-vision-card/70">
                 <Button
                   variant="ghost"
                   onClick={() => navigate('/community/threads')}
-                  className="flex items-center gap-2 px-4 py-2"
+                  className="flex items-center gap-2 px-4 py-2 text-vision-purple-300 hover:text-white"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back to all posts</span>
@@ -617,25 +627,25 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
             
             {/* Feed Tabs - only shown when not viewing a single post */}
             {!postId && (
-              <Tabs defaultValue="latest" className="bg-white dark:bg-gray-950" onValueChange={handleTabChange}>
-                <TabsList className="w-full grid grid-cols-3 rounded-none bg-transparent h-12 border-b border-gray-200 dark:border-gray-800">
+              <Tabs defaultValue="latest" className="bg-vision-dark" onValueChange={handleTabChange}>
+                <TabsList className="w-full grid grid-cols-3 rounded-none bg-vision-card/90 backdrop-blur-xl h-12 border-b border-vision-purple-200/10">
                   <TabsTrigger 
                     value="latest" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
                   >
                     <Clock className="h-4 w-4 mr-2" />
                     Latest
                   </TabsTrigger>
                   <TabsTrigger 
                     value="trending" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
                   >
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Trending
                   </TabsTrigger>
                   <TabsTrigger 
                     value="following" 
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none"
+                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
                   >
                     <Users className="h-4 w-4 mr-2" />
                     Following
@@ -645,14 +655,15 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                 <TabsContent value="latest" className="mt-0 p-0">
                   {/* Display search results or normal feed */}
                   {searchQuery && (
-                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
+                    <div className="px-4 py-2 border-b border-vision-purple-200/10 bg-vision-card/70">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-500">
-                          Results for <span className="font-medium text-gray-700 dark:text-gray-300">"{searchQuery}"</span> in {searchType}
+                        <p className="text-sm text-vision-purple-300">
+                          Results for <span className="font-medium text-white">"{searchQuery}"</span> in {searchType}
                         </p>
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
                           onClick={() => {
                             setSearchQuery("");
                             setFilteredPosts(null);
@@ -669,14 +680,14 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     <>
                       {isSinglePostLoading ? (
                         // Loading skeleton for single post
-                        <div className="border-b border-gray-200 dark:border-gray-800 p-4">
+                        <div className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
                           <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
                             <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
                             </div>
                           </div>
                         </div>
@@ -693,10 +704,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           isDetailView={true}
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-12">
-                          <p className="text-gray-500 mb-4">Post not found</p>
+                        <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                          <p className="text-vision-purple-300 mb-4">Post not found</p>
                           <Button 
                             variant="outline"
+                            className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                             onClick={() => navigate('/community/threads')}
                           >
                             Back to community
@@ -713,21 +725,21 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         // Loading skeletons for initial load
                         <>
                           {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                            <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
                               <div className="flex items-start gap-3">
-                                <Skeleton className="h-10 w-10 rounded-full" />
+                                <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
                                 <div className="flex-1 space-y-2">
-                                  <Skeleton className="h-4 w-32" />
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-full" />
-                                  <Skeleton className="h-4 w-3/4" />
+                                  <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
+                                  <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                                  <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                                  <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
                                 </div>
                               </div>
                             </div>
                           ))}
                         </>
                       ) : posts.length > 0 ? (
-                        <div>
+                        <div className="bg-vision-dark">
                           <AnimatePresence initial={false}>
                             {posts.map((post) => (
                               <ThreadsStylePost
@@ -748,24 +760,24 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           {hasMore && (
                             <div 
                               ref={loadMoreRef} 
-                              className="py-4 flex justify-center"
+                              className="py-4 flex justify-center bg-vision-card/70"
                             >
                               {isFetching && page > 1 ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
                               ) : (
-                                <p className="text-sm text-gray-500">Loading more posts...</p>
+                                <p className="text-sm text-vision-purple-300">Loading more posts...</p>
                               )}
                             </div>
                           )}
                           
                           {/* End of feed indicator */}
                           {!hasMore && posts.length > 0 && (
-                            <div className="py-8 text-center">
-                              <p className="text-sm text-gray-500">You've seen all posts</p>
+                            <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
+                              <p className="text-sm text-vision-purple-300">You've seen all posts</p>
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="mt-2"
+                                className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                                 onClick={() => {
                                   window.scrollTo(0, 0);
                                   setPage(1);
@@ -779,12 +791,13 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           )}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-12">
+                        <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
                           {searchQuery ? (
                             <>
-                              <p className="text-gray-500 mb-4">No results found for "{searchQuery}"</p>
+                              <p className="text-vision-purple-300 mb-4">No results found for "{searchQuery}"</p>
                               <Button
                                 variant="outline"
+                                className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                                 onClick={() => {
                                   setSearchQuery("");
                                   setFilteredPosts(null);
@@ -795,8 +808,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             </>
                           ) : (
                             <>
-                              <p className="text-gray-500 mb-4">No posts yet. Be the first to share an idea!</p>
-                              <Button onClick={handleNewPost}>
+                              <p className="text-vision-purple-300 mb-4">No posts yet. Be the first to share an idea!</p>
+                              <Button 
+                                className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                                onClick={handleNewPost}
+                              >
                                 <PlusSquare className="h-4 w-4 mr-2" />
                                 Create Post
                               </Button>
@@ -815,21 +831,21 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     // Loading skeletons
                     <>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                        <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
                           <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
                             <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
                             </div>
                           </div>
                         </div>
                       ))}
                     </>
                   ) : posts.length > 0 ? (
-                    <div>
+                    <div className="bg-vision-dark">
                       <AnimatePresence initial={false}>
                         {posts.map((post) => (
                           <ThreadsStylePost
@@ -850,24 +866,24 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       {hasMore && (
                         <div 
                           ref={loadMoreRef} 
-                          className="py-4 flex justify-center"
+                          className="py-4 flex justify-center bg-vision-card/70"
                         >
                           {isFetching && page > 1 ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                            <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
                           ) : (
-                            <p className="text-sm text-gray-500">Loading more posts...</p>
+                            <p className="text-sm text-vision-purple-300">Loading more posts...</p>
                           )}
                         </div>
                       )}
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center">
-                          <p className="text-sm text-gray-500">You've seen all trending posts</p>
+                        <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
+                          <p className="text-sm text-vision-purple-300">You've seen all trending posts</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="mt-2"
+                            className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                             onClick={() => {
                               window.scrollTo(0, 0);
                               setPage(1);
@@ -881,9 +897,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-gray-500 mb-4">No trending posts right now</p>
-                      <Button onClick={handleNewPost}>
+                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                      <p className="text-vision-purple-300 mb-4">No trending posts right now</p>
+                      <Button 
+                        className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                        onClick={handleNewPost}
+                      >
                         <PlusSquare className="h-4 w-4 mr-2" />
                         Create the first trending post
                       </Button>
@@ -893,9 +912,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                 
                 <TabsContent value="following" className="mt-0 p-0">
                   {!user ? (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-gray-500 mb-4">Sign in to see posts from people you follow</p>
-                      <Button onClick={() => navigate('/auth')}>
+                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                      <p className="text-vision-purple-300 mb-4">Sign in to see posts from people you follow</p>
+                      <Button 
+                        className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                        onClick={() => navigate('/auth')}
+                      >
                         Sign In
                       </Button>
                     </div>
@@ -903,21 +925,21 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     // Loading skeletons
                     <>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border-b border-gray-200 dark:border-gray-800 p-4">
+                        <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
                           <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
                             <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-full" />
-                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
+                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
                             </div>
                           </div>
                         </div>
                       ))}
                     </>
                   ) : posts.length > 0 ? (
-                    <div>
+                    <div className="bg-vision-dark">
                       <AnimatePresence initial={false}>
                         {posts.map((post) => (
                           <ThreadsStylePost
@@ -938,24 +960,24 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       {hasMore && (
                         <div 
                           ref={loadMoreRef} 
-                          className="py-4 flex justify-center"
+                          className="py-4 flex justify-center bg-vision-card/70"
                         >
                           {isFetching && page > 1 ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                            <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
                           ) : (
-                            <p className="text-sm text-gray-500">Loading more posts...</p>
+                            <p className="text-sm text-vision-purple-300">Loading more posts...</p>
                           )}
                         </div>
                       )}
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center">
-                          <p className="text-sm text-gray-500">You've seen all posts from people you follow</p>
+                        <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
+                          <p className="text-sm text-vision-purple-300">You've seen all posts from people you follow</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="mt-2"
+                            className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                             onClick={() => {
                               window.scrollTo(0, 0);
                               setPage(1);
@@ -969,10 +991,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12">
-                      <p className="text-gray-500 mb-4">You're not following anyone yet or they haven't posted</p>
+                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                      <p className="text-vision-purple-300 mb-4">You're not following anyone yet or they haven't posted</p>
                       <Button
                         variant="outline"
+                        className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
                         onClick={() => setActiveTab('latest')}
                       >
                         Discover people to follow
