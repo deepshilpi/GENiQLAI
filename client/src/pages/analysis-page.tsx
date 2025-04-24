@@ -1152,95 +1152,97 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         returnTo={returnTo}
       />
       
-      {/* Weather and News section - Added to fill the blank space */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="md:col-span-1">
-          <WeatherWidget />
-        </div>
-        <div className="md:col-span-2">
-          <StartupNews />
-        </div>
-      </div>
-      
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (
-        <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">What's in your mind?</CardTitle>
-            <CardDescription className="text-white/70">
-              Share your startup idea for comprehensive AI-powered analysis
+        <>
+          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+            <CardHeader>
+              <CardTitle className="text-xl text-white">What's in your mind?</CardTitle>
+              <CardDescription className="text-white/70">
+                Share your startup idea for comprehensive AI-powered analysis
 
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...ideaForm}>
-              <form onSubmit={ideaForm.handleSubmit(onIdeaSubmit)} className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormField
-                    control={ideaForm.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Target Market</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
-                              <SelectValue placeholder="Select a country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
-                            {countries.map((country) => (
-                              <SelectItem 
-                                key={country.value} 
-                                value={country.value}
-                                className="text-white hover:bg-vision-purple-200/20"
-                              >
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...ideaForm}>
+                <form onSubmit={ideaForm.handleSubmit(onIdeaSubmit)} className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <FormField
+                      control={ideaForm.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Target Market</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
+                                <SelectValue placeholder="Select a country" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
+                              {countries.map((country) => (
+                                <SelectItem 
+                                  key={country.value} 
+                                  value={country.value}
+                                  className="text-white hover:bg-vision-purple-200/20"
+                                >
+                                  {country.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+
+                  </div>
                   
-
-                </div>
-                
-                <div className="mt-4">
-                  <FormField
-                    control={ideaForm.control}
-                    name="idea"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Your Startup Idea</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe your startup idea in detail..."
-                            className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
-                >
-                  Analyze My Idea
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                  <div className="mt-4">
+                    <FormField
+                      control={ideaForm.control}
+                      name="idea"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Your Startup Idea</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe your startup idea in detail..."
+                              className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
+                  >
+                    Analyze My Idea
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+          
+          {/* Weather Widget and News section - Moved below the prompt box as requested */}
+          <div className="mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+              <WeatherWidget />
+            </div>
+            <div className="mt-6">
+              <StartupNews />
+            </div>
+          </div>
+        </>
       )}
       
       {/* LOADING STATE */}
