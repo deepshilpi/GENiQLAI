@@ -77,11 +77,11 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message, c
               {/* Label in center */}
               <text 
                 x="50" 
-                y="50" 
+                y="45" 
                 dominantBaseline="middle" 
                 textAnchor="middle" 
-                className={`fill-white text-2xl font-bold ${colorClass}`}
-                fontSize="18px"
+                className={`fill-white font-bold ${colorClass}`}
+                fontSize="28px"
               >
                 {percentage}%
               </text>
@@ -89,11 +89,11 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message, c
               {/* Rating text below percentage */}
               <text 
                 x="50" 
-                y="60" 
+                y="65" 
                 dominantBaseline="middle" 
                 textAnchor="middle" 
-                className="fill-white/80 text-xs"
-                fontSize="8px"
+                className="fill-white/80"
+                fontSize="10px"
               >
                 {successLevel === "high" ? "HIGH POTENTIAL" : 
                  successLevel === "medium" ? "MODERATE POTENTIAL" : 
@@ -112,17 +112,7 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message, c
             </div>
           </div>
           
-          {/* Success level indicator */}
-          <div className={`mt-4 flex items-center justify-center gap-2 rounded-lg py-2 px-3 bg-gradient-to-r ${bgColorClass} ${borderColorClass} border w-fit`}>
-            {successLevel === "high" ? <ThumbsUp className="w-4 h-4" /> : 
-             successLevel === "medium" ? <AlertTriangle className="w-4 h-4" /> : 
-             <ThumbsDown className="w-4 h-4" />}
-            <span className="text-xs font-medium">
-              {successLevel === "high" ? "High Potential" : 
-               successLevel === "medium" ? "Moderate Potential" : 
-               "Challenging"}
-            </span>
-          </div>
+          {/* Removing duplicate indicator since it's already in the circle */}
         </CardContent>
       </Card>
       

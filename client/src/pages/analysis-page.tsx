@@ -1272,35 +1272,7 @@ export default function AnalysisPage() {
               </motion.div>
             )}
             
-            {/* 4. Market Size */}
-            {analysisData.marketSize && visibleBlocks.includes("marketSize") && (
-              <motion.div 
-                variants={itemVariants} 
-                className="md:col-span-2 lg:col-span-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Card className="overflow-hidden border-0 bg-gradient-to-br from-vision-purple-200/30 to-vision-purple-200/5 backdrop-blur-md shadow-lg shadow-vision-purple-200/10 hover:shadow-vision-purple-200/20 transition h-full">
-                  <CardHeader className="py-5 pb-2 border-b border-vision-purple-200/10">
-                    <CardTitle className="flex items-center text-lg text-white">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3">
-                        <PieChart className="w-5 h-5 text-purple-400" />
-                      </div>
-                      Market Size Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 sm:p-5">
-                    <MarketSizeChart 
-                      segments={analysisData.marketSize.segments}
-                      totalSize={analysisData.marketSize.totalSize}
-                      message={analysisData.marketSize.message}
-                      country={ideaForm.getValues().country || "United States"}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+            {/* Market Size Analysis block has been removed as requested */}
             
             {/* 5. Business Model Strength */}
             {analysisData.businessModelStrength && visibleBlocks.includes("businessModel") && (
