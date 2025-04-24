@@ -409,6 +409,10 @@ export default function AnalysisPage() {
         country: values.country || "Global"
       });
       
+      // Add timeout handling with AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
       const response = await fetch("/api/analyze", {
         method: "POST", 
         headers: {
@@ -418,16 +422,52 @@ export default function AnalysisPage() {
           startupIdea: values.idea,
           country: values.country || "Global",
         }),
+        signal: controller.signal
       });
+      
+      // Clear timeout since we got a response
+      clearTimeout(timeoutId);
       
       console.log("Analysis response status:", response.status);
       
-      const data = await response.json();
-      console.log("Analysis response data keys:", Object.keys(data));
-      
       if (!response.ok) {
-        console.error("Error response from server:", data);
-        throw new Error(data.message || "Failed to analyze startup idea");
+        // Handle different error status codes appropriately
+        let errorMessage = "Failed to analyze startup idea";
+        
+        if (response.status === 502 || response.status === 504) {
+          errorMessage = "The analysis server is taking too long to respond. Please try a shorter description or try again later.";
+        } else if (response.status === 429) {
+          errorMessage = "Too many requests. Please wait a few minutes before trying again.";
+        } else if (response.status === 400) {
+          errorMessage = "Invalid request. Please check your startup idea description.";
+        } else if (response.status === 503) {
+          errorMessage = "AI analysis service is temporarily unavailable. Please try again later.";
+        }
+        
+        // Try to get more detailed error message from response
+        try {
+          const errorData = await response.json();
+          console.error("Error response from server:", errorData);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          console.error("Could not parse error response:", parseError);
+          // Fallback to status text if we can't parse the JSON
+          errorMessage = response.statusText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+      }
+      
+      // Parse the response data
+      let data;
+      try {
+        data = await response.json();
+        console.log("Analysis response data keys:", Object.keys(data));
+      } catch (parseError) {
+        console.error("Error parsing response JSON:", parseError);
+        throw new Error("Received invalid data from server. Please try again.");
       }
       
       // Set remaining free analyses for anonymous users
@@ -452,9 +492,18 @@ export default function AnalysisPage() {
         clearInterval(progressTimerRef.current);
       }
       
+      // Special handling for timeout/abort errors
+      let errorTitle = "Analysis Failed";
+      let errorMessage = err instanceof Error ? err.message : "Failed to analyze your startup idea. Please try again.";
+      
+      if (err.name === 'AbortError') {
+        errorTitle = "Analysis Timeout";
+        errorMessage = "The analysis is taking too long to complete. Please try again with a shorter description.";
+      }
+      
       toast({
-        title: "Analysis Failed",
-        description: err instanceof Error ? err.message : "Failed to analyze your startup idea. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     }
