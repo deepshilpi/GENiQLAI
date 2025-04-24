@@ -357,10 +357,23 @@ export default function CommunityPage() {
                         post={post}
                         onVote={handleVote}
                         onReact={(postId, reactionType) => {
-                          toast({
-                            title: `${reactionType} reaction added`,
-                            description: "Your reaction has been added to the post"
-                          });
+                          // Call the API to add reaction
+                          apiRequest("POST", `/api/posts/${postId}/react`, { reactionType })
+                            .then(() => {
+                              // Immediately invalidate posts to update UI with the latest data
+                              queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+                              toast({
+                                title: `${reactionType} reaction added`,
+                                description: "Your reaction has been added to the post"
+                              });
+                            })
+                            .catch(error => {
+                              toast({
+                                title: "Error adding reaction",
+                                description: error.message || "Failed to add reaction",
+                                variant: "destructive"
+                              });
+                            });
                         }}
                         onComment={(postId, comment) => {
                           toast({

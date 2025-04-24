@@ -59,31 +59,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Give the UI time to update before redirecting
-      setTimeout(() => {
-        // Only invalidate specific queries that depend on auth status
-        // instead of invalidating everything
-        queryClient.invalidateQueries({ 
-          predicate: (query) => {
-            const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-            // Only invalidate certain endpoints that depend on auth
-            return [
-              "/api/saved-ideas", 
-              "/api/analyses", 
-              "/api/posts",
-              "/api/notifications"
-            ].some(key => String(queryKey).includes(key));
-          }
-        });
-        
-        // Redirect to home page
-        navigate("/");
-        
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${userData.username}!`,
-        });
-      }, 300); // Reduced from 500ms to 300ms
+      // Immediately update the UI without delay
+      // Instantly invalidate specific queries that depend on auth status
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
+          // Only invalidate certain endpoints that depend on auth
+          return [
+            "/api/saved-ideas", 
+            "/api/analyses", 
+            "/api/posts",
+            "/api/notifications"
+          ].some(key => String(queryKey).includes(key));
+        }
+      });
+      
+      // Immediately redirect to home page without delay
+      navigate("/");
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${userData.username}!`,
+      });
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -111,31 +108,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Give the UI time to update before redirecting
-      setTimeout(() => {
-        // Only invalidate specific queries that depend on auth status
-        // instead of invalidating everything
-        queryClient.invalidateQueries({ 
-          predicate: (query) => {
-            const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-            // Only invalidate certain endpoints that depend on auth
-            return [
-              "/api/saved-ideas", 
-              "/api/analyses", 
-              "/api/posts",
-              "/api/notifications"
-            ].some(key => String(queryKey).includes(key));
-          }
-        });
-        
-        // Redirect to home page
-        navigate("/");
-        
-        toast({
-          title: "Registration successful",
-          description: `Welcome to GENIQL, ${userData.username}!`,
-        });
-      }, 300); // Reduced from 500ms to 300ms
+      // Immediately update the UI without delay
+      // Instantly invalidate specific queries that depend on auth status  
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
+          // Only invalidate certain endpoints that depend on auth
+          return [
+            "/api/saved-ideas", 
+            "/api/analyses", 
+            "/api/posts",
+            "/api/notifications"
+          ].some(key => String(queryKey).includes(key));
+        }
+      });
+      
+      // Immediately redirect to home page without delay
+      navigate("/");
+      
+      toast({
+        title: "Registration successful",
+        description: `Welcome to GENIQL, ${userData.username}!`,
+      });
     },
     onError: (error: Error) => {
       console.error("Registration error:", error);
