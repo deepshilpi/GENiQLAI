@@ -33,6 +33,8 @@ export async function analyzeStartupIdea(
     
     FOCUS ON SPEED AND EFFICIENCY while maintaining high quality and detail. Your analysis must be thorough but produced quickly.
     
+    IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.
+    
     Your analysis MUST contain the following 8 interactive blocks in this exact JSON structure:
     
     1. successRate: Object with {
@@ -306,7 +308,7 @@ export async function generateBudgetAnalysis(
           
           Make sure all monetary values are realistic for the startup type and scale in ${country}.
           All data should be detailed, specific, and actionable.
-          Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`
+          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.`
         },
         {
           role: "user",
@@ -388,7 +390,7 @@ export async function generateExecutionPlan(
           2. roadmap: Array of objects, each with step (string), timeframe (string), and cost (number)
           
           Format your response as a JSON object that would fit the 'planningToExecute' field in a larger analysis structure.
-          Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`
+          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.`
         },
         {
           role: "user",
@@ -467,7 +469,7 @@ export async function findInvestors(
           - crunchbaseLink: fictional but realistic looking Crunchbase URL (string)
           
           Format your response as a JSON object that would fit the 'findingInvestors' field in a larger analysis structure.
-          Return ONLY a valid JSON object without any explanations, text, or markdown before or after.
+          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.
           
           IMPORTANT DISCLAIMER: The investor information is AI-generated and for illustration purposes only. Always verify manually before contacting.`
         },
