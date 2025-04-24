@@ -111,46 +111,71 @@ export async function analyzeStartupIdeaStepByStep(
       throw new Error("OpenAI API key is not configured");
     }
     
+    // Test the API key with a simple call
+    try {
+      await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: "Test" }],
+        max_tokens: 5
+      });
+    } catch (apiError: any) {
+      console.error("OpenAI API key validation failed:", apiError.message);
+      
+      if (apiError.status === 401) {
+        throw new Error("Invalid OpenAI API key. Please update your API key in the settings.");
+      }
+      
+      throw new Error(`OpenAI API error: ${apiError.message}`);
+    }
+    
     // Determine which blocks to include based on the user's plan
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
     // Initialize complete result structure
     const analysisResults: AnalysisResults = {
       successRate: {
-        percentage: 0,
-        goodPoints: [],
-        badPoints: [],
-        message: ""
+        percentage: 50,
+        goodPoints: [
+          "Technical feasibility is within current capabilities",
+          "Addresses a meaningful problem",
+          "Market need exists and can be verified"
+        ],
+        badPoints: [
+          "Competitive landscape may be challenging",
+          "User acquisition can be expensive",
+          "Regulatory considerations should be evaluated" 
+        ],
+        message: "Your startup idea shows potential but requires further analysis. We'll evaluate multiple aspects to provide a comprehensive assessment."
       },
       competitors: {
         competitors: [],
-        message: ""
+        message: "Analyzing competitors in your market..."
       },
       targetAudienceFit: {
         segments: [],
-        message: ""
+        message: "Identifying optimal target audience segments..."
       },
       marketSize: {
         segments: [],
         totalSize: 0,
         currency: country === "Global" ? "USD" : getCountryCurrency(country),
-        message: ""
+        message: "Calculating addressable market size..."
       },
       businessModelStrength: {
         overall: 0,
         components: [{
-          name: "Initial Component",
-          score: 0,
-          description: "Placeholder component"
+          name: "Initial Assessment",
+          score: 50,
+          description: "Analyzing business model components..."
         }],
-        message: ""
+        message: "Evaluating your business model structure..."
       },
       fundingRequired: {
         total: 0,
         currency: country === "Global" ? "USD" : getCountryCurrency(country),
         breakdown: [],
         fundingStages: [],
-        message: ""
+        message: "Estimating required investment and funding stages..."
       },
       swotAnalysis: {
         strengths: [],
@@ -161,7 +186,7 @@ export async function analyzeStartupIdeaStepByStep(
       },
       previousFailedExecutions: {
         failures: [],
-        message: ""
+        message: "Researching similar past ventures..."
       },
       relatedIdeas: [],
       meta: {

@@ -350,6 +350,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Your startup idea could not be analyzed. Please revise your content and try again.",
           error: "content_policy" 
         });
+      } else if (errorMessage.includes("Invalid OpenAI API key") || errorMessage.includes("Incorrect API key provided")) {
+        return res.status(503).json({ 
+          message: "AI analysis is currently unavailable due to API key validation issues. Please try again later or contact support.",
+          error: "invalid_api_key" 
+        });
       }
       
       return res.status(500).json({ 
