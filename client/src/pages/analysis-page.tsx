@@ -391,24 +391,42 @@ export default function AnalysisPage() {
   
   // Handle startup idea submission
   const onIdeaSubmit = async (values: z.infer<typeof startupIdeaSchema>) => {
+    if (!values.idea || values.idea.trim() === "") {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your startup idea description",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setPhase("loading");
     startProgressiveLoading(); // Start the progressive loading animation
     
     try {
-      const response = await apiRequest("POST", "/api/analyze", {
+      console.log("Submitting idea for analysis:", {
         startupIdea: values.idea,
-        country: values.country || undefined,
+        country: values.country || "Global"
       });
       
-      const data = await response.json();
+      const response = await fetch("/api/analyze", {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          startupIdea: values.idea,
+          country: values.country || "Global",
+        }),
+      });
       
-      // We now allow unlimited analyses for all users
-      if (response.status === 403) {
-        console.log("Processing analysis request...");
-        // Just continue with the analysis
-      }
+      console.log("Analysis response status:", response.status);
+      
+      const data = await response.json();
+      console.log("Analysis response data keys:", Object.keys(data));
       
       if (!response.ok) {
+        console.error("Error response from server:", data);
         throw new Error(data.message || "Failed to analyze startup idea");
       }
       
@@ -422,6 +440,7 @@ export default function AnalysisPage() {
         setRelatedIdeasData(data.relatedIdeas);
       }
       
+      console.log("Analysis completed successfully");
       setAnalysisData(data);
       setPhase("results");
     } catch (err: any) {

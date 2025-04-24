@@ -147,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
-      // Simple in-memory cache for analysis results (lasts for current server session)
+      // Simple in-memory cache for analysis results
       const analysisCache = (req.app.locals.analysisCache = req.app.locals.analysisCache || new Map());
       
       // Create a unique cache key based on idea and country
@@ -160,19 +160,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(cachedResult.data);
       }
       
-      // Add timeout to prevent long-running requests
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 60000); // Increased to 60 seconds for better analysis
-      });
+      console.log("Starting new analysis for idea:", startupIdea.substring(0, 50) + "...");
+      console.log("Target country:", country);
       
       // Determine plan type (free for anonymous users)
       const planType = req.isAuthenticated() ? req.user.planType : 'free';
       
-      // Race between the analysis and the timeout
-      const analysisResults = await Promise.race([
-        analyzeStartupIdea(startupIdea, country, planType),
-        timeoutPromise
-      ]) as AnalysisResults;
+      // Add timeout to prevent long-running requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 60000);
+      });
+      
+      // Get analysis results
+      let analysisResults;
+      try {
+        analysisResults = await Promise.race([
+          analyzeStartupIdea(startupIdea, country, planType),
+          timeoutPromise
+        ]);
+        
+        console.log("Analysis completed successfully");
+      } catch (innerError) {
+        console.error("Error in OpenAI analysis:", innerError);
+        throw innerError;
+      }
+      
+      // Validate the response structure
+      if (!analysisResults || !analysisResults.successRate) {
+        throw new Error("Invalid response format from AI service");
+      }
       
       // Cache the successful result
       analysisCache.set(cacheKey, {
@@ -180,14 +196,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: Date.now()
       });
       
-      // Validate the response structure
-      if (!analysisResults || !analysisResults.successRate) {
-        throw new Error("Invalid response format from AI service");
-      }
-      
       // Save the analysis to storage only if user is authenticated
       if (req.isAuthenticated()) {
-        console.log("Attempting to save analysis for user:", req.user.id);
         try {
           const savedAnalysis = await storage.createAnalysis({
             userId: req.user.id,
