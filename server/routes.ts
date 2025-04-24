@@ -520,17 +520,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userCountry 
       });
       
+      // Prepare team information object
+      const teamInfo = {
+        currency: currency || "INR",
+        teamSize: teamSize || "1-5",
+        teamComposition: teamComposition || [],
+        existingSkills: existingSkills || ""
+      };
+      
       // First, get the enhanced execution plan with country-specific data and team info
       const executionPlan = await generateExecutionPlan(
         startupIdea, 
         initialBudget, 
         userCountry, 
-        {
-          currency: currency || "INR",
-          teamSize: teamSize || "1-5",
-          teamComposition: teamComposition || [],
-          existingSkills: existingSkills || ""
-        }
+        teamInfo
       );
       console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
       
@@ -539,12 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startupIdea, 
         initialBudget, 
         userCountry, 
-        {
-          currency: currency || "INR",
-          teamSize: teamSize || "1-5",
-          teamComposition: teamComposition || [],
-          existingSkills: existingSkills || ""
-        }
+        teamInfo
       );
       console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
