@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout for detailed analysis
       });
       
       // Get analysis results
@@ -362,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout for detailed analysis
       });
       
       // Race between the analysis and the timeout
@@ -489,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
+        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout for detailed analysis
       });
       
       // Race between the investors search and the timeout
