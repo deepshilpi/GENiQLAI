@@ -1481,14 +1481,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Get the user ID from the authenticated session
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(400).json({
+          message: "Invalid user session",
+          notifications: [],
+          unreadCount: 0
+        });
+      }
+      
       // For now, return empty notifications until fully implemented
+      // Note: We log success message for debugging
+      console.log(`Successfully fetched notifications for user ${userId}`);
       return res.status(200).json({
         notifications: [],
         unreadCount: 0
       });
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      return res.status(500).json({ message: "Failed to fetch notifications" });
+      // Still return a properly formatted JSON response even in error cases
+      return res.status(500).json({ 
+        message: "Failed to fetch notifications",
+        notifications: [],
+        unreadCount: 0
+      });
     }
   });
   
@@ -1499,20 +1517,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
+        return res.status(401).json({ 
+          message: "Authentication required",
+          success: false
+        });
+      }
+      
+      // Get the user ID from the authenticated session
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(400).json({
+          message: "Invalid user session",
+          success: false
+        });
       }
       
       const { notificationIds } = req.body;
       
       if (!Array.isArray(notificationIds) || notificationIds.length === 0) {
-        return res.status(400).json({ message: "Invalid notification IDs" });
+        return res.status(400).json({ 
+          message: "Invalid notification IDs", 
+          success: false 
+        });
       }
       
-      // For now, just return success
+      // For now, just log and return success
+      console.log(`Marking notifications as read for user ${userId}: ${notificationIds.join(', ')}`);
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error("Error marking notifications as read:", error);
-      return res.status(500).json({ message: "Failed to mark notifications as read" });
+      return res.status(500).json({ 
+        message: "Failed to mark notifications as read",
+        success: false
+      });
     }
   });
   
@@ -1523,14 +1561,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
+        return res.status(401).json({ 
+          message: "Authentication required",
+          success: false
+        });
       }
       
-      // For now, just return success
+      // Get the user ID from the authenticated session
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(400).json({
+          message: "Invalid user session",
+          success: false
+        });
+      }
+      
+      // For now, just log and return success
+      console.log(`Marking all notifications as read for user ${userId}`);
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
-      return res.status(500).json({ message: "Failed to mark all notifications as read" });
+      return res.status(500).json({ 
+        message: "Failed to mark all notifications as read",
+        success: false
+      });
     }
   });
 

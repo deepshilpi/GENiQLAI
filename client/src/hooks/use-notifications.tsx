@@ -53,33 +53,30 @@ export function useNotifications(): UseNotificationsReturn {
         throw new Error('Failed to fetch notifications');
       }
       
-      // Check for response type to avoid JSON parsing errors
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          const data = await response.json();
-          if (data?.notifications) {
-            const notificationsList = data.notifications || [];
-            setNotifications(notificationsList);
-            setUnreadCount(data.unreadCount || 0);
-            setIsLoading(false);
-            return notificationsList;
-          } else {
-            // Return to empty state if no proper response
-            setNotifications([]);
-            setUnreadCount(0);
-            setIsLoading(false);
-            return [];
-          }
-        } catch (jsonError) {
-          console.log('Non-JSON response received from notifications API');
+      try {
+        // Always attempt to parse as JSON, regardless of content-type header
+        // This is because some servers may not set the correct content-type
+        const data = await response.json();
+        
+        // Validate that we have the expected data structure
+        if (data && typeof data === 'object') {
+          const notificationsList = Array.isArray(data.notifications) ? data.notifications : [];
+          const unreadCountValue = typeof data.unreadCount === 'number' ? data.unreadCount : 0;
+          
+          setNotifications(notificationsList);
+          setUnreadCount(unreadCountValue);
+          setIsLoading(false);
+          return notificationsList;
+        } else {
+          // Empty state if response structure is unexpected
+          console.log('Invalid response structure from notifications API');
           setNotifications([]);
           setUnreadCount(0);
           setIsLoading(false);
           return [];
         }
-      } else {
-        console.log('Non-JSON response received from notifications API');
+      } catch (jsonError) {
+        console.error('Error parsing JSON from notifications API:', jsonError);
         setNotifications([]);
         setUnreadCount(0);
         setIsLoading(false);
