@@ -490,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // All features now available to all users
     // Premium plan check removed
     
-    const { startupIdea, initialBudget } = req.body;
+    const { startupIdea, initialBudget, currency, teamSize, teamComposition, existingSkills } = req.body;
     
     if (!startupIdea || !initialBudget) {
       return res.status(400).json({ message: "Startup idea and initial budget are required" });
@@ -498,17 +498,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       // Get the user's country for context
-      const userCountry = req.user.country || "United States"; // Default if not specified
+      const userCountry = req.user.country || "India"; // Default to India
       
       // Log request data
-      console.log("Execution plan request:", { startupIdea, initialBudget, userCountry });
+      console.log("Execution plan request:", { 
+        startupIdea, 
+        initialBudget, 
+        currency: currency || "INR",
+        teamSize: teamSize || "1-5", 
+        teamComposition: teamComposition || [], 
+        existingSkills: existingSkills || "",
+        userCountry 
+      });
       
-      // First, get the enhanced execution plan with country-specific data
-      const executionPlan = await generateExecutionPlan(startupIdea, initialBudget, userCountry);
+      // First, get the enhanced execution plan with country-specific data and team info
+      const executionPlan = await generateExecutionPlan(
+        startupIdea, 
+        initialBudget, 
+        userCountry, 
+        {
+          currency: currency || "INR",
+          teamSize: teamSize || "1-5",
+          teamComposition: teamComposition || [],
+          existingSkills: existingSkills || ""
+        }
+      );
       console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
       
-      // Then, get the comprehensive budget analysis
-      const budgetAnalysis = await generateBudgetAnalysis(startupIdea, initialBudget, userCountry);
+      // Then, get the comprehensive budget analysis with team info
+      const budgetAnalysis = await generateBudgetAnalysis(
+        startupIdea, 
+        initialBudget, 
+        userCountry, 
+        {
+          currency: currency || "INR",
+          teamSize: teamSize || "1-5",
+          teamComposition: teamComposition || [],
+          existingSkills: existingSkills || ""
+        }
+      );
       console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
       // Combine the data in the correct structure - use the same structure expected by the client

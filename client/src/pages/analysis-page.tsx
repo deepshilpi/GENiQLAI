@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,12 +32,14 @@ import {
   Lightbulb,
   LineChart,
   PieChart,
+  Plus,
   PlusCircle,
   Save,
   Share2,
   Target,
   ThumbsDown,
   ThumbsUp,
+  Trash,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -1551,36 +1554,249 @@ export default function AnalysisPage() {
         </div>
       )}
       
-      {/* BUDGET INPUT PHASE */}
+      {/* BUDGET AND TEAM INPUT PHASE */}
       {phase === "budget-input" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
           <CardHeader>
-            <CardTitle className="text-xl text-white">Plan Your Execution Budget</CardTitle>
+            <CardTitle className="text-xl text-white">Plan Your Execution</CardTitle>
             <CardDescription className="text-white/70">
-              Enter your available budget to get a detailed execution plan
+              Enter your available budget and team information to get a detailed execution plan
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...budgetForm}>
               <form onSubmit={budgetForm.handleSubmit(onBudgetSubmit)} className="space-y-6">
-                <FormField
-                  control={budgetForm.control}
-                  name="budget"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Initial Budget</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="$10,000"
-                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex space-x-3">
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Budget Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-white">Budget Information</h3>
+                    
+                    <FormField
+                      control={budgetForm.control}
+                      name="budget"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Initial Budget</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="₹10,00,000"
+                              className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription className="text-white/70">
+                            Enter your available initial budget
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={budgetForm.control}
+                      name="currency"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Currency</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
+                                <SelectValue placeholder="Select currency" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
+                              <SelectItem value="INR" className="text-white hover:bg-vision-purple-200/20">
+                                INR - Indian Rupee (₹)
+                              </SelectItem>
+                              <SelectItem value="USD" className="text-white hover:bg-vision-purple-200/20">
+                                USD - US Dollar ($)
+                              </SelectItem>
+                              <SelectItem value="EUR" className="text-white hover:bg-vision-purple-200/20">
+                                EUR - Euro (€)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {/* Team Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-white">Team Information</h3>
+                    
+                    <FormField
+                      control={budgetForm.control}
+                      name="teamSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Current Team Size</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
+                                <SelectValue placeholder="Select team size" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
+                              <SelectItem value="1-5" className="text-white hover:bg-vision-purple-200/20">
+                                1-5 people
+                              </SelectItem>
+                              <SelectItem value="6-10" className="text-white hover:bg-vision-purple-200/20">
+                                6-10 people
+                              </SelectItem>
+                              <SelectItem value="11-20" className="text-white hover:bg-vision-purple-200/20">
+                                11-20 people
+                              </SelectItem>
+                              <SelectItem value="21-50" className="text-white hover:bg-vision-purple-200/20">
+                                21-50 people
+                              </SelectItem>
+                              <SelectItem value="50+" className="text-white hover:bg-vision-purple-200/20">
+                                50+ people
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={budgetForm.control}
+                      name="existingSkills"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Existing Team Skills</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Leadership, Engineering, Marketing, Design, etc."
+                              className="min-h-[80px] bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription className="text-white/70">
+                            Describe the skills your current team has
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Team Composition Section - Dynamic roles */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-white mb-4">Key Team Roles Needed</h3>
+                  
+                  {budgetForm.watch("teamComposition").map((_, index) => (
+                    <div key={index} className="grid gap-4 md:grid-cols-3 mb-4 p-4 border border-vision-purple-200/20 rounded-md">
+                      <FormField
+                        control={budgetForm.control}
+                        name={`teamComposition.${index}.role`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Role Title</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="CTO, Marketing Director, etc."
+                                className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={budgetForm.control}
+                        name={`teamComposition.${index}.skills`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Required Skills</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Technical skills, experience, etc."
+                                className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={budgetForm.control}
+                        name={`teamComposition.${index}.importance`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Importance (1-100)</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center space-x-2">
+                                <Slider 
+                                  className="flex-1" 
+                                  min={1} 
+                                  max={100} 
+                                  step={1}
+                                  value={[field.value]}
+                                  onValueChange={(values) => field.onChange(values[0])}
+                                />
+                                <span className="text-white min-w-[30px] text-center">{field.value}</span>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
+                  
+                  <div className="flex space-x-2 mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                      onClick={() => {
+                        const currentRoles = budgetForm.getValues("teamComposition");
+                        budgetForm.setValue("teamComposition", [
+                          ...currentRoles,
+                          { role: "", skills: "", importance: 50 }
+                        ]);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Role
+                    </Button>
+                    
+                    {budgetForm.watch("teamComposition").length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                        onClick={() => {
+                          const currentRoles = budgetForm.getValues("teamComposition");
+                          if (currentRoles.length > 1) {
+                            budgetForm.setValue("teamComposition", currentRoles.slice(0, -1));
+                          }
+                        }}
+                      >
+                        <Trash className="w-4 h-4 mr-1" />
+                        Remove Last
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex space-x-3 mt-8">
                   <Button 
                     type="button" 
                     variant="outline"
