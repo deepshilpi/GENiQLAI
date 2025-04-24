@@ -898,12 +898,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const country = detectCountryFromIP(req.ip || '') || "India";
       console.log(`Detected country: ${country}, fetching relevant startup news`);
       
-      // Use OpenAI instead of Tavily as per user request
+      // Use our new multi-source approach to get real startup news
       const startTime = Date.now();
       const articles = await searchStartupNews(country);
       const elapsedTime = Date.now() - startTime;
       
-      console.log(`Generated ${articles.length} news articles using OpenAI in ${elapsedTime}ms`);
+      console.log(`Fetched ${articles.length} real startup news articles in ${elapsedTime}ms`);
       return res.status(200).json(articles);
     } catch (error) {
       console.error("Error generating startup news:", error);
