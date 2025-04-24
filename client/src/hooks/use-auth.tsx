@@ -37,6 +37,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track auth check status
   const [authChecked, setAuthChecked] = useState(false);
   
+  // Check if we're in a production environment
+  const isProduction = window.location.hostname.includes('.replit.app') || 
+      window.location.hostname.includes('.com') || 
+      window.location.hostname.includes('.org') || 
+      window.location.hostname.includes('.app');
+      
+  // Production-specific login handler to fix auth state issues in deployed environment
+  const handleProductionLogin = (userData: User) => {
+    if (!isProduction) return false;
+    
+    console.log("[Auth] Production environment detected, applying specialized login handler");
+    
+    // Store login state in localStorage as a backup mechanism
+    try {
+      localStorage.setItem('geniql_auth_user', JSON.stringify({
+        id: userData.id,
+        username: userData.username,
+        email: userData.email,
+        timestamp: Date.now()
+      }));
+      console.log("[Auth] User data saved in localStorage as fallback");
+    } catch (err) {
+      console.error("[Auth] Failed to store auth data in localStorage:", err);
+    }
+    
+    // Set a flag in sessionStorage to indicate we're coming from a login
+    try {
+      sessionStorage.setItem('auth_just_logged_in', 'true');
+      sessionStorage.setItem('auth_username', userData.username);
+      console.log("[Auth] Login state flags set in sessionStorage");
+    } catch (err) {
+      console.error("[Auth] Failed to store auth data in sessionStorage:", err); 
+    }
+    
+    // Show toast immediately so user gets immediate feedback
+    toast({
+      title: "Login successful",
+      description: `Welcome back, ${userData.username}! Please wait while we redirect you...`,
+    });
+    
+    // Force a home page redirect with clean state
+    console.log("[Auth] Forcing page navigation for production environment");
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 800);
+    
+    return true; // Return true to indicate we've handled the login
+  };
+  
   // Direct login helper function - used for critical auth operations
   const directLogin = async (credentials: LoginCredentials): Promise<User | null> => {
     try {
@@ -184,7 +233,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (userData) => {
       console.log("Login successful, setting user data:", userData);
       
-      // The most important part: Aggressively update the cache with multiple methods
+      // Check if we need to handle this as a production environment login
+      // This will return true if production handling was applied 
+      if (handleProductionLogin(userData)) {
+        // If production login was handled, skip the rest of this function
+        return;
+      }
+      
+      // For non-production environments, continue with standard login flow:
+      
       // 1. Direct cache update
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       queryClient.setQueryData(["/api/user"], userData);
@@ -220,17 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, delay);
       });
       
-      // 6. In case this is a production environment, also force a page data refetch
-      if (window.location.hostname.includes('.com') || 
-          window.location.hostname.includes('.org') || 
-          window.location.hostname.includes('.app')) {
-        console.log("Production environment detected, applying aggressive refresh strategy");
-        // Force a window reload in 500ms to make sure the browser knows we're logged in
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
-      
+      // For development environment, regular navigation is fine
       // Close any auth dialogs and redirect
       if (location !== "/") {
         navigate("/");
@@ -294,7 +341,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (userData) => {
       console.log("Registration successful, setting user data:", userData);
       
-      // The most important part: Aggressively update the cache with multiple methods
+      // Check if we need to handle this as a production environment login
+      // This will return true if production handling was applied 
+      if (handleProductionLogin(userData)) {
+        // Show a more engaging welcome toast for new users
+        toast({
+          title: "Registration successful",
+          description: `Welcome to GENIQL, ${userData.username}! Setting up your account...`,
+        });
+        // If production login was handled, skip the rest of this function
+        return;
+      }
+      
+      // For non-production environments, continue with standard login flow:
+      
       // 1. Direct cache update
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       queryClient.setQueryData(["/api/user"], userData);
@@ -330,20 +390,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, delay);
       });
       
-      // 6. In case this is a production environment, also force a page data refetch
-      if (window.location.hostname.includes('.com') || 
-          window.location.hostname.includes('.org') || 
-          window.location.hostname.includes('.app')) {
-        console.log("Production environment detected, applying aggressive refresh strategy");
-        // Force a window reload in 500ms to make sure the browser knows we're logged in
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      } else {
-        // In development, just navigate
-        if (location !== "/") {
-          navigate("/");
-        }
+      // For development environment, regular navigation is fine
+      if (location !== "/") {
+        navigate("/");
       }
       
       toast({
@@ -417,6 +466,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       console.log("Logout successful, clearing user data");
       
+      // Clear any localStorage backup auth data
+      try {
+        localStorage.removeItem('geniql_auth_user');
+        sessionStorage.removeItem('auth_just_logged_in');
+        sessionStorage.removeItem('auth_username');
+        console.log("[Auth] Cleared auth data from local/session storage");
+      } catch (err) {
+        console.error("[Auth] Failed to clear storage auth data:", err);
+      }
+      
       // The most important part: Aggressively update the cache with multiple methods
       // 1. Direct cache update - set to null
       queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
@@ -453,23 +512,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, delay);
       });
       
-      // 6. In case this is a production environment, also force a page data refetch
-      if (window.location.hostname.includes('.com') || 
-          window.location.hostname.includes('.org') || 
-          window.location.hostname.includes('.app')) {
-        console.log("Production environment detected, applying aggressive refresh strategy");
-        // Force a window reload in 500ms to make sure the browser knows we're logged out
+      // For production environment, we need special handling
+      if (isProduction) {
+        // Show toast immediately so user gets immediate feedback
+        toast({
+          title: "Logged out successfully",
+          description: "Redirecting to home page...",
+        });
+        
+        // Force a home page redirect with clean state
+        console.log("[Auth] Forcing page navigation for production environment");
         setTimeout(() => {
-          window.location.reload();
-        }, 500);
+          window.location.href = '/';
+        }, 800);
+        
+        return; // Skip the rest of the function
       } else {
         // In development, just navigate
         navigate("/");
+        
+        toast({
+          title: "Logged out successfully",
+        });
       }
-      
-      toast({
-        title: "Logged out successfully",
-      });
     },
     onError: (error: Error, variables: void, context: unknown) => {
       console.error("Logout error:", error);
@@ -561,6 +626,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!authChecked) {
       setAuthChecked(true);
       
+      // First, check if there's a temporary user in sessionStorage from a login redirect
+      const sessionUsername = sessionStorage.getItem('auth_username');
+      const justLoggedIn = sessionStorage.getItem('auth_just_logged_in');
+      
+      if (isProduction && justLoggedIn && sessionUsername) {
+        console.log("[AuthProvider] Found login redirect state in sessionStorage:", sessionUsername);
+        
+        // We'll keep the session data for now, it will be cleared in App.tsx post-reload
+        console.log("[AuthProvider] Login redirect detected, applying aggressive cache fetch");
+        
+        // Force multiple fetch attempts at short intervals before giving up
+        const urgentDelays = [50, 150, 300, 600, 1000];
+        urgentDelays.forEach(delay => {
+          setTimeout(() => {
+            refetchUser().then(userData => {
+              if (userData) {
+                console.log(`[AuthProvider] Urgent auth check at ${delay}ms successful, user:`, userData.username);
+              }
+            });
+          }, delay);
+        });
+      }
+      
+      // Check localStorage for backup auth data
+      try {
+        const storedUserData = localStorage.getItem('geniql_auth_user');
+        if (storedUserData) {
+          const parsedData = JSON.parse(storedUserData);
+          const timestamp = parsedData.timestamp || 0;
+          const nowTime = Date.now();
+          const isRecent = (nowTime - timestamp) < 24 * 60 * 60 * 1000; // 24 hours
+          
+          if (isRecent) {
+            console.log("[AuthProvider] Found backup auth data in localStorage:", parsedData.username);
+          } else {
+            console.log("[AuthProvider] Found expired backup auth data, clearing");
+            localStorage.removeItem('geniql_auth_user');
+          }
+        }
+      } catch (err) {
+        console.error("[AuthProvider] Error checking localStorage:", err);
+      }
+      
       // Force an immediate auth check
       refetchUser().then(userData => {
         if (userData) {
@@ -570,7 +678,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
     }
-  }, []);
+  }, [isProduction, authChecked, refetchUser]);
   
   // Effect to periodically check auth state in Replit environment
   useEffect(() => {
@@ -619,7 +727,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 5000); // Check every 5 seconds
     
     return () => clearInterval(checkInterval);
-  }, [user, forceAuthUpdate]);
+  }, [user, forceAuthUpdate, refetch]);
 
   return (
     <AuthContext.Provider
