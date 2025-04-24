@@ -435,9 +435,9 @@ export function Header() {
           variant="ghost" 
           size="icon" 
           className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
-          onClick={() => navigate("/settings")}
+          onClick={() => navigate("/messages")}
         >
-          <Settings className="w-5 h-5" />
+          <MessageSquare className="w-5 h-5" />
         </Button>
         
         {user ? (
