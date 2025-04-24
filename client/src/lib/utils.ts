@@ -5,32 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: Currency | string = "USD", country?: string, useSuffix: boolean = true): string {
-  // Map of countries to their locale codes for proper formatting
-  const countryToLocale: Record<string, string> = {
-    "United States": "en-US",
-    "United Kingdom": "en-GB",
-    "Canada": "en-CA",
-    "Australia": "en-AU",
-    "India": "en-IN",
-    "China": "zh-CN",
-    "Japan": "ja-JP",
-    "Germany": "de-DE",
-    "France": "fr-FR",
-    "Brazil": "pt-BR",
-    "Singapore": "en-SG",
-    "Israel": "he-IL",
-    // Default to US format for other countries
-  };
+export function formatCurrency(amount: number, currency: Currency | string = "INR", country: string = "India", useSuffix: boolean = true): string {
+  // Always use INR and Indian locale for formatting
+  const locale = "en-IN";
+  const currencyCode = "INR";
   
-  // Get the appropriate locale based on country
-  const locale = country && countryToLocale[country] ? countryToLocale[country] : "en-US";
+  // Convert USD to approximate INR (as of April 2025, using a conversion rate of 83.5)
+  // Only apply conversion if currency is USD or input is clearly a USD amount
+  if (currency === "USD" || typeof currency === 'object' && currency.code === "USD") {
+    amount = amount * 83.5; // Convert USD to INR
+  }
   
-  // Format with locale-specific settings
-  const currencyCode = typeof currency === 'string' ? currency : currency.code;
-  
-  // Special handling for Indian currency using appropriate terms
-  if (country === "India" && useSuffix) {
+  // Always use Indian currency formatting with appropriate terms
+  if (useSuffix) {
     if (amount >= 1e9) { // 1 Arab (100 Crore)
       return `₹${(amount / 1e9).toFixed(2)} Arab`;
     } else if (amount >= 1e7) { // 1 Crore
@@ -42,41 +29,9 @@ export function formatCurrency(amount: number, currency: Currency | string = "US
     } else {
       return `₹${amount.toLocaleString('en-IN')}`;
     }
-  } 
-  // For non-Indian currencies or when Indian suffixes are not used
-  else if (useSuffix) {
-    if (amount >= 1e12) { // Trillion
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 1,
-        currencyDisplay: "symbol"
-      }).format(amount / 1e12) + " T";
-    } else if (amount >= 1e9) { // Billion
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 1,
-        currencyDisplay: "symbol"
-      }).format(amount / 1e9) + " B";
-    } else if (amount >= 1e6) { // Million
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 1,
-        currencyDisplay: "symbol"
-      }).format(amount / 1e6) + " M";
-    } else if (amount >= 1e3) { // Thousand
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currencyCode,
-        maximumFractionDigits: 1,
-        currencyDisplay: "symbol"
-      }).format(amount / 1e3) + " K";
-    }
   }
   
-  // Regular formatting for smaller numbers or when suffix is disabled
+  // Regular formatting without suffix
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyCode,
@@ -127,8 +82,8 @@ export function timeAgo(date: Date | string): string {
 
 export function detectUserCountry(): string {
   // In a real application, we would use an IP geolocation service
-  // For demo purposes, returning a default value
-  return "United States";
+  // For demo purposes, returning a default value of India
+  return "India";
 }
 
 interface Currency {

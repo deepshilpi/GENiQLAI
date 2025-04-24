@@ -351,7 +351,7 @@ export default function AnalysisPage() {
     resolver: zodResolver(startupIdeaSchema),
     defaultValues: {
       idea: searchParams.get('idea') || "",
-      country: "",
+      country: "India",
     },
   });
   
@@ -359,7 +359,7 @@ export default function AnalysisPage() {
     resolver: zodResolver(budgetSchema),
     defaultValues: {
       budget: "",
-      currency: "INR",
+      currency: "INR", // Setting default currency to INR
       teamSize: "1-5",
       teamComposition: [{
         role: "Founder",
@@ -674,7 +674,7 @@ export default function AnalysisPage() {
       const response = await apiRequest("POST", "/api/execution-plan", {
         startupIdea: ideaForm.getValues().idea,
         initialBudget: budgetValue,
-        currency: values.currency,
+        currency: "INR", // Always use INR for all requests
         teamSize: values.teamSize,
         teamComposition: values.teamComposition,
         existingSkills: values.existingSkills,
