@@ -250,7 +250,7 @@ const startupTemplates = {
   ]
 };
 
-// Schema for validating budget form
+// Schema for validating budget and team form
 const budgetSchema = z.object({
   budget: z.string().refine(
     (val) => {
@@ -259,6 +259,18 @@ const budgetSchema = z.object({
     },
     { message: "Please enter a valid budget amount" }
   ),
+  currency: z.string().default("INR"),
+  teamSize: z.string().default("1-5"),
+  teamComposition: z.array(z.object({
+    role: z.string(),
+    skills: z.string(),
+    importance: z.number().min(1).max(100).default(50),
+  })).default([{
+    role: "Founder",
+    skills: "Leadership, Business Development",
+    importance: 100
+  }]),
+  existingSkills: z.string().optional(),
 });
 
 // Animation variants for the results grid
@@ -333,6 +345,14 @@ export default function AnalysisPage() {
     resolver: zodResolver(budgetSchema),
     defaultValues: {
       budget: "",
+      currency: "INR",
+      teamSize: "1-5",
+      teamComposition: [{
+        role: "Founder",
+        skills: "Leadership, Business Development",
+        importance: 100
+      }],
+      existingSkills: "",
     },
   });
   
@@ -640,6 +660,10 @@ export default function AnalysisPage() {
       const response = await apiRequest("POST", "/api/execution-plan", {
         startupIdea: ideaForm.getValues().idea,
         initialBudget: budgetValue,
+        currency: values.currency,
+        teamSize: values.teamSize,
+        teamComposition: values.teamComposition,
+        existingSkills: values.existingSkills,
       });
       
       const data = await response.json();
