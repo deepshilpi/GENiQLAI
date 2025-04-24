@@ -137,7 +137,7 @@ export default function AnalysisPageOptimized() {
   
   // Handle category change with efficient updates
   const handleCategoryChange = (category: Category) => {
-    setSelectedCategory(category);
+    setSelectedCategory(category as Category);
     setSelectedTemplate(CATEGORY_TEMPLATES[category][0]);
   };
   
@@ -499,8 +499,8 @@ export default function AnalysisPageOptimized() {
       </OptimizedCard>
       
       <AuthDialog 
-        open={authDialogOpen} 
-        onOpenChange={setAuthDialogOpen}
+        isOpen={authDialogOpen} 
+        onClose={() => setAuthDialogOpen(false)}
         returnTo={returnTo}
       />
     </div>
