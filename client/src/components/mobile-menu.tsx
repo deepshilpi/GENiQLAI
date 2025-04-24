@@ -125,36 +125,47 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <div className="px-3 pt-4 pb-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider px-3 mb-1">Account</p>
             <nav className="space-y-1">
-              {user && (
+              {user ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className={`w-full justify-start px-3 py-2 text-sm ${isActive('/notifications') 
+                      ? 'bg-vision-primary-gradient text-white' 
+                      : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
+                    onClick={() => handleNavigation('/notifications')}
+                  >
+                    <div className="relative mr-2">
+                      <Bell className="h-4 w-4" />
+                      {notificationCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-[8px] text-white font-bold">
+                          {notificationCount}
+                        </span>
+                      )}
+                    </div>
+                    Notifications
+                  </Button>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className={`w-full justify-start px-3 py-2 text-sm ${isActive('/settings') 
+                      ? 'bg-vision-primary-gradient text-white' 
+                      : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
+                    onClick={() => handleNavigation('/settings')}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Button>
+                </>
+              ) : (
                 <Button 
-                  variant="ghost" 
-                  className={`w-full justify-start px-3 py-2 text-sm ${isActive('/notifications') 
-                    ? 'bg-vision-primary-gradient text-white' 
-                    : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                  onClick={() => handleNavigation('/notifications')}
+                  variant="default" 
+                  className="w-full justify-center bg-vision-primary-gradient text-white hover:brightness-110 py-2 rounded-lg"
+                  onClick={() => handleNavigation('/auth')}
                 >
-                  <div className="relative mr-2">
-                    <Bell className="h-4 w-4" />
-                    {notificationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-[8px] text-white font-bold">
-                        {notificationCount}
-                      </span>
-                    )}
-                  </div>
-                  Notifications
+                  <User className="mr-2 h-4 w-4" />
+                  Sign In
                 </Button>
               )}
-
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start px-3 py-2 text-sm ${isActive('/settings') 
-                  ? 'bg-vision-primary-gradient text-white' 
-                  : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                onClick={() => handleNavigation('/settings')}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Button>
             </nav>
           </div>
         </div>

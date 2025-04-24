@@ -491,7 +491,7 @@ export function Header() {
           <Button 
             variant="secondary"
             className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
-            onClick={() => openAuthDialog({ defaultTab: "login" })}
+            onClick={() => navigate("/auth")}
           >
             <User className="w-4 h-4 mr-2" />
             <span>Sign In</span>
