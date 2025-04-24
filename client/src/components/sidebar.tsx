@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
 import { AuthContext } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
+import { useNotifications } from "@/hooks/use-notifications"; 
 import { Button } from "@/components/ui/button";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 import { 
@@ -21,12 +22,14 @@ import {
   Bell,
   Mail,
   BookmarkIcon,
-  Bookmark
+  Bookmark,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import Logo from "@/assets/logo";
+import { format, formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,9 +47,17 @@ export function Sidebar() {
   const logoutMutation = auth?.logoutMutation;
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3); // Example count
   const isMobile = useIsMobile();
   const { openAuthDialog } = useAuthDialog();
+  
+  // Use real notifications from hook instead of dummy data
+  const { 
+    notifications, 
+    unreadCount: notificationCount, 
+    isLoading: notificationsLoading,
+    markAsRead, 
+    markAllAsRead 
+  } = useNotifications();
   
   // Always show sidebar for everyone, but adapt content based on auth status
   
