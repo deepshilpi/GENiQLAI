@@ -753,10 +753,18 @@ export async function analyzeStartupIdea(
 }
 
 // Generate comprehensive budget-based analysis (Enhanced feature for paid plans)
+interface TeamInfo {
+  currency?: string;
+  teamSize?: string;
+  teamComposition?: Array<{role: string; skills: string; importance: number}>;
+  existingSkills?: string;
+}
+
 export async function generateBudgetAnalysis(
   startupIdea: string,
   initialBudget: number,
-  country: string
+  country: string,
+  teamInfo?: TeamInfo
 ): Promise<AnalysisResults["budgetAnalysis"]> {
   try {
     console.log("Starting OpenAI budget analysis generation...");
@@ -767,14 +775,49 @@ export async function generateBudgetAnalysis(
       throw new Error("OpenAI API key is not configured");
     }
     
-    console.log(`Generating comprehensive execution plan for budget of $${initialBudget} in ${country}...`);
+    // Default currency mapping based on country
+    const currencyMap: {[key: string]: string} = {
+      "United States": "USD",
+      "India": "INR",
+      "United Kingdom": "GBP",
+      "European Union": "EUR",
+      "Canada": "CAD",
+      "Australia": "AUD",
+      "Japan": "JPY",
+      "China": "CNY",
+      "Singapore": "SGD",
+      "Brazil": "BRL"
+    };
+    
+    const currency = teamInfo?.currency || currencyMap[country] || "USD";
+    const currencySymbol = currency === "INR" ? "₹" : "$";
+    
+    // Format team information for the prompt
+    const teamSizeInfo = teamInfo?.teamSize || "Not specified";
+    
+    let teamCompositionText = "Not provided";
+    if (teamInfo?.teamComposition && teamInfo.teamComposition.length > 0) {
+      teamCompositionText = teamInfo.teamComposition.map(role => 
+        `* ${role.role} - Skills: ${role.skills}, Importance: ${role.importance}/100`
+      ).join("\n");
+    }
+    
+    const existingSkillsText = teamInfo?.existingSkills || "Not specified";
+    
+    console.log(`Generating comprehensive execution plan for budget of ${currencySymbol}${initialBudget} in ${country} with team info...`);
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model
       messages: [
         {
           role: "system",
-          content: `You are a senior startup execution planning and financial analysis expert with experience in venture capital and startup financing. Create a DETAILED, INDUSTRY-SPECIFIC, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of $${initialBudget}. Use realistic market figures and industry benchmarks applicable to ${country}.
+          content: `You are a senior startup execution planning and financial analysis expert with experience in venture capital and startup financing. Create a DETAILED, INDUSTRY-SPECIFIC, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of ${currencySymbol}${initialBudget} (${currency}). Use realistic market figures and industry benchmarks applicable to ${country}.
+          
+          TEAM INFORMATION:
+          - Current Team Size: ${teamSizeInfo}
+          - Existing Team Skills: ${existingSkillsText}
+          - Key Team Roles Needed:
+          ${teamCompositionText}
           
           Return a comprehensive JSON object with exactly the following structure:
           
@@ -995,7 +1038,8 @@ export async function generateBudgetAnalysis(
 export async function generateExecutionPlan(
   startupIdea: string,
   initialBudget: number,
-  country: string = "United States"
+  country: string = "United States",
+  teamInfo?: TeamInfo
 ): Promise<AnalysisResults["planToExecute"]> {
   try {
     console.log("Starting OpenAI execution plan generation...");
@@ -1021,16 +1065,35 @@ export async function generateExecutionPlan(
     };
     
     // Get the appropriate currency code or default to USD
-    const currencyCode = currencyMap[country] || "USD";
+    const currency = teamInfo?.currency || currencyMap[country] || "USD";
+    const currencySymbol = currency === "INR" ? "₹" : "$";
     
-    console.log(`Sending request to OpenAI API for execution plan with ${currencyCode} currency...`);
+    // Format team information for the prompt
+    const teamSizeInfo = teamInfo?.teamSize || "Not specified";
+    
+    let teamCompositionText = "Not provided";
+    if (teamInfo?.teamComposition && teamInfo.teamComposition.length > 0) {
+      teamCompositionText = teamInfo.teamComposition.map(role => 
+        `* ${role.role} - Skills: ${role.skills}, Importance: ${role.importance}/100`
+      ).join("\n");
+    }
+    
+    const existingSkillsText = teamInfo?.existingSkills || "Not specified";
+    
+    console.log(`Sending request to OpenAI API for execution plan with ${currency} currency and team info...`);
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a DETAILED, EXPERT-LEVEL budget and execution plan for a startup with an initial budget of ${initialBudget} ${currencyCode}.
+          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a DETAILED, EXPERT-LEVEL budget and execution plan for a startup with an initial budget of ${currencySymbol}${initialBudget} (${currency}).
+          
+          TEAM INFORMATION:
+          - Current Team Size: ${teamSizeInfo}
+          - Existing Team Skills: ${existingSkillsText}
+          - Key Team Roles Needed:
+          ${teamCompositionText}
 
           Return a JSON object with:
           1. budget: Object with the following properties:
@@ -1047,7 +1110,7 @@ export async function generateExecutionPlan(
              - cost (number): Budget required for this step
              - keyDeliverables: Array of 2 strings, each very brief (5-7 words)
           
-          3. currency (string): Three-letter currency code (${currencyCode})
+          3. currency (string): Three-letter currency code (${currency})
           4. timeline (string): Brief overall timeline (10 words max)
           5. keyRisks: Array of 3 strings, each very brief (8 words max)
           6. successMetrics: Array of 3 strings, each very brief (8 words max)
@@ -1061,7 +1124,7 @@ export async function generateExecutionPlan(
         },
         {
           role: "user",
-          content: `Create a detailed, expert-level budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currencyCode}. Include realistic market data and specific recommendations: ${startupIdea}`
+          content: `Create a detailed, expert-level budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currency}. Include realistic market data and specific recommendations: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },

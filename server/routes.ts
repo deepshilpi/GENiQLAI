@@ -415,11 +415,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Authentication required" });
     }
     
-    if (req.user.planType === "free") {
-      return res.status(403).json({ message: "Pro or Unicorn plan required for this feature" });
-    }
+    // All features now available to all users (removed premium plan check)
     
-    const { startupIdea, initialBudget } = req.body;
+    const { startupIdea, initialBudget, currency, teamSize, teamComposition, existingSkills } = req.body;
     
     if (!startupIdea || !initialBudget) {
       return res.status(400).json({ message: "Startup idea and initial budget are required" });
@@ -434,7 +432,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create a unique cache key with Base64 hashing for better performance
       const hashedIdea = Buffer.from(startupIdea.trim().toLowerCase().substring(0, 50)).toString('base64');
-      const cacheKey = `budget_${hashedIdea}_${initialBudget}_${country}`;
+      const teamInfoHash = teamComposition ? 
+        Buffer.from(JSON.stringify({teamSize, teamComposition, existingSkills}).substring(0, 100)).toString('base64') : 
+        'no_team';
+      const cacheKey = `budget_${hashedIdea}_${initialBudget}_${country}_${teamInfoHash}`;
       
       // Longer cache duration (24 hours) for better performance
       const cachedResult = budgetCache.get(cacheKey);
@@ -443,6 +444,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(cachedResult.data);
       }
       
+      // Prepare team information if provided
+      const teamInfo = teamComposition ? {
+        currency: currency || "INR",
+        teamSize: teamSize || "1-5",
+        teamComposition: teamComposition || [],
+        existingSkills: existingSkills || ""
+      } : undefined;
+      
       // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout for detailed analysis
@@ -450,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Race between the analysis and the timeout
       const budgetAnalysis = await Promise.race([
-        generateBudgetAnalysis(startupIdea, initialBudget, country),
+        generateBudgetAnalysis(startupIdea, initialBudget, country, teamInfo),
         timeoutPromise
       ]);
       
