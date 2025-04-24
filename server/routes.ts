@@ -147,16 +147,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
-      // Simple in-memory cache for analysis results
+      // Enhanced in-memory cache with hashing for better performance
       const analysisCache = (req.app.locals.analysisCache = req.app.locals.analysisCache || new Map());
       
-      // Create a unique cache key based on idea and country
-      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${country}`;
+      // Create a unique cache key based on idea and country - use a more efficient hash
+      const hashedIdea = Buffer.from(startupIdea.trim().toLowerCase().substring(0, 50)).toString('base64');
+      const cacheKey = `analysis_${hashedIdea}_${country}`;
       
-      // Check if we have a cached result (cache lasts 60 minutes)
+      // Longer cache duration (24 hours instead of 60 minutes) to improve response times
       const cachedResult = analysisCache.get(cacheKey);
-      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
-        console.log("Using cached analysis result");
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 24 * 60 * 60 * 1000)) {
+        console.log("Using cached analysis result from cache");
         return res.json(cachedResult.data);
       }
       
@@ -166,9 +167,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine plan type (free for anonymous users)
       const planType = req.isAuthenticated() ? req.user.planType : 'free';
       
-      // Add timeout to prevent long-running requests
+      // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 60000);
+        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
       });
       
       // Get analysis results
@@ -345,22 +346,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const country = req.body.country || detectCountryFromIP(req.ip || '');
     
     try {
-      // Simple in-memory cache for budget analysis results (lasts for current server session)
+      // Enhanced in-memory cache for budget analysis
       const budgetCache = (req.app.locals.budgetCache = req.app.locals.budgetCache || new Map());
       
-      // Create a unique cache key based on idea, budget, and country
-      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${initialBudget}_${country}`;
+      // Create a unique cache key with Base64 hashing for better performance
+      const hashedIdea = Buffer.from(startupIdea.trim().toLowerCase().substring(0, 50)).toString('base64');
+      const cacheKey = `budget_${hashedIdea}_${initialBudget}_${country}`;
       
-      // Check if we have a cached result (cache lasts 60 minutes)
+      // Longer cache duration (24 hours) for better performance
       const cachedResult = budgetCache.get(cacheKey);
-      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
-        console.log("Using cached budget analysis result");
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 24 * 60 * 60 * 1000)) {
+        console.log("Using cached budget analysis from cache");
         return res.json(cachedResult.data);
       }
       
-      // Add timeout to prevent long-running requests
+      // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 60000); // Increased to 60 seconds for better analysis
+        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
       });
       
       // Race between the analysis and the timeout

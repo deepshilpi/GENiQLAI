@@ -143,15 +143,18 @@ export async function analyzeStartupIdea(
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: systemPrompt },
+        { 
+          role: "system", 
+          content: systemPrompt + "\n\nIMPORTANT: RESPOND QUICKLY with concise analysis. Focus on SPEED and ACCURACY."
+        },
         { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.5, // Lower temperature for more focused and faster responses
-      max_tokens: 4000,
-      top_p: 0.9,
-      frequency_penalty: 0.2, // Slightly reduce repetition
-      presence_penalty: 0.1 // Slightly encourage topic variety
+      temperature: 0.3, // Lower temperature for faster, more predictable responses
+      max_tokens: 2500, // Reduced token count for faster response
+      top_p: 0.8,
+      frequency_penalty: 0.1, // Reduced for faster responses
+      presence_penalty: 0.1
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -296,7 +299,7 @@ export async function generateBudgetAnalysis(
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning and financial analysis expert. Create a comprehensive budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
+          content: `You are a startup execution planning and financial analysis expert. Create a QUICK yet accurate budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
           
           Return a JSON object with exactly the following structure:
           
@@ -312,9 +315,9 @@ export async function generateBudgetAnalysis(
                   "potentialReturns": number (estimated ROI),
                   "feasibilityScore": number from 0-100
                 },
-                ... at least 3 scaling points
+                ... 2-3 scaling points only
               ],
-              "message": string (explaining feasibility and scaling path)
+              "message": string (short explanation, max 30 words)
             },
             
             "riskAnalysis": {
@@ -324,11 +327,11 @@ export async function generateBudgetAnalysis(
                   "category": string (risk category),
                   "likelihood": number from 0-100,
                   "impact": number from 0-100,
-                  "mitigationStrategy": string (clear explanation)
+                  "mitigationStrategy": string (brief explanation, max 15 words)
                 },
-                ... at least 4-5 different risks
+                ... 3 different risks only
               ],
-              "message": string (summarizing risk profile)
+              "message": string (short explanation, max 25 words)
             },
             
             "goToMarketStrategy": {
@@ -336,42 +339,42 @@ export async function generateBudgetAnalysis(
                 {
                   "phase": string (phase name),
                   "duration": string (e.g., "3 months"),
-                  "activities": array of strings (major activities),
+                  "activities": array of max 2 strings,
                   "estimatedCost": number (cost for this phase)
                 },
-                ... at least 3-4 phases
+                ... max 3 phases
               ],
-              "message": string (explaining GTM approach)
+              "message": string (short explanation, max 25 words)
             },
             
             "longTermVision": {
               "milestones": [
                 {
                   "year": string (e.g., "Year 1"),
-                  "goals": array of strings (3-4 key objectives),
+                  "goals": array of 2-3 strings maximum,
                   "projectedMetrics": {
                     "revenue": number (projected revenue),
                     "users": number (projected user count if applicable),
                     "marketShare": number (projected market share percentage)
                   }
                 },
-                ... at least 3 years of milestones
+                ... max 3 years only
               ],
-              "message": string (explaining long-term vision)
+              "message": string (short explanation, max 25 words)
             },
             
             "teamExecutionCapability": {
               "requiredRoles": [
                 {
                   "title": string (role title),
-                  "skills": array of strings (required skills),
+                  "skills": array of 2-3 strings maximum,
                   "importance": number from 0-100,
                   "estimatedCost": number (annual salary or cost)
                 },
-                ... at least 4-5 key roles
+                ... max 3 key roles
               ],
-              "hiringTimeline": string (hiring sequence),
-              "message": string (explaining talent requirements)
+              "hiringTimeline": string (brief hiring sequence, max 15 words),
+              "message": string (short explanation, max 25 words)
             },
             
             "fundingAndInvestmentPotential": {
@@ -379,32 +382,32 @@ export async function generateBudgetAnalysis(
                 {
                   "name": string (investor name),
                   "firm": string (investment firm),
-                  "investmentFocus": array of strings (focus areas),
+                  "investmentFocus": array of max 2 strings,
                   "location": string (country/region),
-                  "contactInfo": string (fictional contact method),
                   "portfolioFit": number from 0-100
                 },
-                ... exactly 5 investors
+                ... max 3 investors
               ],
-              "message": string (explaining funding approach)
+              "message": string (short explanation, max 25 words)
             }
           }
           
           Make sure all monetary values are realistic for the startup type and scale in ${country}.
-          All data should be detailed, specific, and actionable.
-          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.`
+          BE EXTREMELY CONCISE. Keep text fields very brief.
+          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          Return ONLY valid JSON format without any additional text.`
         },
         {
           role: "user",
-          content: `Create a comprehensive budget analysis for this startup idea in ${country} with an initial budget of $${initialBudget}: ${startupIdea}`
+          content: `Create a quick budget analysis for this startup idea in ${country} with an initial budget of $${initialBudget}: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.5, // Lower temperature for more focused and faster responses
-      max_tokens: 4000,
-      top_p: 0.9,
-      frequency_penalty: 0.2, // Slightly reduce repetition
-      presence_penalty: 0.1 // Slightly encourage topic variety
+      temperature: 0.3, // Lower temperature for faster responses
+      max_tokens: 2000, // Reduced for speed
+      top_p: 0.8,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -552,7 +555,7 @@ export async function generateExecutionPlan(
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a comprehensive budget and execution plan for a startup with an initial budget of ${initialBudget} ${currencyCode}.
+          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a QUICK yet accurate budget and execution plan for a startup with an initial budget of ${initialBudget} ${currencyCode}.
 
           Return a JSON object with:
           1. budget: Object with the following properties:
@@ -562,34 +565,36 @@ export async function generateExecutionPlan(
              - compliance (number): Cost for legal, regulatory, and compliance matters
              - contingency (number): Reserved budget for unexpected expenses
           
-          2. roadmap: Array of at least 6 objects, each with:
-             - step (string): Clear, specific milestone or phase name
-             - description (string): Detailed explanation of activities in this phase
-             - timeframe (string): Realistic time required (e.g., "2-3 months", "Q1 2026")
+          2. roadmap: Array of exactly 4 objects, each with:
+             - step (string): Clear, specific milestone or phase name (5-7 words max)
+             - description (string): Brief explanation (15 words max)
+             - timeframe (string): Realistic time required (e.g., "2-3 months")
              - cost (number): Budget required for this step
-             - keyDeliverables: Array of 2-3 strings detailing specific outputs expected
+             - keyDeliverables: Array of 2 strings, each very brief (5-7 words)
           
           3. currency (string): Three-letter currency code (${currencyCode})
-          4. timeline (string): Overall execution timeline estimate
-          5. keyRisks: Array of 3-4 strings detailing potential execution risks
-          6. successMetrics: Array of 3-4 strings detailing how to measure success
+          4. timeline (string): Brief overall timeline (10 words max)
+          5. keyRisks: Array of 3 strings, each very brief (8 words max)
+          6. successMetrics: Array of 3 strings, each very brief (8 words max)
           
-          Make all costs appropriate to ${country}'s market and provide realistic timeframes. Use industry benchmarks to ensure accuracy.
+          Make all costs appropriate to ${country}'s market.
+          BE EXTREMELY CONCISE. Keep text minimal.
           
           Format your response as a valid JSON object.
-          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.`
+          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          Return ONLY valid JSON format without any additional text.`
         },
         {
           role: "user",
-          content: `Create a detailed budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currencyCode}: ${startupIdea}`
+          content: `Create a quick budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currencyCode}: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.5, // Lower temperature for more focused and faster responses
-      max_tokens: 3000,
-      top_p: 0.9,
-      frequency_penalty: 0.2, // Slightly reduce repetition
-      presence_penalty: 0.1 // Slightly encourage topic variety
+      temperature: 0.3, // Lower temperature for faster responses
+      max_tokens: 1500, // Reduced token count for faster response
+      top_p: 0.8,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -646,31 +651,32 @@ export async function findInvestors(
       messages: [
         {
           role: "system",
-          content: `You are an expert in startup investment. For the given startup idea, suggest 5 potential investors that might be interested in this type of startup in the specified country.
+          content: `You are an expert in startup investment. For the given startup idea, suggest 3 potential investors that might be interested in this type of startup in the specified country. Be extremely concise.
           
           Return a JSON object with:
-          'investors': array of 5 objects, each with:
-          - name: investor's name (string)
-          - firm: investment firm (string)
-          - tags: array of 2-3 strings (industry focus, stage preference, etc.)
-          - crunchbaseLink: fictional but realistic looking Crunchbase URL (string)
+          'investors': array of 3 objects, each with:
+          - name: investor's name (string, keep very brief)
+          - firm: investment firm (string, keep very brief)
+          - tags: array of 2 short strings maximum (industry focus, stage preference)
+          - crunchbaseLink: simple Crunchbase URL format
           
-          Format your response as a JSON object that would fit the 'findingInvestors' field in a larger analysis structure.
-          IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.
+          Format your response as a valid JSON object.
+          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          Return ONLY valid JSON without any additional text.
           
-          IMPORTANT DISCLAIMER: The investor information is AI-generated and for illustration purposes only. Always verify manually before contacting.`
+          DISCLAIMER: This is AI-generated sample data for illustration only.`
         },
         {
           role: "user",
-          content: `Find potential investors for this startup idea in ${country}: ${startupIdea}`
+          content: `Find 3 potential investors for this startup idea in ${country}: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.5, // Lower temperature for more focused and faster responses
-      max_tokens: 1500,
-      top_p: 0.9,
-      frequency_penalty: 0.2, // Slightly reduce repetition
-      presence_penalty: 0.1 // Slightly encourage topic variety
+      temperature: 0.3, // Lower temperature for faster responses
+      max_tokens: 800, // Reduced token count for faster response
+      top_p: 0.8,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
