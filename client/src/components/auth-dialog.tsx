@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthContext } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -186,6 +186,9 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
           <DialogTitle className="text-xl text-white font-bold text-center">
             {activeTab === "login" ? "Welcome back" : "Create an account"}
           </DialogTitle>
+          <DialogDescription className="text-center text-white/60">
+            {activeTab === "login" ? "Sign in to your account to continue" : "Create a new account to get started"}
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register")} className="mt-2">
