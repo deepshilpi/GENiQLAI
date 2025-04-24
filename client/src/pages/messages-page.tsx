@@ -2,24 +2,19 @@ import { useEffect } from "react";
 import { ChatInterface } from "@/components/messaging/chat-interface";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function MessagesPage() {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const { openAuthDialog } = useAuthDialog();
 
-  // Handle authentication - show auth dialog instead of redirect for better UX
+  // Handle authentication - redirect to auth page
   useEffect(() => {
     if (!isLoading && !user) {
-      openAuthDialog({ 
-        defaultTab: 'login',
-        returnTo: '/messages'
-      });
+      setLocation('/auth');
     }
-  }, [user, isLoading, openAuthDialog]);
+  }, [user, isLoading, setLocation]);
 
   if (isLoading) {
     return (
@@ -42,7 +37,7 @@ export default function MessagesPage() {
             Connect with entrepreneurs and investors through our secure messaging platform. Please log in to access your messages.
           </p>
           <Button 
-            onClick={() => openAuthDialog({ defaultTab: 'login', returnTo: '/messages' })}
+            onClick={() => setLocation('/auth')}
             className="bg-vision-primary-gradient hover:bg-vision-primary-gradient/90 text-white px-8 py-6 h-auto text-lg"
           >
             Log In to Access Messages

@@ -46,7 +46,7 @@ function timeAgo(date: Date): string {
   return Math.floor(seconds) + " seconds ago";
 }
 import { useToast } from "@/hooks/use-toast";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
+// Removed auth dialog import as we're using direct navigation
 import { Post } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -106,7 +106,6 @@ export function XStylePost({
   // Use location for navigation
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
-  const { openAuthDialog } = useAuthDialog();
   
   // Initialize reactions if they don't exist
   const reactions = post.reactions || { like: 0, love: 0, idea: 0, fire: 0, smile: 0 };
@@ -119,7 +118,8 @@ export function XStylePost({
   
   const handlePump = () => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     onVote(post.id, "pump");
@@ -127,7 +127,8 @@ export function XStylePost({
   
   const handleDump = () => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     onVote(post.id, "dump");
@@ -135,7 +136,8 @@ export function XStylePost({
   
   const handleReaction = (reactionType: string) => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     onReact(post.id, reactionType);
@@ -145,7 +147,8 @@ export function XStylePost({
     if (!newComment.trim()) return;
     
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     
@@ -160,7 +163,8 @@ export function XStylePost({
   
   const handleFollow = () => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     
@@ -172,7 +176,8 @@ export function XStylePost({
   
   const handleMessage = () => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      setLocation('/auth');
       return;
     }
     
