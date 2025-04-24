@@ -71,21 +71,14 @@ export function setupAuth(app: Express) {
     console.log('Using in-memory session store');
   }
 
-  // Configure cookie settings for both development and production environments
+  // Configure cookie settings for Replit environment
+  // We're using more permissive settings for Replit to ensure cookies work
   const cookieSettings: session.CookieOptions = {
-    // Always use httpOnly and set proper sameSite for security
     httpOnly: true,
-    sameSite: 'lax', // Use one of the allowed literal values
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    
-    // In production, we need to set secure and possibly domain
-    secure: process.env.NODE_ENV === 'production'
+    sameSite: 'none', // Allow cross-site cookies for Replit preview
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for better persistence
+    secure: false // Set to false for testing (works in Replit environment)
   };
-  
-  // Add domain in production if configured
-  if (process.env.NODE_ENV === 'production' && process.env.DOMAIN) {
-    cookieSettings.domain = process.env.DOMAIN.replace(/^https?:\/\//, ''); // Remove protocol if present
-  }
 
   // Log cookie settings for debugging
   console.log('Session cookie settings:', cookieSettings);

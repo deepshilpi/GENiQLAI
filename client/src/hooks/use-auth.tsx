@@ -40,15 +40,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user", forceAuthUpdate], // Include forceAuthUpdate in query key
     queryFn: async (context) => {
       console.log("[Auth] Fetching user data with queryKey:", context.queryKey);
-      // Check for valid session cookie before making the request
-      if (document.cookie.indexOf('connect.sid') === -1) {
-        console.log("[Auth] No session cookie found, returning null");
-        return null;
-      }
+      
+      // In Replit environment, we'll just make the request regardless of cookie presence
+      // This is more reliable in iframe environments where cookie detection can be unreliable
       try {
-        const result = await getQueryFn({ on401: "returnNull" })(context);
-        console.log("[Auth] User fetch result:", result ? "User found" : "No user");
-        return result as User | null;
+        // Add a cache-busting timestamp to the URL
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/user?_t=${timestamp}`, {
+          credentials: 'include', // Always include credentials
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.log("[Auth] User not authenticated (401)");
+            return null;
+          }
+          throw new Error(`User fetch failed: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log("[Auth] User fetch successful:", result.username);
+        return result as User;
       } catch (err) {
         console.error("[Auth] Error fetching user:", err);
         return null;
@@ -56,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     // Override the default queryClient settings for this specific query
     staleTime: 0, // Set to 0 to allow refetching when needed
-    retry: 0, // Don't retry on failure - reduces queries
+    retry: 1, // Try once more on failure
     refetchOnWindowFocus: true, // Enable refetching on window focus for better state sync
     refetchOnMount: true, // Refetch when component mounts to ensure fresh data
   });
@@ -81,7 +98,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         queryClient.cancelQueries({ queryKey: ["/api/user"] });
         
         // Add a special timestamp to prevent caching
-        const res = await apiRequest("POST", `/api/login?_t=${Date.now()}`, credentials);
+        // Use fetch directly instead of apiRequest for more reliable session handling
+        const timestamp = new Date().getTime();
+        const res = await fetch(`/api/login?_t=${timestamp}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include', // Important: include cookies for session
+          body: JSON.stringify(credentials)
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `Login failed with status ${res.status}`);
+        }
+        
         const userData = await res.json();
         return userData;
       } catch (err: any) {
@@ -176,8 +211,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation<User, Error, InsertUser>({
     mutationFn: async (credentials) => {
       try {
-        // Add timestamp to avoid caching
-        const res = await apiRequest("POST", `/api/register?_t=${Date.now()}`, credentials);
+        // Use fetch directly instead of apiRequest for more reliable session handling
+        const timestamp = new Date().getTime();
+        const res = await fetch(`/api/register?_t=${timestamp}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include', // Important: include cookies for session
+          body: JSON.stringify(credentials)
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `Registration failed with status ${res.status}`);
+        }
+        
         const userData = await res.json();
         return userData;
       } catch (err: any) {
@@ -269,7 +321,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         queryClient.cancelQueries({ queryKey: ["/api/user"] });
         
         // Send logout request with a timestamp to avoid caching
-        await apiRequest("POST", `/api/logout?_t=${Date.now()}`);
+        // Use fetch directly instead of apiRequest for more reliable session handling
+        const timestamp = new Date().getTime();
+        const res = await fetch(`/api/logout?_t=${timestamp}`, {
+          method: 'POST',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include' // Important: include cookies for session
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `Logout failed with status ${res.status}`);
+        }
+        
+        // After successful logout, clear any cookies by setting them to expired
+        document.cookie = "connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+        
         return true;
       } catch (err: any) {
         console.error("Logout API error:", err);
