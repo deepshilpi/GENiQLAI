@@ -94,12 +94,16 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
       
       // Parse JSON with fallback mechanisms
       try {
+        // Log the first 200 characters of the response for debugging
+        console.log(`Response for ${stepName} (first 200 chars): ${content.substring(0, 200)}...`);
+        
         // Direct parsing attempt
         const result = JSON.parse(content);
         console.log(`Successfully parsed ${stepName} JSON directly`);
         return result;
       } catch (parseError) {
-        console.log(`Direct JSON parse failed for ${stepName}, trying extraction methods`);
+        console.log(`Direct JSON parse failed for ${stepName}: ${parseError.message}`);
+        console.log(`Trying extraction methods for ${stepName}`);
         
         // Try multiple extraction methods in sequence
         
@@ -108,12 +112,15 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
         if (jsonMatch) {
           try {
             const jsonContent = jsonMatch[0];
+            console.log(`Method 1 extracted content (first 100 chars): ${jsonContent.substring(0, 100)}...`);
             const result = JSON.parse(jsonContent);
             console.log(`Successfully extracted and parsed ${stepName} JSON using method 1`);
             return result;
           } catch (extractError) {
-            console.log(`Extraction method 1 failed for ${stepName}`);
+            console.log(`Extraction method 1 failed for ${stepName}: ${extractError.message}`);
           }
+        } else {
+          console.log(`Method 1 failed: No JSON pattern match found for ${stepName}`);
         }
         
         // Method 2: Try to extract content between markdown code blocks
@@ -122,16 +129,38 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
         if (markdownMatch && markdownMatch[1]) {
           try {
             const extractedJson = markdownMatch[1].trim();
+            console.log(`Method 2 extracted content (first 100 chars): ${extractedJson.substring(0, 100)}...`);
             const result = JSON.parse(extractedJson);
             console.log(`Successfully extracted and parsed ${stepName} JSON using method 2`);
             return result;
           } catch (extractError) {
-            console.log(`Extraction method 2 failed for ${stepName}`);
+            console.log(`Extraction method 2 failed for ${stepName}: ${extractError.message}`);
           }
+        } else {
+          console.log(`Method 2 failed: No markdown code blocks found for ${stepName}`);
         }
         
-        console.error(`All JSON parsing methods failed for ${stepName}`);
-        throw new Error(`Failed to parse ${stepName} response`);
+        // Method 3: Attempt to fix common JSON syntax issues and try again
+        try {
+          // Sometimes the API adds extra text before/after the JSON
+          // Try to salvage by finding the first { and last }
+          const startBrace = content.indexOf('{');
+          const endBrace = content.lastIndexOf('}');
+          
+          if (startBrace !== -1 && endBrace !== -1 && startBrace < endBrace) {
+            const fixedJson = content.substring(startBrace, endBrace + 1);
+            console.log(`Method 3 extracted content (first 100 chars): ${fixedJson.substring(0, 100)}...`);
+            const result = JSON.parse(fixedJson);
+            console.log(`Successfully extracted and parsed ${stepName} JSON using method 3`);
+            return result;
+          }
+        } catch (fixError) {
+          console.log(`Extraction method 3 failed for ${stepName}: ${fixError.message}`);
+        }
+        
+        console.error(`All JSON parsing methods failed for ${stepName}, full response content:`);
+        console.error(content);
+        throw new Error(`Failed to parse ${stepName} response: Invalid JSON format`);
       }
     } catch (error: any) {
       lastError = error;

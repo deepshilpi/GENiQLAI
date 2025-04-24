@@ -307,6 +307,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Added default values for missing fields");
       }
       
+      // Perform JSON validation before caching/saving to ensure serialization works
+      try {
+        console.log("Validating analysis results can be properly serialized");
+        const jsonString = JSON.stringify(analysisResults);
+        JSON.parse(jsonString); // This will throw an error if there are issues with serialization
+        console.log("Successfully verified JSON serialization of analysis results");
+      } catch (jsonError) {
+        console.error("JSON serialization validation failed:", jsonError);
+        // Use a safer approach to handle potential circular references or non-serializable content
+        try {
+          const sanitizedResults = JSON.parse(JSON.stringify(analysisResults, (key, value) => {
+            // Replace functions or other non-serializable values
+            if (typeof value === 'function') {
+              return 'function';
+            }
+            return value;
+          }));
+          analysisResults = sanitizedResults;
+          console.log("Sanitized analysis results to ensure proper JSON serialization");
+        } catch (sanitizeError) {
+          console.error("Failed to sanitize results:", sanitizeError);
+          throw new Error("Failed to process analysis results. Please try again with a simpler description.");
+        }
+      }
+      
       // Cache the successful result
       analysisCache.set(cacheKey, {
         data: analysisResults,
@@ -367,6 +392,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(503).json({ 
           message: "AI analysis is currently unavailable due to API key validation issues. Please try again later or contact support.",
           error: "invalid_api_key" 
+        });
+      } else if (errorMessage.includes("parse") || errorMessage.includes("token") || errorMessage.includes("JSON")) {
+        // Handle potential JSON parsing issues
+        return res.status(500).json({ 
+          message: "The analysis generated an invalid response format. Please try again with a different description.",
+          error: "invalid_response_format" 
         });
       }
       
