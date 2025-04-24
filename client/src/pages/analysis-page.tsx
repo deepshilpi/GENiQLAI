@@ -861,52 +861,371 @@ export default function AnalysisPage() {
     setRelatedIdeasData([]);
   };
   
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
     
-    // All features are now available to everyone
-    
-    toast({
-      title: "Export Started",
-      description: "Your PDF is being generated and will download shortly.",
-    });
-    
-    setTimeout(() => {
+    try {
+      // Show a loading toast
+      toast({
+        title: "Export Started",
+        description: "Your PDF is being generated and will download shortly.",
+      });
+      
+      // Dynamically import jsPDF and html2canvas
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
+      
+      // Create a new PDF document
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const width = pdf.internal.pageSize.getWidth();
+      const height = pdf.internal.pageSize.getHeight();
+      
+      // Set up the document title and properties
+      const ideaText = ideaForm.getValues().idea || "Startup Idea";
+      const country = ideaForm.getValues().country || "Global";
+      const title = `Startup Analysis: ${ideaText.substring(0, 40)}${ideaText.length > 40 ? '...' : ''}`;
+      
+      // Add a header to the PDF
+      pdf.setFontSize(22);
+      pdf.setTextColor(117, 81, 255); // Vision purple
+      pdf.text(title, width / 2, 20, { align: 'center' });
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, width / 2, 28, { align: 'center' });
+      pdf.text(`Market: ${country}`, width / 2, 34, { align: 'center' });
+      
+      // Add the startup idea description
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Startup Idea:', 14, 45);
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      const splitTitle = pdf.splitTextToSize(ideaText, width - 28);
+      pdf.text(splitTitle, 14, 52);
+      
+      let currentY = 52 + (splitTitle.length * 5);
+      
+      // Add a small gap
+      currentY += 10;
+      
+      // Add the success rate and business model strength
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Key Metrics:', 14, currentY);
+      currentY += 8;
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`Success Rate: ${analysisData.successRate}%`, 14, currentY);
+      currentY += 6;
+      pdf.text(`Business Model Strength: ${analysisData.businessModelStrength}/10`, 14, currentY);
+      currentY += 6;
+      pdf.text(`Market Size: ${analysisData.marketSize}`, 14, currentY);
+      currentY += 6;
+      pdf.text(`Funding Required: ${analysisData.fundingRequired}`, 14, currentY);
+      
+      // Add a small gap
+      currentY += 10;
+      
+      // Add the SWOT analysis
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('SWOT Analysis:', 14, currentY);
+      currentY += 8;
+      
+      // Strengths
+      pdf.setFontSize(12);
+      pdf.setTextColor(39, 174, 96); // Green
+      pdf.text('Strengths:', 14, currentY);
+      currentY += 6;
+      
+      pdf.setTextColor(80, 80, 80);
+      for (const strength of analysisData.swotAnalysis.strengths) {
+        const lines = pdf.splitTextToSize(`• ${strength}`, width - 28);
+        pdf.text(lines, 14, currentY);
+        currentY += lines.length * 5 + 2;
+      }
+      
+      // Weaknesses
+      pdf.setFontSize(12);
+      pdf.setTextColor(231, 76, 60); // Red
+      pdf.text('Weaknesses:', 14, currentY);
+      currentY += 6;
+      
+      pdf.setTextColor(80, 80, 80);
+      for (const weakness of analysisData.swotAnalysis.weaknesses) {
+        const lines = pdf.splitTextToSize(`• ${weakness}`, width - 28);
+        pdf.text(lines, 14, currentY);
+        currentY += lines.length * 5 + 2;
+      }
+      
+      // Check if we need a new page (if y position > 250mm)
+      if (currentY > 250) {
+        pdf.addPage();
+        currentY = 20;
+      }
+      
+      // Opportunities
+      pdf.setFontSize(12);
+      pdf.setTextColor(52, 152, 219); // Blue
+      pdf.text('Opportunities:', 14, currentY);
+      currentY += 6;
+      
+      pdf.setTextColor(80, 80, 80);
+      for (const opportunity of analysisData.swotAnalysis.opportunities) {
+        const lines = pdf.splitTextToSize(`• ${opportunity}`, width - 28);
+        pdf.text(lines, 14, currentY);
+        currentY += lines.length * 5 + 2;
+      }
+      
+      // Threats
+      pdf.setFontSize(12);
+      pdf.setTextColor(230, 126, 34); // Orange
+      pdf.text('Threats:', 14, currentY);
+      currentY += 6;
+      
+      pdf.setTextColor(80, 80, 80);
+      for (const threat of analysisData.swotAnalysis.threats) {
+        const lines = pdf.splitTextToSize(`• ${threat}`, width - 28);
+        pdf.text(lines, 14, currentY);
+        currentY += lines.length * 5 + 2;
+      }
+      
+      // Check if we need a new page
+      if (currentY > 250) {
+        pdf.addPage();
+        currentY = 20;
+      }
+      
+      // Add execution plan data if available
+      if (phase === "plan-results" && budgetAnalysisData) {
+        // Add a small gap
+        currentY += 10;
+        
+        pdf.setFontSize(16);
+        pdf.setTextColor(117, 81, 255); // Vision purple
+        pdf.text('Execution Plan', width / 2, currentY, { align: 'center' });
+        currentY += 10;
+        
+        if (budgetAnalysisData.budgetAnalysis?.breakdown) {
+          pdf.setFontSize(14);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text('Budget Breakdown:', 14, currentY);
+          currentY += 8;
+          
+          pdf.setFontSize(12);
+          pdf.setTextColor(80, 80, 80);
+          
+          for (const category of budgetAnalysisData.budgetAnalysis.breakdown) {
+            const text = `${category.category}: ${category.amount} (${category.percentage}%)`;
+            const lines = pdf.splitTextToSize(text, width - 28);
+            pdf.text(lines, 14, currentY);
+            currentY += lines.length * 5 + 2;
+          }
+        }
+        
+        // Check if we need a new page
+        if (currentY > 250) {
+          pdf.addPage();
+          currentY = 20;
+        }
+        
+        // Add top investor recommendations if available
+        if (budgetAnalysisData.fundingInvestors?.investors && budgetAnalysisData.fundingInvestors.investors.length > 0) {
+          pdf.setFontSize(14);
+          pdf.setTextColor(0, 0, 0);
+          pdf.text('Potential Investors:', 14, currentY);
+          currentY += 8;
+          
+          pdf.setFontSize(12);
+          pdf.setTextColor(80, 80, 80);
+          
+          for (const investor of budgetAnalysisData.fundingInvestors.investors) {
+            pdf.setTextColor(117, 81, 255); // Vision purple
+            pdf.text(`${investor.name} (${investor.firm})`, 14, currentY);
+            currentY += 6;
+            
+            pdf.setTextColor(80, 80, 80);
+            pdf.text(`Focus: ${investor.investmentFocus.join(', ')}`, 20, currentY);
+            currentY += 5;
+            pdf.text(`Location: ${investor.location}`, 20, currentY);
+            currentY += 5;
+            pdf.text(`Portfolio Fit: ${investor.portfolioFit}%`, 20, currentY);
+            currentY += 5;
+            
+            if (investor.contactInfo) {
+              pdf.text(`Contact: ${investor.contactInfo}`, 20, currentY);
+              currentY += 5;
+            }
+            
+            currentY += 5; // Add space between investors
+          }
+        }
+      }
+      
+      // Add disclaimer at the bottom of the last page
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text('Generated by GENIQL - AI Startup Analysis Platform. For informational purposes only.', width / 2, height - 10, { align: 'center' });
+      
+      // Save the PDF
+      pdf.save(`GENIQL-Startup-Analysis-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      // Show success message
       toast({
         title: "Export Complete",
-        description: "Your analysis has been exported to PDF.",
+        description: "Your analysis has been downloaded as a PDF."
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was a problem generating your PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
-  const handleShareToCommunity = () => {
+  const handleShareToCommunity = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
     
-    toast({
-      title: "Ready to Share",
-      description: "You'll be redirected to create a community post with your idea.",
-    });
+    try {
+      // Get the current startup idea
+      const ideaText = ideaForm.getValues().idea;
+      const country = ideaForm.getValues().country || "Global";
+      
+      // Prepare the post content with analysis highlights
+      const postContent = `
+## Startup Idea: ${ideaText.substring(0, 100)}${ideaText.length > 100 ? '...' : ''}
+
+### Key Analytics:
+- Success Rate: ${analysisData.successRate}%
+- Business Model Strength: ${analysisData.businessModelStrength}/10
+- Market Size: ${analysisData.marketSize}
+- Funding Required: ${analysisData.fundingRequired}
+
+### SWOT Analysis:
+**Strengths:**
+${analysisData.swotAnalysis.strengths.map(s => `- ${s}`).join('\n')}
+
+**Weaknesses:**
+${analysisData.swotAnalysis.weaknesses.map(w => `- ${w}`).join('\n')}
+
+**Opportunities:**
+${analysisData.swotAnalysis.opportunities.map(o => `- ${o}`).join('\n')}
+
+**Threats:**
+${analysisData.swotAnalysis.threats.map(t => `- ${t}`).join('\n')}
+
+*Analysis performed on ${new Date().toLocaleDateString()} for ${country} market using GENIQL AI*
+      `;
+      
+      // Make API call to create the community post
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `Startup Idea: ${ideaText.substring(0, 80)}${ideaText.length > 80 ? '...' : ''}`,
+          content: postContent,
+          category: "startup_analysis",
+          tags: ["startup", "analysis", country.toLowerCase().replace(/\s+/g, '_')],
+        }),
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create community post: ${response.statusText}`);
+      }
+      
+      const postData = await response.json();
+      
+      // Success message with redirection
+      toast({
+        title: "Post Created",
+        description: "Your analysis has been shared to the community.",
+      });
+      
+      // Redirect to the community page/post
+      setTimeout(() => {
+        window.location.href = `/community/post/${postData.id}`;
+      }, 1500);
+    } catch (error) {
+      console.error("Error sharing to community:", error);
+      toast({
+        title: "Share Failed",
+        description: error instanceof Error ? error.message : "Failed to share your analysis. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
-  const handleSaveAnalysis = () => {
+  const handleSaveAnalysis = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
     
-    toast({
-      title: "Analysis Saved",
-      description: "Your startup analysis has been saved to your account.",
-    });
+    try {
+      // Get the current startup idea
+      const ideaText = ideaForm.getValues().idea;
+      const country = ideaForm.getValues().country || "Global";
+      
+      // Create a results snapshot from the current analysis data
+      const resultsSnapshot = {
+        successRate: analysisData.successRate,
+        marketSize: analysisData.marketSize,
+        businessModelStrength: analysisData.businessModelStrength,
+        fundingRequired: analysisData.fundingRequired,
+        swotAnalysis: analysisData.swotAnalysis,
+        ...(budgetAnalysisData?.budgetAnalysis && { budgetAnalysis: budgetAnalysisData.budgetAnalysis })
+      };
+      
+      // Make API call to save the idea
+      const response = await fetch("/api/saved-ideas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `Startup Idea: ${ideaText.substring(0, 40)}${ideaText.length > 40 ? '...' : ''}`,
+          description: ideaText,
+          ideaType: "startup",
+          notes: `Analysis performed for ${country} market`,
+          resultsSnapshot: JSON.stringify(resultsSnapshot)
+        }),
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save analysis: ${response.statusText}`);
+      }
+      
+      // Success message
+      toast({
+        title: "Analysis Saved",
+        description: "Your startup analysis has been saved to your account."
+      });
+    } catch (error) {
+      console.error("Error saving analysis:", error);
+      toast({
+        title: "Save Failed",
+        description: error instanceof Error ? error.message : "Failed to save your analysis. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
