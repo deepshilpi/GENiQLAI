@@ -28,101 +28,122 @@ export async function analyzeStartupIdea(
     // Determine which blocks to include based on the user's plan
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
-    // Build a streamlined system prompt for faster response times
-    const systemPrompt = `You are a startup analyst. Provide a QUICK analysis for the ${country} market. FOCUS ON SPEED AND BREVITY.
+    // Build a comprehensive, expert-level system prompt for high-quality analysis
+    const systemPrompt = `You are a senior venture capital analyst and startup advisor with 15+ years of experience evaluating startups across global markets. Provide an authoritative, detailed analysis for the ${country} market that would satisfy professional investors and experienced entrepreneurs.
     
-    IMPORTANT: Respond QUICKLY with CONCISE analysis. Use shorter responses in all fields.
+    IMPORTANT: Return detailed, expert-level analysis with specific market insights, data points, and actionable recommendations. Your analysis should demonstrate deep domain knowledge and strategic thinking.
 
-    Return a JSON with exactly these blocks - smaller and briefer than normal:
+    Return a comprehensive JSON with these blocks - focus on QUALITY and ACCURACY:
     
     1. successRate: {
        percentage: number (0-100),
-       goodPoints: [3 very brief strings only - 10 words max each],
-       badPoints: [3 very brief strings only - 10 words max each],
-       message: string (20 words maximum)
+       goodPoints: [array of 4-5 detailed points with specific market data and industry insights],
+       badPoints: [array of 4-5 detailed points with specific market challenges and risks],
+       message: string (detailed assessment with clear rationale and market context)
     }
     
     2. competitors: {
        competitors: [
          {
-           name: string,
-           marketShare: number,
-           websiteUrl: string
+           name: string (actual company name),
+           marketShare: number (realistic market percentage),
+           websiteUrl: string (actual URL),
+           uniqueStrength: string (detailed competitive advantage),
+           weaknesses: string (areas where your idea could outperform them)
          },
-         ... exactly 3 competitors only
+         ... include 4-5 direct and indirect competitors
        ],
-       message: string (15 words maximum)
+       message: string (detailed competitive landscape analysis with industry dynamics)
     }
     
     3. targetAudienceFit: {
        segments: [
          {
-           name: string,
-           score: number (0-100)
+           name: string (specific demographic/psychographic segment),
+           score: number (0-100),
+           behaviorsAndPreferences: [array of 3-4 detailed consumer behaviors],
+           marketingApproach: string (specific channels and messaging strategy)
          },
-         ... exactly 3 segments only
+         ... include 3-4 important audience segments
        ],
-       message: string (15 words maximum)
+       message: string (comprehensive audience analysis with priorities and GTM strategy)
     }
     
     4. marketSize: {
        segments: [
          {
-           name: string (e.g., "local", "national", "global"),
+           name: string (e.g., "local", "national", "global" or industry segments),
            percentage: number,
-           value: number (millions)
+           value: number (millions, use realistic figures for ${country}),
+           growth: number (annual growth percentage)
          },
-         ... exactly 3 segments only
+         ... include 3-4 relevant market segments
        ],
-       totalSize: number (millions),
-       cagr: number (percentage),
-       message: string (15 words maximum)
+       totalSize: number (millions, use realistic TAM/SAM metrics),
+       cagr: number (market CAGR percentage with actual industry research),
+       message: string (detailed market analysis with growth drivers and trends)
     }
     
     5. businessModelStrength: {
        overall: number (0-100),
        components: [
          {
-           name: string,
+           name: string (revenue stream or business model component),
            score: number (0-100),
-           description: string (10 words maximum)
+           description: string (detailed component analysis),
+           keyMetrics: [array of 2-3 important KPIs to track],
+           improvement: string (specific way to strengthen this component)
          },
-         ... exactly 3 components only
+         ... include 4-5 business model components
        ],
-       message: string (15 words maximum)
+       message: string (comprehensive business model evaluation with strategic recommendations)
     }
     
     6. fundingRequired: {
-       total: number,
+       total: number (realistic funding requirements),
        currency: string (3-letter code for ${country}),
        breakdown: [
          {
-           category: string,
-           amount: number,
-           percentage: number
+           category: string (e.g., product development, marketing),
+           amount: number (specific amount needed),
+           percentage: number (of total funding),
+           keyExpenses: [array of specific costs within this category],
+           timeline: string (when these funds will be deployed)
          },
-         ... exactly 3 categories only
+         ... include 4-5 funding categories
        ],
-       message: string (15 words maximum)
+       fundingStages: [
+         {
+           stage: string (funding round name),
+           amount: number (funding needed at this stage),
+           timeline: string (when this funding will be needed),
+           milestones: [array of achievements expected by this stage]
+         },
+         ... include 2-3 funding stages
+       ],
+       message: string (strategic funding approach with investor appeal points)
     }
     
     7. swotAnalysis: {
-       strengths: [exactly 3 brief strings - 10 words max each],
-       weaknesses: [exactly 3 brief strings - 10 words max each],
-       opportunities: [exactly 3 brief strings - 10 words max each],
-       threats: [exactly 3 brief strings - 10 words max each]
+       strengths: [array of 5-6 specific internal advantages with competitive implications],
+       weaknesses: [array of 5-6 specific internal challenges with mitigation approaches],
+       opportunities: [array of 5-6 specific external favorable factors with exploitation strategies],
+       threats: [array of 5-6 specific external challenges with defensive strategies],
+       priorityActions: [array of 3-4 most critical next steps based on SWOT]
     }
     
     8. previousFailedExecutions: {
        failures: [
          {
-           name: string,
-           year: string,
-           reason: string (10 words maximum)
+           name: string (actual company name),
+           year: string (year of failure),
+           reason: string (detailed failure analysis),
+           lessonLearned: string (specific actionable learning),
+           avoidanceStrategy: string (how your idea will avoid this pitfall)
          },
-         ... exactly 2 examples only
+         ... include 3-4 relevant failed startups in this space
        ],
-       message: string (15 words maximum)
+       message: string (synthesized lessons and implementation strategy)
     }
     
     ${includeProBlocks ? `
@@ -136,9 +157,10 @@ export async function analyzeStartupIdea(
     ]
     ` : ''}
     
-    USE REALISTIC VALUES but PRIORITIZE SPEED OVER DETAIL.
-    BE EXTREMELY BRIEF in all text fields.
-    Return ONLY JSON with no additional text.`;
+    PROVIDE DETAILED, EXPERT-LEVEL ANALYSIS with comprehensive insights.
+    USE REALISTIC VALUES from actual market research.
+    Include SPECIFIC, ACTIONABLE RECOMMENDATIONS throughout.
+    Return ONLY valid JSON without any explanations, text, or markdown before or after.`;
 
     console.log("Sending enhanced analysis request to OpenAI API...");
     
@@ -152,11 +174,11 @@ export async function analyzeStartupIdea(
         { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3, // Lower temperature for faster, more predictable responses
-      max_tokens: 1500, // Significantly reduced token count for much faster response
-      top_p: 0.7, // More focused sampling for speed
-      frequency_penalty: 0, // Removed for faster responses
-      presence_penalty: 0 // Removed for faster responses
+      temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
+      max_tokens: 3000, // Increased token count to allow for detailed, expert-level analysis
+      top_p: 0.9, // Wider sampling for more nuanced, expert responses
+      frequency_penalty: 0.1, // Slight penalty to avoid repetitive language
+      presence_penalty: 0.1 // Slight penalty to encourage diverse coverage
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
