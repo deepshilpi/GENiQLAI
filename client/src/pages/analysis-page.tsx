@@ -132,12 +132,12 @@ interface FundingInvestorsProps {
 
 // Define the phases of the analysis process
 type AnalysisPhase = 
-  | "input"        // Initial idea input
-  | "loading"      // Processing analysis
-  | "results"      // Showing analysis results
-  | "budget-input" // Budget entry
-  | "budget-loading" // Processing budget analysis
-  | "budget-results"; // Showing budget-based results
+  | "input"            // Initial idea input
+  | "loading"          // Processing analysis
+  | "results"          // Showing analysis results
+  | "plan-input"       // Execution plan input form (replaces budget-input)
+  | "plan-loading"     // Processing execution plan
+  | "plan-results";    // Showing execution plan results
 
 // Schema for validating startup idea form
 const startupIdeaSchema = z.object({
@@ -333,6 +333,17 @@ export default function AnalysisPage() {
     "failedExecutions", // Previous failed executions
     "relatedIdeas",     // Related startup ideas
     "actionButtons"     // Action buttons (save, export, etc.)
+  ];
+  
+  // Execution plan blocks to be loaded progressively after "Plan to Execute"
+  const executionPlanBlocks = [
+    "planHeader",          // Plan header with idea summary
+    "budgetAllocation",    // Budget allocation breakdown
+    "executionTimeline",   // Step-by-step roadmap with timeframes
+    "teamRequirements",    // Required roles and their importance
+    "riskAnalysis",        // Key risks and mitigation strategies
+    "successMetrics",      // KPIs to track progress
+    "planActionButtons"    // Action buttons (share, save, export, etc.)
   ];
   
   // Forms setup
