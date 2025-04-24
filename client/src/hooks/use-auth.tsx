@@ -37,11 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track auth check status
   const [authChecked, setAuthChecked] = useState(false);
   
-  // Check if we're in a production environment
-  const isProduction = window.location.hostname.includes('.replit.app') || 
+  // Check if we're in a production environment - move this outside component to avoid hooks issues
+  // This should be a plain variable, not derived from hooks
+  const isProduction = typeof window !== 'undefined' && (
+      window.location.hostname.includes('.replit.app') || 
       window.location.hostname.includes('.com') || 
       window.location.hostname.includes('.org') || 
-      window.location.hostname.includes('.app');
+      window.location.hostname.includes('.app')
+  );
       
   // Production-specific login handler to fix auth state issues in deployed environment
   const handleProductionLogin = (userData: User) => {
