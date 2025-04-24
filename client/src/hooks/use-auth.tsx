@@ -39,9 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user", forceAuthUpdate], // Include forceAuthUpdate in query key
     queryFn: getQueryFn({ on401: "returnNull" }),
-    staleTime: Infinity, // Never consider data stale - completely avoid automatic refetching
+    // Override the default queryClient settings for this specific query
+    staleTime: 0, // Set to 0 to allow refetching when needed
     retry: 0, // Don't retry on failure - reduces queries
-    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnWindowFocus: true, // Enable refetching on window focus for better state sync
+    refetchOnMount: true, // Refetch when component mounts to ensure fresh data
   });
 
   // Expose refetch method for use elsewhere
@@ -257,12 +259,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logged out successfully",
       });
     },
-    onError: (error: Error, _, context: { previousUser: User | null } | undefined) => {
+    onError: (error: Error, variables: void, context: unknown) => {
       console.error("Logout error:", error);
       
+      // Type-check and cast the context
+      const typedContext = context as { previousUser: User | null } | undefined;
+      
       // Restore previous user data if available
-      if (context?.previousUser) {
-        queryClient.setQueryData(["/api/user", forceAuthUpdate], context.previousUser);
+      if (typedContext?.previousUser) {
+        queryClient.setQueryData(["/api/user", forceAuthUpdate], typedContext.previousUser);
       }
       
       // Force a refresh of auth state

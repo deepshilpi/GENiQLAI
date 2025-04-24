@@ -93,12 +93,13 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false, // Disable refetching on window focus to avoid delays
-      staleTime: Infinity, // Set to Infinity to prevent automatic refetching
+      refetchOnWindowFocus: true, // Enable refetching on window focus for auth state
+      refetchOnMount: true, // Refetch when component mounts
+      staleTime: 0, // Set to 0 for auth-related queries to prevent stale data
       retry: 1, // Allow one retry for better resilience and user experience
       retryDelay: 1000, // Wait 1 second before retry
       // Note: TanStack Query v5 doesn't use keepPreviousData or placeholderData in defaultOptions
-      gcTime: 1000 * 60 * 60, // Keep unused data in the cache for 1 hour
+      gcTime: 1000 * 60 * 5, // Keep unused data in the cache for 5 minutes (reduced from 1 hour)
     },
     mutations: {
       retry: 1, // Allow one retry for better resilience

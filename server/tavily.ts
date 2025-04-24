@@ -49,7 +49,7 @@ async function fetchTechCrunchNews(): Promise<NewsArticle[]> {
       throw new Error(`TechCrunch API error: ${response.statusText}`);
     }
     
-    const posts = await response.json();
+    const posts = await response.json() as any[];
     
     return posts.map((post: any) => ({
       title: decodeHtmlEntities(post.title.rendered),
@@ -74,7 +74,7 @@ async function fetchHackerNews(): Promise<NewsArticle[]> {
       throw new Error(`Hacker News API error: ${topStoriesResponse.statusText}`);
     }
     
-    const storyIds = await topStoriesResponse.json();
+    const storyIds = await topStoriesResponse.json() as number[];
     const topIds = storyIds.slice(0, 10); // Get top 10 stories
     
     // Fetch details for each story
