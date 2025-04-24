@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
 import { AuthContext } from "@/hooks/use-auth";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useNotifications } from "@/hooks/use-notifications"; 
 import { Button } from "@/components/ui/button";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
@@ -48,7 +47,6 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { openAuthDialog } = useAuthDialog();
   
   // Use real notifications from hook instead of dummy data
   const { 
@@ -381,7 +379,7 @@ export function Sidebar() {
           <ul className="space-y-1 mb-4">
             <li>
               <button
-                onClick={() => openAuthDialog({ defaultTab: 'login' })}
+                onClick={() => navigate('/auth')}
                 className={cn(
                   "vision-sidebar-item w-full text-left bg-primary/20 hover:bg-primary/30",
                   collapsed && "justify-center px-2"

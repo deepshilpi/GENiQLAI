@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation } from "wouter";
 import { AuthContext } from "@/hooks/use-auth";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import { 
@@ -40,7 +39,6 @@ export function Header() {
   const auth = useContext(AuthContext);
   const user = auth?.user || null;
   const logoutMutation = auth?.logoutMutation;
-  const { openAuthDialog } = useAuthDialog();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -307,7 +305,7 @@ export function Header() {
               <Button 
                 variant="secondary"
                 className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
-                onClick={() => openAuthDialog({ defaultTab: "login" })}
+                onClick={() => navigate('/auth')}
               >
                 <User className="w-4 h-4 mr-2" />
                 <span>Sign In</span>

@@ -13,7 +13,6 @@ import {
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Extended post type with author information
@@ -43,7 +42,6 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  const { openAuthDialog } = useAuthDialog();
   
   // Initialize reactions if they don't exist
   const reactions = post.reactions || { like: 0, love: 0, idea: 0, fire: 0, smile: 0 };
@@ -51,8 +49,8 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   
   const handlePump = () => {
     if (!currentUser) {
-      // Show auth dialog instead of navigating
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      navigate('/auth');
       return;
     }
     onVote(post.id, "pump");
@@ -60,8 +58,8 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   
   const handleDump = () => {
     if (!currentUser) {
-      // Show auth dialog instead of navigating
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page
+      navigate('/auth');
       return;
     }
     onVote(post.id, "dump");
@@ -69,7 +67,7 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   
   const handleReaction = (reactionType: string) => {
     if (!currentUser) {
-      openAuthDialog({ defaultTab: "login" });
+      navigate('/auth');
       return;
     }
     
