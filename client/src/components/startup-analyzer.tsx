@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { usePremiumFeatures } from "@/hooks/use-premium-features";
 import { BadgeCheck, Rocket, Sparkles } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface StartupAnalyzerProps {
   startupIdea: string;
@@ -20,11 +21,61 @@ export function StartupAnalyzer({
 }: StartupAnalyzerProps) {
   const { user } = useAuth();
   const { isPro, isUnicorn, userPlan, planLabel } = usePremiumFeatures();
+  const [isTyping, setIsTyping] = useState(false);
+  const demoIdeas = [
+    "An AI-driven mental health platform that provides personalized therapy recommendations and tracks progress over time.",
+    "A blockchain-based supply chain tracking system for Indian farmers to eliminate middlemen and increase profits.",
+    "A smart water management solution using IoT sensors to reduce wastage in urban areas.",
+    "A platform that connects rural artisans directly with global markets using AR/VR product showcases."
+  ];
+  const demoIdeaRef = useRef(0);
+  const typewriterRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Typing animation effect
+  useEffect(() => {
+    if (!startupIdea && !isTyping && !isAnalyzing) {
+      // Start typing animation after 2 seconds of page load
+      const timeout = setTimeout(() => {
+        setIsTyping(true);
+        let currentIndex = 0;
+        const currentDemoIdea = demoIdeas[demoIdeaRef.current % demoIdeas.length];
+        
+        const typeNextCharacter = () => {
+          if (currentIndex <= currentDemoIdea.length) {
+            setStartupIdea(currentDemoIdea.substring(0, currentIndex));
+            currentIndex++;
+            typewriterRef.current = setTimeout(typeNextCharacter, Math.random() * 50 + 30); // Random typing speed for realism
+          } else {
+            setIsTyping(false);
+            demoIdeaRef.current += 1; // Move to next idea for next time
+          }
+        };
+        
+        typeNextCharacter();
+      }, 1000);
+      
+      return () => clearTimeout(timeout);
+    }
+    
+    return () => {
+      if (typewriterRef.current) {
+        clearTimeout(typewriterRef.current);
+      }
+    };
+  }, [startupIdea, isTyping, isAnalyzing, setStartupIdea, demoIdeas]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (startupIdea.trim()) {
       onAnalyze();
+    }
+  };
+  
+  const handleInputFocus = () => {
+    // Stop typing animation when user focuses on input
+    setIsTyping(false);
+    if (typewriterRef.current) {
+      clearTimeout(typewriterRef.current);
     }
   };
   
@@ -48,28 +99,32 @@ export function StartupAnalyzer({
   
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="relative">
-        <Input
+      <div>
+        <Textarea
           value={startupIdea}
           onChange={(e) => setStartupIdea(e.target.value)}
-          className="w-full py-3 px-4 rounded-xl bg-accent border border-border text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          onFocus={handleInputFocus}
+          onClick={handleInputFocus}
+          className="w-full py-3 px-4 rounded-xl bg-accent border border-border text-white placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary min-h-[100px]"
           placeholder="Enter your startup idea..."
           disabled={isAnalyzing}
         />
-        <Button
-          type="submit"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-vision-primary-gradient text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all"
-          disabled={isAnalyzing || !startupIdea.trim()}
-        >
-          {isAnalyzing ? (
-            <>
-              <span className="animate-spin mr-2">⟳</span>
-              Analyzing...
-            </>
-          ) : (
-            "Analyze"
-          )}
-        </Button>
+        <div className="flex justify-end mt-2">
+          <Button
+            type="submit"
+            className="bg-vision-primary-gradient text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all"
+            disabled={isAnalyzing || !startupIdea.trim()}
+          >
+            {isAnalyzing ? (
+              <>
+                <span className="animate-spin mr-2">⟳</span>
+                Analyzing...
+              </>
+            ) : (
+              "Analyze"
+            )}
+          </Button>
+        </div>
       </div>
       
       <div className="flex items-center justify-between">
