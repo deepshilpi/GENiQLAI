@@ -1424,14 +1424,71 @@ function setupWebSocketServer(httpServer: Server) {
     path: '/ws'
   });
   
+  // Track last seen time to handle stale connections
+  const lastSeen = new Map<UserWebSocket, number>();
+  
+  // Set up interval for checking stale connections
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws: UserWebSocket) => {
+      // Check if connection hasn't sent anything in over 60 seconds
+      const lastSeenTime = lastSeen.get(ws);
+      if (lastSeenTime && Date.now() - lastSeenTime > 60000) {
+        // This is a stale connection that hasn't sent a ping recently
+        if (ws.userId) {
+          console.log(`Terminating stale connection for user ${ws.userId} (inactive for >60s)`);
+        } else {
+          console.log('Terminating stale unauthenticated connection (inactive for >60s)');
+        }
+        ws.terminate();
+        lastSeen.delete(ws);
+      }
+    });
+  }, 30000); // Check every 30 seconds
+  
+  // Clean up interval on server close
+  httpServer.on('close', () => {
+    clearInterval(heartbeatInterval);
+    console.log('WebSocket heartbeat interval cleared on server shutdown');
+  });
+
   wss.on('connection', (ws: UserWebSocket, req) => {
     // Initialize user as unauthenticated
     // Later, client will need to send authentication with user ID
     ws.userId = undefined;
     
+    // Set initial last seen time
+    lastSeen.set(ws, Date.now());
+    
+    // Function to update last seen timestamp
+    const updateLastSeen = () => {
+      lastSeen.set(ws, Date.now());
+    };
+    
+    // Handle pings with pongs to keep connection alive
+    ws.on('ping', () => {
+      ws.pong();
+      updateLastSeen();
+    });
+    
+    ws.on('pong', () => {
+      updateLastSeen();
+    });
+    
     ws.on('message', async (message) => {
       try {
-        const data: WebSocketMessage = JSON.parse(message.toString());
+        // Update last seen time whenever a message is received
+        updateLastSeen();
+        
+        const messageStr = message.toString();
+        
+        // Special handling for ping/pong messages (might not be JSON)
+        if (messageStr === 'ping' || messageStr.trim() === '{"type":"ping"}') {
+          ws.send(JSON.stringify({ type: 'pong' }));
+          return;
+        }
+        
+        // Parse message as JSON
+        const data: WebSocketMessage = JSON.parse(messageStr);
         
         // Handle authentication
         if (data.type === 'auth') {
@@ -1679,10 +1736,18 @@ function setupWebSocketServer(httpServer: Server) {
         
       } catch (error) {
         console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({
-          type: 'error',
-          payload: { message: 'Server error processing message' }
-        }));
+        
+        // Make sure we can send the error response even if the connection is having issues
+        try {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Server error processing message' }
+            }));
+          }
+        } catch (sendError) {
+          console.error('Failed to send error message to client:', sendError);
+        }
       }
     });
     

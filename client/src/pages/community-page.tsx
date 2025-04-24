@@ -368,7 +368,7 @@ export default function CommunityPage() {
                             description: "Your comment has been added to the post"
                           });
                         }}
-                        currentUser={user}
+                        currentUser={user || null}
                       />
                     ))
                   ) : (
