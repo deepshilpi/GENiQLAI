@@ -45,31 +45,58 @@ export async function apiRequest(
     sessionStorage.setItem('auth_logout_requested', 'true');
   }
     
-  const res = await fetch(finalUrl, {
-    method,
-    headers: {
-      ...(data ? { "Content-Type": "application/json" } : {}),
-      // Add cache control headers for all auth-related requests
-      ...(isAuthRelated 
-        ? {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          } 
-        : {})
-    },
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(finalUrl, {
+      method,
+      headers: {
+        ...(data ? { "Content-Type": "application/json" } : {}),
+        // Add cache control headers for all auth-related requests
+        ...(isAuthRelated 
+          ? {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            } 
+          : {})
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
 
-  // For login success, ensure we add a marker for post-login behavior
-  if ((url.includes("/api/login") || url.includes("/api/register")) && res.ok) {
-    console.log("[Auth] Login/register successful - flagging for UI refresh");
-    sessionStorage.setItem('auth_login_success', 'true');
+    // For login success, ensure we add a marker for post-login behavior
+    if ((url.includes("/api/login") || url.includes("/api/register")) && res.ok) {
+      console.log("[Auth] Login/register successful - flagging for UI refresh");
+      sessionStorage.setItem('auth_login_success', 'true');
+    }
+
+    // Check if response is not JSON (when HTML is returned instead)
+    const contentType = res.headers.get('content-type');
+    if (contentType && !contentType.includes('application/json') && 
+        method !== 'GET' && !res.ok) {
+      // This likely means we got an HTML error page instead of JSON
+      console.error(`Non-JSON response received from ${url}`, {
+        status: res.status,
+        contentType
+      });
+      
+      // If this is a 401 Unauthorized, handle accordingly
+      if (res.status === 401) {
+        // Create an error object that matches our expected format
+        const authError = new Error("Authentication required");
+        throw Object.assign(authError, { status: 401, message: "Authentication required" });
+      } else {
+        // For other errors, create a helpful error message
+        const error = new Error(`Server returned ${res.status}: Request failed`);
+        throw Object.assign(error, { status: res.status, message: `Server error (${res.status})` });
+      }
+    }
+
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error(`API Request failed for ${method} ${url}:`, error);
+    throw error;
   }
-
-  await throwIfResNotOk(res);
-  return res;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
