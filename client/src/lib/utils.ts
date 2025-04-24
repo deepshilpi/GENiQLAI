@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number, currency: Currency | string = "USD", country?: string): string {
+export function formatCurrency(amount: number, currency: Currency | string = "USD", country?: string, useSuffix: boolean = true): string {
   // Map of countries to their locale codes for proper formatting
   const countryToLocale: Record<string, string> = {
     "United States": "en-US",
@@ -29,6 +29,40 @@ export function formatCurrency(amount: number, currency: Currency | string = "US
   // Format with locale-specific settings
   const currencyCode = typeof currency === 'string' ? currency : currency.code;
   
+  // Handle suffixes for large numbers if the flag is enabled
+  if (useSuffix) {
+    if (amount >= 1e12) { // Trillion
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currencyCode,
+        maximumFractionDigits: 1,
+        currencyDisplay: "symbol"
+      }).format(amount / 1e12) + " Trillion";
+    } else if (amount >= 1e9) { // Billion
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currencyCode,
+        maximumFractionDigits: 1,
+        currencyDisplay: "symbol"
+      }).format(amount / 1e9) + " Billion";
+    } else if (amount >= 1e6) { // Million
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currencyCode,
+        maximumFractionDigits: 1,
+        currencyDisplay: "symbol"
+      }).format(amount / 1e6) + " Million";
+    } else if (amount >= 1e3) { // Thousand
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currencyCode,
+        maximumFractionDigits: 1,
+        currencyDisplay: "symbol"
+      }).format(amount / 1e3) + " Thousand";
+    }
+  }
+  
+  // Regular formatting for smaller numbers or when suffix is disabled
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currencyCode,
