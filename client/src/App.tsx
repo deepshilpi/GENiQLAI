@@ -10,6 +10,7 @@ import AnalysisPage from "@/pages/analysis-page";
 import SettingsPage from "@/pages/settings-page";
 import TermsPage from "@/pages/terms-page";
 import PrivacyPage from "@/pages/privacy-page";
+import SavedIdeasPage from "@/pages/saved-ideas-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -52,6 +53,7 @@ function Router() {
         <ProtectedRoute path="/messages" component={MessagesPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
         <ProtectedRoute path="/settings" component={SettingsPage} />
+        <ProtectedRoute path="/saved-ideas" component={SavedIdeasPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route component={NotFound} />

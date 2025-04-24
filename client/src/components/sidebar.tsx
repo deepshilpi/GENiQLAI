@@ -193,23 +193,21 @@ export function Sidebar() {
           
           {user && (
             <li>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div 
-                    className={cn(
-                      "vision-sidebar-item cursor-pointer",
-                      isActive("/saved-ideas") && "active",
-                      collapsed && "justify-center px-2"
-                    )}
-                  >
-                    <BookmarkIcon className="w-5 h-5" />
-                    {!collapsed && <span>Saved Ideas</span>}
-                  </div>
-                </DropdownMenuTrigger>
-                <SavedIdeasDropdown asMenuItem />
-              </DropdownMenu>
+              <div 
+                className={cn(
+                  "vision-sidebar-item cursor-pointer",
+                  isActive("/saved-ideas") && "active",
+                  collapsed && "justify-center px-2"
+                )}
+                onClick={() => navigate("/saved-ideas")}
+              >
+                <Bookmark className="w-5 h-5" />
+                {!collapsed && <span>Saved Ideas</span>}
+              </div>
             </li>
           )}
+          
+          {/* Removed duplicate Saved Ideas dropdown in favor of dedicated page */}
 
           
         </ul>

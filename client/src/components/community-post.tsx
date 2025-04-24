@@ -30,7 +30,7 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   const handlePump = () => {
     if (!currentUser) {
       // Show auth dialog instead of navigating
-      openAuthDialog("login");
+      openAuthDialog({ defaultTab: "login" });
       return;
     }
     onVote(post.id, "pump");
@@ -39,7 +39,7 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   const handleDump = () => {
     if (!currentUser) {
       // Show auth dialog instead of navigating
-      openAuthDialog("login");
+      openAuthDialog({ defaultTab: "login" });
       return;
     }
     onVote(post.id, "dump");
