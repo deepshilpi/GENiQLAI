@@ -36,19 +36,19 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [location, navigate] = useLocation();
   // Get notification data from hook
   const { unreadCount: notificationCount } = useNotifications();
-  
+
   const handleNavigation = (path: string) => {
     navigate(path);
     onClose();
   };
-  
+
   // Utility function to determine if a nav item is active
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
     if (path !== "/" && location.startsWith(path)) return true;
     return false;
   };
-  
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent 
@@ -57,11 +57,8 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       >
         <div className="p-4 border-b border-vision-purple-200/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 flex items-center justify-center">
-                <img src="/logo.svg" alt="GENIQL Logo" className="w-9 h-9" />
-              </div>
-              <div className="font-heading font-bold text-lg text-white">GENIQL</div>
+            <div className="flex items-center">
+              <span className="font-heading font-bold text-lg text-white">Menu</span>
             </div>
             <SheetClose asChild>
               <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-white/70 hover:text-white hover:bg-vision-purple-100/10">
@@ -83,7 +80,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </div>
           )}
         </div>
-        
+
         <div className="py-4">
           <div className="px-3 pb-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider px-3 mb-1">Main</p>
@@ -124,7 +121,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               )}
               </nav>
           </div>
-          
+
           <div className="px-3 pt-4 pb-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider px-3 mb-1">Account</p>
             <nav className="space-y-1">
