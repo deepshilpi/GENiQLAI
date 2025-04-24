@@ -1029,6 +1029,153 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
           </div>
         </main>
       </div>
+
+      {/* Floating Action Button - Only show when not viewing a single post */}
+      {!postId && user && (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="fixed bottom-6 right-6 z-20"
+        >
+          <Button
+            size="lg"
+            onClick={handleNewPost}
+            className="rounded-full h-16 w-16 bg-vision-primary-gradient shadow-vision-glow hover:shadow-vision-glow-lg transition-all duration-300 border-0 p-0 flex items-center justify-center"
+          >
+            <PlusSquare className="h-7 w-7" />
+          </Button>
+        </motion.div>
+      )}
+
+      {/* New Post Dialog */}
+      <Sheet open={showPostForm} onOpenChange={setShowPostForm}>
+        <SheetContent side="bottom" className="max-w-screen-md mx-auto bg-vision-card/90 backdrop-blur-xl border-vision-purple-200/10 text-white h-[80vh] rounded-t-xl">
+          <SheetHeader>
+            <SheetTitle className="text-white">Share Your Startup Idea</SheetTitle>
+            <SheetDescription className="text-vision-purple-300">
+              Post your startup idea and get feedback from the Hustlers community
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="py-6">
+            <div className="space-y-4">
+              <div>
+                <Input
+                  className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white"
+                  placeholder="Title of your startup idea"
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Textarea
+                  className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white min-h-[150px]"
+                  placeholder="Describe your startup idea..."
+                  value={postInput}
+                  onChange={(e) => setPostInput(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Input
+                    className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white"
+                    placeholder="Add tags (press Enter to add)"
+                    value={currentTag}
+                    onChange={(e) => setCurrentTag(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && currentTag.trim()) {
+                        e.preventDefault();
+                        if (!tagsArray.includes(currentTag.trim())) {
+                          setTagsArray([...tagsArray, currentTag.trim()]);
+                        }
+                        setCurrentTag('');
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                    onClick={() => {
+                      if (currentTag.trim() && !tagsArray.includes(currentTag.trim())) {
+                        setTagsArray([...tagsArray, currentTag.trim()]);
+                        setCurrentTag('');
+                      }
+                    }}
+                  >
+                    <Hash className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {tagsArray.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {tagsArray.map((tag, index) => (
+                      <Badge
+                        key={index}
+                        className="bg-vision-purple-900/30 hover:bg-vision-purple-900/50 cursor-pointer"
+                        onClick={() => {
+                          setTagsArray(tagsArray.filter((_, i) => i !== index));
+                        }}
+                      >
+                        #{tag}
+                        <XCircle className="h-3 w-3 ml-1" />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="pt-4 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                  onClick={() => {
+                    setPostTitle('');
+                    setPostInput('');
+                    setTagsArray([]);
+                    setShowPostForm(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-vision-primary-gradient text-white hover:opacity-90 relative overflow-hidden"
+                  disabled={!postInput.trim() || !postTitle.trim() || isSubmitting}
+                  onClick={() => {
+                    const finalTags = tagsArray.join(',');
+                    setIsSubmitting(true);
+                    createPostMutation.mutate({
+                      title: postTitle.trim(),
+                      description: postInput.trim(),
+                      tags: finalTags,
+                    }, {
+                      onSuccess: () => {
+                        setPostTitle('');
+                        setPostInput('');
+                        setTagsArray([]);
+                        setIsSubmitting(false);
+                      },
+                      onError: () => {
+                        setIsSubmitting(false);
+                      }
+                    });
+                  }}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>Post</>
+                  )}
+                  <div className="absolute inset-0 bg-white/10 w-0 transition-all duration-500 group-hover:w-full"></div>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

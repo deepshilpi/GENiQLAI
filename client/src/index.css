@@ -308,6 +308,48 @@
     @apply bg-vision-card/90 backdrop-blur-md border border-vision-purple-200/20 rounded-xl shadow-lg;
   }
   
+  /* Vision UI special effects */
+  .shadow-vision-glow {
+    box-shadow: 0 0 15px rgba(117, 81, 255, 0.5);
+  }
+  
+  .shadow-vision-glow-lg {
+    box-shadow: 0 0 25px rgba(117, 81, 255, 0.7);
+  }
+  
+  .shadow-vision-blue-glow {
+    box-shadow: 0 0 15px rgba(0, 117, 255, 0.5);
+  }
+  
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .bg-vision-dark {
+    background-color: rgba(11, 20, 55, 0.95);
+  }
+  
+  /* Hustlers Community specific styles */
+  .post-card {
+    @apply backdrop-blur-md bg-vision-card/70 border border-vision-purple-200/10 transition-all duration-300;
+  }
+  
+  .post-card:hover {
+    @apply bg-vision-card/90 border-vision-purple-200/20;
+    box-shadow: 0 0 15px rgba(117, 81, 255, 0.15);
+  }
+  
+  /* Gradient text effect */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-vision-primary-gradient;
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .main-content {
