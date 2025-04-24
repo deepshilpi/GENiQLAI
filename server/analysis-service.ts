@@ -39,58 +39,142 @@ function getCountryCurrency(country: string): string {
   return currencyMap[country] || "USD";
 }
 
-// Helper function to perform structured API calls for analysis steps
+// Add delay function for retry backoff
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to perform structured API calls for analysis steps with retry logic
 async function executeAnalysisStep(stepName: string, systemPrompt: string, userPrompt: string) {
   console.log(`Executing analysis step: ${stepName}`);
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-      max_tokens: 1500, // Reduced for single-step analysis
-      top_p: 0.9
-    });
-    
-    if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
-      console.error(`Empty response for ${stepName} step`);
-      throw new Error(`Failed to get ${stepName} analysis`);
-    }
-    
-    const content = response.choices[0].message.content.trim();
-    
-    // Parse JSON with fallback mechanisms
+  
+  // Set up retry parameters
+  const MAX_RETRIES = 3;
+  let retries = 0;
+  let lastError: any = null;
+  
+  while (retries <= MAX_RETRIES) {
     try {
-      // Direct parsing attempt
-      const result = JSON.parse(content);
-      console.log(`Successfully parsed ${stepName} JSON directly`);
-      return result;
-    } catch (parseError) {
-      console.log(`Direct JSON parse failed for ${stepName}, trying extraction`);
-      
-      // Try regex extraction
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          const jsonContent = jsonMatch[0];
-          const result = JSON.parse(jsonContent);
-          console.log(`Successfully extracted and parsed ${stepName} JSON`);
-          return result;
-        } catch (extractError) {
-          console.error(`Failed to parse extracted ${stepName} JSON`);
-        }
+      // Log retry attempt
+      if (retries > 0) {
+        console.log(`Retry attempt ${retries}/${MAX_RETRIES} for step: ${stepName}`);
       }
       
-      console.error(`All JSON parsing methods failed for ${stepName}`);
-      throw new Error(`Failed to parse ${stepName} response`);
+      // Record start time to monitor API call duration
+      const startTime = Date.now();
+      
+      // Make OpenAI API request with reduced token count to avoid timeouts
+      // Note: Using AbortController for timeout since the OpenAI client doesn't support direct timeout option
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 1200, // Reduced from 1500 to help prevent timeouts
+        top_p: 0.9
+      }, { signal: abortController.signal });
+      
+      // Clear the timeout since we got a response
+      clearTimeout(timeoutId);
+      
+      // Log completion time for monitoring
+      const callDuration = Date.now() - startTime;
+      console.log(`API call for ${stepName} completed in ${callDuration}ms`);
+      
+      if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
+        console.error(`Empty response for ${stepName} step`);
+        throw new Error(`Failed to get ${stepName} analysis`);
+      }
+      
+      const content = response.choices[0].message.content.trim();
+      
+      // Parse JSON with fallback mechanisms
+      try {
+        // Direct parsing attempt
+        const result = JSON.parse(content);
+        console.log(`Successfully parsed ${stepName} JSON directly`);
+        return result;
+      } catch (parseError) {
+        console.log(`Direct JSON parse failed for ${stepName}, trying extraction methods`);
+        
+        // Try multiple extraction methods in sequence
+        
+        // Method 1: Basic regex extraction
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const jsonContent = jsonMatch[0];
+            const result = JSON.parse(jsonContent);
+            console.log(`Successfully extracted and parsed ${stepName} JSON using method 1`);
+            return result;
+          } catch (extractError) {
+            console.log(`Extraction method 1 failed for ${stepName}`);
+          }
+        }
+        
+        // Method 2: Try to extract content between markdown code blocks
+        const markdownMatch = content.match(/```(?:json)?([\s\S]*?)```/) || 
+                             content.match(/```([\s\S]*?)```/);
+        if (markdownMatch && markdownMatch[1]) {
+          try {
+            const extractedJson = markdownMatch[1].trim();
+            const result = JSON.parse(extractedJson);
+            console.log(`Successfully extracted and parsed ${stepName} JSON using method 2`);
+            return result;
+          } catch (extractError) {
+            console.log(`Extraction method 2 failed for ${stepName}`);
+          }
+        }
+        
+        console.error(`All JSON parsing methods failed for ${stepName}`);
+        throw new Error(`Failed to parse ${stepName} response`);
+      }
+    } catch (error: any) {
+      lastError = error;
+      
+      // Determine if this error is retriable
+      const errorMessage = String(error.message || error);
+      const isNetworkError = 
+        errorMessage.includes('timeout') || 
+        errorMessage.includes('rate limit') || 
+        errorMessage.includes('429') ||
+        errorMessage.includes('500') ||
+        errorMessage.includes('502') ||
+        errorMessage.includes('503') ||
+        errorMessage.includes('504') ||
+        errorMessage.includes('busy') ||
+        errorMessage.includes('capacity') ||
+        errorMessage.includes('overloaded');
+      
+      if (isNetworkError && retries < MAX_RETRIES) {
+        // This is a retriable error
+        retries++;
+        console.warn(`Retriable error in ${stepName}: ${errorMessage}. Attempt ${retries}/${MAX_RETRIES}`);
+        
+        // Exponential backoff
+        const backoffMs = 1000 * Math.pow(2, retries - 1);
+        console.log(`Waiting ${backoffMs}ms before retry...`);
+        await delay(backoffMs);
+        continue;
+      }
+      
+      // Non-retriable error or we've exhausted our retries
+      console.error(`Error in ${stepName} step (attempt ${retries}/${MAX_RETRIES}):`, error);
+      
+      if (retries >= MAX_RETRIES) {
+        throw new Error(`${stepName} analysis failed after ${MAX_RETRIES} attempts: ${errorMessage}`);
+      } else {
+        throw new Error(`${stepName} analysis failed: ${errorMessage}`);
+      }
     }
-  } catch (error: any) {
-    console.error(`Error in ${stepName} step:`, error);
-    throw new Error(`${stepName} analysis failed: ${error.message}`);
   }
+  
+  // This should never execute due to the throw in the loop above
+  throw new Error(`Unexpected execution flow in ${stepName}`);
 }
 
 /**

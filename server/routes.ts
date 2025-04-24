@@ -195,8 +195,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             let initialBudget = 500000;
             
             // Check if fundingRequired is available and has total property
-            if (analysisResults.fundingRequired && typeof analysisResults.fundingRequired.total === 'number') {
-              initialBudget = analysisResults.fundingRequired.total;
+            // Type assertion to prevent type errors since we've verified these properties exist
+            const typedAnalysisResults = analysisResults as AnalysisResults;
+            if (typedAnalysisResults.fundingRequired && typeof typedAnalysisResults.fundingRequired.total === 'number') {
+              initialBudget = typedAnalysisResults.fundingRequired.total;
               console.log(`Using calculated initial budget: ${initialBudget}`);
             } else {
               console.log(`Using default initial budget: ${initialBudget}`);
@@ -215,7 +217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Add planning data if available, but don't fail if this step fails
             if (planToExecute) {
               console.log("Successfully added execution planning data");
-              analysisResults.planToExecute = planToExecute;
+              // Updated to use consistent property name (planningToExecute) with type assertion
+              (analysisResults as any).planningToExecute = planToExecute;
             }
           } catch (planningError) {
             // Don't fail the whole analysis if just the planning step fails
