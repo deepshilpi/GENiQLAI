@@ -1817,9 +1817,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <FeasibilityScalability
-                    initialFeasibility={budgetAnalysisData.feasibilityAndScalability.initialFeasibility}
-                    scalingPoints={budgetAnalysisData.feasibilityAndScalability.scalingPoints}
-                    message={budgetAnalysisData.feasibilityAndScalability.message}
+                    initialFeasibility={budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability?.initialFeasibility || 50}
+                    scalingPoints={budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability?.scalingPoints || []}
+                    message={budgetAnalysisData.budgetAnalysis?.feasibilityAndScalability?.message || "Feasibility analysis not available"}
                   />
                 </CardContent>
               </Card>
