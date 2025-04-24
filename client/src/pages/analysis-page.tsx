@@ -515,6 +515,15 @@ export default function AnalysisPage() {
         throw new Error(data.message || "Failed to generate execution plan");
       }
       
+      // Log the response data to debug
+      console.log("Execution plan response:", data);
+      console.log("Response data keys:", Object.keys(data));
+      
+      // Check if planToExecute exists in the response
+      if (!data.planningToExecute && !data.planToExecute) {
+        console.warn("Missing execution plan data in the response");
+      }
+      
       // Also get investor recommendations
       const investorsResponse = await apiRequest("POST", "/api/investors", {
         startupIdea: ideaForm.getValues().idea,

@@ -478,9 +478,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
       
       // Combine the data in the correct structure - use the same structure expected by the client
-      // Make sure budgetAnalysis is properly nested to match what the client expects
+      // IMPORTANT: Use 'planToExecute' consistently (not planningToExecute) to match client expectations
       const responseData = {
-        planningToExecute: executionPlan,
+        planToExecute: executionPlan,
         budgetAnalysis
       };
       
