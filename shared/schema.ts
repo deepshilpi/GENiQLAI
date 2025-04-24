@@ -344,7 +344,11 @@ export type AnalysisResults = {
     segments: Array<{
       name: string;
       score: number; // 0-100 for radar chart
+      percentage?: number; // % of target market
+      fit?: number; // 0-100 alignment score
+      description?: string; // detailed segment analysis
       behaviorsAndPreferences?: string[];
+      marketingApproach?: string; // specific channels and messaging strategy
     }>;
     message: string;
   };
@@ -381,6 +385,7 @@ export type AnalysisResults = {
       category: string;
       amount: number;
       percentage: number;
+      description?: string; // description of what this funding covers
       keyExpenses?: string[];
       timeline?: string; // when these funds will be deployed
     }>;

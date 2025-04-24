@@ -28,12 +28,12 @@ export async function analyzeStartupIdea(
     // Determine which blocks to include based on the user's plan
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
-    // Build a comprehensive, expert-level system prompt for high-quality analysis
-    const systemPrompt = `You are a senior venture capital analyst and startup advisor with 15+ years of experience evaluating startups across global markets. Provide an authoritative, detailed analysis for the ${country} market that would satisfy professional investors and experienced entrepreneurs.
+    // Build a structured prompt based on the user's requirements
+    const systemPrompt = `You are an expert startup analyst specializing in the Indian market. Analyze the startup idea comprehensively for India.
     
-    IMPORTANT: Return detailed, expert-level analysis with specific market insights, data points, and actionable recommendations. Your analysis should demonstrate deep domain knowledge and strategic thinking.
+    IMPORTANT: Provide a detailed, organized, and accurate analysis following the exact structure below. Focus on factual data, cross-reference web sources when possible, and leverage your knowledge base for accuracy.
 
-    Return a comprehensive JSON with these blocks - focus on QUALITY and ACCURACY:
+    Return a JSON object with these eight distinct blocks - focus on QUALITY and ACCURACY:
     
     1. successRate: {
        percentage: number (0-100),
@@ -167,16 +167,16 @@ export async function analyzeStartupIdea(
     Include SPECIFIC, ACTIONABLE RECOMMENDATIONS throughout.
     Return ONLY valid JSON without any explanations, text, or markdown before or after.`;
 
-    console.log("Sending optimized single-call analysis request to OpenAI API...");
+    console.log("Sending optimized India-focused analysis request to OpenAI API...");
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { 
           role: "system", 
-          content: systemPrompt + "\n\nIMPORTANT: Provide COMPREHENSIVE, ACCURATE, and ORGANIZED ANALYSIS with industry-specific insights and realistic market data. Structure your response in clear blocks that are easy to parse and display."
+          content: systemPrompt + "\n\nIMPORTANT: Provide a detailed, organized, and accurate analysis for the INDIAN MARKET. Each block should be concise (100-200 words), data-driven, and include actionable insights specific to India. Use bullet points, tables, or numbered lists for clarity where appropriate."
         },
-        { role: "user", content: `Analyze this startup idea for the ${country} market in the ${startupIdea.includes("category:") ? startupIdea.split("category:")[1].trim().split(" ")[0] : ""} category:\n\n"${startupIdea}"\n\nProvide a comprehensive, accurate, and organized analysis following the structure specified. Focus on factual data and actionable insights.` }
+        { role: "user", content: `Analyze this startup idea for the Indian market in the ${startupIdea.includes("category:") ? startupIdea.split("category:")[1].trim().split(" ")[0] : ""} category:\n\n"${startupIdea}"\n\nProvide a comprehensive analysis following the exact structure specified with all eight required blocks. Focus on Indian market conditions, consumer behaviors, and business environment. Use INR for all monetary values and include cultural nuances relevant to success in India.` }
       ],
       response_format: { type: "json_object" },
       temperature: 0.7, // Set to 0.7 per requirements for balance of creativity and accuracy
@@ -353,11 +353,12 @@ export async function analyzeStartupIdea(
         },
         marketSize: {
           segments: [
-            { name: "Total available market", percentage: 100, value: 1000000 }
+            { name: "Total available market", percentage: 100, value: 75000000, growth: 12 }
           ],
-          totalSize: 1000000,
-          currency: "USD",
-          message: "Market size analysis could not be fully completed."
+          totalSize: 75000000,
+          currency: "INR",
+          cagr: 12.5,
+          message: "Market size analysis could not be fully completed for the Indian market."
         },
         businessModelStrength: {
           overall: 60,
@@ -372,18 +373,91 @@ export async function analyzeStartupIdea(
           message: "Business model analysis could not be fully completed."
         },
         fundingRequired: {
-          total: 500000,
-          currency: "USD",
+          total: 40000000,
+          currency: "INR",
           breakdown: [
-            { category: "Initial investment", amount: 500000, percentage: 100 }
+            { 
+              category: "Product Development", 
+              amount: 15000000, 
+              percentage: 37.5,
+              description: "Initial technology and product development costs" 
+            },
+            { 
+              category: "Marketing", 
+              amount: 10000000, 
+              percentage: 25,
+              description: "User acquisition and brand building in Indian market" 
+            },
+            { 
+              category: "Operations", 
+              amount: 8000000, 
+              percentage: 20,
+              description: "Office space, equipment, and operational costs" 
+            },
+            { 
+              category: "Legal & Compliance", 
+              amount: 3000000, 
+              percentage: 7.5,
+              description: "Regulatory compliance for Indian market" 
+            },
+            { 
+              category: "Contingency", 
+              amount: 4000000, 
+              percentage: 10,
+              description: "Reserve for unexpected expenses" 
+            }
           ],
-          message: "Funding requirements analysis could not be fully completed."
+          fundingStages: [
+            {
+              stage: "Seed",
+              amount: 15000000,
+              timeline: "Immediately",
+              milestones: ["MVP development", "Initial market testing"]
+            },
+            {
+              stage: "Series A",
+              amount: 25000000,
+              timeline: "12-18 months",
+              milestones: ["Established user base", "Revenue growth", "Market expansion"]
+            }
+          ],
+          message: "Funding requirements could not be fully analyzed for the Indian market."
         },
         swotAnalysis: {
-          strengths: ["Innovative concept", "Addresses market need"],
-          weaknesses: ["Analysis incomplete", "More details needed"],
-          opportunities: ["Growing market", "Technology adoption"],
-          threats: ["Competitive landscape", "Regulatory considerations"]
+          strengths: [
+            "Innovative concept for Indian market",
+            "Addresses specific market need in India",
+            "Potential for digital transformation impact",
+            "Scalable solution for diverse Indian demographics",
+            "Localization potential for regional markets"
+          ],
+          weaknesses: [
+            "New entrant in competitive market",
+            "Limited brand recognition in India",
+            "Potential cultural adaptation challenges",
+            "Variable internet connectivity across India",
+            "Initial capital requirements"
+          ],
+          opportunities: [
+            "Rapidly growing digital adoption in India",
+            "Rising middle class with increased spending power",
+            "Government digital India initiatives",
+            "Large untapped tier 2/3 city markets",
+            "Growing investor interest in Indian startups"
+          ],
+          threats: [
+            "Established competitors in Indian market",
+            "Regulatory hurdles in India",
+            "Price sensitivity of Indian consumers",
+            "Data privacy concerns and regulations",
+            "Economic fluctuations impacting consumer spending"
+          ],
+          priorityActions: [
+            "Conduct India-specific market research",
+            "Develop localized MVP for Indian users",
+            "Build strategic partnerships with local players",
+            "Ensure regulatory compliance for Indian market"
+          ]
         },
         previousFailedExecutions: {
           failures: [],
