@@ -57,9 +57,11 @@ function Router() {
           <Switch>
             <Route path="/" component={AnalysisPage} />
             <Route path="/home" component={HomePage} />
-            <Route path="/community/threads" component={ThreadsCommunityPage} />
+            <Route path="/community/threads">
+              {() => <ThreadsCommunityPage />}
+            </Route>
             <Route path="/community">
-              <Redirect to="/community/threads" />
+              {() => <Redirect to="/community/threads" />}
             </Route>
             <Route path="/community/post/:id">
               {(params) => <ThreadsCommunityPage postId={params.id} />}
