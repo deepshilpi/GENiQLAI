@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useLocation } from "wouter";
 import { AnalysisResults } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
@@ -8,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSavedIdeas } from "@/hooks/use-saved-ideas";
 import { AuthContext } from "@/hooks/use-auth";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface SaveIdeaButtonProps {
@@ -20,7 +20,7 @@ interface SaveIdeaButtonProps {
 export function SaveIdeaButton({ startupIdea, analysisResults, className }: SaveIdeaButtonProps) {
   const auth = useContext(AuthContext);
   const user = auth?.user;
-  const { openAuthDialog } = useAuthDialog();
+  const [_, navigate] = useLocation();
   const { toast } = useToast();
   const { createSavedIdea, isCreating } = useSavedIdeas();
   const [open, setOpen] = useState(false);
@@ -30,11 +30,8 @@ export function SaveIdeaButton({ startupIdea, analysisResults, className }: Save
 
   const handleSave = () => {
     if (!user) {
-      // Show login dialog instead of hiding button
-      openAuthDialog({ 
-        defaultTab: 'login',
-        returnTo: '/'
-      });
+      // Redirect to auth page instead of showing dialog
+      navigate('/auth');
       return;
     }
     
@@ -67,10 +64,8 @@ export function SaveIdeaButton({ startupIdea, analysisResults, className }: Save
   // Changed to always show button
   const handleButtonClick = () => {
     if (!user) {
-      openAuthDialog({ 
-        defaultTab: 'login',
-        returnTo: '/'
-      });
+      // Redirect to auth page instead of showing dialog
+      navigate('/auth');
       return;
     }
     setOpen(true);
