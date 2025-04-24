@@ -121,31 +121,44 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/register", async (req: Request, res: Response) => {
+    console.log("POST /api/register - New registration attempt");
+    
+    // Add cache control headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     try {
       const { username, email, password } = req.body;
+      console.log(`Registration request for username: ${username}, email: ${email}`);
 
       // Validate required fields
       if (!username || !email || !password) {
+        console.log("Registration failed: Missing required fields");
         return res.status(400).json({ 
           message: "Username, email, and password are required" 
         });
       }
 
-      // Check if username or email already exists
+      // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
+        console.log(`Registration failed: Username ${username} already exists`);
         return res.status(400).json({ message: "Username already exists" });
       }
 
       // Hash password and create user
+      console.log("Hashing password and creating user");
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
         username,
         email,
         password: hashedPassword,
       });
+      console.log(`User created with ID: ${user.id}`);
 
       // Log the user in after successful registration
+      console.log("Attempting automatic login after registration");
       req.login(user, (err: Error | null) => {
         if (err) {
           console.error("Login after registration failed:", err);
@@ -153,6 +166,9 @@ export function setupAuth(app: Express) {
             message: "Registration succeeded but automatic login failed. Please log in manually." 
           });
         }
+        
+        console.log(`Registration and login successful for ${username}, session ID: ${req.session?.id}`);
+        
         // Return the user without the password
         const { password, ...userWithoutPassword } = user;
         return res.status(201).json(userWithoutPassword);
@@ -166,9 +182,17 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req: Request, res: Response, next: NextFunction) => {
+    console.log("POST /api/login - attempt with username:", req.body?.username);
+    
+    // Add cache control headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     // Validate required fields
     const { username, password } = req.body;
     if (!username || !password) {
+      console.log("Login failed: Missing username or password");
       return res.status(400).json({ 
         message: "Username and password are required" 
       });
@@ -181,14 +205,19 @@ export function setupAuth(app: Express) {
       }
       
       if (!user) {
+        console.log("Login failed: Invalid credentials for username:", username);
         return res.status(401).json({ message: info?.message || "Invalid username or password" });
       }
 
+      console.log("Credentials valid, creating session for user:", username);
+      
       req.login(user, (loginErr: Error | null) => {
         if (loginErr) {
           console.error("Session login error:", loginErr);
           return res.status(500).json({ message: "Session creation failed" });
         }
+        
+        console.log("Login successful, session created with ID:", req.session?.id);
         
         // Return the user without the password
         const { password, ...userWithoutPassword } = user as any;
@@ -198,21 +227,55 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req: Request, res: Response) => {
+    // Add cache control headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    const username = req.user ? (req.user as any).username : 'unknown';
+    const sessionId = req.session?.id;
+    
+    console.log(`POST /api/logout - User: ${username}, Session ID: ${sessionId}`);
+    
+    if (!req.isAuthenticated()) {
+      console.log("Logout requested but user not authenticated");
+      return res.status(200).json({ message: "Already logged out" });
+    }
+    
     req.logout((err: Error | null) => {
       if (err) {
-        return res.status(500).json({ message: "Logout failed" });
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed: " + err.message });
       }
-      res.json({ message: "Logged out successfully" });
+      
+      // Destroy the session after logout
+      req.session.destroy((sessionErr) => {
+        if (sessionErr) {
+          console.warn("Session destruction error:", sessionErr);
+        }
+        
+        console.log(`Logout successful for user: ${username}`);
+        res.json({ message: "Logged out successfully" });
+      });
     });
   });
 
   app.get("/api/user", (req: Request, res: Response) => {
-    if (!req.isAuthenticated()) {
+    // Add cache control headers to prevent browser caching
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    console.log("GET /api/user - isAuthenticated:", req.isAuthenticated(), "session ID:", req.session?.id);
+    
+    if (!req.isAuthenticated() || !req.user) {
+      console.log("User not authenticated, returning 401");
       return res.status(401).json({ message: "Unauthorized" });
     }
     
     // Return user without password
     const { password, ...userWithoutPassword } = req.user as any;
+    console.log("Returning authenticated user:", userWithoutPassword.username);
     res.json(userWithoutPassword);
   });
 }
