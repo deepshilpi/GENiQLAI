@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import { useWebSocket } from './use-websocket';
 
 // Type definitions for notifications
 export interface Notification {
@@ -15,39 +16,67 @@ export interface Notification {
   data?: any;
 }
 
-// WebSocket message types for notifications
-interface WebSocketMessage {
-  type: string;
-  payload: any;
-}
-
 export function useNotifications() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { status: connectionStatus, subscribe, sendMessage } = useWebSocket();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   
-  // WebSocket reference using any to avoid TypeScript complaints about nested properties
-  const wsRef = useRef<any>(null);
-
-  // Track connection attempts
-  const reconnectAttempts = useRef(0);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Connect to WebSocket when the component mounts and user is authenticated
-  useEffect(() => {
-    // Clear any existing reconnect timeout
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
+  // Fetch notifications function
+  const fetchNotifications = useCallback(async () => {
+    if (!user || !user.id) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setIsLoading(false);
+      return;
     }
     
-    // Don't attempt to connect if no user is logged in
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/notifications');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch notifications');
+      }
+      
+      // Check for response type to avoid JSON parsing errors
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const data = await response.json();
+          if (data?.notifications) {
+            setNotifications(data.notifications || []);
+            setUnreadCount(data.unreadCount || 0);
+          } else {
+            // Return to empty state if no proper response
+            setNotifications([]);
+            setUnreadCount(0);
+          }
+        } catch (jsonError) {
+          console.log('Non-JSON response received from notifications API');
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      } else {
+        console.log('Non-JSON response received from notifications API');
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+      setUnreadCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+  
+  // Subscribe to WebSocket events
+  useEffect(() => {
     if (!user || !user.id) {
       setIsLoading(false);
-      setConnectionStatus('disconnected');
       setNotifications([]);
       setUnreadCount(0);
       return;
