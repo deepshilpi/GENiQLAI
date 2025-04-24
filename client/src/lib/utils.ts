@@ -29,36 +29,48 @@ export function formatCurrency(amount: number, currency: Currency | string = "US
   // Format with locale-specific settings
   const currencyCode = typeof currency === 'string' ? currency : currency.code;
   
-  // Handle suffixes for large numbers if the flag is enabled
-  if (useSuffix) {
+  // Special handling for Indian currency using appropriate terms
+  if (country === "India" && useSuffix) {
+    if (amount >= 1e9) { // 1 Arab (100 Crore)
+      return `₹${(amount / 1e9).toFixed(1)} Arab`;
+    } else if (amount >= 1e7) { // 1 Crore
+      return `₹${(amount / 1e7).toFixed(1)} Crore`;
+    } else if (amount >= 1e5) { // 1 Lakh
+      return `₹${(amount / 1e5).toFixed(1)} Lakh`;
+    } else if (amount >= 1e3) { // 1 Thousand
+      return `₹${(amount / 1e3).toFixed(1)}K`;
+    }
+  } 
+  // For non-Indian currencies or when Indian suffixes are not used
+  else if (useSuffix) {
     if (amount >= 1e12) { // Trillion
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
         maximumFractionDigits: 1,
         currencyDisplay: "symbol"
-      }).format(amount / 1e12) + " Trillion";
+      }).format(amount / 1e12) + " T";
     } else if (amount >= 1e9) { // Billion
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
         maximumFractionDigits: 1,
         currencyDisplay: "symbol"
-      }).format(amount / 1e9) + " Billion";
+      }).format(amount / 1e9) + " B";
     } else if (amount >= 1e6) { // Million
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
         maximumFractionDigits: 1,
         currencyDisplay: "symbol"
-      }).format(amount / 1e6) + " Million";
+      }).format(amount / 1e6) + " M";
     } else if (amount >= 1e3) { // Thousand
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency: currencyCode,
         maximumFractionDigits: 1,
         currencyDisplay: "symbol"
-      }).format(amount / 1e3) + " Thousand";
+      }).format(amount / 1e3) + " K";
     }
   }
   
