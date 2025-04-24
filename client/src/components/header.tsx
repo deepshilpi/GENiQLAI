@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation } from "wouter";
 import { AuthContext } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
@@ -86,9 +87,38 @@ export function Header() {
     setIsDarkMode(!isDarkMode);
   };
 
+  // Fixed logout handler with debounce to prevent repeated calls
   const handleLogout = () => {
+    // Check if already logging out
+    if (logoutMutation?.isPending) {
+      console.log("Logout already in progress, ignoring duplicate request");
+      return;
+    }
+    
+    // Check if logged in first
+    if (!user) {
+      console.log("User already logged out, no need to logout again");
+      navigate("/auth");
+      return;
+    }
+    
     if (logoutMutation) {
-      logoutMutation.mutate();
+      console.log("Executing logout");
+      
+      // Set UI state immediately
+      queryClient.setQueryData(["/api/user"], null);
+      
+      // Clear session storage
+      sessionStorage.removeItem('auth_login_success');
+      sessionStorage.removeItem('auth_logout_requested');
+      
+      // Do the actual logout API call
+      logoutMutation.mutate(undefined, {
+        onSettled: () => {
+          // Force navigation to auth page
+          window.location.href = "/auth";
+        }
+      });
     } else {
       console.error("Logout mutation not available");
     }

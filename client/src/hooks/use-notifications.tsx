@@ -17,7 +17,17 @@ export interface Notification {
   data?: any;
 }
 
-export function useNotifications() {
+interface UseNotificationsReturn {
+  notifications: Notification[];
+  unreadCount: number;
+  isLoading: boolean;
+  connectionStatus: WebSocketStatus;
+  markAsRead: (notificationId: number) => void;
+  markAllAsRead: () => void;
+  fetchNotifications: () => Promise<Notification[]>;
+}
+
+export function useNotifications(): UseNotificationsReturn {
   const { user } = useAuth();
   const { toast } = useToast();
   const { status: connectionStatus, subscribe, sendMessage } = useWebSocket();
@@ -128,9 +138,12 @@ export function useNotifications() {
     };
   }, [user, fetchNotifications, handleNotification, subscribe]);
   
-  // Mark notifications as read
-  const markAsRead = useCallback((notificationIds: number[]) => {
-    if (!user || !user.id || !notificationIds.length) return;
+  // Mark a single notification as read
+  const markAsRead = useCallback((notificationId: number) => {
+    if (!user || !user.id) return;
+    
+    // Convert single ID to array for reuse in existing logic
+    const notificationIds = [notificationId];
     
     // Optimistic UI update
     setNotifications(prev => 
@@ -158,12 +171,46 @@ export function useNotifications() {
     });
   }, [user, sendMessage]);
   
+  // Mark all notifications as read
+  const markAllAsRead = useCallback(() => {
+    if (!user || !user.id || !notifications.length) return;
+    
+    // Get all unread notification IDs
+    const unreadIds = notifications
+      .filter(notification => !notification.isRead)
+      .map(notification => notification.id);
+    
+    if (unreadIds.length === 0) return;
+    
+    // Optimistic UI update
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, isRead: true }))
+    );
+    setUnreadCount(0);
+    
+    // Send message through WebSocket
+    sendMessage({
+      type: 'mark_all_read',
+      payload: { notificationIds: unreadIds }
+    });
+    
+    // Fallback API call to ensure synchronization
+    fetch('/api/notifications/mark-all-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationIds: unreadIds })
+    }).catch(error => {
+      console.error('Error marking all notifications as read:', error);
+    });
+  }, [user, notifications, sendMessage]);
+  
   return {
     notifications,
     unreadCount,
     isLoading,
     connectionStatus,
     markAsRead,
+    markAllAsRead,
     fetchNotifications
   };
 }
