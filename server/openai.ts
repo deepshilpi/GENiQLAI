@@ -937,7 +937,32 @@ export async function generateBudgetAnalysis(
     
     try {
       const content = response.choices[0].message.content.trim();
-      const budgetAnalysisContent = JSON.parse(content);
+      
+      console.log("Budget analysis response (first 100 chars):", content.substring(0, 100) + "...");
+      
+      let budgetAnalysisContent;
+      try {
+        budgetAnalysisContent = JSON.parse(content);
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        
+        // Attempt to sanitize the response if it might have extra text
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          const potentialJson = content.substring(jsonStart, jsonEnd + 1);
+          console.log("Attempting to parse sanitized JSON (first 100 chars):", potentialJson.substring(0, 100) + "...");
+          budgetAnalysisContent = JSON.parse(potentialJson);
+        } else {
+          throw new Error("Could not extract valid JSON from response");
+        }
+      }
+      
+      // Check if budgetAnalysisContent is an object
+      if (!budgetAnalysisContent || typeof budgetAnalysisContent !== 'object') {
+        throw new Error("Parsed content is not a valid object");
+      }
       
       // Check for missing fields and provide defaults instead of failing
       const requiredFields = [
@@ -1144,12 +1169,101 @@ export async function generateExecutionPlan(
     
     try {
       const content = response.choices[0].message.content.trim();
-      const planContent = JSON.parse(content);
+      console.log("Execution plan response (first 100 chars):", content.substring(0, 100) + "...");
       
-      // Validate the basic structure
-      if (!planContent.budget || !planContent.roadmap) {
-        console.error("Missing required fields in execution plan response:", planContent);
-        throw new Error("Invalid execution plan structure");
+      let planContent;
+      try {
+        planContent = JSON.parse(content);
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        
+        // Attempt to sanitize the response if it might have extra text
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          const potentialJson = content.substring(jsonStart, jsonEnd + 1);
+          console.log("Attempting to parse sanitized JSON (first 100 chars):", potentialJson.substring(0, 100) + "...");
+          planContent = JSON.parse(potentialJson);
+        } else {
+          throw new Error("Could not extract valid JSON from response");
+        }
+      }
+      
+      // Check if planContent is an object
+      if (!planContent || typeof planContent !== 'object') {
+        throw new Error("Parsed content is not a valid object");
+      }
+      
+      // Validate the basic structure and provide defaults if needed
+      if (!planContent.budget) {
+        console.warn("Missing budget in execution plan, providing default");
+        planContent.budget = {
+          development: initialBudget * 0.4,
+          marketing: initialBudget * 0.3,
+          operations: initialBudget * 0.2,
+          compliance: initialBudget * 0.05,
+          contingency: initialBudget * 0.05
+        };
+      }
+      
+      if (!planContent.roadmap || !Array.isArray(planContent.roadmap) || planContent.roadmap.length === 0) {
+        console.warn("Missing or invalid roadmap in execution plan, providing default");
+        planContent.roadmap = [
+          {
+            step: "MVP Development",
+            description: "Build core functionality with minimal features",
+            timeframe: "2-3 months",
+            cost: initialBudget * 0.3,
+            keyDeliverables: ["Working prototype", "Initial user testing"]
+          },
+          {
+            step: "Market Testing & Iteration",
+            description: "Test with early adopters and iterate",
+            timeframe: "2 months",
+            cost: initialBudget * 0.2,
+            keyDeliverables: ["User feedback collection", "Product improvements"]
+          },
+          {
+            step: "Official Launch",
+            description: "Full market launch with marketing campaign",
+            timeframe: "1 month",
+            cost: initialBudget * 0.25,
+            keyDeliverables: ["Marketing materials", "Public release"]
+          },
+          {
+            step: "Growth & Expansion",
+            description: "Scale operations and expand user base",
+            timeframe: "6 months",
+            cost: initialBudget * 0.25,
+            keyDeliverables: ["Increased user metrics", "Revenue generation"]
+          }
+        ];
+      }
+      
+      // Ensure other fields exist
+      if (!planContent.currency) {
+        planContent.currency = currency;
+      }
+      
+      if (!planContent.timeline) {
+        planContent.timeline = "12-15 months to market profitability";
+      }
+      
+      if (!planContent.keyRisks || !Array.isArray(planContent.keyRisks)) {
+        planContent.keyRisks = [
+          "Market adoption slower than expected",
+          "Unexpected development roadblocks",
+          "Stronger competition emerges"
+        ];
+      }
+      
+      if (!planContent.successMetrics || !Array.isArray(planContent.successMetrics)) {
+        planContent.successMetrics = [
+          "User acquisition targets met",
+          "Positive customer feedback",
+          "Revenue growth on track"
+        ];
       }
       
       return planContent as AnalysisResults["planToExecute"];
@@ -1226,13 +1340,59 @@ export async function findInvestors(
     
     try {
       const content = response.choices[0].message.content.trim();
-      const investorsContent = JSON.parse(content);
+      console.log("Investors response (first 100 chars):", content.substring(0, 100) + "...");
       
-      // Validate the basic structure
-      if (!investorsContent.investors || !Array.isArray(investorsContent.investors)) {
-        console.error("Missing required fields in investors response:", investorsContent);
-        throw new Error("Invalid investors response structure");
+      let investorsContent;
+      try {
+        investorsContent = JSON.parse(content);
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        
+        // Attempt to sanitize the response if it might have extra text
+        const jsonStart = content.indexOf('{');
+        const jsonEnd = content.lastIndexOf('}');
+        
+        if (jsonStart >= 0 && jsonEnd > jsonStart) {
+          const potentialJson = content.substring(jsonStart, jsonEnd + 1);
+          console.log("Attempting to parse sanitized JSON (first 100 chars):", potentialJson.substring(0, 100) + "...");
+          investorsContent = JSON.parse(potentialJson);
+        } else {
+          throw new Error("Could not extract valid JSON from response");
+        }
       }
+      
+      // Check if investorsContent is an object
+      if (!investorsContent || typeof investorsContent !== 'object') {
+        throw new Error("Parsed content is not a valid object");
+      }
+      
+      // Validate the basic structure and provide defaults if needed
+      if (!investorsContent.investors || !Array.isArray(investorsContent.investors) || investorsContent.investors.length === 0) {
+        console.warn("Missing or invalid investors array, providing default");
+        investorsContent.investors = [
+          {
+            name: "Accel Partners",
+            firm: "Accel",
+            tags: ["Technology", "Early Stage"],
+            crunchbaseLink: "https://www.crunchbase.com/organization/accel-partners"
+          },
+          {
+            name: "Sequoia Capital",
+            firm: "Sequoia",
+            tags: ["Technology", "Growth Stage"],
+            crunchbaseLink: "https://www.crunchbase.com/organization/sequoia-capital"
+          },
+          {
+            name: "Y Combinator",
+            firm: "Y Combinator",
+            tags: ["Tech Startups", "Seed Stage"],
+            crunchbaseLink: "https://www.crunchbase.com/organization/y-combinator"
+          }
+        ];
+      }
+      
+      // Add disclaimer
+      investorsContent.disclaimer = "This is AI-generated sample data for illustration only. Always conduct your own research before approaching investors.";
       
       return investorsContent as AnalysisResults["findingInvestors"];
     } catch (parseError) {

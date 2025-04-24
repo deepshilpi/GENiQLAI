@@ -174,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Get analysis results using a more robust, multi-step approach
-      let analysisResults;
+      let analysisResults: AnalysisResults | undefined;
       try {
         console.log("Using multi-step analysis workflow for better reliability");
         
