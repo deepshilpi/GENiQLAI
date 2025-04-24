@@ -1836,9 +1836,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <RiskAnalysis
-                    overallRisk={budgetAnalysisData.riskAnalysis.overallRisk}
-                    risks={budgetAnalysisData.riskAnalysis.risks}
-                    message={budgetAnalysisData.riskAnalysis.message}
+                    overallRisk={budgetAnalysisData.budgetAnalysis?.riskAnalysis?.overallRisk || 50}
+                    risks={budgetAnalysisData.budgetAnalysis?.riskAnalysis?.risks || []}
+                    message={budgetAnalysisData.budgetAnalysis?.riskAnalysis?.message || "Risk analysis not available"}
                   />
                 </CardContent>
               </Card>
@@ -1855,8 +1855,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <GoToMarketStrategy
-                    timeline={budgetAnalysisData.goToMarketStrategy.timeline}
-                    message={budgetAnalysisData.goToMarketStrategy.message}
+                    timeline={budgetAnalysisData.budgetAnalysis?.goToMarketStrategy?.timeline || []}
+                    message={budgetAnalysisData.budgetAnalysis?.goToMarketStrategy?.message || "Go-to-market strategy not available"}
                   />
                 </CardContent>
               </Card>
@@ -1873,8 +1873,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <LongTermVision
-                    milestones={budgetAnalysisData.longTermVision.milestones}
-                    message={budgetAnalysisData.longTermVision.message}
+                    milestones={budgetAnalysisData.budgetAnalysis?.longTermVision?.milestones || []}
+                    message={budgetAnalysisData.budgetAnalysis?.longTermVision?.message || "Long-term vision not available"}
                   />
                 </CardContent>
               </Card>
@@ -1891,9 +1891,9 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <TeamExecution
-                    requiredRoles={budgetAnalysisData.teamExecutionCapability.requiredRoles}
-                    hiringTimeline={budgetAnalysisData.teamExecutionCapability.hiringTimeline}
-                    message={budgetAnalysisData.teamExecutionCapability.message}
+                    requiredRoles={budgetAnalysisData.budgetAnalysis?.teamExecutionCapability?.requiredRoles || []}
+                    hiringTimeline={budgetAnalysisData.budgetAnalysis?.teamExecutionCapability?.hiringTimeline || "Not available"}
+                    message={budgetAnalysisData.budgetAnalysis?.teamExecutionCapability?.message || "Team execution plan not available"}
                   />
                 </CardContent>
               </Card>
