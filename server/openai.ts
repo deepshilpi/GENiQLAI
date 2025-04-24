@@ -639,7 +639,7 @@ export async function generateExecutionPlan(
   startupIdea: string,
   initialBudget: number,
   country: string = "United States"
-): Promise<AnalysisResults["planningToExecute"]> {
+): Promise<AnalysisResults["planToExecute"]> {
   try {
     console.log("Starting OpenAI execution plan generation...");
     
@@ -732,7 +732,7 @@ export async function generateExecutionPlan(
         throw new Error("Invalid execution plan structure");
       }
       
-      return planContent as AnalysisResults["planningToExecute"];
+      return planContent as AnalysisResults["planToExecute"];
     } catch (parseError) {
       console.error("Failed to parse OpenAI execution plan response:", parseError);
       console.error("Response content:", response.choices[0].message.content);

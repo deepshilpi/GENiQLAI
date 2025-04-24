@@ -516,7 +516,7 @@ export type AnalysisResults = {
       timeframe: string;
     }>;
   };
-  planningToExecute?: {
+  planToExecute?: {
     budget: {
       development: number;
       marketing: number;

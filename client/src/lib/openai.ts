@@ -28,7 +28,7 @@ export async function analyzeStartupIdea(
 export async function generateExecutionPlan(
   startupIdea: string,
   initialBudget: number
-): Promise<AnalysisResults["planningToExecute"]> {
+): Promise<AnalysisResults["planToExecute"]> {
   try {
     const response = await fetch("/api/execution-plan", {
       method: "POST",

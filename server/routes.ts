@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine the data in the correct structure - use the same structure expected by the client
       // Make sure budgetAnalysis is properly nested to match what the client expects
       const responseData = {
-        ...executionPlan,
+        planningToExecute: executionPlan,
         budgetAnalysis
       };
       
@@ -491,6 +491,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(responseData);
     } catch (error) {
       console.error("Error generating execution plan:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("Invalid OpenAI API key") || errorMessage.includes("Incorrect API key provided")) {
+        return res.status(503).json({ 
+          message: "AI analysis is currently unavailable due to API key validation issues. Please try again later or contact support.",
+          error: "invalid_api_key" 
+        });
+      }
+      
       return res.status(500).json({ message: "Failed to generate execution plan" });
     }
   });
