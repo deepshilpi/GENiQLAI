@@ -271,26 +271,36 @@ export default function SettingsPage() {
             </Button>
           </div>
           
-          {/* Tabs */}
+          {/* Tabs - Improved for mobile */}
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="mb-6 bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 w-full rounded-lg shadow-lg overflow-x-auto flex nowrap">
-              <TabsTrigger value="profile" className="flex-1 py-3">
-                <User className="h-4 w-4 mr-2" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="security" className="flex-1 py-3">
-                <Shield className="h-4 w-4 mr-2" />
-                Security
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex-1 py-3">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex-1 py-3">
-                <Monitor className="h-4 w-4 mr-2" />
-                Preferences
-              </TabsTrigger>
-            </TabsList>
+            <div className="relative mb-6 overflow-hidden">
+              <ScrollArea className="w-full">
+                <TabsList className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 w-auto min-w-full inline-flex rounded-lg shadow-lg">
+                  <TabsTrigger value="profile" className="py-3 px-4 whitespace-nowrap">
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Profile</span>
+                    <span className="sm:hidden">Profile</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="security" className="py-3 px-4 whitespace-nowrap">
+                    <Shield className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Security</span>
+                    <span className="sm:hidden">Security</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="py-3 px-4 whitespace-nowrap">
+                    <Bell className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Notifications</span>
+                    <span className="sm:hidden">Alerts</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="preferences" className="py-3 px-4 whitespace-nowrap">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Preferences</span>
+                    <span className="sm:hidden">Prefs</span>
+                  </TabsTrigger>
+                </TabsList>
+              </ScrollArea>
+              <div className="absolute left-0 top-0 bottom-0 w-4 pointer-events-none bg-gradient-to-r from-background to-transparent"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-4 pointer-events-none bg-gradient-to-l from-background to-transparent"></div>
+            </div>
             
             {/* Profile Tab */}
             <TabsContent value="profile" className="mt-0 space-y-6">

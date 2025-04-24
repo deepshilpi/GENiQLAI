@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     fileFilter: function (req, file, cb) {
       // Accept images only
       if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
-        return cb(new Error('Only image files are allowed!'), false);
+        return cb(null, false);
       }
       cb(null, true);
     }
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'businessModelStrength', 'fundingRequired', 'swotAnalysis', 'previousFailedExecutions'
       ];
       
-      const missingFields = requiredFields.filter(field => !(field in analysisResults));
+      const missingFields = requiredFields.filter(field => !Object.prototype.hasOwnProperty.call(analysisResults, field));
       
       if (missingFields.length > 0) {
         console.error("Missing required fields in analysis results:", missingFields);
@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               threats: ["Could not analyze threats at this time"]
             };
           } else if (field === 'previousFailedExecutions') {
-            analysisResults.previousFailedExecutions = {
+            (analysisResults as any).previousFailedExecutions = {
               failures: [],
               message: "Could not analyze previous failures at this time"
             };
@@ -442,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Budget analysis first property:", 
           Object.keys(responseData.budgetAnalysis).length > 0 ? 
           Object.keys(responseData.budgetAnalysis)[0] + ": " + 
-          JSON.stringify(responseData.budgetAnalysis[Object.keys(responseData.budgetAnalysis)[0]]).substring(0, 50) : 
+          JSON.stringify((responseData.budgetAnalysis as any)[Object.keys(responseData.budgetAnalysis)[0]]).substring(0, 50) : 
           "No properties");
       }
       
