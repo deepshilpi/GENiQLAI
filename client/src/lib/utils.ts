@@ -32,13 +32,15 @@ export function formatCurrency(amount: number, currency: Currency | string = "US
   // Special handling for Indian currency using appropriate terms
   if (country === "India" && useSuffix) {
     if (amount >= 1e9) { // 1 Arab (100 Crore)
-      return `₹${(amount / 1e9).toFixed(1)} Arab`;
+      return `₹${(amount / 1e9).toFixed(2)} Arab`;
     } else if (amount >= 1e7) { // 1 Crore
-      return `₹${(amount / 1e7).toFixed(1)} Crore`;
+      return `₹${(amount / 1e7).toFixed(2)} Crore`;
     } else if (amount >= 1e5) { // 1 Lakh
-      return `₹${(amount / 1e5).toFixed(1)} Lakh`;
+      return `₹${(amount / 1e5).toFixed(2)} Lakh`;
     } else if (amount >= 1e3) { // 1 Thousand
       return `₹${(amount / 1e3).toFixed(1)}K`;
+    } else {
+      return `₹${amount.toLocaleString('en-IN')}`;
     }
   } 
   // For non-Indian currencies or when Indian suffixes are not used

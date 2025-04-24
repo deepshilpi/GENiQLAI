@@ -1222,7 +1222,7 @@ export default function AnalysisPage() {
             {analysisData.targetAudienceFit && visibleBlocks.includes("targetAudience") && (
               <motion.div 
                 variants={itemVariants} 
-                className="md:col-span-2 lg:col-span-2"
+                className="lg:col-span-1"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -1276,7 +1276,7 @@ export default function AnalysisPage() {
             {analysisData.marketSize && visibleBlocks.includes("marketSize") && (
               <motion.div 
                 variants={itemVariants} 
-                className="lg:col-span-1"
+                className="md:col-span-2 lg:col-span-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
