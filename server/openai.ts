@@ -423,7 +423,7 @@ export async function generateBudgetAnalysis(
         },
         {
           role: "user",
-          content: `Create a quick budget analysis for this startup idea in ${country} with an initial budget of $${initialBudget}: ${startupIdea}`
+          content: `Create a detailed, expert-level budget analysis with realistic industry-specific metrics for this startup idea in ${country} with an initial budget of $${initialBudget}. Include comprehensive cost breakdowns, funding stages, and investor appeal points: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
@@ -579,7 +579,7 @@ export async function generateExecutionPlan(
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a QUICK yet accurate budget and execution plan for a startup with an initial budget of ${initialBudget} ${currencyCode}.
+          content: `You are a startup execution planning expert with deep knowledge of ${country}'s startup ecosystem. Create a DETAILED, EXPERT-LEVEL budget and execution plan for a startup with an initial budget of ${initialBudget} ${currencyCode}.
 
           Return a JSON object with:
           1. budget: Object with the following properties:
@@ -610,15 +610,15 @@ export async function generateExecutionPlan(
         },
         {
           role: "user",
-          content: `Create a quick budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currencyCode}: ${startupIdea}`
+          content: `Create a detailed, expert-level budget and execution plan for this startup idea in ${country} with an initial budget of ${initialBudget} ${currencyCode}. Include realistic market data and specific recommendations: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 1000, // Significantly reduced token count for much faster response
-      top_p: 0.7, // More focused sampling for speed
-      frequency_penalty: 0, // Removed for faster responses
-      presence_penalty: 0 // Removed for faster responses
+      temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
+      max_tokens: 2000, // Increased token count for detailed expert analysis
+      top_p: 0.9, // Wider sampling for more nuanced, expert responses
+      frequency_penalty: 0.1, // Slight penalty to avoid repetitive language
+      presence_penalty: 0.1 // Slight penalty to encourage diverse coverage
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -675,7 +675,7 @@ export async function findInvestors(
       messages: [
         {
           role: "system",
-          content: `You are an expert in startup investment. For the given startup idea, suggest 3 potential investors that might be interested in this type of startup in the specified country. Be extremely concise.
+          content: `You are an expert in startup investment with deep knowledge of venture capital and angel investors. For the given startup idea, identify 3-5 specific, real investors that would be most likely to invest in this type of startup in the specified country.
           
           Return a JSON object with:
           'investors': array of 3 objects, each with:
@@ -692,15 +692,15 @@ export async function findInvestors(
         },
         {
           role: "user",
-          content: `Find 3 potential investors for this startup idea in ${country}: ${startupIdea}`
+          content: `Find 3-5 real, specific investors with a strong track record who would be particularly interested in this startup idea in ${country}, including their investment focus and portfolio fit: ${startupIdea}`
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 600, // Significantly reduced token count for much faster response
-      top_p: 0.7, // More focused sampling for speed
-      frequency_penalty: 0, // Removed for faster responses
-      presence_penalty: 0 // Removed for faster responses
+      temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
+      max_tokens: 1000, // Increased token count for detailed investor information
+      top_p: 0.9, // Wider sampling for more accurate investor matching
+      frequency_penalty: 0.1, // Slight penalty to avoid repetitive suggestions
+      presence_penalty: 0.1 // Slight penalty to encourage diverse investor options
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
