@@ -93,16 +93,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <BrainCircuit className="mr-2 h-4 w-4" />
                 AI Analysis
               </Button>
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start px-3 py-2 text-sm ${isActive('/dashboard') 
-                  ? 'bg-vision-primary-gradient text-white' 
-                  : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                onClick={() => handleNavigation('/dashboard')}
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
+
               <Button 
                 variant="ghost" 
                 className={`w-full justify-start px-3 py-2 text-sm ${isActive('/community') 
@@ -132,18 +123,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <div className="px-3 pt-4 pb-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider px-3 mb-1">Account</p>
             <nav className="space-y-1">
-              {user && (
-                <Button 
-                  variant="ghost" 
-                  className={`w-full justify-start px-3 py-2 text-sm ${isActive('/profile') 
-                    ? 'bg-vision-primary-gradient text-white' 
-                    : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
-                  onClick={() => handleNavigation(`/profile/${user?.username || 'user'}`)}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  My Profile
-                </Button>
-              )}
+
               <Button 
                 variant="ghost" 
                 className={`w-full justify-start px-3 py-2 text-sm ${isActive('/settings') 

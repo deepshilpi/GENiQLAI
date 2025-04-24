@@ -2,7 +2,6 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
-import DashboardPage from "@/pages/dashboard-page";
 import CommunityPage from "@/pages/community-page";
 import ProfilePage from "@/pages/profile-page";
 import MessagesPage from "@/pages/messages-page";
@@ -49,7 +48,6 @@ function Router() {
         <Route path="/" component={AnalysisPage} />
         <Route path="/home" component={HomePage} />
         <Route path="/community" component={CommunityPage} />
-        <ProtectedRoute path="/dashboard" component={DashboardPage} />
         <ProtectedRoute path="/messages" component={MessagesPage} />
         <ProtectedRoute path="/profile/:username" component={ProfilePage} />
         <ProtectedRoute path="/settings" component={SettingsPage} />

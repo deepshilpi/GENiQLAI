@@ -137,7 +137,6 @@ export function Sidebar() {
           {!collapsed && (
             <div className="ml-3">
               <span className="font-bold text-xl text-white">GENIQL</span>
-              <span className="text-[10px] bg-vision-purple-200/20 px-1.5 py-0.5 rounded-sm ml-1 text-white/80">BETA</span>
             </div>
           )}
         </div>
@@ -303,19 +302,7 @@ export function Sidebar() {
               </DropdownMenu>
             </li>
             
-            <li>
-              <div 
-                className={cn(
-                  "vision-sidebar-item cursor-pointer",
-                  isActive(`/profile/${user?.username}`) && "active",
-                  collapsed && "justify-center px-2"
-                )}
-                onClick={() => navigate(`/profile/${user?.username}`)}
-              >
-                <User className="w-5 h-5" />
-                {!collapsed && <span>Profile</span>}
-              </div>
-            </li>
+
             <li>
               <div 
                 className={cn(
