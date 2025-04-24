@@ -191,7 +191,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (analysisResults) {
           try {
             console.log("Step 2: Enhancing analysis with execution planning data");
-            const initialBudget = analysisResults.fundingRequired?.total || 500000;
+            // Use default budget if funding required is not available
+            let initialBudget = 500000;
+            
+            // Check if fundingRequired is available and has total property
+            if (analysisResults.fundingRequired && typeof analysisResults.fundingRequired.total === 'number') {
+              initialBudget = analysisResults.fundingRequired.total;
+              console.log(`Using calculated initial budget: ${initialBudget}`);
+            } else {
+              console.log(`Using default initial budget: ${initialBudget}`);
+            }
             
             // Use a separate promise race for the execution plan with a shorter timeout
             const planningPromise = new Promise((_, planReject) => {
@@ -210,7 +219,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           } catch (planningError) {
             // Don't fail the whole analysis if just the planning step fails
-            console.warn("Planning enhancement failed, continuing with core analysis:", planningError.message);
+            const errorMessage = planningError instanceof Error ? planningError.message : String(planningError);
+            console.warn("Planning enhancement failed, continuing with core analysis:", errorMessage);
           }
         }
         
