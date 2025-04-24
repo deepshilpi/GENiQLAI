@@ -32,204 +32,247 @@ export function useNotifications() {
   // WebSocket reference
   const wsRef = useRef<WebSocket | null>(null);
 
+  // Track connection attempts
+  const reconnectAttempts = useRef(0);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   // Connect to WebSocket when the component mounts and user is authenticated
   useEffect(() => {
+    // Clear any existing reconnect timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    
     // Don't attempt to connect if no user is logged in
     if (!user || !user.id) {
-      setNotifications([
-        {
-          id: 1,
-          userId: 0,
-          type: 'community',
-          title: 'New community comment',
-          message: 'John replied to your post about AI startups',
-          isRead: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-        },
-        {
-          id: 2,
-          userId: 0,
-          type: 'analysis',
-          title: 'Analysis complete',
-          message: 'Your startup idea analysis is ready to view',
-          isRead: false,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-        },
-        {
-          id: 3,
-          userId: 0,
-          type: 'follow',
-          title: 'New follower',
-          message: 'Sarah is now following you',
-          isRead: false,
-          createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
-        }
-      ]);
-      setUnreadCount(3);
       setIsLoading(false);
+      setConnectionStatus('disconnected');
+      setNotifications([]);
+      setUnreadCount(0);
       return;
     }
 
-    // Fetch initial notifications from the API
-    const fetchNotifications = async () => {
+    // Set up WebSocket connection with reconnection logic
+    const setupWebSocket = () => {
+      // Clear any existing WebSocket
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    
+      // Fetch initial notifications from the API
+      const fetchNotifications = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch('/api/notifications');
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch notifications');
+          }
+          
+          const data = await response.json();
+          if (data?.notifications) {
+            setNotifications(data.notifications || []);
+            setUnreadCount(data.unreadCount || 0);
+          } else {
+            // Return to empty state if no proper response
+            setNotifications([]);
+            setUnreadCount(0);
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+          // Set to empty state instead of mock data
+          setNotifications([]);
+          setUnreadCount(0);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
       try {
-        const response = await fetch('/api/notifications');
-        if (!response.ok) {
-          throw new Error('Failed to fetch notifications');
+        // Set up WebSocket connection
+        if (connectionStatus !== 'connecting') {
+          setConnectionStatus('connecting');
         }
         
-        const data = await response.json();
-        setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-        // Set default notifications if fetch fails
-        setNotifications([
-          {
-            id: 1,
-            userId: user.id,
-            type: 'community',
-            title: 'New community comment',
-            message: 'John replied to your post about AI startups',
-            isRead: false,
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-          },
-          {
-            id: 2,
-            userId: user.id,
-            type: 'analysis',
-            title: 'Analysis complete',
-            message: 'Your startup idea analysis is ready to view',
-            isRead: false,
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-          },
-          {
-            id: 3,
-            userId: user.id,
-            type: 'follow',
-            title: 'New follower',
-            message: 'Sarah is now following you',
-            isRead: false,
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
+        // Use a more resilient WebSocket setup
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+        
+        // Implement a ping/pong heartbeat to keep connection alive
+        let pingInterval: NodeJS.Timeout | null = null;
+        
+        // Handle WebSocket open
+        ws.onopen = () => {
+          console.log('WebSocket connected, authenticating...');
+          setConnectionStatus('connected');
+          reconnectAttempts.current = 0; // Reset the counter on successful connection
+          
+          // Send authentication with user ID
+          ws.send(JSON.stringify({
+            type: 'auth',
+            payload: { userId: user.id }
+          }));
+          console.log('Authentication message sent');
+          
+          // Set up ping every 30 seconds to keep connection alive
+          pingInterval = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: 'ping' }));
+            }
+          }, 30000);
+          
+          // Fetch notifications after authentication
+          fetchNotifications();
+        };
+        
+        // Handle WebSocket close with exponential backoff
+        ws.onclose = () => {
+          if (pingInterval) {
+            clearInterval(pingInterval);
           }
-        ]);
-        setUnreadCount(3);
-      } finally {
-        setIsLoading(false);
+          
+          console.log('WebSocket disconnected');
+          setConnectionStatus('disconnected');
+          
+          // Implement exponential backoff for reconnection
+          const maxReconnectDelay = 30000; // 30 seconds max
+          const baseDelay = 1000; // 1 second base
+          const delay = Math.min(
+            maxReconnectDelay, 
+            baseDelay * Math.pow(2, reconnectAttempts.current)
+          );
+          
+          reconnectAttempts.current += 1;
+          
+          // Try to reconnect with backoff
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (user && user.id && document.visibilityState === 'visible') {
+              setupWebSocket();
+            }
+          }, delay);
+        };
+        
+        // Handle WebSocket errors
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          // We don't need to set status to disconnected here as onclose will be called after onerror
+        };
+        
+        // Handle WebSocket messages
+        ws.onmessage = (event) => {
+          try {
+            const data: WebSocketMessage = JSON.parse(event.data);
+            // Reduce console spam by only logging important messages
+            if (data.type !== 'pong') {
+              console.log('Received WebSocket message:', data.type);
+            }
+            
+            switch (data.type) {
+              case 'auth_success':
+                console.log('Authentication successful');
+                break;
+                
+              case 'auth_error':
+                console.error('WebSocket authentication failed:', data.payload?.message);
+                break;
+                
+              case 'notification':
+                if (data.payload?.notification) {
+                  // Add new notification to the list
+                  const newNotification = data.payload.notification;
+                  setNotifications(prev => [newNotification, ...prev]);
+                  setUnreadCount(prev => prev + 1);
+                  
+                  // Show toast notification
+                  toast({
+                    title: newNotification.title,
+                    description: newNotification.message,
+                    duration: 5000,
+                  });
+                }
+                break;
+                
+              case 'unread_count':
+                if (data.payload?.count !== undefined) {
+                  setUnreadCount(data.payload.count);
+                }
+                break;
+                
+              case 'notifications_marked_read':
+                // Update read status for multiple notifications
+                if (data.payload?.notificationIds) {
+                  const { notificationIds } = data.payload;
+                  setNotifications(prev => 
+                    prev.map(notification => 
+                      notificationIds.includes(notification.id) 
+                        ? { ...notification, isRead: true } 
+                        : notification
+                    )
+                  );
+                  setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
+                }
+                break;
+                
+              case 'pong':
+                // Silent pong response - no need to do anything
+                break;
+                
+              case 'error':
+                console.error('WebSocket error message:', data.payload?.message);
+                toast({
+                  title: 'Error',
+                  description: data.payload?.message || 'An error occurred',
+                  variant: 'destructive',
+                  duration: 3000,
+                });
+                break;
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
+      } catch (error) {
+        console.error('Error setting up WebSocket:', error);
+        setConnectionStatus('disconnected');
       }
     };
 
-    // Set up WebSocket connection
-    console.log('Setting up WebSocket connection for notifications...');
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    // Set up WebSocket with proper connection handling
+    setupWebSocket();
     
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-    
-    // Handle WebSocket open
-    ws.onopen = () => {
-      console.log('WebSocket connected, authenticating...');
-      setConnectionStatus('connected');
-      
-      // Send authentication with user ID
-      ws.send(JSON.stringify({
-        type: 'auth',
-        payload: { userId: user.id }
-      }));
-      
-      // Fetch notifications after authentication
-      fetchNotifications();
-    };
-    
-    // Handle WebSocket close
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setConnectionStatus('disconnected');
-      
-      // Try to reconnect after 3 seconds
-      setTimeout(() => {
-        setConnectionStatus('connecting');
-        
-        // Only reconnect if component is still mounted and user is logged in
-        if (user && user.id) {
-          console.log('Attempting to reconnect WebSocket...');
-        }
-      }, 3000);
-    };
-    
-    // Handle WebSocket errors
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setConnectionStatus('disconnected');
-    };
-    
-    // Handle WebSocket messages
-    ws.onmessage = (event) => {
-      try {
-        const data: WebSocketMessage = JSON.parse(event.data);
-        console.log('Received WebSocket message:', data.type);
-        
-        switch (data.type) {
-          case 'auth_success':
-            console.log('WebSocket authentication successful');
-            break;
-            
-          case 'auth_error':
-            console.error('WebSocket authentication failed:', data.payload.message);
-            break;
-            
-          case 'notification':
-            // Add new notification to the list
-            const newNotification = data.payload.notification;
-            setNotifications(prev => [newNotification, ...prev]);
-            setUnreadCount(prev => prev + 1);
-            
-            // Show toast notification
-            toast({
-              title: newNotification.title,
-              description: newNotification.message,
-              duration: 5000,
-            });
-            break;
-            
-          case 'notifications_marked_read':
-            // Update read status for multiple notifications
-            const { notificationIds } = data.payload;
-            setNotifications(prev => 
-              prev.map(notification => 
-                notificationIds.includes(notification.id) 
-                  ? { ...notification, isRead: true } 
-                  : notification
-              )
-            );
-            setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
-            break;
-            
-          case 'error':
-            console.error('WebSocket error:', data.payload.message);
-            toast({
-              title: 'Error',
-              description: data.payload.message,
-              variant: 'destructive',
-              duration: 3000,
-            });
-            break;
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+    // Handle visibility change to reconnect if needed when page becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && 
+          user && 
+          user.id && 
+          (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN)) {
+        setupWebSocket();
       }
     };
     
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     // Cleanup on unmount
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
       console.log('Cleaning up notification WebSocket connection');
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
       }
     };
-  }, [user, toast]);
+  }, [user?.id]); // Only reconnect if user ID changes, not on every user object change
 
   // Mark notification as read
   const markAsRead = async (notificationId: number) => {

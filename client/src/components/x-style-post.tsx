@@ -48,6 +48,7 @@ function timeAgo(date: Date): string {
 import { useToast } from "@/hooks/use-toast";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Post } from "@shared/schema";
+import type { User } from "@shared/schema";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogClose } from "@/components/ui/dialog";
@@ -88,7 +89,7 @@ interface XStylePostProps {
   onVote: (postId: number, voteType: string) => void;
   onReact: (postId: number, reactionType: string) => void;
   onComment: (postId: number, comment: string) => void;
-  currentUser: any | null;
+  currentUser: User | null;
 }
 
 export function XStylePost({ 

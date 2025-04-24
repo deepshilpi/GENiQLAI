@@ -35,16 +35,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    retry: 0, // Don't retry on failure - reduces queries
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
-  // Periodically check for user session still being valid
+  // Periodically check for user session at a less frequent interval
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (user) {
-        refetch();
+        // Only refetch if the document is visible to prevent background queries
+        if (document.visibilityState === 'visible') {
+          refetch();
+        }
       }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+    }, 15 * 60 * 1000); // Check every 15 minutes instead of 5 minutes
     
     return () => clearInterval(intervalId);
   }, [user, refetch]);
@@ -67,20 +72,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Give the UI time to update before redirecting
       setTimeout(() => {
-        // Force a refetch to ensure we have the latest
-        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+        // Only invalidate specific queries that depend on auth status
+        // instead of invalidating everything
+        queryClient.invalidateQueries({ 
+          predicate: (query) => {
+            const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
+            // Only invalidate certain endpoints that depend on auth
+            return [
+              "/api/saved-ideas", 
+              "/api/analyses", 
+              "/api/posts",
+              "/api/notifications"
+            ].some(key => String(queryKey).includes(key));
+          }
+        });
         
-        // Refresh other queries that might depend on authentication
-        queryClient.invalidateQueries();
-        
-        // Redirect to home page after a slight delay to allow state updates
+        // Redirect to home page
         navigate("/");
         
         toast({
           title: "Login successful",
           description: `Welcome back, ${userData.username}!`,
         });
-      }, 500);
+      }, 300); // Reduced from 500ms to 300ms
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -110,20 +124,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Give the UI time to update before redirecting
       setTimeout(() => {
-        // Force a refetch to ensure we have the latest
-        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+        // Only invalidate specific queries that depend on auth status
+        // instead of invalidating everything
+        queryClient.invalidateQueries({ 
+          predicate: (query) => {
+            const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
+            // Only invalidate certain endpoints that depend on auth
+            return [
+              "/api/saved-ideas", 
+              "/api/analyses", 
+              "/api/posts",
+              "/api/notifications"
+            ].some(key => String(queryKey).includes(key));
+          }
+        });
         
-        // Refresh other queries that might depend on authentication
-        queryClient.invalidateQueries();
-        
-        // Redirect to home page after a slight delay to allow state updates
+        // Redirect to home page
         navigate("/");
         
         toast({
           title: "Registration successful",
           description: `Welcome to GENIQL, ${userData.username}!`,
         });
-      }, 500);
+      }, 300); // Reduced from 500ms to 300ms
     },
     onError: (error: Error) => {
       console.error("Registration error:", error);
@@ -148,18 +171,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear user data
       queryClient.setQueryData(["/api/user"], null);
       
-      // Give the UI time to update before redirecting
-      setTimeout(() => {
-        // Invalidate all queries to make sure they're refreshed
-        queryClient.invalidateQueries();
-        
-        // Force reload the page to clear all state and prevent any stale data
-        window.location.href = "/";
-        
-        toast({
-          title: "Logged out successfully",
-        });
-      }, 500);
+      // Reset all auth-dependent queries to their initial state instead of invalidating
+      queryClient.resetQueries({ 
+        predicate: (query) => {
+          const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
+          // Reset these specific endpoints
+          return [
+            "/api/saved-ideas", 
+            "/api/analyses", 
+            "/api/posts",
+            "/api/notifications"
+          ].some(key => String(queryKey).includes(key));
+        }
+      });
+      
+      // Redirect to home page
+      window.location.href = "/";
+      
+      toast({
+        title: "Logged out successfully",
+      });
     },
     onError: (error: Error) => {
       console.error("Logout error:", error);
