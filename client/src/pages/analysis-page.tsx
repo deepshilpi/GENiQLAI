@@ -519,9 +519,75 @@ export default function AnalysisPage() {
       console.log("Execution plan response:", data);
       console.log("Response data keys:", Object.keys(data));
       
-      // Check if planToExecute exists in the response
-      if (!data.planningToExecute && !data.planToExecute) {
+      // Process response data - ensure we have a consistent structure regardless of server response format
+      let processedData = { ...data };
+      
+      // If plan data is in planToExecute (preferred) or planningToExecute, use it
+      const planData = data.planToExecute || data.planningToExecute;
+      
+      if (planData) {
+        console.log("Found execution plan data");
+        
+        // Make sure budgetAnalysis exists and has the correct structure
+        if (!processedData.budgetAnalysis && data.budgetAnalysis) {
+          // If budgetAnalysis is at the top level, keep it
+          console.log("Using existing budgetAnalysis data");
+        } else if (!processedData.budgetAnalysis) {
+          // If budgetAnalysis doesn't exist, create it from the plan data or elsewhere
+          console.log("Creating budgetAnalysis structure from available data");
+          processedData.budgetAnalysis = {};
+          
+          // Handle all possible locations of analysis data
+          // First check top level, then in planData
+          
+          // Feasibility and Scalability
+          if (processedData.feasibilityAndScalability) {
+            processedData.budgetAnalysis.feasibilityAndScalability = processedData.feasibilityAndScalability;
+          } else if (planData.feasibilityAndScalability) {
+            processedData.budgetAnalysis.feasibilityAndScalability = planData.feasibilityAndScalability;
+          } else {
+            // Add fallback structure to prevent UI errors
+            processedData.budgetAnalysis.feasibilityAndScalability = {
+              initialFeasibility: 50,
+              scalingPoints: [],
+              message: "Feasibility analysis not available. Try again later."
+            };
+            console.warn("Missing feasibilityAndScalability data");
+          }
+          
+          // Risk Analysis
+          if (processedData.riskAnalysis) {
+            processedData.budgetAnalysis.riskAnalysis = processedData.riskAnalysis;
+          } else if (planData.riskAnalysis) {
+            processedData.budgetAnalysis.riskAnalysis = planData.riskAnalysis;
+          } else {
+            processedData.budgetAnalysis.riskAnalysis = {
+              overallRisk: 50,
+              risks: [],
+              message: "Risk analysis not available. Try again later."
+            };
+            console.warn("Missing riskAnalysis data");
+          }
+          
+          // Other sections...
+          // (Add similar logic for other required sections)
+        }
+      } else {
         console.warn("Missing execution plan data in the response");
+        // Create minimal structure to prevent UI errors
+        processedData.budgetAnalysis = {
+          feasibilityAndScalability: {
+            initialFeasibility: 50,
+            scalingPoints: [],
+            message: "Execution plan data not available. Try again later."
+          },
+          riskAnalysis: {
+            overallRisk: 50,
+            risks: [],
+            message: "Risk analysis not available. Try again later."
+          }
+          // Add other required sections with minimal data
+        };
       }
       
       // Also get investor recommendations
@@ -531,10 +597,10 @@ export default function AnalysisPage() {
       
       if (investorsResponse.ok) {
         const investorsData = await investorsResponse.json();
-        data.investorsData = investorsData;
+        processedData.investorsData = investorsData;
       }
       
-      setBudgetAnalysisData(data);
+      setBudgetAnalysisData(processedData);
       setPhase("budget-results");
     } catch (err: any) {
       console.error("Error generating execution plan:", err);
