@@ -96,18 +96,47 @@ export function useNotifications() {
           setConnectionStatus('connecting');
         }
         
-        // Use a more resilient WebSocket setup
+        // Use a more resilient WebSocket setup with timeout
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws`;
         
+        console.log(`Connecting to WebSocket at ${wsUrl}`);
+        
+        // Close any existing connection
+        if (wsRef.current) {
+          // Use try-catch to handle any errors during close
+          try {
+            // TypeScript safety - only close if WebSocket is not already closed
+            const currentWs = wsRef.current;
+            if (currentWs.readyState !== WebSocket.CLOSED) {
+              currentWs.close();
+            }
+          } catch (e) {
+            // Ignore errors when closing
+            console.error('Error closing existing WebSocket:', e);
+          }
+        }
+        
+        // Create new connection
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
+        
+        // Set connection timeout
+        const connectionTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            console.log('WebSocket connection timed out after 10 seconds');
+            ws.close();
+          }
+        }, 10000);
         
         // Implement a ping/pong heartbeat to keep connection alive
         let pingInterval: NodeJS.Timeout | null = null;
         
         // Handle WebSocket open
         ws.onopen = () => {
+          // Clear connection timeout since we're now connected
+          clearTimeout(connectionTimeout);
+          
           console.log('WebSocket connected, authenticating...');
           setConnectionStatus('connected');
           reconnectAttempts.current = 0; // Reset the counter on successful connection
@@ -119,12 +148,24 @@ export function useNotifications() {
           }));
           console.log('Authentication message sent');
           
-          // Set up ping every 30 seconds to keep connection alive
+          // Set up ping/pong heartbeat every 15 seconds to keep connection alive
           pingInterval = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'ping' }));
+              try {
+                console.log('Sending ping to keep connection alive');
+                ws.send(JSON.stringify({ type: 'ping' }));
+              } catch (err) {
+                console.error('Error sending ping:', err);
+                // If we can't send a ping, the connection might be broken
+                // Close it so our reconnect logic can kick in
+                try {
+                  ws.close();
+                } catch (closeErr) {
+                  // Ignore close errors
+                }
+              }
             }
-          }, 30000);
+          }, 15000);
           
           // Fetch notifications after authentication
           fetchNotifications();
