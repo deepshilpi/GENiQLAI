@@ -80,7 +80,7 @@ export function TeamExecution({ requiredRoles, hiringTimeline, message }: TeamEx
           <p className="text-xs font-medium text-white mb-1">{data.title}</p>
           <p className="text-xs text-white/80">
             <span className="font-medium">Annual Cost:</span>{" "}
-            ${data.cost.toLocaleString()}
+            ₹{data.cost.toLocaleString('en-IN')}
           </p>
           <p className="text-xs text-white/80">
             <span className="font-medium">Percentage:</span>{" "}
@@ -105,7 +105,7 @@ export function TeamExecution({ requiredRoles, hiringTimeline, message }: TeamEx
           <div>
             <h4 className="text-sm font-medium text-white mb-1">Estimated Team Budget</h4>
             <div className="flex items-baseline">
-              <span className="text-xl font-semibold text-white">${totalCost.toLocaleString()}</span>
+              <span className="text-xl font-semibold text-white">₹{totalCost.toLocaleString('en-IN')}</span>
               <span className="text-xs text-white/70 ml-2">annual</span>
             </div>
           </div>
@@ -167,7 +167,7 @@ export function TeamExecution({ requiredRoles, hiringTimeline, message }: TeamEx
                 tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.7)' }}
                 axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                tickFormatter={(value) => `$${value/1000}k`}
+                tickFormatter={(value) => `₹${value/1000}k`}
               />
               <YAxis 
                 type="category" 
@@ -223,7 +223,7 @@ export function TeamExecution({ requiredRoles, hiringTimeline, message }: TeamEx
               </div>
               <div className="text-right">
                 <p className="text-xs text-white/70">Annual Cost</p>
-                <p className="text-sm font-medium text-white">${role.estimatedCost.toLocaleString()}</p>
+                <p className="text-sm font-medium text-white">₹{role.estimatedCost.toLocaleString('en-IN')}</p>
               </div>
             </div>
             

@@ -118,7 +118,7 @@ export function GoToMarketStrategy({ timeline, message }: GoToMarketStrategyProp
             >
               <p className="text-xs text-white/70 mb-1">{phase.phase}</p>
               <div className="flex justify-between items-baseline">
-                <p className="text-sm font-medium text-white">${phase.estimatedCost.toLocaleString()}</p>
+                <p className="text-sm font-medium text-white">₹{phase.estimatedCost.toLocaleString('en-IN')}</p>
                 <p className="text-xs text-primary">{Math.round((phase.estimatedCost / totalCost) * 100)}%</p>
               </div>
             </div>
@@ -170,7 +170,7 @@ export function GoToMarketStrategy({ timeline, message }: GoToMarketStrategyProp
                 <div className="p-3 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/10">
                   <div className="flex justify-between mb-1">
                     <span className="text-xs text-white/70">Estimated Cost</span>
-                    <span className="text-sm font-medium text-white">${phase.estimatedCost.toLocaleString()}</span>
+                    <span className="text-sm font-medium text-white">₹{phase.estimatedCost.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-xs text-white/70">Percentage of Total</span>
