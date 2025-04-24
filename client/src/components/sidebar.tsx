@@ -216,7 +216,7 @@ export function Sidebar() {
       </nav>
       
       {/* Account section */}
-      <div className="px-3 py-2 border-t border-vision-purple-200/10">
+      <div className="px-3 py-2 border-t border-vision-purple-200/10 mb-16">
         {!collapsed && (
           <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2">Account</h4>
         )}
