@@ -81,7 +81,7 @@ export function useNotifications() {
             setUnreadCount(0);
           }
         } catch (error) {
-          console.error('Error fetching notifications:', error);
+          console.error('Error fetching notifications:', error instanceof Error ? error.message : 'Unknown error');
           // Set to empty state instead of mock data
           setNotifications([]);
           setUnreadCount(0);
@@ -274,7 +274,7 @@ export function useNotifications() {
                 break;
             }
           } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
+            console.error('Error parsing WebSocket message:', error instanceof Error ? error.message : 'Unknown parsing error');
           }
         };
       } catch (error) {
