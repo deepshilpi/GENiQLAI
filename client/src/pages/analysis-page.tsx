@@ -314,8 +314,6 @@ export default function AnalysisPage() {
   const [budgetAnalysisData, setBudgetAnalysisData] = useState<any>(null);
   const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number | null>(null);
   const [relatedIdeasData, setRelatedIdeasData] = useState<any[]>([]);
-  const [selectedCategoryTemplates, setSelectedCategoryTemplates] = useState<Array<{title: string, description: string}>>([]);
-  const [activeTab, setActiveTab] = useState<string>("custom");
   
   // Progressive loading states
   const [visibleBlocks, setVisibleBlocks] = useState<string[]>([]);
@@ -1330,72 +1328,25 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   />
                 </div>
                 
-                <Tabs 
-                  value={activeTab} 
-                  onValueChange={setActiveTab}
-                  className="w-full"
-                >
-                  <TabsList className="w-full bg-vision-purple-100/10 border-vision-purple-200/20">
-                    <TabsTrigger 
-                      value="custom" 
-                      className="text-white data-[state=active]:bg-vision-purple-200/20"
-                    >
-                      Custom Idea
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="templates"
-                      disabled={selectedCategoryTemplates.length === 0}
-                      className="text-white data-[state=active]:bg-vision-purple-200/20"
-                    >
-                      Idea Templates
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="custom" className="mt-4">
-                    <FormField
-                      control={ideaForm.control}
-                      name="idea"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">Your Startup Idea</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describe your startup idea in detail..."
-                              className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="templates" className="mt-4">
-                    <div className="space-y-4">
-                      <FormLabel className="text-white">Select a Template</FormLabel>
-                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {selectedCategoryTemplates.map((template, index) => (
-                          <Card 
-                            key={index}
-                            className="cursor-pointer border-vision-purple-200/20 bg-vision-purple-100/10 backdrop-blur-md hover:bg-vision-purple-200/20 transition"
-                            onClick={() => {
-                              ideaForm.setValue('idea', template.description);
-                              setActiveTab("custom");
-                            }}
-                          >
-                            <CardHeader className="py-3">
-                              <CardTitle className="text-sm font-medium text-white">{template.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="py-2">
-                              <p className="text-xs text-white/70">{template.description}</p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                <div className="mt-4">
+                  <FormField
+                    control={ideaForm.control}
+                    name="idea"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Your Startup Idea</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Describe your startup idea in detail..."
+                            className="min-h-32 bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <Button 
                   type="submit" 
