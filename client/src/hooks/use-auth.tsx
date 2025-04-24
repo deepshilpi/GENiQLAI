@@ -136,58 +136,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Completely rewritten logout mutation for more reliable behavior
   const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      // Set flag that logout is in progress - will be checked by queryClient
+      sessionStorage.setItem('auth_logout_requested', 'true');
+      
+      try {
+        // This may succeed or fail, but UI will update regardless
+        await apiRequest("POST", "/api/logout");
+      } catch (error) {
+        console.error("Logout API error:", error);
+        // Even if API call fails, proceed with client-side logout
+      }
     },
     onMutate: async () => {
-      // Set up optimistic update - clear user data immediately
-      // for faster UI response
-      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
+      console.log("[Auth] Logout mutation started");
       
-      // Save the previous user value in case we need to roll back
-      const previousUser = queryClient.getQueryData<User | null>(["/api/user"]);
+      // Cancel any in-flight queries
+      await queryClient.cancelQueries();
       
-      // Optimistically update the cache
+      // Clear user data from cache immediately for faster UI response
       queryClient.setQueryData(["/api/user"], null);
       
-      return { previousUser };
+      // Clear any session cookies from browser storage (just in case)
+      document.cookie = "connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      
+      return { previousUser: null };
     },
     onSuccess: () => {
-      // Clear user data in cache (again, to ensure consistency)
+      console.log("[Auth] Logout API call succeeded");
+      
+      // Double-check user data is cleared from cache
       queryClient.setQueryData(["/api/user"], null);
       
-      // Invalidate all queries to refresh data without user context
-      queryClient.invalidateQueries();
+      // Reset query cache completely
+      queryClient.clear();
       
-      // Redirect to login page
-      navigate("/auth");
-      
-      // Show success message
+      // Show success toast
       toast({
         title: "Logged out successfully",
+        description: "You have been securely logged out",
       });
+      
+      // Force browser to auth page (unless a callback function overrides)
+      if (location !== "/auth") {
+        // Use timeout to ensure UI updates first
+        setTimeout(() => {
+          navigate("/auth");
+        }, 100);
+      }
     },
-    onError: (error, _, context) => {
-      // If there was an error logging out, we don't want to revert the UI
-      // as it's better to show logged out state even if the server had issues
-      console.error("Logout error:", error);
+    onError: (error) => {
+      console.error("Logout API error (handled):", error);
       
-      // Clear user data in cache anyway
+      // Even on error, we want to clear the UI state
       queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
       
-      // Redirect to auth page
-      navigate("/auth");
-      
+      // Show error toast but with user-friendly message
       toast({
-        title: "Logout issue",
-        description: "You've been logged out but there was a server error.",
+        title: "Logged out",
+        description: "You've been logged out, but there was a server error.",
         variant: "destructive",
       });
+      
+      // Force browser to auth page
+      if (location !== "/auth") {
+        // Use timeout to ensure UI updates first
+        setTimeout(() => {
+          navigate("/auth");
+        }, 100);
+      }
     },
     onSettled: () => {
-      // Refetch auth state after logout is settled
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      console.log("[Auth] Logout completed (success or error)");
+      
+      // Final cleanup
+      queryClient.removeQueries({ queryKey: ["/api/user"] });
+      sessionStorage.removeItem('auth_login_success');
+      sessionStorage.removeItem('auth_logout_requested');
+      
+      // If we're still not on auth page, force it
+      if (location !== "/auth") {
+        window.location.href = "/auth";
+      }
     },
   });
 

@@ -179,8 +179,29 @@ export default function SettingsPage() {
     });
   };
 
+  // Improved logout handler with immediate UI feedback and reliable redirect
   const handleLogout = () => {
-    logoutMutation.mutate();
+    // Check if already in progress
+    if (logoutMutation.isPending) {
+      console.log("Logout already in progress, preventing duplicate request");
+      return;
+    }
+    
+    // First update the UI immediately
+    queryClient.setQueryData(["/api/user"], null);
+    
+    // Clear session storage flags
+    sessionStorage.removeItem('auth_login_success');
+    sessionStorage.removeItem('auth_logout_requested');
+    
+    // Then do the API call with hard redirect afterward
+    console.log("Executing logout from settings page");
+    logoutMutation.mutate(undefined, {
+      onSettled: () => {
+        // Force navigation to auth page
+        window.location.href = "/auth";
+      }
+    });
   };
   
   // Handle profile picture selection
