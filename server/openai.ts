@@ -169,7 +169,7 @@ export async function analyzeStartupIdea(
       messages: [
         { 
           role: "system", 
-          content: systemPrompt + "\n\nIMPORTANT: RESPOND QUICKLY with concise analysis. Focus on SPEED and ACCURACY."
+          content: systemPrompt + "\n\nIMPORTANT: Provide DEEP, EXPERT-LEVEL ANALYSIS with detailed insights and realistic data. Focus on QUALITY and ACCURACY."
         },
         { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
       ],
@@ -323,7 +323,7 @@ export async function generateBudgetAnalysis(
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning and financial analysis expert. Create a QUICK yet accurate budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
+          content: `You are a startup execution planning and financial analysis expert. Create a DETAILED, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
           
           Return a JSON object with exactly the following structure:
           
@@ -417,8 +417,8 @@ export async function generateBudgetAnalysis(
           }
           
           Make sure all monetary values are realistic for the startup type and scale in ${country}.
-          BE EXTREMELY CONCISE. Keep text fields very brief.
-          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          Provide COMPREHENSIVE, EXPERT-LEVEL ANALYSIS with detailed insights.
+          IMPORTANT: Focus on QUALITY and ACCURACY with realistic data specific to this startup type.
           Return ONLY valid JSON format without any additional text.`
         },
         {
@@ -427,11 +427,11 @@ export async function generateBudgetAnalysis(
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 1500, // Significantly reduced token count for much faster response
-      top_p: 0.7, // More focused sampling for speed
-      frequency_penalty: 0, // Removed for faster responses
-      presence_penalty: 0 // Removed for faster responses
+      temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
+      max_tokens: 2500, // Increased token count to allow for detailed, expert-level analysis
+      top_p: 0.9, // Wider sampling for more nuanced, expert responses
+      frequency_penalty: 0.1, // Slight penalty to avoid repetitive language
+      presence_penalty: 0.1 // Slight penalty to encourage diverse coverage
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -602,10 +602,10 @@ export async function generateExecutionPlan(
           6. successMetrics: Array of 3 strings, each very brief (8 words max)
           
           Make all costs appropriate to ${country}'s market.
-          BE EXTREMELY CONCISE. Keep text minimal.
+          Provide DETAILED, EXPERT-LEVEL INSIGHTS with industry-specific recommendations.
           
           Format your response as a valid JSON object.
-          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          IMPORTANT: Focus on QUALITY and ACCURACY with realistic market-based data.
           Return ONLY valid JSON format without any additional text.`
         },
         {
@@ -685,7 +685,7 @@ export async function findInvestors(
           - crunchbaseLink: simple Crunchbase URL format
           
           Format your response as a valid JSON object.
-          IMPORTANT: RESPOND QUICKLY. Focus on SPEED and ACCURACY.
+          IMPORTANT: Provide REAL, SPECIFIC INVESTORS that match the startup idea with accurate information.
           Return ONLY valid JSON without any additional text.
           
           DISCLAIMER: This is AI-generated sample data for illustration only.`
