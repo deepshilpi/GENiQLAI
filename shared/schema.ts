@@ -319,6 +319,18 @@ export type AnalysisResults = {
     badPoints: string[];
     message: string;
   };
+  
+  // Analysis metadata
+  meta?: {
+    analysisVersion?: string;
+    analysisDate?: string;
+    analysisTime?: string;
+    modelUsed?: string;
+    includedBlocks?: string[];
+    isAuthenticated?: boolean;
+    remainingFreeAnalyses?: number | null;
+    totalFreeAnalyses?: number;
+  };
   competitors: {
     competitors: Array<{
       name: string;

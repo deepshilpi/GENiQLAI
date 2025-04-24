@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { analyzeStartupIdea, generateBudgetAnalysis, generateExecutionPlan, findInvestors } from "./openai";
+import { analyzeStartupIdeaStepByStep } from "./analysis-service";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
 import { 
@@ -177,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         console.log("Using multi-step analysis workflow for better reliability");
         
-        // Step 1: Get core analysis
-        console.log("Step 1: Requesting core analysis data");
+        // Step 1: Get core analysis using the new step-by-step approach
+        console.log("Step 1: Requesting core analysis data with step-by-step analysis");
         analysisResults = await Promise.race([
-          analyzeStartupIdea(startupIdea, country, planType),
+          analyzeStartupIdeaStepByStep(startupIdea, country, planType),
           timeoutPromise
         ]);
         
