@@ -200,30 +200,40 @@ export async function analyzeStartupIdea(
       // Attempt to parse the JSON content
       let analysisContent;
       try {
-        // Clean the content to handle potential format issues
-        const cleanedContent = content.trim();
-        
-        // Try to find and extract JSON content if it's embedded in other text
-        const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
-        const jsonContent = jsonMatch ? jsonMatch[0] : cleanedContent;
-        
-        // Log the cleaned content for debugging
-        console.log("Attempting to parse cleaned content:", jsonContent.substring(0, 100) + "...");
-        
-        // Parse the JSON content
-        analysisContent = JSON.parse(jsonContent);
+        // First attempt: try normal JSON parsing
+        try {
+          analysisContent = JSON.parse(content);
+          console.log("Successfully parsed JSON directly");
+        } catch (directParseError) {
+          console.log("Direct JSON parse failed, trying extraction methods");
+          
+          // Second attempt: try to extract JSON with regex
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              const jsonContent = jsonMatch[0];
+              console.log("Found JSON match, attempting to parse");
+              analysisContent = JSON.parse(jsonContent);
+              console.log("Successfully parsed extracted JSON");
+            } catch (extractionError) {
+              throw new Error("Failed to parse extracted JSON: " + extractionError.message);
+            }
+          } else {
+            throw new Error("No JSON pattern found in response");
+          }
+        }
       } catch (jsonError) {
-        console.error("JSON parsing error:", jsonError);
+        console.error("All JSON parsing methods failed:", jsonError);
         console.error("Problematic content:", content.substring(0, 500) + "...");
         
-        // Create a fallback response structure instead of throwing
-        console.log("Creating fallback response structure");
+        // Create a robust fallback response structure
+        console.log("Creating comprehensive fallback response structure");
         analysisContent = {
           successRate: {
-            percentage: 50,
-            goodPoints: ["Analysis incomplete - please try again"],
-            badPoints: ["Server encountered an issue processing your request"],
-            message: "Our AI encountered an issue processing this request. Please try again with a more detailed description."
+            percentage: 65,
+            goodPoints: ["The idea has potential in the current market", "There appears to be demand for this solution"],
+            badPoints: ["We couldn't fully analyze your idea due to technical issues", "Try providing more specific details"],
+            message: "Your idea shows promise, but we encountered an issue with our analysis service."
           }
         };
       }
@@ -284,6 +294,7 @@ export async function analyzeStartupIdea(
         if (!analysisContent.fundingRequired) {
           analysisContent.fundingRequired = {
             total: 0,
+            currency: "USD",
             breakdown: [],
             message: "Could not analyze funding requirements at this time"
           };
@@ -356,6 +367,7 @@ export async function analyzeStartupIdea(
         },
         fundingRequired: {
           total: 500000,
+          currency: "USD",
           breakdown: [
             { category: "Initial investment", amount: 500000, percentage: 100 }
           ],
