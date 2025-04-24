@@ -259,54 +259,89 @@ export function Sidebar() {
                 <DropdownMenuContent side="right" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
                   <DropdownMenuLabel className="flex justify-between items-center">
                     <span>Notifications</span>
-                    <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
-                      {notificationCount} new
-                    </Badge>
+                    <div className="flex gap-2 items-center">
+                      <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+                        {notificationCount} new
+                      </Badge>
+                      {notificationCount > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 px-2 text-xs text-white/70 hover:text-white hover:bg-vision-purple-100/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markAllAsRead();
+                          }}
+                        >
+                          <Check className="w-3 h-3 mr-1" />
+                          Mark all read
+                        </Button>
+                      )}
+                    </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                  {/* Sample notifications */}
-                  <div className="max-h-96 overflow-y-auto py-1">
-                    <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
-                      <div className="flex w-full">
-                        <div className="w-8 h-8 rounded-full bg-vision-primary-gradient/20 flex-shrink-0 flex items-center justify-center mr-2">
-                          <MessageSquare className="w-4 h-4 text-vision-purple-700" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-white">New community comment</p>
-                          <p className="text-xs text-white/60 mt-1">John replied to your post about AI startups</p>
-                          <p className="text-xs text-white/40 mt-1">2 hours ago</p>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
-                      <div className="flex w-full">
-                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                          <BrainCircuit className="w-4 h-4 text-green-500" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-white">Analysis complete</p>
-                          <p className="text-xs text-white/60 mt-1">Your startup idea analysis is ready to view</p>
-                          <p className="text-xs text-white/40 mt-1">1 day ago</p>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3">
-                      <div className="flex w-full">
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center mr-2">
-                          <User className="w-4 h-4 text-blue-500" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-white">New follower</p>
-                          <p className="text-xs text-white/60 mt-1">Sarah is now following you</p>
-                          <p className="text-xs text-white/40 mt-1">3 days ago</p>
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                  </div>
+                  
+                  {notificationsLoading ? (
+                    <div className="py-8 flex justify-center items-center">
+                      <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="py-8 text-center text-white/50 text-sm">
+                      No notifications to display
+                    </div>
+                  ) : (
+                    <div className="max-h-80 overflow-y-auto py-1">
+                      {notifications.map((notification) => {
+                        // Get icon based on notification type
+                        let Icon = MessageSquare;
+                        let iconBgClass = "bg-vision-primary-gradient/20"; 
+                        let iconClass = "text-vision-purple-700";
+                        
+                        if (notification.type === 'analysis') {
+                          Icon = BrainCircuit;
+                          iconBgClass = "bg-green-500/20";
+                          iconClass = "text-green-500";
+                        } else if (notification.type === 'follow') {
+                          Icon = User;
+                          iconBgClass = "bg-blue-500/20";
+                          iconClass = "text-blue-500";
+                        }
+                        
+                        // Format time
+                        const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
+                        
+                        return (
+                          <DropdownMenuItem 
+                            key={notification.id} 
+                            className={`cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3 ${
+                              notification.isRead ? 'opacity-70' : ''
+                            }`}
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <div className="flex w-full">
+                              <div className={`w-8 h-8 rounded-full ${iconBgClass} flex-shrink-0 flex items-center justify-center mr-2`}>
+                                <Icon className={`w-4 h-4 ${iconClass}`} />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-white">{notification.title}</p>
+                                <p className="text-xs text-white/60 mt-1">{notification.message}</p>
+                                <p className="text-xs text-white/40 mt-1">{timeAgo}</p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="ml-2 w-2 h-2 bg-vision-purple-500 rounded-full mt-2"></div>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
                   <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                  <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2">
+                  <DropdownMenuItem 
+                    className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
+                    onClick={() => navigate("/notifications")}
+                  >
                     <span className="text-sm text-white/70">View all notifications</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

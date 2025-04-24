@@ -71,13 +71,11 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
   // If user becomes authenticated, close dialog and redirect if needed
   useEffect(() => {
     if (user && isOpen) {
-      // Add a slight delay to ensure any state updates have completed
-      setTimeout(() => {
-        onClose();
-        if (returnTo) {
-          navigate(returnTo);
-        }
-      }, 300);
+      // Close immediately without delay
+      onClose();
+      if (returnTo) {
+        navigate(returnTo);
+      }
     }
   }, [user, isOpen, onClose, navigate, returnTo]);
 

@@ -10,7 +10,8 @@ import {
   CreditCard,
   User,
   X,
-  BookmarkIcon
+  BookmarkIcon,
+  Bell
 } from "lucide-react";
 import { 
   Sheet, 
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useNotifications } from "@/hooks/use-notifications";
+import { Badge } from "@/components/ui/badge";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 
 interface MobileMenuProps {
@@ -31,6 +34,8 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
+  // Get notification data from hook
+  const { unreadCount: notificationCount } = useNotifications();
   
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -123,6 +128,25 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <div className="px-3 pt-4 pb-2">
             <p className="text-xs font-medium text-white/40 uppercase tracking-wider px-3 mb-1">Account</p>
             <nav className="space-y-1">
+              {user && (
+                <Button 
+                  variant="ghost" 
+                  className={`w-full justify-start px-3 py-2 text-sm ${isActive('/notifications') 
+                    ? 'bg-vision-primary-gradient text-white' 
+                    : 'text-white/70 hover:text-white hover:bg-vision-purple-100/10'} rounded-lg`}
+                  onClick={() => handleNavigation('/notifications')}
+                >
+                  <div className="relative mr-2">
+                    <Bell className="h-4 w-4" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center text-[8px] text-white font-bold">
+                        {notificationCount}
+                      </span>
+                    )}
+                  </div>
+                  Notifications
+                </Button>
+              )}
 
               <Button 
                 variant="ghost" 
