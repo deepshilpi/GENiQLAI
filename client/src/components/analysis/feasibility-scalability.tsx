@@ -161,7 +161,7 @@ export function FeasibilityScalability({
                 tickFormatter={(value) => `${value}%`}
               />
               <Tooltip content={renderTooltip} />
-              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" />
+              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" yAxisId="left" />
               <Line
                 yAxisId="left"
                 type="monotone"
