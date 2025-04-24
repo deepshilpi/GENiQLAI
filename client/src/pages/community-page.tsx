@@ -132,8 +132,8 @@ export default function CommunityPage() {
 
   const handleNewPost = () => {
     if (!user) {
-      // Show auth dialog instead of redirecting
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page instead of opening dialog
+      navigate('/auth');
       return;
     }
     setShowPostForm(true);
@@ -141,8 +141,8 @@ export default function CommunityPage() {
 
   const handleVote = (postId: number, voteType: string) => {
     if (!user) {
-      // Show auth dialog instead of redirecting
-      openAuthDialog({ defaultTab: "login" });
+      // Redirect to auth page instead of opening dialog
+      navigate('/auth');
       return;
     }
     voteMutation.mutate({ postId, voteType });
@@ -357,6 +357,11 @@ export default function CommunityPage() {
                         post={post}
                         onVote={handleVote}
                         onReact={(postId, reactionType) => {
+                          if (!user) {
+                            // Redirect to auth page if not logged in
+                            navigate('/auth');
+                            return;
+                          }
                           // Call the API to add reaction
                           apiRequest("POST", `/api/posts/${postId}/react`, { reactionType })
                             .then(() => {
@@ -376,6 +381,11 @@ export default function CommunityPage() {
                             });
                         }}
                         onComment={(postId, comment) => {
+                          if (!user) {
+                            // Redirect to auth page if not logged in
+                            navigate('/auth');
+                            return;
+                          }
                           toast({
                             title: "Comment added",
                             description: "Your comment has been added to the post"
