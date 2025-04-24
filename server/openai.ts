@@ -1303,14 +1303,16 @@ export async function findInvestors(
       messages: [
         {
           role: "system",
-          content: `You are an expert in startup investment with deep knowledge of venture capital and angel investors. For the given startup idea, identify 3-5 specific, real investors that would be most likely to invest in this type of startup in the specified country.
+          content: `You are an expert in startup investment with deep knowledge of venture capital and angel investors. For the given startup idea, identify 5 specific, real investors that would be most likely to invest in this type of startup in the specified country.
           
           Return a JSON object with:
-          'investors': array of 3 objects, each with:
+          'investors': array of 5 objects, each with:
           - name: investor's name (string, keep very brief)
           - firm: investment firm (string, keep very brief)
-          - tags: array of 2 short strings maximum (industry focus, stage preference)
-          - crunchbaseLink: simple Crunchbase URL format
+          - investmentFocus: array of 2-3 short strings (areas of investment interest)
+          - location: investor's location, city or region (string, keep brief)
+          - contactInfo: professional contact method (email or LinkedIn URL format)
+          - portfolioFit: number between 0-100 indicating match quality
           
           Format your response as a valid JSON object.
           IMPORTANT: Provide REAL, SPECIFIC INVESTORS that match the startup idea with accurate information.
@@ -1373,20 +1375,42 @@ export async function findInvestors(
           {
             name: "Accel Partners",
             firm: "Accel",
-            tags: ["Technology", "Early Stage"],
-            crunchbaseLink: "https://www.crunchbase.com/organization/accel-partners"
+            investmentFocus: ["Technology", "Early Stage", "SaaS"],
+            location: "Palo Alto, CA",
+            contactInfo: "https://www.linkedin.com/company/accel-partners",
+            portfolioFit: 85
           },
           {
             name: "Sequoia Capital",
             firm: "Sequoia",
-            tags: ["Technology", "Growth Stage"],
-            crunchbaseLink: "https://www.crunchbase.com/organization/sequoia-capital"
+            investmentFocus: ["Technology", "Growth Stage", "AI"],
+            location: "Menlo Park, CA",
+            contactInfo: "https://www.linkedin.com/company/sequoia-capital",
+            portfolioFit: 80
           },
           {
             name: "Y Combinator",
             firm: "Y Combinator",
-            tags: ["Tech Startups", "Seed Stage"],
-            crunchbaseLink: "https://www.crunchbase.com/organization/y-combinator"
+            investmentFocus: ["Tech Startups", "Seed Stage", "B2B"],
+            location: "Mountain View, CA",
+            contactInfo: "https://www.linkedin.com/company/y-combinator",
+            portfolioFit: 75
+          },
+          {
+            name: "Blume Ventures",
+            firm: "Blume Ventures",
+            investmentFocus: ["Early Stage", "Tech", "India Market"],
+            location: "Mumbai, India",
+            contactInfo: "https://www.linkedin.com/company/blume-ventures",
+            portfolioFit: 90
+          },
+          {
+            name: "Nexus Venture Partners",
+            firm: "Nexus Venture",
+            investmentFocus: ["Enterprise", "Consumer", "India Growth"],
+            location: "Bangalore, India",
+            contactInfo: "https://www.linkedin.com/company/nexus-venture-partners",
+            portfolioFit: 88
           }
         ];
       }

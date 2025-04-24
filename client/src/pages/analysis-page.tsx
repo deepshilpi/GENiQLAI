@@ -1899,8 +1899,8 @@ export default function AnalysisPage() {
               </Card>
             </motion.div>
             
-            {/* 6. Funding & Investment Potential */}
-            <motion.div variants={itemVariants} className="lg:col-span-1">
+            {/* 6. Funding & Investment Potential - Full screen */}
+            <motion.div variants={itemVariants} className="lg:col-span-3">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
                 <CardHeader className="pb-0 pt-4">
                   {/* Title moved to FundingInvestors component */}
