@@ -701,14 +701,14 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     <>
                       {isSinglePostLoading ? (
                         // Loading skeleton for single post
-                        <div className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
-                          <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
-                            <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
+                        <div className="border-b border-[#A163F7]/10 bg-[#11083C]/90 p-5">
+                          <div className="flex items-start gap-4">
+                            <Skeleton className="h-12 w-12 rounded-full bg-[#A163F7]/10" />
+                            <div className="flex-1 space-y-3">
+                              <Skeleton className="h-4 w-32 bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-3/4 bg-[#A163F7]/10" />
                             </div>
                           </div>
                         </div>
@@ -746,14 +746,14 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         // Loading skeletons for initial load
                         <>
                           {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
-                              <div className="flex items-start gap-3">
-                                <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
-                                <div className="flex-1 space-y-2">
-                                  <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
-                                  <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                                  <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                                  <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
+                            <div key={i} className="border-b border-[#A163F7]/10 bg-[#11083C]/90 p-5">
+                              <div className="flex items-start gap-4">
+                                <Skeleton className="h-12 w-12 rounded-full bg-[#A163F7]/10" />
+                                <div className="flex-1 space-y-3">
+                                  <Skeleton className="h-4 w-32 bg-[#A163F7]/10" />
+                                  <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                                  <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                                  <Skeleton className="h-4 w-3/4 bg-[#A163F7]/10" />
                                 </div>
                               </div>
                             </div>
