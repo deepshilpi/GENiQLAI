@@ -3,7 +3,11 @@ import { NewsArticle } from "../client/src/lib/tavily";
 // Function to search for news articles about successful startups in other countries
 export async function searchStartupNews(userCountry: string): Promise<NewsArticle[]> {
   try {
-    const apiKey = process.env.TAVILY_API_KEY || "tavily-placeholder-key";
+    const apiKey = process.env.TAVILY_API_KEY;
+    if (!apiKey) {
+      console.error("Missing TAVILY_API_KEY environment variable");
+      return getDummyNewsArticles(userCountry);
+    }
     const url = "https://api.tavily.com/search";
     
     const query = `successful startups outside of ${userCountry} that could expand to ${userCountry}`;

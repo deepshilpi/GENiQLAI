@@ -889,23 +889,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get news articles (Authentication required)
+  // Get news articles (No authentication required)
   app.get("/api/news", async (req, res) => {
-    // Only authenticated users can access news articles
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ 
-        message: "Authentication required to view news articles",
-        error: "auth_required"
-      });
-    }
-    
     try {
       const country = detectCountryFromIP(req.ip || '');
       const articles = await searchStartupNews(country);
       return res.status(200).json(articles);
     } catch (error) {
-      console.error("Error fetching news articles:", error);
-      return res.status(500).json({ message: "Failed to fetch news articles" });
+      console.error("Error searching startup news:", error);
+      return res.status(200).json([]); // Return empty array to gracefully handle API issues
     }
   });
   

@@ -11,16 +11,11 @@ export interface NewsArticle {
 
 export async function fetchNewsArticles(): Promise<NewsArticle[]> {
   try {
-    // This endpoint is authenticated but we'll handle the error gracefully
+    // The endpoint is now open to all users
     const response = await apiRequest("GET", "/api/news");
     
     if (!response.ok) {
-      const errorData = await response.json();
-      if (errorData.error === "auth_required") {
-        // For unauthenticated users, return empty array (handled in UI)
-        return [];
-      }
-      throw new Error(errorData.message || "Failed to fetch news");
+      throw new Error("Failed to fetch news");
     }
     
     return await response.json();
