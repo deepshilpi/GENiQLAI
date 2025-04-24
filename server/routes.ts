@@ -1040,9 +1040,19 @@ function setupWebSocketServer(httpServer: Server) {
         
         // Handle authentication
         if (data.type === 'auth') {
+          // Validate the payload has a userId field
+          if (!data.payload || typeof data.payload !== 'object') {
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Authentication failed: Invalid payload' }
+            }));
+            console.log('WebSocket auth failed: Invalid payload', data);
+            return;
+          }
+
           // Validate user ID from authentication payload
           const userId = data.payload.userId;
-          if (typeof userId !== 'number' || isNaN(userId)) {
+          if (typeof userId !== 'number' || isNaN(userId) || userId <= 0) {
             ws.send(JSON.stringify({
               type: 'error',
               payload: { message: 'Authentication failed: Invalid user ID' }
@@ -1065,7 +1075,7 @@ function setupWebSocketServer(httpServer: Server) {
               return;
             }
             
-            console.log('User found, authenticating WebSocket connection');
+            console.log('User found, authenticating WebSocket connection for', user.username);
             
             // Set the authenticated user ID
             ws.userId = userId;
@@ -1073,10 +1083,14 @@ function setupWebSocketServer(httpServer: Server) {
             // Add connection to active connections map
             if (!activeConnections.has(userId)) {
               activeConnections.set(userId, new Set());
+              console.log(`Creating new connection set for user ${userId}`);
             }
             const connections = activeConnections.get(userId);
             if (connections) {
               connections.add(ws);
+              console.log(`Added connection to pool for user ${userId}. Total connections: ${connections.size}`);
+            } else {
+              console.error(`Unexpected: connection set for user ${userId} is undefined`);
             }
           } catch (error) {
             console.error('Error authenticating WebSocket connection:', error);
@@ -1277,18 +1291,27 @@ function setupWebSocketServer(httpServer: Server) {
       }
     });
     
-    // Handle disconnection
+    // Handle disconnection with improved cleanup
     ws.on('close', () => {
       if (ws.userId !== undefined) {
         const userConnections = activeConnections.get(ws.userId);
         
         if (userConnections) {
-          userConnections.delete(ws);
+          const wasDeleted = userConnections.delete(ws);
+          console.log(`WebSocket connection closed for user ${ws.userId}. Connection removed: ${wasDeleted}`);
           
+          // If this was the last connection for this user, remove the user from active connections
           if (userConnections.size === 0) {
             activeConnections.delete(ws.userId);
+            console.log(`Removed user ${ws.userId} from active connections (no more connections)`);
+          } else {
+            console.log(`User ${ws.userId} still has ${userConnections.size} active connections`);
           }
+        } else {
+          console.log(`User ${ws.userId} had no active connections set`);
         }
+      } else {
+        console.log(`WebSocket connection closed for unauthenticated user`);
       }
     });
   });
