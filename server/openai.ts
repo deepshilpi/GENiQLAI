@@ -167,21 +167,21 @@ export async function analyzeStartupIdea(
     Include SPECIFIC, ACTIONABLE RECOMMENDATIONS throughout.
     Return ONLY valid JSON without any explanations, text, or markdown before or after.`;
 
-    console.log("Sending enhanced analysis request to OpenAI API...");
+    console.log("Sending optimized single-call analysis request to OpenAI API...");
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { 
           role: "system", 
-          content: systemPrompt + "\n\nIMPORTANT: Provide DEEP, EXPERT-LEVEL ANALYSIS with industry-specific insights and realistic market data. Focus on QUALITY, ACCURACY, and ACTIONABLE INTELLIGENCE. Include country-specific market metrics and industry benchmarks where appropriate."
+          content: systemPrompt + "\n\nIMPORTANT: Provide COMPREHENSIVE, ACCURATE, and ORGANIZED ANALYSIS with industry-specific insights and realistic market data. Structure your response in clear blocks that are easy to parse and display."
         },
-        { role: "user", content: `Provide a comprehensive, expert-level analysis of this startup idea for the ${country} market, including detailed industry-specific metrics, realistic market figures, and actionable recommendations: ${startupIdea}` }
+        { role: "user", content: `Analyze this startup idea for the ${country} market in the ${startupIdea.includes("category:") ? startupIdea.split("category:")[1].trim().split(" ")[0] : ""} category:\n\n"${startupIdea}"\n\nProvide a comprehensive, accurate, and organized analysis following the structure specified. Focus on factual data and actionable insights.` }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
-      max_tokens: 3000, // Increased token count to allow for detailed, expert-level analysis
-      top_p: 0.9, // Wider sampling for more nuanced, expert responses
+      temperature: 0.7, // Set to 0.7 per requirements for balance of creativity and accuracy
+      max_tokens: 4000, // Higher token limit for detailed output
+      top_p: 0.9, // Wider sampling for more detailed and varied responses
       frequency_penalty: 0.1, // Slight penalty to avoid repetitive language
       presence_penalty: 0.1 // Slight penalty to encourage diverse coverage
     });
@@ -215,8 +215,9 @@ export async function analyzeStartupIdea(
               console.log("Found JSON match, attempting to parse");
               analysisContent = JSON.parse(jsonContent);
               console.log("Successfully parsed extracted JSON");
-            } catch (extractionError) {
-              throw new Error("Failed to parse extracted JSON: " + extractionError.message);
+            } catch (extractionError: unknown) {
+              const errMessage = extractionError instanceof Error ? extractionError.message : "Unknown error";
+              throw new Error("Failed to parse extracted JSON: " + errMessage);
             }
           } else {
             throw new Error("No JSON pattern found in response");
@@ -361,7 +362,12 @@ export async function analyzeStartupIdea(
         businessModelStrength: {
           overall: 60,
           components: [
-            { name: "Revenue potential", score: 60 }
+            { 
+              name: "Revenue potential", 
+              score: 60,
+              description: "Could not fully analyze revenue potential",
+              keyMetrics: ["Potential market size", "Monetization strategy"] 
+            }
           ],
           message: "Business model analysis could not be fully completed."
         },
