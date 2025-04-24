@@ -28,115 +28,117 @@ export async function analyzeStartupIdea(
     // Determine which blocks to include based on the user's plan
     const includeProBlocks = planType === "pro" || planType === "unicorn";
     
-    // Build the system prompt with instructions for the enhanced analysis
-    const systemPrompt = `You are a startup analysis expert with extensive experience in venture capital and market analysis. Analyze the startup idea for the ${country} market and provide comprehensive, detailed insights in JSON format. Your analysis should be thorough, expert-level, and contain specific market insights and actionable advice.
+    // Build a streamlined system prompt for faster response times
+    const systemPrompt = `You are a startup analyst. Provide a QUICK analysis for the ${country} market. FOCUS ON SPEED AND BREVITY.
     
-    IMPORTANT: Return ONLY valid JSON format without additional explanations or text. DO NOT include any markdown formatting like triple backticks.
+    IMPORTANT: Respond QUICKLY with CONCISE analysis. Use shorter responses in all fields.
+
+    Return a JSON with exactly these blocks - smaller and briefer than normal:
     
-    Your analysis MUST contain the following 8 interactive blocks in this exact JSON structure:
-    
-    1. successRate: Object with {
-       percentage: number from 0-100,
-       goodPoints: array of 3-4 strings explaining specific positive factors with data points where possible,
-       badPoints: array of 3-4 strings explaining specific negative factors with data points where possible,
-       message: string summarizing the overall success likelihood with clear rationale
+    1. successRate: {
+       percentage: number (0-100),
+       goodPoints: [3 very brief strings only - 10 words max each],
+       badPoints: [3 very brief strings only - 10 words max each],
+       message: string (20 words maximum)
     }
     
-    2. competitors: Object with {
-       competitors: array of 4-6 objects, each with {
-         name: string (real company name in this space),
-         marketShare: number (realistic percentage of market),
-         websiteUrl: string (realistic URL),
-         uniqueStrength: string (brief description of competitive advantage)
-       },
-       message: string summarizing the competitive landscape with specific insights
+    2. competitors: {
+       competitors: [
+         {
+           name: string,
+           marketShare: number,
+           websiteUrl: string
+         },
+         ... exactly 3 competitors only
+       ],
+       message: string (15 words maximum)
     }
     
-    3. targetAudienceFit: Object with {
-       segments: array of 3-5 objects, each with {
-         name: string (specific demographic or psychographic segment name),
-         score: number from 0-100 (how well idea fits this segment),
-         behaviorsAndPreferences: array of 3-4 strings (detailed consumer behaviors and preferences)
-       },
-       message: string providing detailed audience analysis with key behavioral insights
+    3. targetAudienceFit: {
+       segments: [
+         {
+           name: string,
+           score: number (0-100)
+         },
+         ... exactly 3 segments only
+       ],
+       message: string (15 words maximum)
     }
     
-    4. marketSize: Object with {
-       segments: array of objects, each with {
-         name: string (e.g., "local", "national", "global"),
-         percentage: number,
-         value: number (REALISTIC dollar size in millions - research equivalent markets)
-       },
-       totalSize: number (REALISTIC total market size in millions - minimum $100M for viable markets),
-       cagr: number (market compound annual growth rate as percentage),
-       message: string explaining market size impact with actual market research citations
+    4. marketSize: {
+       segments: [
+         {
+           name: string (e.g., "local", "national", "global"),
+           percentage: number,
+           value: number (millions)
+         },
+         ... exactly 3 segments only
+       ],
+       totalSize: number (millions),
+       cagr: number (percentage),
+       message: string (15 words maximum)
     }
     
-    5. businessModelStrength: Object with {
-       overall: number from 0-100,
-       components: array of 5-7 objects, each with {
-         name: string (specific revenue model component),
-         score: number from 0-100,
-         description: string explaining this aspect with specifics,
-         keyMetrics: array of 2-3 strings (important KPIs to track)
-       },
-       message: string summarizing overall business model with specific strengths and weaknesses
+    5. businessModelStrength: {
+       overall: number (0-100),
+       components: [
+         {
+           name: string,
+           score: number (0-100),
+           description: string (10 words maximum)
+         },
+         ... exactly 3 components only
+       ],
+       message: string (15 words maximum)
     }
     
-    6. fundingRequired: Object with {
-       total: number (realistic total funding needed - minimum $100K, typically $500K-5M for most startups),
-       currency: string (3-letter currency code like "USD", "INR", "EUR" - use appropriate currency for ${country}),
-       breakdown: array of objects, each with {
-         category: string (e.g., "Product Development", "Marketing"),
-         amount: number (currency amount),
-         percentage: number (of total funding),
-         keyExpenses: array of 2-3 strings (specific expenses in this category)
-       },
-       timeline: array of objects, each with {
-         stage: string (funding stage name),
-         amount: number (amount needed at this stage),
-         milestone: string (key milestone to achieve)
-       },
-       message: string explaining detailed funding strategy
+    6. fundingRequired: {
+       total: number,
+       currency: string (3-letter code for ${country}),
+       breakdown: [
+         {
+           category: string,
+           amount: number,
+           percentage: number
+         },
+         ... exactly 3 categories only
+       ],
+       message: string (15 words maximum)
     }
     
-    7. swotAnalysis: Object with {
-       strengths: array of 5-6 detailed strings (specific internal advantages),
-       weaknesses: array of 5-6 detailed strings (specific internal disadvantages),
-       opportunities: array of 5-6 detailed strings (specific external positive factors),
-       threats: array of 5-6 detailed strings (specific external negative factors),
-       priorityAction: string (most important action item from the SWOT analysis)
+    7. swotAnalysis: {
+       strengths: [exactly 3 brief strings - 10 words max each],
+       weaknesses: [exactly 3 brief strings - 10 words max each],
+       opportunities: [exactly 3 brief strings - 10 words max each],
+       threats: [exactly 3 brief strings - 10 words max each]
     }
     
-    8. previousFailedExecutions: Object with {
-       failures: array of 4-6 objects, each with {
-         name: string (real company name),
-         year: string (actual year of failure),
-         reason: string (detailed primary reason for failure),
-         lessonLearned: string (specific actionable lesson)
-       },
-       message: string explaining what can be learned with specific strategies to avoid similar failures
+    8. previousFailedExecutions: {
+       failures: [
+         {
+           name: string,
+           year: string,
+           reason: string (10 words maximum)
+         },
+         ... exactly 2 examples only
+       ],
+       message: string (15 words maximum)
     }
     
     ${includeProBlocks ? `
-    9. relatedIdeas: Array of 4-6 objects, each with {
-       title: string (related startup idea with specific focus),
-       description: string (detailed explanation with market opportunity),
-       potentialScore: number from 0-100 (potential success),
-       synergies: array of 2-3 strings (ways this idea complements the main idea)
-    }
+    9. relatedIdeas: [
+       {
+         title: string (5 words maximum),
+         description: string (15 words maximum),
+         potentialScore: number (0-100)
+       },
+       ... exactly 3 ideas only
+    ]
     ` : ''}
     
-    ALL MONETARY VALUES MUST BE REALISTIC AND INDUSTRY-APPROPRIATE - research similar companies and markets to provide accurate figures. For example:
-    - A SaaS startup might need $500K-2M initial funding
-    - A marketplace might have a $1B+ total addressable market
-    - An app might need $100-300K for MVP development
-    
-    The analysis should be specific to ${country} with country-specific insights, regulations, and market conditions.
-    
-    Be detailed and specific - avoid generic responses. Include specific metrics, strategies, and actionable insights throughout the analysis.
-    
-    Return ONLY a valid JSON object without any explanations, text, or markdown before or after.`;
+    USE REALISTIC VALUES but PRIORITIZE SPEED OVER DETAIL.
+    BE EXTREMELY BRIEF in all text fields.
+    Return ONLY JSON with no additional text.`;
 
     console.log("Sending enhanced analysis request to OpenAI API...");
     
@@ -151,10 +153,10 @@ export async function analyzeStartupIdea(
       ],
       response_format: { type: "json_object" },
       temperature: 0.3, // Lower temperature for faster, more predictable responses
-      max_tokens: 2500, // Reduced token count for faster response
-      top_p: 0.8,
-      frequency_penalty: 0.1, // Reduced for faster responses
-      presence_penalty: 0.1
+      max_tokens: 1500, // Significantly reduced token count for much faster response
+      top_p: 0.7, // More focused sampling for speed
+      frequency_penalty: 0, // Removed for faster responses
+      presence_penalty: 0 // Removed for faster responses
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -404,10 +406,10 @@ export async function generateBudgetAnalysis(
       ],
       response_format: { type: "json_object" },
       temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 2000, // Reduced for speed
-      top_p: 0.8,
-      frequency_penalty: 0.1,
-      presence_penalty: 0.1
+      max_tokens: 1500, // Significantly reduced token count for much faster response
+      top_p: 0.7, // More focused sampling for speed
+      frequency_penalty: 0, // Removed for faster responses
+      presence_penalty: 0 // Removed for faster responses
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -591,10 +593,10 @@ export async function generateExecutionPlan(
       ],
       response_format: { type: "json_object" },
       temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 1500, // Reduced token count for faster response
-      top_p: 0.8,
-      frequency_penalty: 0.1,
-      presence_penalty: 0.1
+      max_tokens: 1000, // Significantly reduced token count for much faster response
+      top_p: 0.7, // More focused sampling for speed
+      frequency_penalty: 0, // Removed for faster responses
+      presence_penalty: 0 // Removed for faster responses
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
@@ -673,10 +675,10 @@ export async function findInvestors(
       ],
       response_format: { type: "json_object" },
       temperature: 0.3, // Lower temperature for faster responses
-      max_tokens: 800, // Reduced token count for faster response
-      top_p: 0.8,
-      frequency_penalty: 0.1,
-      presence_penalty: 0.1
+      max_tokens: 600, // Significantly reduced token count for much faster response
+      top_p: 0.7, // More focused sampling for speed
+      frequency_penalty: 0, // Removed for faster responses
+      presence_penalty: 0 // Removed for faster responses
     });
 
     if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {

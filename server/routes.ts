@@ -472,23 +472,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // Simple in-memory cache for investors results
+      // Enhanced in-memory cache for investors results
       const investorsCache = (req.app.locals.investorsCache = req.app.locals.investorsCache || new Map());
       
-      // Create a unique cache key based on idea and country
+      // Create a unique cache key with Base64 hashing for better performance
+      const hashedIdea = Buffer.from(startupIdea.trim().toLowerCase().substring(0, 50)).toString('base64');
       const country = detectCountryFromIP(req.ip || '');
-      const cacheKey = `${startupIdea.trim().toLowerCase().substring(0, 100)}_${country}`;
+      const cacheKey = `investor_${hashedIdea}_${country}`;
       
-      // Check if we have a cached result (cache lasts 60 minutes)
+      // Longer cache duration (24 hours) for better performance
       const cachedResult = investorsCache.get(cacheKey);
-      if (cachedResult && (Date.now() - cachedResult.timestamp < 60 * 60 * 1000)) {
-        console.log("Using cached investors result");
+      if (cachedResult && (Date.now() - cachedResult.timestamp < 24 * 60 * 60 * 1000)) {
+        console.log("Using cached investors result from cache");
         return res.json(cachedResult.data);
       }
       
-      // Add timeout to prevent long-running requests
+      // Add shorter timeout to prevent long-running requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout
+        setTimeout(() => reject(new Error("Request timeout")), 30000); // 30 seconds timeout
       });
       
       // Race between the investors search and the timeout
