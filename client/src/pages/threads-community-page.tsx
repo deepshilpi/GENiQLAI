@@ -524,7 +524,13 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
           <div className="max-w-screen-md mx-auto">
             {/* Header Bar */}
             <div className="sticky top-0 z-10 bg-vision-card/90 backdrop-blur-xl border-b border-vision-purple-200/10 px-4 py-3 flex justify-between items-center">
-              <h1 className="text-xl font-semibold text-white">Startup Community</h1>
+              <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+                <span className="bg-vision-primary-gradient bg-clip-text text-transparent">Hustlers</span> 
+                <span>Community</span>
+                <div className="relative">
+                  <span className="absolute -top-1 -right-4 h-2 w-2 bg-green-400 rounded-full animate-pulse"></span>
+                </div>
+              </h1>
               
               <div className="flex items-center gap-2">
                 <Button 
@@ -628,27 +634,42 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
             {/* Feed Tabs - only shown when not viewing a single post */}
             {!postId && (
               <Tabs defaultValue="latest" className="bg-vision-dark" onValueChange={handleTabChange}>
-                <TabsList className="w-full grid grid-cols-3 rounded-none bg-vision-card/90 backdrop-blur-xl h-12 border-b border-vision-purple-200/10">
+                <TabsList className="w-full grid grid-cols-3 rounded-none bg-vision-card/90 backdrop-blur-xl h-14 border-b border-vision-purple-200/10">
                   <TabsTrigger 
                     value="latest" 
-                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
+                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
-                    <Clock className="h-4 w-4 mr-2" />
-                    Latest
+                    <div className="flex items-center justify-center gap-2 z-10 relative">
+                      <Clock className="h-4 w-4" />
+                      <span>Latest</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="trending" 
-                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
+                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Trending
+                    <div className="flex items-center justify-center gap-2 z-10 relative">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>Trending</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="following" 
-                    className="text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-vision-purple-500 data-[state=active]:shadow-none rounded-none"
+                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
-                    <Users className="h-4 w-4 mr-2" />
-                    Following
+                    <div className="flex items-center justify-center gap-2 z-10 relative">
+                      <Users className="h-4 w-4" />
+                      <span>Following</span>
+                      {user && (
+                        <span className="absolute top-0 right-6 h-2 w-2 bg-green-400 rounded-full"></span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
                   </TabsTrigger>
                 </TabsList>
                 
