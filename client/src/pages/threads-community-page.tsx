@@ -760,7 +760,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           ))}
                         </>
                       ) : posts.length > 0 ? (
-                        <div className="bg-vision-dark">
+                        <div className="bg-[#11083C]/80">
                           <AnimatePresence initial={false}>
                             {posts.map((post) => (
                               <ThreadsStylePost
@@ -781,7 +781,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           {hasMore && (
                             <div 
                               ref={loadMoreRef} 
-                              className="py-4 flex justify-center bg-vision-card/70"
+                              className="py-4 flex justify-center bg-[#11083C]/90"
                             >
                               {isFetching && page > 1 ? (
                                 <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
@@ -793,12 +793,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           
                           {/* End of feed indicator */}
                           {!hasMore && posts.length > 0 && (
-                            <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
-                              <p className="text-sm text-vision-purple-300">You've seen all posts</p>
+                            <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                              <p className="text-sm text-[#a09dd2]">You've seen all posts</p>
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                                className="mt-2 border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white"
                                 onClick={() => {
                                   window.scrollTo(0, 0);
                                   setPage(1);
@@ -852,14 +852,14 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     // Loading skeletons
                     <>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
-                          <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
-                            <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
+                        <div key={i} className="border-b border-[#A163F7]/10 bg-[#11083C]/90 p-5">
+                          <div className="flex items-start gap-4">
+                            <Skeleton className="h-12 w-12 rounded-full bg-[#A163F7]/10" />
+                            <div className="flex-1 space-y-3">
+                              <Skeleton className="h-4 w-32 bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-3/4 bg-[#A163F7]/10" />
                             </div>
                           </div>
                         </div>
@@ -946,14 +946,14 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     // Loading skeletons
                     <>
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border-b border-vision-purple-200/10 bg-vision-card/70 p-4">
-                          <div className="flex items-start gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full bg-vision-purple-200/10" />
-                            <div className="flex-1 space-y-2">
-                              <Skeleton className="h-4 w-32 bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-full bg-vision-purple-200/10" />
-                              <Skeleton className="h-4 w-3/4 bg-vision-purple-200/10" />
+                        <div key={i} className="border-b border-[#A163F7]/10 bg-[#11083C]/90 p-5">
+                          <div className="flex items-start gap-4">
+                            <Skeleton className="h-12 w-12 rounded-full bg-[#A163F7]/10" />
+                            <div className="flex-1 space-y-3">
+                              <Skeleton className="h-4 w-32 bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-full bg-[#A163F7]/10" />
+                              <Skeleton className="h-4 w-3/4 bg-[#A163F7]/10" />
                             </div>
                           </div>
                         </div>
