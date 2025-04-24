@@ -68,11 +68,16 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
     }
   });
 
-  // If user becomes authenticated, close dialog and redirect if needed
+  // Force close the dialog when user becomes authenticated
   useEffect(() => {
+    // If we're logged in and the dialog is open, force close it
     if (user && isOpen) {
-      // Close immediately without delay
+      console.log("User authenticated, forcing dialog close");
+      
+      // Immediately close without any delay
       onClose();
+      
+      // If there's a return path, navigate there
       if (returnTo) {
         navigate(returnTo);
       }
@@ -139,8 +144,28 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
     }
   };
 
+  // Create a direct close function that will be used in both dialog and auth functions
+  const closeDialog = () => {
+    if (isOpen) {
+      console.log("Manually closing auth dialog");
+      onClose();
+    }
+  };
+  
+  // Update login/register callbacks to directly close dialog
+  useEffect(() => {
+    // After successful login or registration, explicitly close dialog
+    if (loginMutation?.isSuccess || registerMutation?.isSuccess) {
+      closeDialog();
+    }
+  }, [loginMutation?.isSuccess, registerMutation?.isSuccess]);
+  
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => !open && closeDialog()}
+      modal={true}
+    >
       <DialogContent className="vision-card max-w-md border-vision-purple-200/10">
         <DialogHeader>
           <DialogTitle className="text-xl text-white font-bold text-center">

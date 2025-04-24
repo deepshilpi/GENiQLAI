@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
 import { User, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
@@ -19,13 +19,17 @@ type AuthContextType = {
   registerMutation: UseMutationResult<User, Error, InsertUser>;
   updatePlanMutation: UseMutationResult<User, Error, { planType: string }>;
   updateProfilePicture: UseMutationResult<User, Error, FormData>;
+  refetchUser: () => Promise<User | null>; // Add direct refetch method
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const [_, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  
+  // Local state to track manual log state to force re-renders
+  const [forceAuthUpdate, setForceAuthUpdate] = useState(0);
 
   const {
     data: user,
@@ -33,38 +37,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     refetch,
   } = useQuery<User | null, Error>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/user", forceAuthUpdate], // Include forceAuthUpdate in query key
     queryFn: getQueryFn({ on401: "returnNull" }),
     staleTime: Infinity, // Never consider data stale - completely avoid automatic refetching
     retry: 0, // Don't retry on failure - reduces queries
     refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
-  // Completely disabled periodic authentication checks to avoid delays
-  // No automatic reauthentication will happen in the background
+  // Expose refetch method for use elsewhere
+  const refetchUser = async () => {
+    setForceAuthUpdate(prev => prev + 1); // Force a refetch by updating the state
+    const result = await refetch();
+    return result.data ?? null;
+  };
 
   const loginMutation = useMutation<User, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
       try {
         const res = await apiRequest("POST", "/api/login", credentials);
-        return await res.json();
-      } catch (err) {
+        const userData = await res.json();
+        return userData;
+      } catch (err: any) {
         console.error("Login API error:", err);
-        throw err;
+        throw new Error(err.message || "Login failed");
       }
     },
     onSuccess: (userData) => {
       console.log("Login successful, setting user data:", userData);
       
       // Update user data in the cache
-      queryClient.setQueryData(["/api/user"], userData);
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       
-      // Immediately update the UI without delay
-      // Instantly invalidate specific queries that depend on auth status
+      // Force a rerender of the auth context
+      setForceAuthUpdate(prev => prev + 1);
+      
+      // Immediately refresh data that depends on auth status
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          // Only invalidate certain endpoints that depend on auth
           return [
             "/api/saved-ideas", 
             "/api/analyses", 
@@ -74,8 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // Immediately redirect to home page without delay
-      navigate("/");
+      // Close any auth dialogs and redirect
+      if (location !== "/") {
+        navigate("/");
+      }
       
       toast({
         title: "Login successful",
@@ -96,24 +108,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutationFn: async (credentials) => {
       try {
         const res = await apiRequest("POST", "/api/register", credentials);
-        return await res.json();
-      } catch (err) {
+        const userData = await res.json();
+        return userData;
+      } catch (err: any) {
         console.error("Registration API error:", err);
-        throw err;
+        throw new Error(err.message || "Registration failed");
       }
     },
     onSuccess: (userData) => {
       console.log("Registration successful, setting user data:", userData);
       
       // Update user data in the cache
-      queryClient.setQueryData(["/api/user"], userData);
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
       
-      // Immediately update the UI without delay
-      // Instantly invalidate specific queries that depend on auth status  
+      // Force a rerender of the auth context
+      setForceAuthUpdate(prev => prev + 1);
+      
+      // Immediately refresh data that depends on auth status
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          // Only invalidate certain endpoints that depend on auth
           return [
             "/api/saved-ideas", 
             "/api/analyses", 
@@ -123,8 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // Immediately redirect to home page without delay
-      navigate("/");
+      // Close any auth dialogs and redirect
+      if (location !== "/") {
+        navigate("/");
+      }
       
       toast({
         title: "Registration successful",
@@ -145,20 +161,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutationFn: async () => {
       try {
         await apiRequest("POST", "/api/logout");
-      } catch (err) {
+        return true;
+      } catch (err: any) {
         console.error("Logout API error:", err);
-        throw err;
+        throw new Error(err.message || "Logout failed");
       }
     },
     onSuccess: () => {
       // Clear user data
-      queryClient.setQueryData(["/api/user"], null);
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
       
-      // Reset all auth-dependent queries to their initial state instead of invalidating
+      // Force a rerender of the auth context
+      setForceAuthUpdate(prev => prev + 1);
+      
+      // Reset all auth-dependent queries to their initial state
       queryClient.resetQueries({ 
         predicate: (query) => {
           const queryKey = Array.isArray(query.queryKey) ? query.queryKey[0] : query.queryKey;
-          // Reset these specific endpoints
           return [
             "/api/saved-ideas", 
             "/api/analyses", 
@@ -168,8 +187,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      // Redirect to home page
-      window.location.href = "/";
+      // Use navigation to avoid full page reload
+      navigate("/");
       
       toast({
         title: "Logged out successfully",
@@ -182,6 +201,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "There was a problem logging out. Please try again.",
         variant: "destructive",
       });
+      
+      // Force refetch user data to ensure consistent state
+      refetchUser();
     },
   });
 
@@ -191,8 +213,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["/api/user"], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], updatedUser);
+      setForceAuthUpdate(prev => prev + 1);
       
       toast({
         title: "Subscription updated",
@@ -225,8 +247,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return responseData.user;
     },
     onSuccess: (updatedUser) => {
-      queryClient.setQueryData(["/api/user"], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], updatedUser);
+      setForceAuthUpdate(prev => prev + 1);
       
       toast({
         title: "Profile updated",
@@ -253,6 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registerMutation,
         updatePlanMutation,
         updateProfilePicture,
+        refetchUser,
       }}
     >
       {children}
