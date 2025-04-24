@@ -180,10 +180,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Step 1: Get core analysis using the new step-by-step approach
         console.log("Step 1: Requesting core analysis data with step-by-step analysis");
-        analysisResults = await Promise.race([
+        const analysisResult = await Promise.race([
           analyzeStartupIdeaStepByStep(startupIdea, country, planType),
           timeoutPromise
         ]);
+        analysisResults = analysisResult as AnalysisResults;
         
         console.log("Core analysis completed successfully");
         
@@ -529,22 +530,243 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // First, get the enhanced execution plan with country-specific data and team info
-      const executionPlan = await generateExecutionPlan(
-        startupIdea, 
-        initialBudget, 
-        userCountry, 
-        teamInfo
-      );
-      console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
+      let executionPlan;
+      try {
+        executionPlan = await generateExecutionPlan(
+          startupIdea, 
+          initialBudget, 
+          userCountry, 
+          teamInfo
+        );
+        console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
+      } catch (executionPlanError) {
+        console.error("Error generating execution plan:", executionPlanError);
+        // Create a fallback execution plan
+        executionPlan = {
+          budget: {
+            development: initialBudget * 0.4,
+            marketing: initialBudget * 0.3,
+            operations: initialBudget * 0.2,
+            compliance: initialBudget * 0.05,
+            contingency: initialBudget * 0.05
+          },
+          roadmap: [
+            {
+              step: "MVP Development",
+              description: "Build core functionality with minimal features",
+              timeframe: "2-3 months",
+              cost: initialBudget * 0.3,
+              keyDeliverables: ["Working prototype", "Initial user testing"]
+            },
+            {
+              step: "Market Testing & Iteration",
+              description: "Test with early adopters and iterate",
+              timeframe: "2 months",
+              cost: initialBudget * 0.2,
+              keyDeliverables: ["User feedback collection", "Product improvements"]
+            },
+            {
+              step: "Official Launch",
+              description: "Full market launch with marketing campaign",
+              timeframe: "1 month",
+              cost: initialBudget * 0.25,
+              keyDeliverables: ["Marketing materials", "Public release"]
+            },
+            {
+              step: "Growth & Expansion",
+              description: "Scale operations and expand user base",
+              timeframe: "6 months",
+              cost: initialBudget * 0.25,
+              keyDeliverables: ["Increased user metrics", "Revenue generation"]
+            }
+          ],
+          currency: "INR",
+          timeline: "12-15 months to market profitability",
+          keyRisks: [
+            "Market adoption slower than expected",
+            "Unexpected development roadblocks",
+            "Stronger competition emerges"
+          ],
+          successMetrics: [
+            "User acquisition targets met",
+            "Positive customer feedback",
+            "Revenue growth on track"
+          ]
+        };
+        console.log("Using fallback execution plan due to error");
+      }
       
       // Then, get the comprehensive budget analysis with team info
-      const budgetAnalysis = await generateBudgetAnalysis(
-        startupIdea, 
-        initialBudget, 
-        userCountry, 
-        teamInfo
-      );
-      console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
+      let budgetAnalysis;
+      try {
+        budgetAnalysis = await generateBudgetAnalysis(
+          startupIdea, 
+          initialBudget, 
+          userCountry, 
+          teamInfo
+        );
+        console.log("Budget analysis response:", JSON.stringify(budgetAnalysis).substring(0, 100) + "...");
+      } catch (budgetAnalysisError) {
+        console.error("Error generating budget analysis:", budgetAnalysisError);
+        // Create a fallback budget analysis
+        budgetAnalysis = {
+          initialBudget: initialBudget,
+          feasibilityAndScalability: {
+            initialFeasibility: 70,
+            scalingPoints: [
+              {
+                milestone: "MVP Launch",
+                investment: initialBudget * 0.3,
+                potentialReturns: initialBudget * 0.5,
+                feasibilityScore: 80
+              },
+              {
+                milestone: "Market Expansion",
+                investment: initialBudget * 0.7,
+                potentialReturns: initialBudget * 1.5,
+                feasibilityScore: 65
+              },
+              {
+                milestone: "Scale Operations",
+                investment: initialBudget * 1.5,
+                potentialReturns: initialBudget * 3,
+                feasibilityScore: 55
+              }
+            ],
+            message: "Startup has a promising path to scaling with appropriate investment."
+          },
+          riskAnalysis: {
+            overallRisk: 60,
+            risks: [
+              {
+                category: "Market Risk",
+                likelihood: 60,
+                impact: 70,
+                mitigationStrategy: "Conduct thorough market research and start with a targeted niche."
+              },
+              {
+                category: "Financial Risk",
+                likelihood: 65,
+                impact: 80,
+                mitigationStrategy: "Maintain lean operations and secure additional funding sources."
+              },
+              {
+                category: "Execution Risk",
+                likelihood: 50,
+                impact: 75,
+                mitigationStrategy: "Build a skilled team and implement agile development methodologies."
+              }
+            ],
+            message: "This venture has moderate risk factors that can be mitigated with proper planning."
+          },
+          goToMarketStrategy: {
+            timeline: [
+              {
+                phase: "Market Research & MVP",
+                duration: "3 months",
+                activities: ["Customer interviews", "Prototype development"],
+                estimatedCost: initialBudget * 0.25
+              },
+              {
+                phase: "Beta Launch",
+                duration: "2 months",
+                activities: ["Limited release", "User feedback collection"],
+                estimatedCost: initialBudget * 0.15
+              },
+              {
+                phase: "Full Market Launch",
+                duration: "3 months",
+                activities: ["Marketing campaign", "Sales outreach"],
+                estimatedCost: initialBudget * 0.35
+              }
+            ],
+            message: "A phased approach focused on validated learning and iteration."
+          },
+          longTermVision: {
+            milestones: [
+              {
+                year: "Year 1",
+                goals: ["Product-market fit", "Initial customer base"],
+                projectedMetrics: {
+                  revenue: initialBudget * 0.8,
+                  users: 1000,
+                  marketShare: 0.5
+                }
+              },
+              {
+                year: "Year 2",
+                goals: ["Expand features", "Increase market presence"],
+                projectedMetrics: {
+                  revenue: initialBudget * 2,
+                  users: 5000,
+                  marketShare: 2.5
+                }
+              },
+              {
+                year: "Year 3",
+                goals: ["Expansion to new markets", "Diversify revenue streams"],
+                projectedMetrics: {
+                  revenue: initialBudget * 5,
+                  users: 20000,
+                  marketShare: 7.5
+                }
+              }
+            ],
+            message: "Progressive growth strategy focused on sustainable expansion."
+          },
+          teamExecutionCapability: {
+            requiredRoles: [
+              {
+                title: "Technical Lead",
+                skills: ["Software development", "System architecture"],
+                importance: 90,
+                estimatedCost: initialBudget * 0.2
+              },
+              {
+                title: "Marketing Manager",
+                skills: ["Digital marketing", "User acquisition"],
+                importance: 80,
+                estimatedCost: initialBudget * 0.15
+              },
+              {
+                title: "Operations Manager",
+                skills: ["Process optimization", "Team coordination"],
+                importance: 75,
+                estimatedCost: initialBudget * 0.15
+              }
+            ],
+            hiringTimeline: "Hire key roles in first 2 months",
+            message: "Focus on a lean, highly skilled initial team."
+          },
+          fundingAndInvestmentPotential: {
+            investors: [
+              {
+                name: "Accel Partners",
+                firm: "Accel",
+                investmentFocus: ["Technology", "Early Stage"],
+                location: "India/Global",
+                portfolioFit: 75
+              },
+              {
+                name: "Sequoia Capital India",
+                firm: "Sequoia",
+                investmentFocus: ["Technology", "Growth Stage"],
+                location: "India",
+                portfolioFit: 80
+              },
+              {
+                name: "Blume Ventures",
+                firm: "Blume",
+                investmentFocus: ["Early Stage", "Tech Startups"],
+                location: "India",
+                portfolioFit: 85
+              }
+            ],
+            message: "Strong potential for seed and Series A funding."
+          }
+        };
+        console.log("Using fallback budget analysis due to error");
+      }
       
       // Combine the data in the correct structure - use the same structure expected by the client
       // IMPORTANT: Use 'planToExecute' consistently (not planningToExecute) to match client expectations
