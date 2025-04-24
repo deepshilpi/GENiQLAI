@@ -1910,8 +1910,8 @@ export default function AnalysisPage() {
                 </CardHeader>
                 <CardContent>
                   <FundingInvestors
-                    investors={budgetAnalysisData.fundingAndInvestmentPotential.investors}
-                    message={budgetAnalysisData.fundingAndInvestmentPotential.message}
+                    investors={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.investors || []}
+                    message={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.message || "Funding and investment recommendations not available"}
                   />
                 </CardContent>
               </Card>
