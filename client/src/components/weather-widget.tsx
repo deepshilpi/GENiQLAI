@@ -83,9 +83,8 @@ export function WeatherWidget() {
             <Loader2 className="h-6 w-6 text-white animate-spin" />
           </div>
         ) : error ? (
-          <div className="h-32 flex flex-col items-center justify-center text-center">
-            <p className="text-white/80 text-sm">{error}</p>
-            <p className="text-white/60 text-xs mt-1">Check location permissions</p>
+          <div className="h-32 flex items-center justify-center text-center">
+            <p className="text-white/60 text-sm">Unable to fetch weather data</p>
           </div>
         ) : weatherData ? (
           <div className="flex flex-col">
