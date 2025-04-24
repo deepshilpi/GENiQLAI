@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -19,7 +18,6 @@ import * as THREE from "three";
 export default function HomePage() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
-  const { openAuthDialog } = useAuthDialog();
   const { toast } = useToast();
   const [startupIdea, setStartupIdea] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -40,10 +38,8 @@ export default function HomePage() {
           const data = await checkResponse.json();
           if (data.remainingFreeAnalyses <= 0) {
             setIsAnalyzing(false);
-            openAuthDialog({
-              defaultTab: 'register',
-              returnTo: '/'
-            });
+            // Navigate to auth page instead of showing dialog
+            navigate('/auth');
 
             toast({
               title: "Free Analysis Limit Reached",

@@ -6,7 +6,6 @@ import { Header } from "@/components/header";
 import { XStylePost } from "@/components/x-style-post";
 import { PostForm } from "@/components/post-form";
 import { AuthContext } from "@/hooks/use-auth";
-import { useAuthDialog } from "@/hooks/use-auth-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -64,7 +63,6 @@ interface ExtendedPost extends Omit<Post, 'tags'> {
 export default function CommunityPage() {
   const auth = useContext(AuthContext);
   const user = auth?.user;
-  const { openAuthDialog } = useAuthDialog();
   const [showPostForm, setShowPostForm] = useState(false);
   // No longer using plan dialog
   const [searchQuery, setSearchQuery] = useState("");
