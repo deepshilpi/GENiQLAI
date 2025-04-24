@@ -270,14 +270,14 @@ export function ThreadsStylePost({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`border-b border-gray-200 dark:border-gray-800 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-white dark:bg-gray-950 rounded-lg mb-2 hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-all`}
+      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-vision-card/70 backdrop-blur-sm rounded-lg mb-2 hover:bg-vision-card/90 cursor-pointer transition-all`}
       onClick={navigateToDetailView}
     >
       {/* Post Header */}
       <div className="flex items-start gap-3">
         <div className="flex flex-col items-center">
           <Avatar 
-            className="h-10 w-10 rounded-full cursor-pointer ring-2 ring-offset-2 ring-gray-100 dark:ring-gray-800" 
+            className="h-10 w-10 rounded-full cursor-pointer ring-2 ring-offset-2 ring-vision-purple-500/30" 
             onClick={(e) => {
               e.stopPropagation();
               viewProfile();
@@ -286,19 +286,19 @@ export function ThreadsStylePost({
             {post.author?.profilePic ? (
               <AvatarImage src={post.author.profilePic} alt={post.author.username} />
             ) : (
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-600 text-white">
+              <AvatarFallback className="bg-vision-primary-gradient text-white">
                 {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : "UN"}
               </AvatarFallback>
             )}
           </Avatar>
-          <div className="w-0.5 flex-grow mt-2 bg-gray-200 dark:bg-gray-800"></div>
+          <div className="w-0.5 flex-grow mt-2 bg-vision-purple-200/20"></div>
         </div>
         
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span 
-                className="font-semibold text-sm dark:text-gray-200 cursor-pointer hover:underline"
+                className="font-semibold text-sm text-white cursor-pointer hover:underline"
                 onClick={(e) => {
                   e.stopPropagation();
                   viewProfile();
@@ -306,7 +306,7 @@ export function ThreadsStylePost({
               >
                 {post.author?.username || "Anonymous"}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">• {formattedDate}</span>
+              <span className="text-xs text-vision-purple-300">• {formattedDate}</span>
             </div>
             
             <div className="flex items-center gap-2">
@@ -315,30 +315,39 @@ export function ThreadsStylePost({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="h-8 w-8 text-vision-purple-300 hover:text-white hover:bg-vision-purple-100/10"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontal className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSharingOpen(true);
-                  }}>
+                <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 text-white">
+                  <DropdownMenuItem 
+                    className="hover:bg-vision-purple-100/10 focus:bg-vision-purple-100/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSharingOpen(true);
+                    }}
+                  >
                     Share
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    viewProfile();
-                  }}>
+                  <DropdownMenuItem 
+                    className="hover:bg-vision-purple-100/10 focus:bg-vision-purple-100/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      viewProfile();
+                    }}
+                  >
                     View profile
                   </DropdownMenuItem>
                   {post.author?.username !== currentUser?.username && (
-                    <DropdownMenuItem onClick={(e) => {
-                      e.stopPropagation();
-                      handleFollow();
-                    }}>
+                    <DropdownMenuItem 
+                      className="hover:bg-vision-purple-100/10 focus:bg-vision-purple-100/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFollow();
+                      }}
+                    >
                       {post.isFollowingAuthor ? "Unfollow" : "Follow"} @{post.author?.username}
                     </DropdownMenuItem>
                   )}
@@ -350,13 +359,13 @@ export function ThreadsStylePost({
           {/* Post Content */}
           <div className="mt-2">
             {post.title && (
-              <h3 className="font-semibold text-base mb-1 dark:text-white">{post.title}</h3>
+              <h3 className="font-semibold text-base mb-1 text-white">{post.title}</h3>
             )}
-            <p className="text-gray-800 dark:text-gray-300 whitespace-pre-line mb-1">
+            <p className="text-vision-purple-300 whitespace-pre-line mb-1">
               {truncatedDescription}
               {shouldTruncate && (
                 <button 
-                  className="text-primary hover:underline text-sm ml-1 font-medium"
+                  className="text-vision-purple-700 hover:underline text-sm ml-1 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(true);
@@ -367,7 +376,7 @@ export function ThreadsStylePost({
               )}
               {isExpanded && !isDetailView && (
                 <button
-                  className="text-primary hover:underline text-sm ml-1 font-medium"
+                  className="text-vision-purple-700 hover:underline text-sm ml-1 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(false);
@@ -384,7 +393,7 @@ export function ThreadsStylePost({
                   <Badge 
                     key={index} 
                     variant="secondary" 
-                    className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs py-0 px-2"
+                    className="bg-vision-purple-100/10 hover:bg-vision-purple-100/20 text-vision-purple-300 text-xs py-0 px-2 border border-vision-purple-200/20"
                     onClick={(e) => e.stopPropagation()}
                   >
                     #{tag}
@@ -403,7 +412,7 @@ export function ThreadsStylePost({
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'pump' ? 'text-green-500 bg-green-50 dark:bg-green-900/20' : 'text-gray-500 dark:text-gray-400'} hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20`}
+                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'pump' ? 'text-green-400 bg-green-900/30' : 'text-vision-purple-300'} hover:text-green-400 hover:bg-green-900/20`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote('pump');
@@ -412,17 +421,17 @@ export function ThreadsStylePost({
                       <ArrowUp className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Pump</TooltipContent>
+                  <TooltipContent side="top" className="bg-vision-card/90 text-vision-purple-300 border-vision-purple-200/20">Pump</TooltipContent>
                 </Tooltip>
                 
-                <span className="text-gray-600 dark:text-gray-400 mx-0.5">{post.pumpCount || 0}</span>
+                <span className="text-vision-purple-300 mx-0.5">{post.pumpCount || 0}</span>
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'dump' ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-500 dark:text-gray-400'} hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20`}
+                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'dump' ? 'text-red-400 bg-red-900/30' : 'text-vision-purple-300'} hover:text-red-400 hover:bg-red-900/20`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote('dump');
@@ -431,7 +440,7 @@ export function ThreadsStylePost({
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">Dump</TooltipContent>
+                  <TooltipContent side="top" className="bg-vision-card/90 text-vision-purple-300 border-vision-purple-200/20">Dump</TooltipContent>
                 </Tooltip>
               </div>
             </TooltipProvider>
@@ -440,7 +449,7 @@ export function ThreadsStylePost({
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 rounded-full ${showComments ? 'text-primary bg-primary/10' : 'text-gray-500 dark:text-gray-400'} hover:text-primary hover:bg-primary/10`}
+                className={`h-8 w-8 rounded-full ${showComments ? 'text-vision-purple-700 bg-vision-purple-100/20' : 'text-vision-purple-300'} hover:text-vision-purple-700 hover:bg-vision-purple-100/10`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowComments(!showComments);
@@ -448,13 +457,13 @@ export function ThreadsStylePost({
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{post.commentsCount || 0}</span>
+              <span className="text-sm text-vision-purple-300 ml-1">{post.commentsCount || 0}</span>
             </div>
             
             <Button
               variant="ghost"
               size="icon"
-              className={`h-8 w-8 rounded-full ${post.currentUserLiked ? 'text-pink-500 bg-pink-50 dark:bg-pink-900/20' : 'text-gray-500 dark:text-gray-400'} hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20`}
+              className={`h-8 w-8 rounded-full ${post.currentUserLiked ? 'text-pink-400 bg-pink-900/30' : 'text-vision-purple-300'} hover:text-pink-400 hover:bg-pink-900/20`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleLike();
@@ -466,7 +475,7 @@ export function ThreadsStylePost({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              className="h-8 w-8 rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-100/10"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsSharingOpen(true);
