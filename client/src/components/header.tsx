@@ -44,7 +44,7 @@ export function Header() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
-  
+
   // Use notifications hook
   const { 
     notifications, 
@@ -53,12 +53,12 @@ export function Header() {
     markAsRead, 
     markAllAsRead 
   } = useNotifications();
-  
+
   // Handle mobile menu toggle
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
-  
+
   useEffect(() => {
     // Reset mobile menu state when resizing from mobile to desktop
     const handleResize = () => {
@@ -66,11 +66,11 @@ export function Header() {
         setMobileMenuOpen(false);
       }
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   const getPageTitle = () => {
     if (location === "/") return "AI Analysis";
     if (location === "/dashboard") return "Dashboard";
@@ -82,11 +82,11 @@ export function Header() {
     if (location === "/subscription") return "Plans";
     return "";
   };
-  
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
-  
+
   const handleLogout = () => {
     if (logoutMutation) {
       logoutMutation.mutate();
@@ -101,7 +101,7 @@ export function Header() {
       <div>
         {/* Mobile Menu */}
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-        
+
         <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-40 vision-card shadow-lg">
           {/* Logo section with menu toggle */}
           <div className="flex items-center">
@@ -114,10 +114,9 @@ export function Header() {
               >
                 <Menu className="w-5 h-5" />
               </Button>
-              <div className="w-9 h-9 flex items-center justify-center">
+              <div className="w-9 h-9 flex items-center justify-center" onClick={() => navigate("/")}>
                 <Logo width={36} height={36} />
               </div>
-              <span className="font-heading font-bold text-lg text-white">GENIQL</span>
             </div>
           </div>
 
@@ -148,7 +147,7 @@ export function Header() {
                 />
               )
             )}
-            
+
             {/* Notifications dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -191,7 +190,7 @@ export function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                
+
                 {notificationsLoading ? (
                   <div className="py-8 flex justify-center items-center">
                     <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
@@ -207,7 +206,7 @@ export function Header() {
                       let Icon = MessageSquare;
                       let iconBgClass = "bg-vision-primary-gradient/20"; 
                       let iconClass = "text-vision-purple-700";
-                      
+
                       if (notification.type === 'analysis') {
                         Icon = BrainCircuit;
                         iconBgClass = "bg-green-500/20";
@@ -217,10 +216,10 @@ export function Header() {
                         iconBgClass = "bg-blue-500/20";
                         iconClass = "text-blue-500";
                       }
-                      
+
                       // Format time
                       const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
-                      
+
                       return (
                         <DropdownMenuItem 
                           key={notification.id} 
@@ -247,7 +246,7 @@ export function Header() {
                     })}
                   </div>
                 )}
-                
+
                 <DropdownMenuSeparator className="bg-vision-purple-200/10" />
                 <DropdownMenuItem 
                   className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
@@ -319,20 +318,23 @@ export function Header() {
       </div>
     );
   }
-  
+
   // Desktop Header
   return (
     <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
       <div className="flex items-center gap-3">
+        <div className="w-9 h-9 flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
+          <Logo width={36} height={36} />
+        </div>
         <span className="text-white font-medium">{getPageTitle()}</span>
       </div>
-      
+
       <div className="flex items-center space-x-3">
         {/* Saved Ideas Dropdown - Only show for authenticated users */}
         {user && (
           <SavedIdeasDropdown />
         )}
-        
+
         {/* Notifications Button with badge */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -375,7 +377,7 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                
+
             {notificationsLoading ? (
               <div className="py-8 flex justify-center items-center">
                 <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
@@ -391,7 +393,7 @@ export function Header() {
                   let Icon = MessageSquare;
                   let iconBgClass = "bg-vision-primary-gradient/20"; 
                   let iconClass = "text-vision-purple-700";
-                  
+
                   if (notification.type === 'analysis') {
                     Icon = BrainCircuit;
                     iconBgClass = "bg-green-500/20";
@@ -401,10 +403,10 @@ export function Header() {
                     iconBgClass = "bg-blue-500/20";
                     iconClass = "text-blue-500";
                   }
-                  
+
                   // Format time
                   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
-                  
+
                   return (
                     <DropdownMenuItem 
                       key={notification.id} 
@@ -431,7 +433,7 @@ export function Header() {
                 })}
               </div>
             )}
-                
+
             <DropdownMenuSeparator className="bg-vision-purple-200/10" />
             <DropdownMenuItem 
               className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
@@ -441,7 +443,7 @@ export function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
         <Button 
           variant="ghost" 
           size="icon" 
@@ -450,7 +452,7 @@ export function Header() {
         >
           <MessageSquare className="w-5 h-5" />
         </Button>
-        
+
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
