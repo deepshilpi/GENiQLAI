@@ -505,6 +505,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
+  
+  // Effect to periodically check auth state in Replit environment
+  useEffect(() => {
+    // Skip if user is already loaded
+    if (user) {
+      console.log("[AuthProvider] User already loaded:", user.username);
+      return;
+    }
+    
+    // Replit-specific: Force check user state periodically
+    const checkInterval = setInterval(() => {
+      console.log("[AuthProvider] Scheduled auth check running");
+      // Only run this check if we don't have a user yet
+      if (!user) {
+        // Hard fetch for auth state
+        fetch('/api/user?_t=' + Date.now(), {
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        })
+        .then(res => {
+          if (res.ok) {
+            return res.json();
+          }
+          return null;
+        })
+        .then(userData => {
+          if (userData?.id) {
+            console.log("[AuthProvider] Direct auth check found user:", userData.username);
+            // Force update with this userData
+            queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+            queryClient.setQueryData(["/api/user"], userData);
+            setForceAuthUpdate(prev => prev + 1);
+            
+            // Also explicitly refetch via React Query
+            refetch();
+          }
+        })
+        .catch(err => {
+          console.error("[AuthProvider] Direct auth check error:", err);
+        });
+      }
+    }, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(checkInterval);
+  }, [user, forceAuthUpdate]);
 
   return (
     <AuthContext.Provider

@@ -100,6 +100,11 @@ export function Header() {
       <div>
         {/* Mobile Menu */}
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        
+        {/* Auth Debugger for development */}
+        <div className="p-2 mb-16">
+          <AuthDebugger />
+        </div>
 
         <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-40 vision-card shadow-lg">
           {/* Logo section with menu toggle */}
@@ -320,183 +325,190 @@ export function Header() {
 
   // Desktop Header
   return (
-    <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
-          <Logo width={36} height={36} />
-        </div>
-        <span className="text-white font-medium">{getPageTitle()}</span>
+    <div>
+      {/* Auth Debugger for development */}
+      <div className="p-2 mb-4">
+        <AuthDebugger />
       </div>
+      
+      <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
+            <Logo width={36} height={36} />
+          </div>
+          <span className="text-white font-medium">{getPageTitle()}</span>
+        </div>
 
-      <div className="flex items-center space-x-3">
-        {/* Saved Ideas Dropdown - Only show for authenticated users */}
-        {user && (
-          <SavedIdeasDropdown />
-        )}
+        <div className="flex items-center space-x-3">
+          {/* Saved Ideas Dropdown - Only show for authenticated users */}
+          {user && (
+            <SavedIdeasDropdown />
+          )}
 
-        {/* Notifications Button with badge */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
-            >
-              <div className="relative">
-                <Bell className="w-5 h-5" />
-                {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
-                    {notificationCount}
-                  </span>
-                )}
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
-            <DropdownMenuLabel className="flex justify-between items-center">
-              <span>Notifications</span>
-              <div className="flex gap-2 items-center">
-                <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
-                  {notificationCount} new
-                </Badge>
-                {notificationCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-6 px-2 text-xs text-white/70 hover:text-white hover:bg-vision-purple-100/10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      markAllAsRead();
-                    }}
-                  >
-                    <Check className="w-3 h-3 mr-1" />
-                    Mark all read
-                  </Button>
-                )}
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-
-            {notificationsLoading ? (
-              <div className="py-8 flex justify-center items-center">
-                <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="py-8 text-center text-white/50 text-sm">
-                No notifications to display
-              </div>
-            ) : (
-              <div className="max-h-80 overflow-y-auto py-1">
-                {notifications.map((notification) => {
-                  // Get icon based on notification type
-                  let Icon = MessageSquare;
-                  let iconBgClass = "bg-vision-primary-gradient/20"; 
-                  let iconClass = "text-vision-purple-700";
-
-                  if (notification.type === 'analysis') {
-                    Icon = BrainCircuit;
-                    iconBgClass = "bg-green-500/20";
-                    iconClass = "text-green-500";
-                  } else if (notification.type === 'follow') {
-                    Icon = User;
-                    iconBgClass = "bg-blue-500/20";
-                    iconClass = "text-blue-500";
-                  }
-
-                  // Format time
-                  const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
-
-                  return (
-                    <DropdownMenuItem 
-                      key={notification.id} 
-                      className={`cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3 ${
-                        notification.isRead ? 'opacity-70' : ''
-                      }`}
-                      onClick={() => markAsRead(notification.id)}
-                    >
-                      <div className="flex w-full">
-                        <div className={`w-8 h-8 rounded-full ${iconBgClass} flex-shrink-0 flex items-center justify-center mr-2`}>
-                          <Icon className={`w-4 h-4 ${iconClass}`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-white">{notification.title}</p>
-                          <p className="text-xs text-white/60 mt-1">{notification.message}</p>
-                          <p className="text-xs text-white/40 mt-1">{timeAgo}</p>
-                        </div>
-                        {!notification.isRead && (
-                          <div className="ml-2 w-2 h-2 bg-vision-purple-500 rounded-full mt-2"></div>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </div>
-            )}
-
-            <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-            <DropdownMenuItem 
-              className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
-              onClick={() => navigate("/notifications")}
-            >
-              <span className="text-sm text-white/70">View all notifications</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
-          onClick={() => navigate("/messages")}
-        >
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-
-        {user ? (
+          {/* Notifications Button with badge */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
-                <div className="flex flex-col items-end mr-2">
-                  <span className="text-white text-sm font-medium">{user?.username || 'User'}</span>
-                  <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+              >
+                <div className="relative">
+                  <Bell className="w-5 h-5" />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                      {notificationCount}
+                    </span>
+                  )}
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
-                  <span className="text-sm font-medium text-white">
-                    {user?.username?.charAt(0)?.toUpperCase() || '?'}
-                  </span>
-                </div>
-                <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-80">
+              <DropdownMenuLabel className="flex justify-between items-center">
+                <span>Notifications</span>
+                <div className="flex gap-2 items-center">
+                  <Badge className="bg-vision-primary-gradient text-white text-xs py-0">
+                    {notificationCount} new
+                  </Badge>
+                  {notificationCount > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 px-2 text-xs text-white/70 hover:text-white hover:bg-vision-purple-100/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAllAsRead();
+                      }}
+                    >
+                      <Check className="w-3 h-3 mr-1" />
+                      Mark all read
+                    </Button>
+                  )}
+                </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
-                <User className="w-4 h-4 mr-2" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/settings")}>
-                <Settings className="w-4 h-4 mr-2" />
-                <span>Settings</span>
-              </DropdownMenuItem>
+
+              {notificationsLoading ? (
+                <div className="py-8 flex justify-center items-center">
+                  <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="py-8 text-center text-white/50 text-sm">
+                  No notifications to display
+                </div>
+              ) : (
+                <div className="max-h-80 overflow-y-auto py-1">
+                  {notifications.map((notification) => {
+                    // Get icon based on notification type
+                    let Icon = MessageSquare;
+                    let iconBgClass = "bg-vision-primary-gradient/20"; 
+                    let iconClass = "text-vision-purple-700";
+
+                    if (notification.type === 'analysis') {
+                      Icon = BrainCircuit;
+                      iconBgClass = "bg-green-500/20";
+                      iconClass = "text-green-500";
+                    } else if (notification.type === 'follow') {
+                      Icon = User;
+                      iconBgClass = "bg-blue-500/20";
+                      iconClass = "text-blue-500";
+                    }
+
+                    // Format time
+                    const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
+
+                    return (
+                      <DropdownMenuItem 
+                        key={notification.id} 
+                        className={`cursor-pointer hover:bg-vision-purple-100/10 flex flex-col items-start py-3 ${
+                          notification.isRead ? 'opacity-70' : ''
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex w-full">
+                          <div className={`w-8 h-8 rounded-full ${iconBgClass} flex-shrink-0 flex items-center justify-center mr-2`}>
+                            <Icon className={`w-4 h-4 ${iconClass}`} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-white">{notification.title}</p>
+                            <p className="text-xs text-white/60 mt-1">{notification.message}</p>
+                            <p className="text-xs text-white/40 mt-1">{timeAgo}</p>
+                          </div>
+                          {!notification.isRead && (
+                            <div className="ml-2 w-2 h-2 bg-vision-purple-500 rounded-full mt-2"></div>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </div>
+              )}
+
               <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-vision-purple-100/10">
-                <LogOut className="w-4 h-4 mr-2" />
-                <span>Logout</span>
+              <DropdownMenuItem 
+                className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
+                onClick={() => navigate("/notifications")}
+              >
+                <span className="text-sm text-white/70">View all notifications</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
+
           <Button 
-            variant="secondary"
-            className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
-            onClick={() => navigate("/auth")}
+            variant="ghost" 
+            size="icon" 
+            className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-9 h-9"
+            onClick={() => navigate("/messages")}
           >
-            <User className="w-4 h-4 mr-2" />
-            <span>Sign In</span>
+            <MessageSquare className="w-5 h-5" />
           </Button>
-        )}
-      </div>
-    </header>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-vision-purple-100/10 rounded-lg">
+                  <div className="flex flex-col items-end mr-2">
+                    <span className="text-white text-sm font-medium">{user?.username || 'User'}</span>
+                    <span className="text-white/50 text-xs">{user?.planType || "Free"}</span>
+                  </div>
+                  <div className="w-9 h-9 rounded-lg bg-vision-primary-gradient flex items-center justify-center">
+                    <span className="text-sm font-medium text-white">
+                      {user?.username?.charAt(0)?.toUpperCase() || '?'}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/10 text-white w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate(`/profile/${user?.username || 'user'}`)}>
+                  <User className="w-4 h-4 mr-2" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer hover:bg-vision-purple-100/10" onClick={() => navigate("/settings")}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-vision-purple-200/10" />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-vision-purple-100/10">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="secondary"
+              className="bg-vision-primary-gradient text-white hover:brightness-110 transition-all rounded-lg"
+              onClick={() => navigate("/auth")}
+            >
+              <User className="w-4 h-4 mr-2" />
+              <span>Sign In</span>
+            </Button>
+          )}
+        </div>
+      </header>
+    </div>
   );
 }
