@@ -200,48 +200,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'businessModelStrength', 'fundingRequired', 'swotAnalysis', 'previousFailedExecutions'
       ];
       
-      const missingFields = requiredFields.filter(field => !analysisResults[field]);
+      const missingFields = requiredFields.filter(field => !(field in analysisResults));
       
       if (missingFields.length > 0) {
         console.error("Missing required fields in analysis results:", missingFields);
         // Initialize missing fields with default values to prevent app crashes
         missingFields.forEach(field => {
           if (field === 'successRate') {
-            analysisResults.successRate = {
+            (analysisResults as any).successRate = {
               percentage: 50,
               goodPoints: ["Analysis incomplete - please try again"],
               badPoints: ["Server encountered an issue processing your request"],
               message: "Analysis could not be fully completed"
             };
           } else if (field === 'competitors') {
-            analysisResults.competitors = {
+            (analysisResults as any).competitors = {
               competitors: [],
               message: "Could not analyze competitors at this time"
             };
           } else if (field === 'targetAudienceFit') {
-            analysisResults.targetAudienceFit = {
+            (analysisResults as any).targetAudienceFit = {
               segments: [],
               message: "Could not analyze target audience at this time"
             };
           } else if (field === 'marketSize') {
-            analysisResults.marketSize = {
+            (analysisResults as any).marketSize = {
               segments: [],
+              totalSize: 0,
               message: "Could not analyze market size at this time"
             };
           } else if (field === 'businessModelStrength') {
-            analysisResults.businessModelStrength = {
+            (analysisResults as any).businessModelStrength = {
               overall: 50,
               components: [],
               message: "Could not analyze business model at this time"
             };
           } else if (field === 'fundingRequired') {
-            analysisResults.fundingRequired = {
+            (analysisResults as any).fundingRequired = {
               total: 0,
               breakdown: [],
               message: "Could not analyze funding requirements at this time"
             };
           } else if (field === 'swotAnalysis') {
-            analysisResults.swotAnalysis = {
+            (analysisResults as any).swotAnalysis = {
               strengths: ["Could not analyze strengths at this time"],
               weaknesses: ["Could not analyze weaknesses at this time"],
               opportunities: ["Could not analyze opportunities at this time"],
