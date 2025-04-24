@@ -147,7 +147,6 @@ const startupIdeaSchema = z.object({
     .min(10, "Your idea must be at least 10 characters long")
     .max(1000, "Your idea is too long, please summarize it"),
   country: z.string().optional(),
-  category: z.string().optional(),
 });
 
 // List of popular countries for the dropdown
@@ -167,93 +166,7 @@ const countries = [
   { value: "Global", label: "Global / International" },
 ];
 
-// Startup idea templates by category
-const startupTemplates = {
-  "Technology": [
-    {
-      title: "AI Assistant",
-      description: "An AI-powered virtual assistant that helps users with scheduling, email management, and task automation through natural language processing."
-    },
-    {
-      title: "Blockchain for Supply Chain",
-      description: "A blockchain platform that provides end-to-end transparency and traceability for global supply chains, reducing fraud and improving efficiency."
-    },
-    {
-      title: "AR Navigation",
-      description: "An augmented reality navigation app that overlays directions onto the real world through smartphone cameras, making navigation more intuitive."
-    }
-  ],
-  "Healthcare": [
-    {
-      title: "Remote Patient Monitoring",
-      description: "A wearable device and companion app that continuously monitors vital signs and alerts healthcare providers about concerning changes."
-    },
-    {
-      title: "Mental Health Platform",
-      description: "An AI-driven mental health platform that provides personalized therapy recommendations and tracks progress over time."
-    },
-    {
-      title: "Medical Translation",
-      description: "A real-time medical translation service that helps doctors communicate with patients who speak different languages."
-    }
-  ],
-  "Sustainability": [
-    {
-      title: "Plastic Alternative",
-      description: "A biodegradable alternative to single-use plastics made from agricultural waste that breaks down completely within 90 days."
-    },
-    {
-      title: "Carbon Footprint Tracker",
-      description: "A mobile app that tracks individual carbon footprints and provides actionable recommendations to reduce environmental impact."
-    },
-    {
-      title: "Clean Energy Marketplace",
-      description: "A platform connecting consumers directly with renewable energy producers, allowing users to purchase clean energy at competitive prices."
-    }
-  ],
-  "Finance": [
-    {
-      title: "Micro-Investment Platform",
-      description: "An app that automatically rounds up everyday purchases and invests the spare change in diversified portfolios tailored to user goals."
-    },
-    {
-      title: "Freelancer Banking",
-      description: "A specialized banking platform for freelancers and gig workers that handles invoicing, tax preparation, and retirement planning."
-    },
-    {
-      title: "Financial Literacy Game",
-      description: "An educational mobile game that teaches financial literacy concepts through engaging gameplay and real-world simulations."
-    }
-  ],
-  "Education": [
-    {
-      title: "Personalized Learning Platform",
-      description: "An adaptive learning platform that customizes educational content based on individual student progress and learning styles."
-    },
-    {
-      title: "Vocational Training VR",
-      description: "Virtual reality training modules for vocational skills that simulate real-world working environments and scenarios."
-    },
-    {
-      title: "Peer Teaching Marketplace",
-      description: "A platform connecting students who excel in certain subjects with peers who need help, creating a marketplace for knowledge exchange."
-    }
-  ],
-  "E-commerce": [
-    {
-      title: "AR Shopping Experience",
-      description: "An augmented reality platform that allows shoppers to visualize products in their own space before purchasing."
-    },
-    {
-      title: "Sustainable Marketplace",
-      description: "An online marketplace exclusively for sustainable and ethically-produced goods with transparent supply chains."
-    },
-    {
-      title: "Local Business Delivery",
-      description: "A same-day delivery service that partners with local businesses to compete with large e-commerce platforms."
-    }
-  ]
-};
+
 
 // Schema for validating budget and team form
 const budgetSchema = z.object({
@@ -1283,49 +1196,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                     )}
                   />
                   
-                  <FormField
-                    control={ideaForm.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Idea Category</FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            
-                            // Display category templates when a category is selected
-                            setSelectedCategoryTemplates(
-                              startupTemplates[value as keyof typeof startupTemplates] || []
-                            );
-                            
-                            // Switch to templates tab if a category with templates is selected
-                            if (startupTemplates[value as keyof typeof startupTemplates]) {
-                              setActiveTab("templates");
-                            }
-                          }}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white">
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20">
-                            {Object.keys(startupTemplates).map((category) => (
-                              <SelectItem 
-                                key={category} 
-                                value={category}
-                                className="text-white hover:bg-vision-purple-200/20"
-                              >
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                 </div>
                 
                 <div className="mt-4">
