@@ -306,7 +306,7 @@ export function ThreadsStylePost({
               >
                 {post.author?.username || "Anonymous"}
               </span>
-              <span className="text-xs text-vision-purple-300">• {formattedDate}</span>
+              <span className="text-xs text-[#a09dd2]">• {formattedDate}</span>
             </div>
             
             <div className="flex items-center gap-2">
