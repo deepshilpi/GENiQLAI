@@ -523,20 +523,20 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
         <main className="overflow-y-auto w-full h-full">
           <div className="w-full">
             {/* Header Bar */}
-            <div className="sticky top-0 z-10 bg-vision-card/90 backdrop-blur-xl border-b border-vision-purple-200/10 px-4 py-3 flex justify-between items-center">
-              <h1 className="text-xl font-semibold text-white flex items-center gap-2">
-                <span className="bg-vision-primary-gradient bg-clip-text text-transparent">Hustlers</span> 
+            <div className="sticky top-0 z-10 bg-[#11083C] backdrop-blur-xl border-b border-[#A163F7]/20 px-6 py-4 flex justify-between items-center">
+              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                <span className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] bg-clip-text text-transparent">Hustlers</span> 
                 <span>Community</span>
                 <div className="relative">
                   <span className="absolute -top-1 -right-4 h-2 w-2 bg-green-400 rounded-full animate-pulse"></span>
                 </div>
               </h1>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
+                  className="rounded-full text-[#CB9FFF] hover:text-white hover:bg-[#A163F7]/10 h-10 w-10"
                   onClick={() => {
                     setSearchQuery("");
                     setFilteredPosts(null);
@@ -552,22 +552,22 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
+                      className="rounded-full text-[#CB9FFF] hover:text-white hover:bg-[#A163F7]/10 h-10 w-10"
                     >
                       <Search className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="top" className="max-w-screen-md mx-auto bg-vision-card/90 backdrop-blur-xl border-vision-purple-200/10 text-white">
+                  <SheetContent side="top" className="max-w-screen-md mx-auto bg-[#11083C] backdrop-blur-xl border border-[#A163F7]/20 text-white">
                     <SheetHeader>
-                      <SheetTitle className="text-white">Search</SheetTitle>
-                      <SheetDescription className="text-vision-purple-300">
+                      <SheetTitle className="text-xl text-white font-semibold">Search</SheetTitle>
+                      <SheetDescription className="text-[#a09dd2] text-base">
                         Find startup ideas, founders, and topics
                       </SheetDescription>
                     </SheetHeader>
-                    <div className="py-4">
+                    <div className="py-6">
                       <div className="relative">
                         <Input
-                          className="pr-10 bg-vision-card border-vision-purple-200/20 focus:border-vision-purple-500"
+                          className="pr-10 bg-[#0B1437]/50 border border-[#A163F7]/20 focus:border-[#A163F7] text-white placeholder:text-[#a09dd2]/70 rounded-lg h-12"
                           placeholder="Search..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
@@ -575,18 +575,18 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-vision-purple-300 hover:text-white"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#CB9FFF] hover:text-white"
                           onClick={() => setSearchQuery("")}
                         >
                           <XCircle className="h-4 w-4" />
                         </Button>
                       </div>
                       
-                      <div className="flex gap-2 mt-4">
+                      <div className="flex gap-3 mt-5">
                         <Button 
                           variant={searchType === "posts" ? "default" : "outline"}
-                          className={searchType === "posts" ? "bg-vision-primary-gradient text-white" : 
-                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
+                          className={searchType === "posts" ? "bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white rounded-lg" : 
+                            "border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white rounded-lg"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("posts")}
                         >
@@ -594,8 +594,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         </Button>
                         <Button 
                           variant={searchType === "users" ? "default" : "outline"}
-                          className={searchType === "users" ? "bg-vision-primary-gradient text-white" : 
-                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
+                          className={searchType === "users" ? "bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white rounded-lg" : 
+                            "border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white rounded-lg"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("users")}
                         >
@@ -603,8 +603,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         </Button>
                         <Button 
                           variant={searchType === "tags" ? "default" : "outline"}
-                          className={searchType === "tags" ? "bg-vision-primary-gradient text-white" : 
-                            "border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"}
+                          className={searchType === "tags" ? "bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white rounded-lg" : 
+                            "border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white rounded-lg"}
                           size="sm"
                           onClick={() => handleSearchTypeChange("tags")}
                         >
@@ -619,11 +619,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
             
             {/* Back button for single post view */}
             {postId && (
-              <div className="border-b border-vision-purple-200/10 bg-vision-card/70">
+              <div className="border-b border-[#A163F7]/10 bg-[#11083C]/90">
                 <Button
                   variant="ghost"
                   onClick={() => navigate('/community/threads')}
-                  className="flex items-center gap-2 px-4 py-2 text-vision-purple-300 hover:text-white"
+                  className="flex items-center gap-2 px-6 py-3 text-[#a09dd2] hover:text-white"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back to all posts</span>
@@ -633,33 +633,33 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
             
             {/* Feed Tabs - only shown when not viewing a single post */}
             {!postId && (
-              <Tabs defaultValue="latest" className="bg-vision-dark" onValueChange={handleTabChange}>
-                <TabsList className="w-full grid grid-cols-3 rounded-none bg-vision-card/90 backdrop-blur-xl h-14 border-b border-vision-purple-200/10">
+              <Tabs defaultValue="latest" className="bg-[#0B1437]" onValueChange={handleTabChange}>
+                <TabsList className="w-full grid grid-cols-3 rounded-none bg-[#11083C] backdrop-blur-xl h-14 border-b border-[#A163F7]/10">
                   <TabsTrigger 
                     value="latest" 
-                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
+                    className="relative text-[#a09dd2] hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
                     <div className="flex items-center justify-center gap-2 z-10 relative">
                       <Clock className="h-4 w-4" />
                       <span>Latest</span>
                     </div>
-                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
-                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#7551FF] data-[state=active]:to-[#A163F7] transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-[#A163F7]/0 data-[state=active]:bg-[#A163F7]/5 transition-all duration-300"></div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="trending" 
-                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
+                    className="relative text-[#a09dd2] hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
                     <div className="flex items-center justify-center gap-2 z-10 relative">
                       <TrendingUp className="h-4 w-4" />
                       <span>Trending</span>
                     </div>
-                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
-                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#7551FF] data-[state=active]:to-[#A163F7] transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-[#A163F7]/0 data-[state=active]:bg-[#A163F7]/5 transition-all duration-300"></div>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="following" 
-                    className="relative text-vision-purple-300 hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
+                    className="relative text-[#a09dd2] hover:text-white data-[state=active]:text-white data-[state=active]:shadow-none rounded-none transition-all duration-300 overflow-hidden"
                   >
                     <div className="flex items-center justify-center gap-2 z-10 relative">
                       <Users className="h-4 w-4" />
@@ -668,23 +668,23 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         <span className="absolute top-0 right-6 h-2 w-2 bg-green-400 rounded-full"></span>
                       )}
                     </div>
-                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-vision-primary-gradient transition-all duration-300"></div>
-                    <div className="absolute inset-0 bg-vision-purple-100/0 data-[state=active]:bg-vision-purple-100/5 transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#7551FF] data-[state=active]:to-[#A163F7] transition-all duration-300"></div>
+                    <div className="absolute inset-0 bg-[#A163F7]/0 data-[state=active]:bg-[#A163F7]/5 transition-all duration-300"></div>
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="latest" className="mt-0 p-0">
                   {/* Display search results or normal feed */}
                   {searchQuery && (
-                    <div className="px-4 py-2 border-b border-vision-purple-200/10 bg-vision-card/70">
+                    <div className="px-6 py-3 border-b border-[#A163F7]/10 bg-[#11083C]/90">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-vision-purple-300">
+                        <p className="text-sm text-[#a09dd2]">
                           Results for <span className="font-medium text-white">"{searchQuery}"</span> in {searchType}
                         </p>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="text-vision-purple-300 hover:text-white hover:bg-vision-purple-900/20"
+                          className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white h-8 px-3 rounded-lg"
                           onClick={() => {
                             setSearchQuery("");
                             setFilteredPosts(null);
@@ -829,12 +829,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             </>
                           ) : (
                             <>
-                              <p className="text-vision-purple-300 mb-4">No posts yet. Be the first to share an idea!</p>
+                              <p className="text-[#a09dd2] mb-5 text-lg">No posts yet. Be the first to share an idea!</p>
                               <Button 
-                                className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                                className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
                                 onClick={handleNewPost}
                               >
-                                <PlusSquare className="h-4 w-4 mr-2" />
+                                <PlusSquare className="h-5 w-5 mr-2" />
                                 Create Post
                               </Button>
                             </>
@@ -919,12 +919,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
-                      <p className="text-vision-purple-300 mb-4">No trending posts right now</p>
+                      <p className="text-[#a09dd2] mb-5 text-lg">No trending posts right now</p>
                       <Button 
-                        className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                        className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
                         onClick={handleNewPost}
                       >
-                        <PlusSquare className="h-4 w-4 mr-2" />
+                        <PlusSquare className="h-5 w-5 mr-2" />
                         Create the first trending post
                       </Button>
                     </div>
@@ -934,9 +934,9 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                 <TabsContent value="following" className="mt-0 p-0">
                   {!user ? (
                     <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
-                      <p className="text-vision-purple-300 mb-4">Sign in to see posts from people you follow</p>
+                      <p className="text-[#a09dd2] mb-5 text-lg">Sign in to see posts from people you follow</p>
                       <Button 
-                        className="bg-vision-primary-gradient text-white hover:bg-vision-primary-gradient/90"
+                        className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
                         onClick={() => navigate('/auth')}
                       >
                         Sign In
@@ -1012,10 +1012,10 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
-                      <p className="text-vision-purple-300 mb-4">You're not following anyone yet or they haven't posted</p>
+                      <p className="text-[#a09dd2] mb-5 text-lg">You're not following anyone yet or they haven't posted</p>
                       <Button
                         variant="outline"
-                        className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                        className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white h-11 px-6 rounded-lg"
                         onClick={() => setActiveTab('latest')}
                       >
                         Discover people to follow
@@ -1035,12 +1035,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="fixed bottom-6 right-6 z-20"
+          className="fixed bottom-20 right-6 z-20"
         >
           <Button
             size="lg"
             onClick={handleNewPost}
-            className="rounded-full h-16 w-16 bg-vision-primary-gradient shadow-vision-glow hover:shadow-vision-glow-lg transition-all duration-300 border-0 p-0 flex items-center justify-center"
+            className="rounded-full h-16 w-16 bg-gradient-to-r from-[#7551FF] to-[#A163F7] shadow-lg shadow-[#7551FF]/30 hover:shadow-[#7551FF]/50 transition-all duration-300 border-0 p-0 flex items-center justify-center"
           >
             <PlusSquare className="h-7 w-7" />
           </Button>
@@ -1049,19 +1049,21 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
 
       {/* New Post Dialog */}
       <Sheet open={showPostForm} onOpenChange={setShowPostForm}>
-        <SheetContent side="bottom" className="max-w-screen-md mx-auto bg-vision-card/90 backdrop-blur-xl border-vision-purple-200/10 text-white h-[80vh] rounded-t-xl">
+        <SheetContent side="bottom" className="max-w-screen-md mx-auto bg-[#11083C] backdrop-blur-xl border border-[#A163F7]/20 text-white h-[80vh] rounded-t-xl">
           <SheetHeader>
-            <SheetTitle className="text-white">Share Your Startup Idea</SheetTitle>
-            <SheetDescription className="text-vision-purple-300">
+            <SheetTitle className="text-xl text-white font-semibold">Share Your Startup Idea</SheetTitle>
+            <SheetDescription className="text-[#a09dd2] text-base">
               Post your startup idea and get feedback from the Hustlers community
             </SheetDescription>
           </SheetHeader>
           
           <div className="py-6">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
+                <label htmlFor="post-title" className="text-[#a09dd2] text-sm mb-1.5 block">Title</label>
                 <Input
-                  className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white"
+                  id="post-title"
+                  className="bg-[#0B1437]/50 border border-[#A163F7]/20 focus:border-[#A163F7] text-white placeholder:text-[#a09dd2]/70 rounded-lg h-12"
                   placeholder="Title of your startup idea"
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
@@ -1069,18 +1071,22 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
               </div>
               
               <div>
+                <label htmlFor="post-description" className="text-[#a09dd2] text-sm mb-1.5 block">Description</label>
                 <Textarea
-                  className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white min-h-[150px]"
-                  placeholder="Describe your startup idea..."
+                  id="post-description"
+                  className="bg-[#0B1437]/50 border border-[#A163F7]/20 focus:border-[#A163F7] text-white placeholder:text-[#a09dd2]/70 rounded-lg min-h-[180px]"
+                  placeholder="Describe your startup idea in detail..."
                   value={postInput}
                   onChange={(e) => setPostInput(e.target.value)}
                 />
               </div>
               
-              <div className="space-y-2">
+              <div>
+                <label htmlFor="post-tags" className="text-[#a09dd2] text-sm mb-1.5 block">Tags</label>
                 <div className="flex items-center gap-2">
                   <Input
-                    className="bg-vision-purple-900/20 border-vision-purple-200/20 focus:border-vision-purple-500 text-white"
+                    id="post-tags"
+                    className="bg-[#0B1437]/50 border border-[#A163F7]/20 focus:border-[#A163F7] text-white placeholder:text-[#a09dd2]/70 rounded-lg h-12"
                     placeholder="Add tags (press Enter to add)"
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
@@ -1097,7 +1103,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                   <Button
                     type="button"
                     variant="outline"
-                    className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                    className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#CB9FFF] hover:bg-[#0B1437] hover:text-white h-12 w-12 rounded-lg"
                     onClick={() => {
                       if (currentTag.trim() && !tagsArray.includes(currentTag.trim())) {
                         setTagsArray([...tagsArray, currentTag.trim()]);
@@ -1105,32 +1111,32 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       }
                     }}
                   >
-                    <Hash className="h-4 w-4" />
+                    <Hash className="h-5 w-5" />
                   </Button>
                 </div>
                 
                 {tagsArray.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     {tagsArray.map((tag, index) => (
                       <Badge
                         key={index}
-                        className="bg-vision-purple-900/30 hover:bg-vision-purple-900/50 cursor-pointer"
+                        className="bg-[#A163F7]/20 hover:bg-[#A163F7]/30 text-[#CB9FFF] py-1.5 px-3 rounded-full cursor-pointer"
                         onClick={() => {
                           setTagsArray(tagsArray.filter((_, i) => i !== index));
                         }}
                       >
                         #{tag}
-                        <XCircle className="h-3 w-3 ml-1" />
+                        <XCircle className="h-3 w-3 ml-1.5" />
                       </Badge>
                     ))}
                   </div>
                 )}
               </div>
               
-              <div className="pt-4 flex justify-end gap-2">
+              <div className="pt-4 flex justify-end gap-3">
                 <Button
                   variant="outline"
-                  className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                  className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white h-11 px-5 rounded-lg"
                   onClick={() => {
                     setPostTitle('');
                     setPostInput('');
@@ -1141,7 +1147,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                   Cancel
                 </Button>
                 <Button
-                  className="bg-vision-primary-gradient text-white hover:opacity-90 relative overflow-hidden"
+                  className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
                   disabled={!postInput.trim() || !postTitle.trim() || isSubmitting}
                   onClick={() => {
                     const finalTags = tagsArray.join(',');
@@ -1155,20 +1161,32 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         setPostTitle('');
                         setPostInput('');
                         setTagsArray([]);
+                        setShowPostForm(false);
                         setIsSubmitting(false);
+                        toast({
+                          title: "Post created successfully",
+                          description: "Your startup idea has been shared with the community",
+                        });
                       },
-                      onError: () => {
+                      onError: (error) => {
                         setIsSubmitting(false);
+                        toast({
+                          title: "Error creating post",
+                          description: error.message || "Please try again later",
+                          variant: "destructive"
+                        });
                       }
                     });
                   }}
                 >
                   {isSubmitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Posting...
+                    </span>
                   ) : (
                     <>Post</>
                   )}
-                  <div className="absolute inset-0 bg-white/10 w-0 transition-all duration-500 group-hover:w-full"></div>
                 </Button>
               </div>
             </div>
