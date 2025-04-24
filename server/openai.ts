@@ -72,15 +72,20 @@ export async function analyzeStartupIdea(
     4. marketSize: {
        segments: [
          {
-           name: string (e.g., "local", "national", "global" or industry segments),
-           percentage: number,
-           value: number (millions, use realistic figures for ${country}),
+           name: string (e.g., specific market segment like "Digital Mental Health Solutions", "Corporate Wellness Programs"),
+           percentage: number (what percentage of total market this segment represents),
+           value: number (actual value in millions or billions, use realistic figures for ${country}),
            growth: number (annual growth percentage)
          },
          ... include 3-4 relevant market segments
        ],
-       totalSize: number (millions, use realistic TAM/SAM metrics),
+       totalSize: number (total market size in millions or billions, use realistic TAM/SAM metrics),
+       currency: string (3-letter currency code for ${country}, e.g., "USD", "INR", "GBP"),
        cagr: number (market CAGR percentage with actual industry research),
+       countryInsights: {
+         currency: string (local currency symbol or name),
+         marketGrowthRate: number (country-specific annual growth rate)
+       },
        message: string (detailed market analysis with growth drivers and trends)
     }
     

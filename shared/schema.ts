@@ -338,12 +338,18 @@ export type AnalysisResults = {
   };
   marketSize: {
     segments: Array<{
-      name: string; // local, national, global
+      name: string; // market segment name
       percentage: number;
-      value?: number; // monetary value in millions
+      value: number; // monetary value in millions/billions
+      growth?: number; // annual growth percentage
     }>;
-    totalSize?: number;
+    totalSize: number;
+    currency: string; // 3-letter currency code
     cagr?: number; // compound annual growth rate
+    countryInsights?: {
+      currency: string; // local currency symbol or name
+      marketGrowthRate: number; // country-specific annual growth rate
+    };
     message: string;
   };
   businessModelStrength: {
@@ -358,17 +364,19 @@ export type AnalysisResults = {
   };
   fundingRequired: {
     total: number;
-    currency?: string; // 3-letter currency code (USD, INR, etc.)
+    currency: string; // 3-letter currency code (USD, INR, etc.)
     breakdown: Array<{
       category: string;
       amount: number;
       percentage: number;
       keyExpenses?: string[];
+      timeline?: string; // when these funds will be deployed
     }>;
-    timeline?: Array<{
-      stage: string;
-      amount: number;
-      milestone: string;
+    fundingStages?: Array<{
+      stage: string; // funding round name
+      amount: number; // funding needed at this stage
+      timeline: string; // when this funding will be needed
+      milestones?: string[]; // achievements expected by this stage
     }>;
     message: string;
   };
@@ -377,7 +385,7 @@ export type AnalysisResults = {
     weaknesses: string[];
     opportunities: string[];
     threats: string[];
-    priorityAction?: string;
+    priorityActions?: string[];
   };
   previousFailedExecutions: {
     failures: Array<{
