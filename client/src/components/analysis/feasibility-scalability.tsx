@@ -206,11 +206,11 @@ export function FeasibilityScalability({
             <div className="grid grid-cols-2 gap-2 mb-2">
               <div className="text-xs">
                 <p className="text-white/60">Investment</p>
-                <p className="text-sm text-white">${point.investment.toLocaleString()}</p>
+                <p className="text-sm text-white">₹{point.investment.toLocaleString('en-IN')}</p>
               </div>
               <div className="text-xs">
                 <p className="text-white/60">Potential Return</p>
-                <p className="text-sm text-white">${point.potentialReturns.toLocaleString()}</p>
+                <p className="text-sm text-white">₹{point.potentialReturns.toLocaleString('en-IN')}</p>
               </div>
             </div>
             <div className="mt-auto text-xs">

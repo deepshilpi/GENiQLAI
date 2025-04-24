@@ -107,7 +107,7 @@ export function GoToMarketStrategy({ timeline, message }: GoToMarketStrategyProp
       <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-sm font-medium text-white">Total GTM Budget</h4>
-          <span className="text-lg font-semibold text-white">${totalCost.toLocaleString()}</span>
+          <span className="text-lg font-semibold text-white">₹{totalCost.toLocaleString('en-IN')}</span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

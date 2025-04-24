@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useRef } from "react";
+import { formatCurrency } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContext } from "@/hooks/use-auth";
