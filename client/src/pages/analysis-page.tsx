@@ -1463,7 +1463,7 @@ export default function AnalysisPage() {
                   <CardTitle className="text-xl text-white">What's Next?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <Button 
                       variant="outline" 
                       className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
@@ -1479,55 +1479,13 @@ export default function AnalysisPage() {
                     <Button 
                       variant="outline" 
                       className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                      onClick={() => setPhase("budget-input")}
+                      onClick={() => setPhase("plan-input")}
                     >
                       <Coins className="w-5 h-5 mr-2" />
                       <div className="text-left">
                         <div className="text-sm font-medium">Plan to Execute</div>
                         <div className="text-xs text-white/70">Get detailed execution plan based on budget</div>
                       </div>
-                    </Button>
-                    
-                    {/* Save Idea Button - Only shown to logged in users */}
-                    <SaveIdeaButton
-                      startupIdea={ideaForm.getValues().idea}
-                      analysisResults={analysisData}
-                      className="h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 hover:bg-vision-purple-200/20"
-                    />
-                    
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
-                      onClick={handleShareToCommunity}
-                    >
-                      <Share2 className="w-5 h-5 mr-2" />
-                      <div className="text-left">
-                        <div className="text-sm font-medium">Share to Community</div>
-                        <div className="text-xs text-white/70">Get feedback from other entrepreneurs</div>
-                      </div>
-                    </Button>
-                  </div>
-                  
-                  {/* Additional Action Buttons */}
-                  <div className="flex flex-wrap gap-2 mt-4 justify-end">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
-                      onClick={handleSaveAnalysis}
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Analysis
-                    </Button>
-                    
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-white/70 hover:text-white hover:bg-vision-purple-200/10"
-                      onClick={handleExportPDF}
-                    >
-                      <FileDown className="w-4 h-4 mr-2" />
-                      Export PDF
                     </Button>
                   </div>
                 </CardContent>
