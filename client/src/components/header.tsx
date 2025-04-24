@@ -123,19 +123,30 @@ export function Header() {
 
           {/* Action buttons */}
           <div className="flex items-center space-x-3">
-            {/* Saved Ideas - Only visible when logged in */}
+            {/* Messages button on mobile, Saved Ideas on desktop */}
             {user && (
-              <SavedIdeasDropdown 
-                trigger={
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
-                  >
-                    <BookmarkIcon className="w-5 h-5" />
-                  </Button>
-                }
-              />
+              isMobile ? (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                  onClick={() => navigate("/messages")}
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </Button>
+              ) : (
+                <SavedIdeasDropdown 
+                  trigger={
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white/70 hover:text-white hover:bg-vision-purple-100/10 rounded-lg w-8 h-8"
+                    >
+                      <BookmarkIcon className="w-5 h-5" />
+                    </Button>
+                  }
+                />
+              )
             )}
             
             {/* Notifications dropdown */}

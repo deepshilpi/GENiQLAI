@@ -31,15 +31,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
-// Extended post type for UI with author and current user vote
-interface ExtendedPost extends Omit<Post, 'tags'> {
-  author?: {
-    username?: string;
-  };
-  currentUserVote?: 'pump' | 'dump' | null;
-  tags: string[];
-}
-
 import { 
   Search, 
   TrendingUp, 
@@ -60,6 +51,15 @@ import {
   BellPlus,
   Award
 } from "lucide-react";
+
+// Extended post type for UI with author and current user vote
+interface ExtendedPost extends Omit<Post, 'tags'> {
+  author?: {
+    username?: string;
+  };
+  currentUserVote?: 'pump' | 'dump' | null;
+  tags: string[];
+}
 
 export default function CommunityPage() {
   const auth = useContext(AuthContext);
@@ -86,77 +86,105 @@ export default function CommunityPage() {
   // Ensure the posts are properly typed as ExtendedPost[]
   const posts = postsData as ExtendedPost[];
 
-  // Update filtered posts when posts or search query changes
-  useEffect(() => {
-    if (!posts || !searchQuery.trim()) {
-      setFilteredPosts(null);
-      return;
+  // Create post mutation
+  const createPostMutation = useMutation({
+    mutationFn: async (postData: any) => {
+      const res = await apiRequest("POST", "/api/posts", postData);
+      const data = await res.json();
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      setShowPostForm(false);
+      toast({
+        title: "Success",
+        description: "Your post has been created!",
+        variant: "default",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create post: ${error.message}`,
+        variant: "destructive",
+      });
     }
-
-    const query = searchQuery.toLowerCase();
-    let filtered: ExtendedPost[] = [];
-
-    switch (searchType) {
-      case "posts":
-        filtered = posts.filter(post => 
-          post.title.toLowerCase().includes(query) || 
-          post.description.toLowerCase().includes(query)
-        );
-        break;
-      case "users":
-        filtered = posts.filter(post => 
-          post.author?.username?.toLowerCase().includes(query)
-        );
-        break;
-      case "tags":
-        filtered = posts.filter(post => 
-          post.tags?.some(tag => tag.toLowerCase().includes(query))
-        );
-        break;
-    }
-
-    setFilteredPosts(filtered);
-  }, [posts, searchQuery, searchType]);
+  });
 
   // Vote mutation
   const voteMutation = useMutation({
     mutationFn: async ({ postId, voteType }: { postId: number, voteType: string }) => {
-      await apiRequest("POST", `/api/posts/${postId}/vote`, { voteType });
+      const res = await apiRequest("POST", `/api/posts/${postId}/vote`, { voteType });
+      const data = await res.json();
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to vote: ${error.message}`,
+        variant: "destructive",
+      });
     }
   });
 
+  const handleNewPost = () => {
+    if (!user) {
+      // Show auth dialog instead of redirecting
+      openAuthDialog({ defaultTab: "login" });
+      return;
+    }
+    setShowPostForm(true);
+  };
+
   const handleVote = (postId: number, voteType: string) => {
     if (!user) {
-      // Show auth dialog instead of toast
-      openAuthDialog({ 
-        defaultTab: 'login',
-        returnTo: '/community'
-      });
+      // Show auth dialog instead of redirecting
+      openAuthDialog({ defaultTab: "login" });
       return;
     }
     voteMutation.mutate({ postId, voteType });
   };
 
-  const handleNewPost = () => {
-    if (!user) {
-      // Show auth dialog instead of redirecting
-      openAuthDialog({ 
-        defaultTab: 'login',
-        returnTo: '/community'
-      });
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setFilteredPosts(null);
       return;
     }
-    
-    // Allow all users to post
-    setShowPostForm(true);
+
+    if (searchType === "posts") {
+      const lowerQuery = searchQuery.toLowerCase();
+      const filtered = posts?.filter(post => 
+        post.title.toLowerCase().includes(lowerQuery) || 
+        post.description.toLowerCase().includes(lowerQuery) ||
+        post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+      );
+      setFilteredPosts(filtered || []);
+    } else if (searchType === "tags") {
+      const lowerQuery = searchQuery.toLowerCase();
+      const filtered = posts?.filter(post => 
+        post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+      );
+      setFilteredPosts(filtered || []);
+    } else if (searchType === "users") {
+      const lowerQuery = searchQuery.toLowerCase();
+      const filtered = posts?.filter(post => 
+        post.author?.username?.toLowerCase().includes(lowerQuery)
+      );
+      setFilteredPosts(filtered || []);
+    }
   };
-  
+
+  // Run search when query changes
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, posts]);
+
   const handleSearchTypeChange = (type: "posts" | "users" | "tags") => {
-    setSearchType(type);
-    if (searchQuery) {
+    if (type !== searchType) {
+      setSearchType(type);
       // Re-trigger search with new type
       setSearchQuery(searchQuery);
     }
@@ -188,333 +216,261 @@ export default function CommunityPage() {
                   size="sm"
                 >
                   <ImageIcon className="w-4 h-4 mr-2" /> 
-                  <span className="hidden sm:inline">Create Post</span>
-                  <span className="sm:hidden">Post</span>
+                  Share Idea
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-background/95 backdrop-blur-sm border-primary/20 max-w-3xl">
-                <div className="mb-4">
-                  <DialogTitle className="text-2xl font-bold text-foreground">Create New Post</DialogTitle>
-                  <DialogDescription className="text-sm text-foreground/70 mt-2">
-                    Share your startup idea with the community
-                  </DialogDescription>
-                </div>
-                <PostForm onComplete={() => setShowPostForm(false)} />
+              <DialogContent className="sm:max-w-[600px] bg-card">
+                <DialogTitle className="font-bold tracking-tight">Share Your Startup Idea</DialogTitle>
+                <DialogDescription>
+                  Get feedback from the community and AI analysis to validate your concept.
+                </DialogDescription>
+                <PostForm onSubmit={(data) => createPostMutation.mutate(data)} />
               </DialogContent>
             </Dialog>
           </div>
           
-          {/* Plan dialog removed - all users can post now */}
-          
-          {/* Enhanced Search Bar with Better Mobile Support */}
-          <div className="bg-card border border-border rounded-lg p-3 md:p-4 mb-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search posts, users, or tags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background h-10 focus-visible:ring-primary/50"
-                />
-              </div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                <Button 
-                  variant={searchType === "posts" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => handleSearchTypeChange("posts")}
-                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
-                >
-                  <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
-                  Posts
-                </Button>
-                <Button 
-                  variant={searchType === "users" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => handleSearchTypeChange("users")}
-                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
-                >
-                  <Users className="h-3.5 w-3.5 mr-1.5" />
-                  Users
-                </Button>
-                <Button 
-                  variant={searchType === "tags" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => handleSearchTypeChange("tags")}
-                  className="rounded-full px-3 sm:px-4 text-xs whitespace-nowrap min-w-[70px]"
-                >
-                  <Filter className="h-3.5 w-3.5 mr-1.5" />
-                  Tags
-                </Button>
+          {/* Search Box - Redesigned with Mobile Optimization */}
+          <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-xl p-4 mb-6">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none opacity-50"></div>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">Find Startup Ideas & Founders</h2>
+              
+              <div className="flex flex-col sm:flex-row w-full gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by keyword..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 bg-background/50 rounded-lg focus:ring-1 focus:ring-primary border-border w-full"
+                  />
+                </div>
+                
+                <div className="flex flex-row gap-2">
+                  <Button
+                    variant={searchType === "posts" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleSearchTypeChange("posts")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Posts
+                  </Button>
+                  <Button
+                    variant={searchType === "tags" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleSearchTypeChange("tags")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Tags
+                  </Button>
+                  <Button
+                    variant={searchType === "users" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleSearchTypeChange("users")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Users
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 w-full max-w-full">
-            {/* Main Content Area - Responsive Grid (9/12 on desktop, full on mobile) */}
-            <div className="w-full lg:col-span-8 xl:col-span-9 order-2 lg:order-1">
-              <Tabs defaultValue="latest" className="mb-6">
-                <TabsList className="mb-4 bg-card w-full rounded-lg shadow-sm overflow-hidden">
-                  <TabsTrigger value="latest" className="flex-1 py-3">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Latest
-                  </TabsTrigger>
-                  <TabsTrigger value="trending" className="flex-1 py-3">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Trending
-                  </TabsTrigger>
-                  <TabsTrigger value="following" className="flex-1 py-3">
-                    <Users className="h-4 w-4 mr-2" />
-                    Following
-                  </TabsTrigger>
-                </TabsList>
+          {/* Trending Tags Card - Optimized for mobile, shown first */}
+          <div className="w-full mb-5">
+            <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center">
+                  <Hash className="h-4 w-4 mr-2 text-primary" />
+                  Trending Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-0 px-4 pb-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("ai")}>
+                    #ai
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("saas")}>
+                    #saas
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("marketplace")}>
+                    #marketplace
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("fintech")}>
+                    #fintech
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("mobile")}>
+                    #mobile
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("sustainability")}>
+                    #sustainability
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Content area for mobile optimized layout */}
+          <div className="flex flex-col w-full max-w-full gap-4 md:gap-6">
+            <Tabs defaultValue="latest" className="mb-6">
+              <TabsList className="mb-4 bg-card w-full rounded-lg shadow-sm overflow-hidden">
+                <TabsTrigger value="latest" className="flex-1 py-3">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Latest
+                </TabsTrigger>
+                <TabsTrigger value="trending" className="flex-1 py-3">
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Trending
+                </TabsTrigger>
+                <TabsTrigger value="following" className="flex-1 py-3">
+                  <Users className="h-4 w-4 mr-2" />
+                  Following
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="latest" className="mt-0">
+                {searchQuery.trim() && filteredPosts && (
+                  <div className="bg-card border border-border rounded-lg p-4 mb-4">
+                    <h3 className="font-medium mb-1">Search Results</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Found {filteredPosts.length} results for "{searchQuery}" in {searchType}
+                      {filteredPosts.length === 0 && (
+                        <Button variant="link" onClick={() => setSearchQuery("")} className="p-0 h-auto ml-2">
+                          Clear search
+                        </Button>
+                      )}
+                    </p>
+                  </div>
+                )}
                 
-                <TabsContent value="latest" className="mt-0">
-                  {searchQuery.trim() && filteredPosts && (
-                    <div className="bg-card border border-border rounded-lg p-4 mb-4">
-                      <h3 className="font-medium mb-1">Search Results</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Found {filteredPosts.length} results for "{searchQuery}" in {searchType}
-                        {filteredPosts.length === 0 && (
-                          <Button variant="link" onClick={() => setSearchQuery("")} className="p-0 h-auto ml-2">
-                            Clear search
-                          </Button>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="space-y-4">
-                    {isLoading ? (
-                      Array.from({ length: 5 }).map((_, index) => (
-                        <div key={index} className="bg-card animate-pulse rounded-lg h-32 shadow-sm"></div>
-                      ))
-                    ) : (filteredPosts || posts)?.length ? (
-                      (filteredPosts || posts).map((post: any) => (
-                        <div key={post.id} className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200 relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none opacity-50"></div>
-                          <div className="flex flex-col sm:flex-row relative z-10">
-                            {/* Vote Column - Horizontal on Mobile, Vertical on Desktop */}
-                            <div className="sm:w-16 bg-accent/30 flex flex-row sm:flex-col items-center justify-center py-2 sm:py-4 px-4 sm:px-0 border-b sm:border-b-0 sm:border-r border-border">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0 rounded-full"
-                                onClick={() => handleVote(post.id, "pump")}
-                                aria-label="Vote up"
-                              >
-                                <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'pump' ? 'text-green-500' : 'text-muted-foreground'}`} />
-                              </Button>
-                              <span className="mx-2 sm:mx-0 sm:my-1 font-medium text-sm">
-                                {post.pumpCount && post.dumpCount
-                                  ? post.pumpCount - post.dumpCount
-                                  : 0}
+                <div className="space-y-4">
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <div key={index} className="bg-card animate-pulse rounded-lg h-32 shadow-sm"></div>
+                    ))
+                  ) : (filteredPosts || posts)?.length ? (
+                    (filteredPosts || posts).map((post: any) => (
+                      <div key={post.id} className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200 relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none opacity-50"></div>
+                        <div className="flex flex-col sm:flex-row relative z-10">
+                          {/* Vote Column - Horizontal on Mobile, Vertical on Desktop */}
+                          <div className="sm:w-16 bg-accent/30 flex flex-row sm:flex-col items-center justify-center py-2 sm:py-4 px-4 sm:px-0 border-b sm:border-b-0 sm:border-r border-border">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 rounded-full"
+                              onClick={() => handleVote(post.id, "pump")}
+                              aria-label="Vote up"
+                            >
+                              <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'pump' ? 'text-green-500' : 'text-muted-foreground'}`} />
+                            </Button>
+                            <span className="mx-2 sm:mx-0 sm:my-1 font-medium text-sm">
+                              {post.pumpCount && post.dumpCount
+                                ? post.pumpCount - post.dumpCount
+                                : 0}
+                            </span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 rotate-180 rounded-full"
+                              onClick={() => handleVote(post.id, "dump")}
+                              aria-label="Vote down"
+                            >
+                              <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'dump' ? 'text-red-500' : 'text-muted-foreground'}`} />
+                            </Button>
+                          </div>
+                          
+                          {/* Content Column - Enhanced for Mobile */}
+                          <div className="flex-1 p-3 sm:p-4">
+                            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
+                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
+                                {post.author?.username?.charAt(0).toUpperCase() || post.authorId?.toString().charAt(0)}
+                              </div>
+                              <span className="truncate max-w-[120px] sm:max-w-none">
+                                Posted by {post.author?.username || "Anonymous"}
                               </span>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0 rotate-180 rounded-full"
-                                onClick={() => handleVote(post.id, "dump")}
-                                aria-label="Vote down"
-                              >
-                                <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'dump' ? 'text-red-500' : 'text-muted-foreground'}`} />
-                              </Button>
+                              <span className="hidden xs:inline">•</span>
+                              <span className="text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
                             </div>
                             
-                            {/* Content Column - Enhanced for Mobile */}
-                            <div className="flex-1 p-3 sm:p-4">
-                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
-                                <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                                  {post.author?.username?.charAt(0).toUpperCase() || post.authorId?.toString().charAt(0)}
-                                </div>
-                                <span className="truncate max-w-[120px] sm:max-w-none">
-                                  Posted by {post.author?.username || "Anonymous"}
-                                </span>
-                                <span className="hidden xs:inline">•</span>
-                                <span className="text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
+                            <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{post.title}</h3>
+                            <p className="text-muted-foreground text-sm line-clamp-2 sm:line-clamp-3 mb-3">{post.description}</p>
+                            
+                            {post.imageUrl && (
+                              <div className="mb-3 rounded-md overflow-hidden bg-accent/30">
+                                <img 
+                                  src={post.imageUrl} 
+                                  alt={post.title}
+                                  loading="lazy"
+                                  className="w-full h-auto max-h-40 sm:max-h-56 object-cover transition-transform hover:scale-105 duration-300"
+                                />
                               </div>
-                              
-                              <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{post.title}</h3>
-                              <p className="text-muted-foreground text-sm line-clamp-2 sm:line-clamp-3 mb-3">{post.description}</p>
-                              
-                              {post.imageUrl && (
-                                <div className="mb-3 rounded-md overflow-hidden bg-accent/30">
-                                  <img 
-                                    src={post.imageUrl} 
-                                    alt={post.title}
-                                    loading="lazy"
-                                    className="w-full h-auto max-h-40 sm:max-h-56 object-cover transition-transform hover:scale-105 duration-300"
-                                  />
-                                </div>
-                              )}
-                              
-                              {post.tags?.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                                  {post.tags.map((tag: string, index: number) => (
-                                    <div 
-                                      key={index} 
-                                      className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs hover:bg-primary/20 transition-colors cursor-pointer"
-                                      onClick={() => setSearchQuery(tag)}
-                                    >
-                                      #{tag}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                            )}
+                            
+                            {post.tags?.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                {post.tags.map((tag: string, index: number) => (
+                                  <div 
+                                    key={index} 
+                                    className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs hover:bg-primary/20 transition-colors cursor-pointer"
+                                    onClick={() => setSearchQuery(tag)}
+                                  >
+                                    #{tag}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                        <div className="relative z-10">
-                          <p className="text-muted-foreground mb-4">
-                            {searchQuery 
-                              ? "No posts matching your search." 
-                              : `No posts yet. ${user ? "Be the first to share your startup idea!" : "Sign in to create a post!"}`}
-                          </p>
-                          {!searchQuery && (
-                            <Button onClick={handleNewPost} className="bg-primary hover:bg-primary/90">
-                              {user ? "Create Post" : "Sign In to Post"}
-                            </Button>
-                          )}
-                          {searchQuery && (
-                            <Button variant="outline" onClick={() => setSearchQuery("")}>
-                              Clear Search
-                            </Button>
-                          )}
                         </div>
                       </div>
-                    )}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="trending" className="mt-0">
-                  <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                    <div className="relative z-10">
-                      <p className="text-muted-foreground">Trending posts will appear here based on engagement.</p>
+                    ))
+                  ) : (
+                    <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
+                      <div className="relative z-10">
+                        <p className="text-muted-foreground mb-4">
+                          {searchQuery 
+                            ? "No posts matching your search." 
+                            : `No posts yet. ${user ? "Be the first to share your startup idea!" : "Sign in to create a post!"}`}
+                        </p>
+                        {!searchQuery && (
+                          <Button onClick={handleNewPost} className="bg-primary hover:bg-primary/90">
+                            {user ? "Create Post" : "Sign In to Post"}
+                          </Button>
+                        )}
+                        {searchQuery && (
+                          <Button variant="outline" onClick={() => setSearchQuery("")}>
+                            Clear Search
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="following" className="mt-0">
-                  <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                    <div className="relative z-10">
-                      <p className="text-muted-foreground">Posts from people you follow will appear here.</p>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-            
-            {/* Right Column - Sidebar (Mobile & Desktop Optimized) */}
-            <div className="w-full lg:col-span-4 xl:col-span-3 order-1 lg:order-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 max-w-full lg:sticky lg:top-20">
-                
-                {/* Popular Tags Card */}
-                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="trending" className="mt-0">
+                <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center">
-                      <Hash className="h-4 w-4 mr-2 text-primary" />
-                      Trending Tags
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("ai")}>
-                        #ai
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("saas")}>
-                        #saas
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("marketplace")}>
-                        #marketplace
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("fintech")}>
-                        #fintech
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("mobile")}>
-                        #mobile
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-xs cursor-pointer" onClick={() => setSearchQuery("sustainability")}>
-                        #sustainability
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Getting Started Card */}
-                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                  <div className="relative z-10">
+                    <p className="text-muted-foreground">Trending posts will appear here based on engagement.</p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="following" className="mt-0">
+                <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-primary" />
-                      Getting Started
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-start gap-2">
-                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</div>
-                        <span>Share your innovative startup idea with the community</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</div>
-                        <span>Get constructive feedback from experienced founders</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <div className="bg-primary/20 text-primary text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</div>
-                        <span>Use the AI analysis tool to evaluate market potential</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                {/* Top Contributors Card */}
-                <Card className="border-primary/20 overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none"></div>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center">
-                      <Award className="h-4 w-4 mr-2 text-primary" />
-                      Top Contributors
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <div className="relative">
-                            <Avatar className="h-8 w-8 border border-primary/20">
-                              <AvatarFallback>{["JD", "AS", "MK"][i-1]}</AvatarFallback>
-                            </Avatar>
-                            <div className="absolute -bottom-1 -right-1 bg-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold text-white">
-                              {i}
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium truncate">{["JaneDoe", "AlexSmith", "MikeKhan"][i-1]}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {[52, 47, 36][i-1]} posts
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="bg-primary/10 h-5 text-[10px]">
-                            <span className="text-primary">+{[12, 9, 7][i-1]}</span>
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+                  <div className="relative z-10">
+                    <p className="text-muted-foreground">Posts from people you follow will appear here.</p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
-        
-        {/* Footer removed */}
       </div>
     </div>
   );

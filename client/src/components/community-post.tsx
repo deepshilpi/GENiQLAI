@@ -1,10 +1,20 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
+import { 
+  ArrowUp, 
+  ArrowDown, 
+  MessageSquare, 
+  ThumbsUp, 
+  Heart, 
+  Lightbulb, 
+  Flame, 
+  Smile 
+} from "lucide-react";
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Extended post type with author information
 interface ExtendedPost extends Post {
@@ -12,6 +22,14 @@ interface ExtendedPost extends Post {
     username: string;
   };
   commentsCount?: number;
+  reactions?: {
+    like: number;
+    love: number;
+    idea: number;
+    fire: number;
+    smile: number;
+  };
+  currentUserReactions?: string[];
 }
 
 interface CommunityPostProps {
@@ -26,6 +44,10 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   const [_, navigate] = useLocation();
   const { toast } = useToast();
   const { openAuthDialog } = useAuthDialog();
+  
+  // Initialize reactions if they don't exist
+  const reactions = post.reactions || { like: 0, love: 0, idea: 0, fire: 0, smile: 0 };
+  const userReactions = post.currentUserReactions || [];
   
   const handlePump = () => {
     if (!currentUser) {
@@ -43,6 +65,25 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
       return;
     }
     onVote(post.id, "dump");
+  };
+  
+  const handleReaction = (reactionType: string) => {
+    if (!currentUser) {
+      openAuthDialog({ defaultTab: "login" });
+      return;
+    }
+    
+    // This would normally connect to your API endpoint
+    // For now, we'll just show a toast message
+    toast({
+      title: "Reaction added",
+      description: `You reacted with ${reactionType} to this post`,
+    });
+    
+    // In real implementation, you would call your backend API
+    // Something like:
+    // apiRequest('POST', `/api/posts/${post.id}/reaction`, { reactionType })
+    //   .then(() => queryClient.invalidateQueries(['/api/posts']))
   };
   
   return (
@@ -75,27 +116,120 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
           ))}
         </div>
         
-        <div className="flex space-x-4 border-t border-border pt-3">
-          <button 
-            className={`flex items-center text-sm ${post.pumpCount > post.dumpCount ? "text-success" : "text-muted-foreground"}`}
-            onClick={handlePump}
-          >
-            <ArrowUp className="mr-1 w-4 h-4" />
-            <span>Pump ({post.pumpCount})</span>
-          </button>
-          <button 
-            className={`flex items-center text-sm ${post.dumpCount > post.pumpCount ? "text-destructive" : "text-muted-foreground"}`}
-            onClick={handleDump}
-          >
-            <ArrowDown className="mr-1 w-4 h-4" />
-            <span>Dump ({post.dumpCount})</span>
-          </button>
-          <Link href={`/post/${post.id}`}>
-            <a className="flex items-center text-muted-foreground text-sm ml-auto">
-              <MessageSquare className="mr-1 w-4 h-4" />
-              <span>15</span>
-            </a>
-          </Link>
+        <div className="flex flex-col space-y-3 border-t border-border pt-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Emoji Reactions */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`flex items-center p-1.5 rounded-full text-sm bg-accent/50 hover:bg-accent ${userReactions.includes('like') ? 'text-blue-400 border border-blue-400/30' : 'text-muted-foreground'}`}
+                    onClick={() => handleReaction('like')}
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                    <span className="ml-1 text-xs">{reactions.like || 0}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Like</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`flex items-center p-1.5 rounded-full text-sm bg-accent/50 hover:bg-accent ${userReactions.includes('love') ? 'text-pink-400 border border-pink-400/30' : 'text-muted-foreground'}`}
+                    onClick={() => handleReaction('love')}
+                  >
+                    <Heart className="w-3.5 h-3.5" />
+                    <span className="ml-1 text-xs">{reactions.love || 0}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Love</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`flex items-center p-1.5 rounded-full text-sm bg-accent/50 hover:bg-accent ${userReactions.includes('idea') ? 'text-yellow-400 border border-yellow-400/30' : 'text-muted-foreground'}`}
+                    onClick={() => handleReaction('idea')}
+                  >
+                    <Lightbulb className="w-3.5 h-3.5" />
+                    <span className="ml-1 text-xs">{reactions.idea || 0}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Great Idea</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`flex items-center p-1.5 rounded-full text-sm bg-accent/50 hover:bg-accent ${userReactions.includes('fire') ? 'text-orange-400 border border-orange-400/30' : 'text-muted-foreground'}`}
+                    onClick={() => handleReaction('fire')}
+                  >
+                    <Flame className="w-3.5 h-3.5" />
+                    <span className="ml-1 text-xs">{reactions.fire || 0}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Fire</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`flex items-center p-1.5 rounded-full text-sm bg-accent/50 hover:bg-accent ${userReactions.includes('smile') ? 'text-green-400 border border-green-400/30' : 'text-muted-foreground'}`}
+                    onClick={() => handleReaction('smile')}
+                  >
+                    <Smile className="w-3.5 h-3.5" />
+                    <span className="ml-1 text-xs">{reactions.smile || 0}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Smile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button 
+                className={`flex items-center text-sm ${post.pumpCount > post.dumpCount ? "text-success" : "text-muted-foreground"}`}
+                onClick={handlePump}
+              >
+                <ArrowUp className="mr-1 w-4 h-4" />
+                <span>Pump ({post.pumpCount})</span>
+              </button>
+              <button 
+                className={`flex items-center text-sm ${post.dumpCount > post.pumpCount ? "text-destructive" : "text-muted-foreground"}`}
+                onClick={handleDump}
+              >
+                <ArrowDown className="mr-1 w-4 h-4" />
+                <span>Dump ({post.dumpCount})</span>
+              </button>
+            </div>
+            
+            <Link href={`/post/${post.id}`}>
+              <a className="flex items-center text-muted-foreground text-sm">
+                <MessageSquare className="mr-1 w-4 h-4" />
+                <span>{post.commentsCount || 0}</span>
+              </a>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
