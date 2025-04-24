@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Switch, Route, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
@@ -81,6 +82,32 @@ function Router() {
 }
 
 function App() {
+  // Production environment detection for auth resilience
+  const isProduction = window.location.hostname.includes('.replit.app') || 
+      window.location.hostname.includes('.com') || 
+      window.location.hostname.includes('.org') || 
+      window.location.hostname.includes('.app');
+  
+  // Special startup check for post-login redirects in production
+  useEffect(() => {
+    if (isProduction) {
+      // Check if we just logged in (production environment)
+      const justLoggedIn = sessionStorage.getItem('auth_just_logged_in');
+      if (justLoggedIn) {
+        console.log("[App] Detected post-login state, performing additional auth checks");
+        
+        // Remove the flag to prevent multiple executions
+        sessionStorage.removeItem('auth_just_logged_in');
+        
+        // Force a clean reload to reset all app state
+        setTimeout(() => {
+          console.log("[App] Executing post-login cleanup and refresh");
+          window.location.reload();
+        }, 500);
+      }
+    }
+  }, [isProduction]);
+  
   return (
     <>
       <AuthProvider>
