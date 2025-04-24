@@ -158,17 +158,84 @@ export async function analyzeStartupIdea(
         throw new Error("Failed to parse JSON from OpenAI response");
       }
       
-      // Validate the basic structure of the enhanced response
-      if (!analysisContent.successRate || 
-          !analysisContent.competitors || 
-          !analysisContent.targetAudienceFit ||
-          !analysisContent.marketSize ||
-          !analysisContent.businessModelStrength ||
-          !analysisContent.fundingRequired ||
-          !analysisContent.swotAnalysis ||
-          !analysisContent.previousFailedExecutions) {
-        console.error("Missing required fields in enhanced analysis response:", Object.keys(analysisContent));
-        throw new Error("Invalid response structure from AI service");
+      // Log the available fields for debugging
+      console.log("Fields present in the response:", Object.keys(analysisContent));
+      
+      // Check for partial responses and populate missing fields with defaults
+      const requiredFields = [
+        'successRate', 'competitors', 'targetAudienceFit', 'marketSize', 
+        'businessModelStrength', 'fundingRequired', 'swotAnalysis', 'previousFailedExecutions'
+      ];
+      
+      const missingFields = requiredFields.filter(field => !analysisContent[field]);
+      
+      if (missingFields.length > 0) {
+        console.warn("Missing fields in analysis response:", missingFields);
+        
+        // Instead of failing, populate missing fields with defaults
+        if (!analysisContent.successRate) {
+          analysisContent.successRate = {
+            percentage: 50,
+            goodPoints: ["Analysis incomplete - please try again"],
+            badPoints: ["Server encountered an issue processing your request"],
+            message: "Analysis could not be fully completed"
+          };
+        }
+        
+        if (!analysisContent.competitors) {
+          analysisContent.competitors = {
+            competitors: [],
+            message: "Could not analyze competitors at this time"
+          };
+        }
+        
+        if (!analysisContent.targetAudienceFit) {
+          analysisContent.targetAudienceFit = {
+            segments: [],
+            message: "Could not analyze target audience at this time"
+          };
+        }
+        
+        if (!analysisContent.marketSize) {
+          analysisContent.marketSize = {
+            segments: [],
+            message: "Could not analyze market size at this time"
+          };
+        }
+        
+        if (!analysisContent.businessModelStrength) {
+          analysisContent.businessModelStrength = {
+            overall: 50,
+            components: [],
+            message: "Could not analyze business model at this time"
+          };
+        }
+        
+        if (!analysisContent.fundingRequired) {
+          analysisContent.fundingRequired = {
+            total: 0,
+            breakdown: [],
+            message: "Could not analyze funding requirements at this time"
+          };
+        }
+        
+        if (!analysisContent.swotAnalysis) {
+          analysisContent.swotAnalysis = {
+            strengths: ["Could not analyze strengths at this time"],
+            weaknesses: ["Could not analyze weaknesses at this time"],
+            opportunities: ["Could not analyze opportunities at this time"],
+            threats: ["Could not analyze threats at this time"]
+          };
+        }
+        
+        if (!analysisContent.previousFailedExecutions) {
+          analysisContent.previousFailedExecutions = {
+            failures: [],
+            message: "Could not analyze previous failures at this time"
+          };
+        }
+        
+        console.log("Added default values for missing fields in OpenAI response");
       }
       
       return analysisContent as AnalysisResults;
