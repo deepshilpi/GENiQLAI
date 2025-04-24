@@ -993,12 +993,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
-                          <p className="text-sm text-vision-purple-300">You've seen all posts from people you follow</p>
+                        <div className="py-8 text-center">
+                          <p className="text-sm font-medium text-white">You've seen all posts from people you follow</p>
                           <Button 
-                            variant="outline" 
                             size="sm" 
-                            className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                            className="mt-2 bg-vision-primary-gradient font-semibold text-white hover:opacity-90"
                             onClick={() => {
                               window.scrollTo(0, 0);
                               setPage(1);
