@@ -26,9 +26,12 @@ interface FundingInvestorsProps {
   message: string;
 }
 
-export function FundingInvestors({ investors, message }: FundingInvestorsProps) {
+export function FundingInvestors({ investors = [], message = "No funding information available" }: FundingInvestorsProps) {
+  // Make sure investors is an array
+  const safeInvestors = Array.isArray(investors) ? investors : [];
+  
   // Sort investors by portfolio fit (descending)
-  const sortedInvestors = [...investors].sort((a, b) => b.portfolioFit - a.portfolioFit);
+  const sortedInvestors = [...safeInvestors].sort((a, b) => b.portfolioFit - a.portfolioFit);
   
   // Get top 3 investors for highlighting
   const topInvestors = sortedInvestors.slice(0, 3);
@@ -37,7 +40,7 @@ export function FundingInvestors({ investors, message }: FundingInvestorsProps) 
   const getLocationCounts = () => {
     const locationMap = new Map<string, number>();
     
-    investors.forEach(investor => {
+    safeInvestors.forEach(investor => {
       const location = investor.location;
       locationMap.set(location, (locationMap.get(location) || 0) + 1);
     });
@@ -51,7 +54,7 @@ export function FundingInvestors({ investors, message }: FundingInvestorsProps) 
   const locationData = getLocationCounts();
   
   // Prepare data for scatter chart
-  const scatterData = investors.map(investor => ({
+  const scatterData = safeInvestors.map(investor => ({
     x: investor.portfolioFit,
     y: Math.random() * 60 + 20, // Random y position for visualization
     z: 10, // Size
@@ -89,7 +92,7 @@ export function FundingInvestors({ investors, message }: FundingInvestorsProps) 
             <span className="font-medium">Investors:</span> {payload[0].value}
           </p>
           <p className="text-xs text-white/80">
-            <span className="font-medium">Percentage:</span> {((payload[0].value / investors.length) * 100).toFixed(1)}%
+            <span className="font-medium">Percentage:</span> {((payload[0].value / safeInvestors.length) * 100).toFixed(1)}%
           </p>
         </div>
       );
@@ -216,7 +219,7 @@ export function FundingInvestors({ investors, message }: FundingInvestorsProps) 
                     </p>
                   </div>
                   <p className="text-xs text-primary">
-                    {Math.round((location.value / investors.length) * 100)}%
+                    {Math.round((location.value / safeInvestors.length) * 100)}%
                   </p>
                 </div>
               ))
@@ -293,10 +296,10 @@ export function FundingInvestors({ investors, message }: FundingInvestorsProps) 
         ))}
         
         {/* View all investors button */}
-        {investors.length > 3 && (
+        {safeInvestors.length > 3 && (
           <button className="w-full py-2 flex items-center justify-center rounded-md bg-primary/10 hover:bg-primary/20 transition-colors text-xs text-primary font-medium">
             <ExternalLink className="h-3 w-3 mr-1.5" />
-            View All {investors.length} Potential Investors
+            View All {safeInvestors.length} Potential Investors
           </button>
         )}
       </div>
