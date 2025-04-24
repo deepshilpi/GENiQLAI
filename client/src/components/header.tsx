@@ -32,6 +32,7 @@ import { MobileMenu } from "@/components/mobile-menu";
 import Logo from "@/assets/logo";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 import { format, formatDistanceToNow } from "date-fns";
+import { AuthDebugger } from "@/components/auth-debugger";
 
 export function Header() {
   const [location, navigate] = useLocation();
