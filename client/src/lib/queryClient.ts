@@ -148,12 +148,24 @@ export const getQueryFn: <T>(options: {
     } catch (error: any) {
       // For auth requests, we want to handle errors differently
       if (isAuthRequest) {
-        // Log more descriptive error
-        console.error(`[Auth] Error fetching user:`, error);
+        // Log more descriptive error but don't expose sensitive data
+        console.error(`[Auth] Error fetching user:`, {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
         
-        // For 401s with returnNull behavior, we should return null
-        if (unauthorizedBehavior === "returnNull" && error.status === 401) {
-          console.log("[Analysis] Auth refresh rejected with 401, clearing user data");
+        // Handle network errors and server errors differently
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          console.log("[Analysis] Network error during auth check, will retry later");
+          // Return null to prevent app from crashing due to network issues
+          return null;
+        }
+        
+        // For 401s and 403s with returnNull behavior, we should return null
+        if (unauthorizedBehavior === "returnNull" && 
+            (error.status === 401 || error.status === 403 || error.status === 502)) {
+          console.log("[Analysis] Auth refresh rejected with status code, clearing user data");
           return null;
         }
       }

@@ -83,10 +83,39 @@ export default function AuthPage() {
   // Select a random quote to display
   const [randomQuote, setRandomQuote] = useState(entrepreneurQuotes[Math.floor(Math.random() * entrepreneurQuotes.length)]);
   
-  // If user is already logged in, redirect to home
+  // Enhanced redirect for logged-in users with useEffect to avoid state update during render
+  useEffect(() => {
+    if (user) {
+      console.log("[Auth] User already logged in, redirecting to home page");
+      
+      // Clean up any auth flags that might be lingering
+      sessionStorage.removeItem('auth_login_success');
+      sessionStorage.removeItem('auth_logout_requested');
+      
+      // Use setTimeout to ensure this happens after render
+      setTimeout(() => {
+        navigate("/");
+      }, 0);
+    }
+  }, [user, navigate]);
+  
+  // If user is already logged in, show loading state
   if (user) {
-    navigate("/");
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="w-[400px] max-w-sm border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Redirecting...</CardTitle>
+            <CardDescription className="text-white/70">
+              You're already logged in
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-vision-purple-400" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Get return URL from query params (if any)
