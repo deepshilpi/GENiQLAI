@@ -106,9 +106,9 @@ export function useNotifications() {
         if (wsRef.current) {
           // Use try-catch to handle any errors during close
           try {
-            // TypeScript safety - only close if WebSocket is not already closed
+            // TypeScript safety with any type to avoid readyState complaints
             const currentWs = wsRef.current;
-            if (currentWs.readyState !== WebSocket.CLOSED) {
+            if (currentWs && currentWs.readyState !== 3) { // 3 = CLOSED
               currentWs.close();
             }
           } catch (e) {
@@ -123,7 +123,7 @@ export function useNotifications() {
         
         // Set connection timeout
         const connectionTimeout = setTimeout(() => {
-          if (ws.readyState !== WebSocket.OPEN) {
+          if (ws.readyState !== 1) { // 1 = OPEN
             console.log('WebSocket connection timed out after 10 seconds');
             ws.close();
           }
@@ -150,7 +150,7 @@ export function useNotifications() {
           
           // Set up ping/pong heartbeat every 15 seconds to keep connection alive
           pingInterval = setInterval(() => {
-            if (ws.readyState === WebSocket.OPEN) {
+            if (ws.readyState === 1) { // 1 = OPEN
               try {
                 console.log('Sending ping to keep connection alive');
                 ws.send(JSON.stringify({ type: 'ping' }));
@@ -291,7 +291,7 @@ export function useNotifications() {
       if (document.visibilityState === 'visible' && 
           user && 
           user.id && 
-          (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN)) {
+          (!wsRef.current || wsRef.current.readyState !== 1)) { // 1 = OPEN
         setupWebSocket();
       }
     };
@@ -329,7 +329,7 @@ export function useNotifications() {
       setUnreadCount(prev => Math.max(0, prev - 1));
       
       // Send to server
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      if (wsRef.current && wsRef.current.readyState === 1) { // 1 = OPEN
         wsRef.current.send(JSON.stringify({
           type: 'mark_notification_read',
           payload: { notificationId }
@@ -361,7 +361,7 @@ export function useNotifications() {
       setUnreadCount(0);
       
       // Send to server
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      if (wsRef.current && wsRef.current.readyState === 1) { // 1 = OPEN
         wsRef.current.send(JSON.stringify({
           type: 'mark_all_notifications_read',
           payload: {}
