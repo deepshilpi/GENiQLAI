@@ -81,8 +81,13 @@ export function useNotifications() {
             setUnreadCount(0);
           }
         } catch (error) {
-          console.error('Error fetching notifications:', error instanceof Error ? error.message : 'Unknown error');
-          // Set to empty state instead of mock data
+          // Use a safer approach to log errors without causing additional errors
+          console.error('Error fetching notifications:', 
+            error && typeof error === 'object' ? 
+              (error instanceof Error ? error.message : JSON.stringify(error) || 'Empty error object') 
+              : 'Unknown error');
+          
+          // Set to empty state
           setNotifications([]);
           setUnreadCount(0);
         } finally {
@@ -278,7 +283,10 @@ export function useNotifications() {
           }
         };
       } catch (error) {
-        console.error('Error setting up WebSocket:', error);
+        console.error('Error setting up WebSocket:', 
+          error && typeof error === 'object' ? 
+            (error instanceof Error ? error.message : JSON.stringify(error) || 'Empty error object') 
+            : 'Unknown error');
         setConnectionStatus('disconnected');
       }
     };
@@ -345,7 +353,10 @@ export function useNotifications() {
         }
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error marking notification as read:', 
+        error && typeof error === 'object' ? 
+          (error instanceof Error ? error.message : JSON.stringify(error) || 'Empty error object') 
+          : 'Unknown error');
       // Revert the state update if there was an error
       // This would require re-fetching notifications
     }
@@ -377,7 +388,10 @@ export function useNotifications() {
         }
       }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.error('Error marking all notifications as read:', 
+        error && typeof error === 'object' ? 
+          (error instanceof Error ? error.message : JSON.stringify(error) || 'Empty error object') 
+          : 'Unknown error');
       // Revert the state update if there was an error
       // This would require re-fetching notifications
     }
