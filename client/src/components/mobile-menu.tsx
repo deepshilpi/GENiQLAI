@@ -53,13 +53,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent 
         side="left" 
-        className="p-0 w-[270px] bg-vision-dark/95 backdrop-blur-md border-r border-vision-purple-200/10 text-white"
+        className="p-0 w-[270px] bg-vision-dark/95 backdrop-blur-md border-r border-vision-purple-200/10 text-white z-[100]"
       >
         <div className="p-4 border-b border-vision-purple-200/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 flex items-center justify-center">
-                <img src="/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
+                <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
               </div>
               <div className="font-heading font-bold text-lg text-white">GENIQL</div>
             </div>
