@@ -514,7 +514,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
   };
 
   return (
-    <div className="flex h-screen w-full max-w-full overflow-hidden bg-vision-dark">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[#0B1437]">
       <Sidebar />
       
       <div className="flex-1 flex flex-col w-full max-w-full transition-all duration-300">
@@ -729,7 +729,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           <p className="text-[#a09dd2] mb-4">Post not found</p>
                           <Button 
                             variant="outline"
-                            className="border-vision-purple-200/20 text-[#a09dd2] hover:bg-vision-purple-900/20 hover:text-white"
+                            className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white"
                             onClick={() => navigate('/community/threads')}
                           >
                             Back to community
@@ -866,7 +866,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       ))}
                     </>
                   ) : posts.length > 0 ? (
-                    <div className="bg-vision-dark">
+                    <div className="bg-[#0B1437]/80">
                       <AnimatePresence initial={false}>
                         {posts.map((post) => (
                           <ThreadsStylePost
@@ -960,7 +960,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       ))}
                     </>
                   ) : posts.length > 0 ? (
-                    <div className="bg-vision-dark">
+                    <div className="bg-[#0B1437]/80">
                       <AnimatePresence initial={false}>
                         {posts.map((post) => (
                           <ThreadsStylePost
