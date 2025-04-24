@@ -725,11 +725,11 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           isDetailView={true}
                         />
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
-                          <p className="text-vision-purple-300 mb-4">Post not found</p>
+                        <div className="flex flex-col items-center justify-center py-12 bg-[#11083C]/90 text-white">
+                          <p className="text-[#a09dd2] mb-4">Post not found</p>
                           <Button 
                             variant="outline"
-                            className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                            className="border-vision-purple-200/20 text-[#a09dd2] hover:bg-vision-purple-900/20 hover:text-white"
                             onClick={() => navigate('/community/threads')}
                           >
                             Back to community
@@ -784,9 +784,9 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                               className="py-4 flex justify-center bg-[#11083C]/90"
                             >
                               {isFetching && page > 1 ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
+                                <Loader2 className="h-6 w-6 animate-spin text-[#CB9FFF]" />
                               ) : (
-                                <p className="text-sm text-vision-purple-300">Loading more posts...</p>
+                                <p className="text-sm text-[#a09dd2]">Loading more posts...</p>
                               )}
                             </div>
                           )}
@@ -887,12 +887,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       {hasMore && (
                         <div 
                           ref={loadMoreRef} 
-                          className="py-4 flex justify-center bg-vision-card/70"
+                          className="py-4 flex justify-center bg-[#11083C]/90"
                         >
                           {isFetching && page > 1 ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
+                            <Loader2 className="h-6 w-6 animate-spin text-[#CB9FFF]" />
                           ) : (
-                            <p className="text-sm text-vision-purple-300">Loading more posts...</p>
+                            <p className="text-sm text-[#a09dd2]">Loading more posts...</p>
                           )}
                         </div>
                       )}
@@ -981,12 +981,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       {hasMore && (
                         <div 
                           ref={loadMoreRef} 
-                          className="py-4 flex justify-center bg-vision-card/70"
+                          className="py-4 flex justify-center bg-[#11083C]/90"
                         >
                           {isFetching && page > 1 ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-vision-purple-300" />
+                            <Loader2 className="h-6 w-6 animate-spin text-[#CB9FFF]" />
                           ) : (
-                            <p className="text-sm text-vision-purple-300">Loading more posts...</p>
+                            <p className="text-sm text-[#a09dd2]">Loading more posts...</p>
                           )}
                         </div>
                       )}
