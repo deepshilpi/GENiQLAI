@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2, X, Quote } from "lucide-react";
+import { Loader2, X, Quote as QuoteIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
@@ -19,43 +19,43 @@ const entrepreneurQuotes = [
     quote: "Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work.",
     author: "Steve Jobs",
     company: "Apple",
-    image: "https://images.unsplash.com/photo-1603069989831-9fab04484d9f?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "The biggest risk is not taking any risk. In a world that's changing quickly, the only strategy that is guaranteed to fail is not taking risks.",
     author: "Mark Zuckerberg",
     company: "Meta",
-    image: "https://images.unsplash.com/photo-1633409361618-c73427e4e206?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "If you are not embarrassed by the first version of your product, you've launched too late.",
     author: "Reid Hoffman",
     company: "LinkedIn",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/1181345/pexels-photo-1181345.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "The way to get started is to quit talking and begin doing.",
     author: "Walt Disney",
     company: "Disney",
-    image: "https://images.unsplash.com/photo-1635805737707-575885ab0820?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "Your most unhappy customers are your greatest source of learning.",
     author: "Bill Gates",
     company: "Microsoft",
-    image: "https://images.unsplash.com/photo-1558900934-4b1a983aceb6?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "It's not about ideas. It's about making ideas happen.",
     author: "Scott Belsky",
     company: "Behance",
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   },
   {
     quote: "The only limit to our realization of tomorrow will be our doubts of today.",
     author: "Franklin D. Roosevelt",
     company: "Former US President",
-    image: "https://images.unsplash.com/photo-1531599020532-5f0d3f932623?q=80&w=1000&auto=format&fit=crop"
+    image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   }
 ];
 
@@ -348,6 +348,20 @@ export default function AuthPage() {
               </div>
             </CardFooter>
           </Card>
+          
+          {/* Mobile Quote Section (only visible on mobile) */}
+          <div className="mt-8 md:hidden w-full p-4 bg-[#1a1045]/40 backdrop-blur-sm rounded-xl border border-purple-500/20">
+            <div className="flex items-start mb-4">
+              <QuoteIcon className="h-5 w-5 text-purple-400 mr-3 shrink-0 mt-1" />
+              <p className="text-base text-white italic">"{randomQuote.quote}"</p>
+            </div>
+            <div className="flex justify-end">
+              <div className="text-right">
+                <p className="text-sm font-bold text-purple-300">{randomQuote.author}</p>
+                <p className="text-xs text-gray-400">{randomQuote.company}</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
 
@@ -355,7 +369,7 @@ export default function AuthPage() {
       <div 
         className="hidden md:flex md:w-1/2 flex-col justify-center items-center p-10 relative overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(17, 8, 60, 0.85), rgba(21, 12, 59, 0.9)), url(${randomQuote.image})`,
+          backgroundImage: `linear-gradient(rgba(17, 8, 60, 0.85), rgba(21, 12, 59, 0.9)), url('${randomQuote.image}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -370,7 +384,7 @@ export default function AuthPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="p-6 rounded-xl bg-black/20 backdrop-blur-md border border-purple-500/20"
           >
-            <Quote className="h-8 w-8 text-purple-400 mb-4 opacity-80" />
+            <QuoteIcon className="h-8 w-8 text-purple-400 mb-4 opacity-80" />
             
             <h2 className="text-2xl font-medium mb-6 text-white leading-relaxed">
               "{randomQuote.quote}"
