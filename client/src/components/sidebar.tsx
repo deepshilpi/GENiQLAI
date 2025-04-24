@@ -177,10 +177,10 @@ export function Sidebar() {
             <div 
               className={cn(
                 "vision-sidebar-item cursor-pointer",
-                isActive("/community") && "active",
+                (isActive("/community/threads") || isActive("/community/post")) && "active",
                 collapsed && "justify-center px-2"
               )}
-              onClick={() => navigate("/community")}
+              onClick={() => navigate("/community/threads")}
             >
               <MessageSquare className="w-5 h-5" />
               {!collapsed && <span>Community</span>}

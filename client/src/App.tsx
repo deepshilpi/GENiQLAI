@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
@@ -58,7 +58,9 @@ function Router() {
             <Route path="/" component={AnalysisPage} />
             <Route path="/home" component={HomePage} />
             <Route path="/community/threads" component={ThreadsCommunityPage} />
-            <Route path="/community" component={CommunityPage} />
+            <Route path="/community">
+              <Redirect to="/community/threads" />
+            </Route>
             <Route path="/community/post/:id">
               {(params) => <ThreadsCommunityPage postId={params.id} />}
             </Route>
