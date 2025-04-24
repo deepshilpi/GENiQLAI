@@ -101,8 +101,9 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
         const result = JSON.parse(content);
         console.log(`Successfully parsed ${stepName} JSON directly`);
         return result;
-      } catch (parseError) {
-        console.log(`Direct JSON parse failed for ${stepName}: ${parseError.message}`);
+      } catch (parseError: unknown) {
+        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+        console.log(`Direct JSON parse failed for ${stepName}: ${errorMessage}`);
         console.log(`Trying extraction methods for ${stepName}`);
         
         // Try multiple extraction methods in sequence
@@ -116,8 +117,9 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
             const result = JSON.parse(jsonContent);
             console.log(`Successfully extracted and parsed ${stepName} JSON using method 1`);
             return result;
-          } catch (extractError) {
-            console.log(`Extraction method 1 failed for ${stepName}: ${extractError.message}`);
+          } catch (extractError: unknown) {
+            const errorMessage = extractError instanceof Error ? extractError.message : String(extractError);
+            console.log(`Extraction method 1 failed for ${stepName}: ${errorMessage}`);
           }
         } else {
           console.log(`Method 1 failed: No JSON pattern match found for ${stepName}`);
@@ -133,8 +135,9 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
             const result = JSON.parse(extractedJson);
             console.log(`Successfully extracted and parsed ${stepName} JSON using method 2`);
             return result;
-          } catch (extractError) {
-            console.log(`Extraction method 2 failed for ${stepName}: ${extractError.message}`);
+          } catch (extractError: unknown) {
+            const errorMessage = extractError instanceof Error ? extractError.message : String(extractError);
+            console.log(`Extraction method 2 failed for ${stepName}: ${errorMessage}`);
           }
         } else {
           console.log(`Method 2 failed: No markdown code blocks found for ${stepName}`);
@@ -154,8 +157,9 @@ async function executeAnalysisStep(stepName: string, systemPrompt: string, userP
             console.log(`Successfully extracted and parsed ${stepName} JSON using method 3`);
             return result;
           }
-        } catch (fixError) {
-          console.log(`Extraction method 3 failed for ${stepName}: ${fixError.message}`);
+        } catch (fixError: unknown) {
+          const errorMessage = fixError instanceof Error ? fixError.message : String(fixError);
+          console.log(`Extraction method 3 failed for ${stepName}: ${errorMessage}`);
         }
         
         console.error(`All JSON parsing methods failed for ${stepName}, full response content:`);

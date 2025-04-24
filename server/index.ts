@@ -6,12 +6,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Increase server timeout for expert-level analysis (60 seconds)
+// Increase server timeouts for expert-level analysis (3 minutes)
 app.use((req, res, next) => {
-  // Only increase timeouts for analysis endpoints
-  if (req.path.includes('/api/analyze')) {
-    req.setTimeout(60000);
-    res.setTimeout(60000);
+  // Only increase timeouts for analysis and related endpoints
+  if (req.path.includes('/api/analyze') || 
+      req.path.includes('/api/execution-plan') || 
+      req.path.includes('/api/budget-analysis') || 
+      req.path.includes('/api/investors')) {
+    // Set long timeouts for AI-powered analysis endpoints
+    req.setTimeout(180000); // 3 minutes
+    res.setTimeout(180000); // 3 minutes
+    console.log(`Extended timeout set for ${req.path}`);
   }
   next();
 });
@@ -73,8 +78,8 @@ app.use((req, res, next) => {
   try {
     log(`Attempting to start server on port ${PORT}`);
     
-    // Set server timeout to 2 minutes for long-running analysis
-    server.timeout = 120000; // 2 minutes
+    // Set server timeout to 5 minutes for long-running analysis
+    server.timeout = 300000; // 5 minutes
 
     // Simple approach: Just try to listen directly on port 5000
     server.listen(PORT, "0.0.0.0", () => {
