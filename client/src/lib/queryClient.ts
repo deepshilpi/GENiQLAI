@@ -60,8 +60,8 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: true, // Enable selective refetching on window focus for fresh data
-      staleTime: 5 * 60 * 1000, // 5 minutes stale time instead of Infinity for balance between caching and freshness
+      refetchOnWindowFocus: false, // Disable refetching on window focus to avoid delays
+      staleTime: Infinity, // Set to Infinity to prevent automatic refetching
       retry: 1, // Allow one retry for better resilience and user experience
       retryDelay: 1000 // Wait 1 second before retry
       // Note: TanStack Query v5 doesn't use keepPreviousData or placeholderData in defaultOptions

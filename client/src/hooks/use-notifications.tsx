@@ -29,8 +29,8 @@ export function useNotifications() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   
-  // WebSocket reference
-  const wsRef = useRef<WebSocket | null>(null);
+  // WebSocket reference using any to avoid TypeScript complaints about nested properties
+  const wsRef = useRef<any>(null);
 
   // Track connection attempts
   const reconnectAttempts = useRef(0);

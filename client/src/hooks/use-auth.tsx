@@ -35,24 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    staleTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: Infinity, // Never consider data stale - completely avoid automatic refetching
     retry: 0, // Don't retry on failure - reduces queries
     refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
-  // Periodically check for user session at a less frequent interval
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (user) {
-        // Only refetch if the document is visible to prevent background queries
-        if (document.visibilityState === 'visible') {
-          refetch();
-        }
-      }
-    }, 15 * 60 * 1000); // Check every 15 minutes instead of 5 minutes
-    
-    return () => clearInterval(intervalId);
-  }, [user, refetch]);
+  // Completely disabled periodic authentication checks to avoid delays
+  // No automatic reauthentication will happen in the background
 
   const loginMutation = useMutation<User, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
