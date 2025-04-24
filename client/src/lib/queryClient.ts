@@ -25,9 +25,24 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Add timestamp to auth-related endpoints to prevent caching
+  const finalUrl = url.includes("/api/login") || url.includes("/api/logout") || url.includes("/api/user") || url.includes("/api/register")
+    ? `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`
+    : url;
+    
+  const res = await fetch(finalUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      ...(data ? { "Content-Type": "application/json" } : {}),
+      // Add cache control headers for all auth-related requests
+      ...(url.includes("/api/login") || url.includes("/api/logout") || url.includes("/api/user") || url.includes("/api/register") 
+        ? {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          } 
+        : {})
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -45,10 +60,15 @@ export const getQueryFn: <T>(options: {
     // Extract the URL from the query key (first element is always the URL)
     const url = queryKey[0] as string;
     
-    // Log the query being made for debugging purposes
-    console.log(`Making query request to: ${url}, queryKey:`, queryKey);
+    // Add timestamp to auth-related endpoints to prevent caching issues
+    const finalUrl = url.includes("/api/user")
+      ? `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`
+      : url;
     
-    const res = await fetch(url, {
+    // Log the query being made for debugging purposes
+    console.log(`Making query request to: ${finalUrl}, queryKey:`, queryKey);
+    
+    const res = await fetch(finalUrl, {
       credentials: "include",
       // Add cache busting for auth-related endpoints to prevent browser caching
       headers: url.includes("/api/user") ? {
@@ -59,7 +79,7 @@ export const getQueryFn: <T>(options: {
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      console.log(`Query to ${url} returned 401, handling with returnNull`);
+      console.log(`Query to ${finalUrl} returned 401, handling with returnNull`);
       return null;
     }
 
@@ -76,8 +96,9 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false, // Disable refetching on window focus to avoid delays
       staleTime: Infinity, // Set to Infinity to prevent automatic refetching
       retry: 1, // Allow one retry for better resilience and user experience
-      retryDelay: 1000 // Wait 1 second before retry
+      retryDelay: 1000, // Wait 1 second before retry
       // Note: TanStack Query v5 doesn't use keepPreviousData or placeholderData in defaultOptions
+      gcTime: 1000 * 60 * 60, // Keep unused data in the cache for 1 hour
     },
     mutations: {
       retry: 1, // Allow one retry for better resilience

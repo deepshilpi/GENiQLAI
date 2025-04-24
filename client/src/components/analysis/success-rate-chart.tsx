@@ -93,7 +93,10 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message, c
                 dominantBaseline="middle" 
                 textAnchor="middle" 
                 className="fill-white/80"
-                fontSize="10px"
+                fontSize="9px"
+                fontFamily="sans-serif"
+                fontWeight="bold"
+                letterSpacing="-0.5px"
               >
                 {successLevel === "high" ? "HIGH POTENTIAL" : 
                  successLevel === "medium" ? "MODERATE POTENTIAL" : 
@@ -112,7 +115,16 @@ export function SuccessRateChart({ percentage, goodPoints, badPoints, message, c
             </div>
           </div>
           
-          {/* Removing duplicate indicator since it's already in the circle */}
+          {/* Additional text display to ensure proper rendering */}
+          <div className={`mt-2 text-center px-3 py-1 rounded-full text-xs font-medium ${
+            successLevel === "high" ? "bg-green-500/20 text-green-400" :
+            successLevel === "medium" ? "bg-amber-500/20 text-amber-400" : 
+            "bg-red-500/20 text-red-400"
+          }`}>
+            {successLevel === "high" ? "HIGH POTENTIAL" : 
+             successLevel === "medium" ? "MODERATE POTENTIAL" : 
+             "CHALLENGING"}
+          </div>
         </CardContent>
       </Card>
       
