@@ -34,6 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Add timestamp to avoid browser caching
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
   
+  // Track auth check status
+  const [authChecked, setAuthChecked] = useState(false);
+  
   // Direct login helper function - used for critical auth operations
   const directLogin = async (credentials: LoginCredentials): Promise<User | null> => {
     try {
@@ -549,6 +552,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
   });
+  
+  // Effect to perform an initial auth check on mount
+  useEffect(() => {
+    console.log("[AuthProvider] Initial auth check on mount");
+    
+    // Set a flag to ensure we only run this once
+    if (!authChecked) {
+      setAuthChecked(true);
+      
+      // Force an immediate auth check
+      refetchUser().then(userData => {
+        if (userData) {
+          console.log("[AuthProvider] Initial auth check successful, user:", userData.username);
+        } else {
+          console.log("[AuthProvider] Initial auth check - no user found");
+        }
+      });
+    }
+  }, []);
   
   // Effect to periodically check auth state in Replit environment
   useEffect(() => {

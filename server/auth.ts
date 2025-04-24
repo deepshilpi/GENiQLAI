@@ -75,9 +75,10 @@ export function setupAuth(app: Express) {
   // We're using more permissive settings for Replit to ensure cookies work
   const cookieSettings: session.CookieOptions = {
     httpOnly: true,
-    sameSite: 'none', // Allow cross-site cookies for Replit preview
+    sameSite: 'lax', // Use 'lax' for better compatibility in Replit environment
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for better persistence
-    secure: false // Set to false for testing (works in Replit environment)
+    secure: false, // Set to false for testing (works in Replit environment)
+    path: '/' // Ensure cookie is available for all paths
   };
 
   // Log cookie settings for debugging
@@ -86,8 +87,9 @@ export function setupAuth(app: Express) {
   app.use(session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Set to true to ensure session is saved on each request
+    saveUninitialized: true, // Allow saving empty sessions (better for auth flows)
+    rolling: true, // Reset cookie expiration on each request
     cookie: cookieSettings
   }));
 
