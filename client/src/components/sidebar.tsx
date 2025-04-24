@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useLocation } from "wouter";
 import { AuthContext } from "@/hooks/use-auth";
+import { queryClient } from "@/lib/queryClient";
 import { useNotifications } from "@/hooks/use-notifications"; 
 import { Button } from "@/components/ui/button";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
@@ -105,9 +106,38 @@ export function Sidebar() {
     return location === path;
   };
   
+  // Fixed logout handler with improved error handling
   const handleLogout = () => {
+    // Check if already logging out
+    if (logoutMutation?.isPending) {
+      console.log("Logout already in progress, ignoring duplicate request");
+      return;
+    }
+    
+    // Check if logged in first
+    if (!user) {
+      console.log("User already logged out, no need to logout again");
+      navigate("/auth");
+      return;
+    }
+    
     if (logoutMutation) {
-      logoutMutation.mutate();
+      console.log("Executing logout");
+      
+      // Set UI state immediately for better feedback
+      queryClient.setQueryData(["/api/user"], null);
+      
+      // Clear session storage
+      sessionStorage.removeItem('auth_login_success');
+      sessionStorage.removeItem('auth_logout_requested');
+      
+      // Do the actual logout API call
+      logoutMutation.mutate(undefined, {
+        onSettled: () => {
+          // Force navigation to auth page
+          window.location.href = "/auth";
+        }
+      });
     }
   };
   

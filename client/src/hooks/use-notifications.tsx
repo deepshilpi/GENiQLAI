@@ -1,8 +1,9 @@
+// Fix for authentication-related issues in the notifications system
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useWebSocket } from './use-websocket';
-import { WebSocketMessage } from '@/lib/websocket-service';
+import { WebSocketMessage, WebSocketStatus } from '@/lib/websocket-service';
 
 // Type definitions for notifications
 export interface Notification {
@@ -36,12 +37,12 @@ export function useNotifications(): UseNotificationsReturn {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Fetch notifications function
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (): Promise<Notification[]> => {
     if (!user || !user.id) {
       setNotifications([]);
       setUnreadCount(0);
       setIsLoading(false);
-      return;
+      return [];
     }
     
     try {
@@ -58,29 +59,38 @@ export function useNotifications(): UseNotificationsReturn {
         try {
           const data = await response.json();
           if (data?.notifications) {
-            setNotifications(data.notifications || []);
+            const notificationsList = data.notifications || [];
+            setNotifications(notificationsList);
             setUnreadCount(data.unreadCount || 0);
+            setIsLoading(false);
+            return notificationsList;
           } else {
             // Return to empty state if no proper response
             setNotifications([]);
             setUnreadCount(0);
+            setIsLoading(false);
+            return [];
           }
         } catch (jsonError) {
           console.log('Non-JSON response received from notifications API');
           setNotifications([]);
           setUnreadCount(0);
+          setIsLoading(false);
+          return [];
         }
       } else {
         console.log('Non-JSON response received from notifications API');
         setNotifications([]);
         setUnreadCount(0);
+        setIsLoading(false);
+        return [];
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
       setNotifications([]);
       setUnreadCount(0);
-    } finally {
       setIsLoading(false);
+      return [];
     }
   }, [user]);
   
