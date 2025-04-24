@@ -31,124 +31,123 @@ export async function analyzeStartupIdea(
     // Build a structured prompt based on the user's requirements
     const systemPrompt = `You are an expert startup analyst specializing in the Indian market. Analyze the startup idea comprehensively for India.
     
-    IMPORTANT: Provide a detailed, organized, and accurate analysis following the exact structure below. Focus on factual data, cross-reference web sources when possible, and leverage your knowledge base for accuracy.
+    IMPORTANT: Provide a detailed, organized, and accurate analysis following the exact structure below. Focus on factual data, cross-reference web sources when possible, and leverage your knowledge base for accuracy. Your goal is to produce high-quality, detailed, and organized output specifically for the Indian market.
 
     Return a JSON object with these eight distinct blocks - focus on QUALITY and ACCURACY:
     
     1. successRate: {
-       percentage: number (0-100),
-       goodPoints: [array of 4-5 detailed points with specific market data and industry insights],
-       badPoints: [array of 4-5 detailed points with specific market challenges and risks],
-       message: string (detailed assessment with clear rationale and market context)
+       percentage: number (0-100, realistic success probability with justification),
+       goodPoints: [array of 3-5 key factors influencing success with specific industry trends in India],
+       badPoints: [array of 3-5 challenges or risks with Indian market-specific details],
+       message: string (concise assessment with clear rationale, 100-200 words)
     }
     
     2. competitors: {
        competitors: [
          {
-           name: string (actual company name),
-           marketShare: number (realistic market percentage),
+           name: string (actual company name in India),
+           marketShare: number (realistic market percentage in Indian market),
            websiteUrl: string (actual URL),
-           uniqueStrength: string (detailed competitive advantage),
-           weaknesses: string (areas where your idea could outperform them)
+           uniqueStrength: string (competitive advantage in Indian context)
          },
-         ... include 4-5 direct and indirect competitors
+         ... include 3-5 major players in the Indian market
        ],
-       message: string (detailed competitive landscape analysis with industry dynamics)
+       message: string (highlight gaps or opportunities in the Indian market)
     }
     
     3. targetAudienceFit: {
        segments: [
          {
-           name: string (specific demographic/psychographic segment),
-           score: number (0-100),
-           behaviorsAndPreferences: [array of 3-4 detailed consumer behaviors],
-           marketingApproach: string (specific channels and messaging strategy)
+           name: string (Indian demographic segment with clear profile),
+           score: number (0-100 fit score),
+           percentage: number (% of target market),
+           description: string (detailed insights into this Indian segment),
+           behaviorsAndPreferences: [array of 2-3 key behaviors specific to India],
+           marketingApproach: string (India-specific channels and messaging)
          },
-         ... include 3-4 important audience segments
+         ... include 3-4 distinct Indian market segments
        ],
-       message: string (comprehensive audience analysis with priorities and GTM strategy)
+       message: string (analysis of cultural/behavioral factors in Indian market)
     }
     
     4. marketSize: {
        segments: [
          {
-           name: string (e.g., specific market segment like "Digital Mental Health Solutions", "Corporate Wellness Programs"),
-           percentage: number (what percentage of total market this segment represents),
-           value: number (actual value in millions or billions, use realistic figures for ${country}),
-           growth: number (annual growth percentage)
+           name: string (sector or segment specific to Indian market),
+           percentage: number (segment's percentage of total market in India),
+           value: number (segment value in INR millions/billions with proper formatting),
+           growth: number (Indian growth rate for this segment, not global)
          },
-         ... include 3-4 relevant market segments
+         ... include 3-4 relevant Indian market segments
        ],
-       totalSize: number (total market size in millions or billions, use realistic TAM/SAM metrics),
-       currency: string (3-letter currency code for ${country}, e.g., "USD", "INR", "GBP"),
-       cagr: number (market CAGR percentage with actual industry research),
+       totalSize: number (total addressable market in INR with proper magnitude),
+       currency: "INR",
+       cagr: number (compound annual growth rate in Indian market),
        countryInsights: {
-         currency: string (local currency symbol or name),
-         marketGrowthRate: number (country-specific annual growth rate)
+         currency: "₹", 
+         marketGrowthRate: number (India-specific annual growth percentage)
        },
-       message: string (detailed market analysis with growth drivers and trends)
+       message: string (analysis with India-specific economic and regulatory factors)
     }
     
     5. businessModelStrength: {
-       overall: number (0-100),
+       overall: number (0-100 viability score in Indian context),
        components: [
          {
-           name: string (revenue stream or business model component),
-           score: number (0-100),
-           description: string (detailed component analysis),
-           keyMetrics: [array of 2-3 important KPIs to track],
-           improvement: string (specific way to strengthen this component)
+           name: string (revenue stream adapted for Indian market),
+           score: number (0-100 component viability),
+           description: string (detailed analysis with India-specific pricing factors),
+           keyMetrics: [array of 2-3 key performance indicators for Indian market]
          },
-         ... include 4-5 business model components
+         ... include 3-5 India-adapted business model components
        ],
-       message: string (comprehensive business model evaluation with strategic recommendations)
+       message: string (business model evaluation with localization recommendations)
     }
     
     6. fundingRequired: {
-       total: number (realistic funding requirements),
-       currency: string (3-letter code for ${country}),
+       total: number (realistic funding requirement in INR),
+       currency: "INR",
        breakdown: [
          {
-           category: string (e.g., product development, marketing),
-           amount: number (specific amount needed),
-           percentage: number (of total funding),
-           keyExpenses: [array of specific costs within this category],
-           timeline: string (when these funds will be deployed)
+           category: string (specific expense category relevant to India),
+           amount: number (amount in INR millions),
+           percentage: number (of total budget),
+           description: string (India-specific cost considerations),
+           keyExpenses: [array of 2-3 specific line items in Indian context]
          },
-         ... include 4-5 funding categories
+         ... include 4-5 realistic expense categories
        ],
        fundingStages: [
          {
-           stage: string (funding round name),
-           amount: number (funding needed at this stage),
-           timeline: string (when this funding will be needed),
-           milestones: [array of achievements expected by this stage]
+           stage: string (standard Indian funding stage),
+           amount: number (amount in INR),
+           timeline: string (realistic timeframe for Indian market),
+           milestones: [array of 2-3 concrete deliverables]
          },
          ... include 2-3 funding stages
        ],
-       message: string (strategic funding approach with investor appeal points)
+       message: string (funding strategy aligned with Indian investment landscape)
     }
     
     7. swotAnalysis: {
-       strengths: [array of 5-6 specific internal advantages with competitive implications],
-       weaknesses: [array of 5-6 specific internal challenges with mitigation approaches],
-       opportunities: [array of 5-6 specific external favorable factors with exploitation strategies],
-       threats: [array of 5-6 specific external challenges with defensive strategies],
-       priorityActions: [array of 3-4 most critical next steps based on SWOT]
+       strengths: [array of 4-6 internal advantages specifically for Indian market],
+       weaknesses: [array of 4-6 internal challenges in Indian context],
+       opportunities: [array of 4-6 favorable Indian market factors or trends],
+       threats: [array of 4-6 India-specific risks or competitive threats],
+       priorityActions: [array of 3-4 India-focused strategic priorities]
     }
     
     8. previousFailedExecutions: {
        failures: [
          {
-           name: string (actual company name),
+           name: string (actual failed Indian company name in this space),
            year: string (year of failure),
-           reason: string (detailed failure analysis),
-           lessonLearned: string (specific actionable learning),
-           avoidanceStrategy: string (how your idea will avoid this pitfall)
+           reason: string (specific failure reason in Indian context),
+           lessonLearned: string (key learnings for Indian market)
          },
-         ... include 3-4 relevant failed startups in this space
+         ... include 2-3 relevant failed Indian startups in this domain
        ],
-       message: string (synthesized lessons and implementation strategy)
+       message: string (India-specific lessons for avoiding similar failures)
     }
     
     ${includeProBlocks ? `
@@ -257,9 +256,9 @@ export async function analyzeStartupIdea(
         if (!analysisContent.successRate) {
           analysisContent.successRate = {
             percentage: 50,
-            goodPoints: ["Analysis incomplete - please try again"],
-            badPoints: ["Server encountered an issue processing your request"],
-            message: "Analysis could not be fully completed"
+            goodPoints: ["The Indian market shows potential for this solution", "Growing digital adoption in India supports this idea"],
+            badPoints: ["More India-specific details would help with analysis", "Consider Indian regulatory factors"],
+            message: "Your idea shows promise for the Indian market, but we need more specific details to fully analyze its potential."
           };
         }
         
