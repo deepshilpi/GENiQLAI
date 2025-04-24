@@ -49,11 +49,17 @@ export async function analyzeStartupIdeaStepByStep(
       },
       marketSize: {
         segments: [],
+        totalSize: 0,
+        currency: country === "Global" ? "USD" : getCountryCurrency(country),
         message: ""
       },
       businessModelStrength: {
         overall: 0,
-        components: [],
+        components: [{
+          name: "Initial Component",
+          score: 0,
+          description: "Placeholder component"
+        }],
         message: ""
       },
       fundingRequired: {
@@ -135,7 +141,7 @@ export async function analyzeStartupIdeaStepByStep(
           console.error(`All JSON parsing methods failed for ${stepName}`);
           throw new Error(`Failed to parse ${stepName} response`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error in ${stepName} step:`, error);
         throw new Error(`${stepName} analysis failed: ${error.message}`);
       }
@@ -159,7 +165,9 @@ export async function analyzeStartupIdeaStepByStep(
       
       const successRateResult = await executeAnalysisStep("Success Rate", successRateSystemPrompt, successRatePrompt);
       analysisResults.successRate = successRateResult;
-      analysisResults.meta.includedBlocks.push('successRate');
+      if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+        analysisResults.meta.includedBlocks.push('successRate');
+      }
       console.log("Completed success rate analysis");
     } catch (error) {
       console.error("Success rate analysis failed, using default:", error);
@@ -211,7 +219,9 @@ export async function analyzeStartupIdeaStepByStep(
       
       if (marketResult.competitors) {
         analysisResults.competitors = marketResult.competitors;
-        analysisResults.meta.includedBlocks.push('competitors');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('competitors');
+        }
       }
       
       if (marketResult.marketSize) {
@@ -223,7 +233,9 @@ export async function analyzeStartupIdeaStepByStep(
             currency: segment.currency || (country === "Global" ? "USD" : getCountryCurrency(country))
           }));
         }
-        analysisResults.meta.includedBlocks.push('marketSize');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('marketSize');
+        }
       }
       
       console.log("Completed market analysis");
@@ -277,12 +289,16 @@ export async function analyzeStartupIdeaStepByStep(
       
       if (businessResult.businessModelStrength) {
         analysisResults.businessModelStrength = businessResult.businessModelStrength;
-        analysisResults.meta.includedBlocks.push('businessModelStrength');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('businessModelStrength');
+        }
       }
       
       if (businessResult.targetAudienceFit) {
         analysisResults.targetAudienceFit = businessResult.targetAudienceFit;
-        analysisResults.meta.includedBlocks.push('targetAudienceFit');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('targetAudienceFit');
+        }
       }
       
       console.log("Completed business model and target audience analysis");
@@ -341,7 +357,9 @@ export async function analyzeStartupIdeaStepByStep(
       
       if (strategicResult.swotAnalysis) {
         analysisResults.swotAnalysis = strategicResult.swotAnalysis;
-        analysisResults.meta.includedBlocks.push('swotAnalysis');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('swotAnalysis');
+        }
       }
       
       if (strategicResult.fundingRequired) {
@@ -350,7 +368,9 @@ export async function analyzeStartupIdeaStepByStep(
         if (!analysisResults.fundingRequired.currency) {
           analysisResults.fundingRequired.currency = country === "Global" ? "USD" : getCountryCurrency(country);
         }
-        analysisResults.meta.includedBlocks.push('fundingRequired');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('fundingRequired');
+        }
       }
       
       console.log("Completed SWOT and funding analysis");
@@ -398,12 +418,16 @@ export async function analyzeStartupIdeaStepByStep(
       
       if (learningResult.previousFailedExecutions) {
         analysisResults.previousFailedExecutions = learningResult.previousFailedExecutions;
-        analysisResults.meta.includedBlocks.push('previousFailedExecutions');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('previousFailedExecutions');
+        }
       }
       
       if (includeProBlocks && learningResult.relatedIdeas) {
         analysisResults.relatedIdeas = learningResult.relatedIdeas;
-        analysisResults.meta.includedBlocks.push('relatedIdeas');
+        if (analysisResults.meta && analysisResults.meta.includedBlocks) {
+          analysisResults.meta.includedBlocks.push('relatedIdeas');
+        }
       }
       
       console.log("Completed failure analysis and related ideas");
