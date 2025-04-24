@@ -312,7 +312,7 @@ export const messageReadsRelations = relations(messageReads, ({ one }) => ({
 }));
 
 export type AnalysisResults = {
-  // Initial 8 interactive blocks
+  // Enhanced 8 interactive blocks
   successRate: {
     percentage: number;
     goodPoints: string[];
@@ -324,6 +324,7 @@ export type AnalysisResults = {
       name: string;
       marketShare: number;
       websiteUrl?: string;
+      uniqueStrength?: string;
     }>;
     message: string;
   };
@@ -331,6 +332,7 @@ export type AnalysisResults = {
     segments: Array<{
       name: string;
       score: number; // 0-100 for radar chart
+      behaviorsAndPreferences?: string[];
     }>;
     message: string;
   };
@@ -338,9 +340,10 @@ export type AnalysisResults = {
     segments: Array<{
       name: string; // local, national, global
       percentage: number;
-      value?: number; // optional monetary value
+      value?: number; // monetary value in millions
     }>;
     totalSize?: number;
+    cagr?: number; // compound annual growth rate
     message: string;
   };
   businessModelStrength: {
@@ -349,15 +352,23 @@ export type AnalysisResults = {
       name: string; // e.g., "Revenue Streams", "Cost Structure"
       score: number; // 0-100
       description: string;
+      keyMetrics?: string[];
     }>;
     message: string;
   };
   fundingRequired: {
     total: number;
+    currency?: string; // 3-letter currency code (USD, INR, etc.)
     breakdown: Array<{
       category: string;
       amount: number;
       percentage: number;
+      keyExpenses?: string[];
+    }>;
+    timeline?: Array<{
+      stage: string;
+      amount: number;
+      milestone: string;
     }>;
     message: string;
   };
@@ -366,12 +377,14 @@ export type AnalysisResults = {
     weaknesses: string[];
     opportunities: string[];
     threats: string[];
+    priorityAction?: string;
   };
   previousFailedExecutions: {
     failures: Array<{
       name: string;
       year: string;
       reason: string;
+      lessonLearned?: string;
     }>;
     message: string;
   };
@@ -488,12 +501,20 @@ export type AnalysisResults = {
       development: number;
       marketing: number;
       operations: number;
+      compliance?: number;
+      contingency?: number;
     };
     roadmap: Array<{
       step: string;
+      description?: string;
       timeframe: string;
       cost: number;
+      keyDeliverables?: string[];
     }>;
+    currency?: string;
+    timeline?: string;
+    keyRisks?: string[];
+    successMetrics?: string[];
   };
   findingInvestors?: {
     investors: Array<{

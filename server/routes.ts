@@ -418,8 +418,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log request data
       console.log("Execution plan request:", { startupIdea, initialBudget, userCountry });
       
-      // First, get the basic execution plan (used mainly for the budget breakdown)
-      const executionPlan = await generateExecutionPlan(startupIdea, initialBudget);
+      // First, get the enhanced execution plan with country-specific data
+      const executionPlan = await generateExecutionPlan(startupIdea, initialBudget, userCountry);
       console.log("Execution plan response:", JSON.stringify(executionPlan).substring(0, 100) + "...");
       
       // Then, get the comprehensive budget analysis
