@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { CommunityPost } from "@/components/community-post";
+import { XStylePost } from "@/components/x-style-post";
 import { PostForm } from "@/components/post-form";
 import { AuthContext } from "@/hooks/use-auth";
 import { useAuthDialog } from "@/hooks/use-auth-dialog";
@@ -352,79 +352,24 @@ export default function CommunityPage() {
                     ))
                   ) : (filteredPosts || posts)?.length ? (
                     (filteredPosts || posts).map((post: any) => (
-                      <div key={post.id} className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg overflow-hidden hover:border-primary/50 hover:shadow-md transition-all duration-200 relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 pointer-events-none opacity-50"></div>
-                        <div className="flex flex-col sm:flex-row relative z-10">
-                          {/* Vote Column - Horizontal on Mobile, Vertical on Desktop */}
-                          <div className="sm:w-16 bg-accent/30 flex flex-row sm:flex-col items-center justify-center py-2 sm:py-4 px-4 sm:px-0 border-b sm:border-b-0 sm:border-r border-border">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 rounded-full"
-                              onClick={() => handleVote(post.id, "pump")}
-                              aria-label="Vote up"
-                            >
-                              <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'pump' ? 'text-green-500' : 'text-muted-foreground'}`} />
-                            </Button>
-                            <span className="mx-2 sm:mx-0 sm:my-1 font-medium text-sm">
-                              {post.pumpCount && post.dumpCount
-                                ? post.pumpCount - post.dumpCount
-                                : 0}
-                            </span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 rotate-180 rounded-full"
-                              onClick={() => handleVote(post.id, "dump")}
-                              aria-label="Vote down"
-                            >
-                              <TrendingUp className={`h-4 w-4 ${post.currentUserVote === 'dump' ? 'text-red-500' : 'text-muted-foreground'}`} />
-                            </Button>
-                          </div>
-                          
-                          {/* Content Column - Enhanced for Mobile */}
-                          <div className="flex-1 p-3 sm:p-4">
-                            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-2">
-                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                                {post.author?.username?.charAt(0).toUpperCase() || post.authorId?.toString().charAt(0)}
-                              </div>
-                              <span className="truncate max-w-[120px] sm:max-w-none">
-                                Posted by {post.author?.username || "Anonymous"}
-                              </span>
-                              <span className="hidden xs:inline">•</span>
-                              <span className="text-xs">{new Date(post.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            
-                            <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{post.title}</h3>
-                            <p className="text-muted-foreground text-sm line-clamp-2 sm:line-clamp-3 mb-3">{post.description}</p>
-                            
-                            {post.imageUrl && (
-                              <div className="mb-3 rounded-md overflow-hidden bg-accent/30">
-                                <img 
-                                  src={post.imageUrl} 
-                                  alt={post.title}
-                                  loading="lazy"
-                                  className="w-full h-auto max-h-40 sm:max-h-56 object-cover transition-transform hover:scale-105 duration-300"
-                                />
-                              </div>
-                            )}
-                            
-                            {post.tags?.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                                {post.tags.map((tag: string, index: number) => (
-                                  <div 
-                                    key={index} 
-                                    className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs hover:bg-primary/20 transition-colors cursor-pointer"
-                                    onClick={() => setSearchQuery(tag)}
-                                  >
-                                    #{tag}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <XStylePost 
+                        key={post.id}
+                        post={post}
+                        onVote={handleVote}
+                        onReact={(postId, reactionType) => {
+                          toast({
+                            title: `${reactionType} reaction added`,
+                            description: "Your reaction has been added to the post"
+                          });
+                        }}
+                        onComment={(postId, comment) => {
+                          toast({
+                            title: "Comment added",
+                            description: "Your comment has been added to the post"
+                          });
+                        }}
+                        currentUser={user}
+                      />
                     ))
                   ) : (
                     <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border rounded-lg p-8 text-center relative">
