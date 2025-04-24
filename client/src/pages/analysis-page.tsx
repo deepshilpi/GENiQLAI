@@ -411,19 +411,60 @@ export default function AnalysisPage() {
       
       // Add timeout handling with AbortController
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout (increased from 2 min)
       
-      const response = await fetch("/api/analyze", {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          startupIdea: values.idea,
-          country: values.country || "Global",
-        }),
-        signal: controller.signal
-      });
+      // Implement retry mechanism for network failures
+      let maxRetries = 2;
+      let retries = 0;
+      let response = null;
+      
+      while (retries <= maxRetries) {
+        try {
+          response = await fetch("/api/analyze", {
+            method: "POST", 
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              startupIdea: values.idea,
+              country: values.country || "Global",
+            }),
+            signal: controller.signal
+          });
+          
+          // If we got a successful response or a non-retriable error, break the loop
+          if (response.status < 500 || response.status === 504) {
+            break;
+          }
+          
+          // If we get a 502/500 error, retry after a short delay
+          if (response.status === 502 || response.status === 500) {
+            retries++;
+            if (retries <= maxRetries) {
+              console.log(`Retrying request after 502/500 error (attempt ${retries} of ${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 2000 * retries)); // Exponential backoff
+              continue;
+            }
+          }
+          
+          break;
+        } catch (fetchError: unknown) {
+          // If the error is not a timeout, retry
+          if (fetchError instanceof Error && fetchError.name !== 'AbortError') {
+            retries++;
+            if (retries <= maxRetries) {
+              console.log(`Retrying after fetch error: ${fetchError.message} (attempt ${retries} of ${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 2000 * retries));
+              continue;
+            }
+          }
+          throw fetchError;
+        }
+      }
+      
+      if (!response) {
+        throw new Error("Failed to connect to the analysis server. Please try again later.");
+      }
       
       // Clear timeout since we got a response
       clearTimeout(timeoutId);
@@ -460,14 +501,57 @@ export default function AnalysisPage() {
         throw new Error(errorMessage);
       }
       
-      // Parse the response data
+      // Parse the response data with robust error handling
       let data;
       try {
-        data = await response.json();
+        // Try standard JSON parsing first
+        const responseText = await response.text();
+        
+        // Log the first part of the response for debugging
+        console.log("Response text (first 100 chars):", responseText.substring(0, 100) + "...");
+        
+        try {
+          // Attempt direct JSON parsing
+          data = JSON.parse(responseText);
+        } catch (directParseError) {
+          console.error("Direct JSON parse error:", directParseError);
+          
+          // Fallback 1: Try to extract JSON from the response using regex
+          const jsonMatch = responseText.match(/(\{[\s\S]*\})/);
+          if (jsonMatch && jsonMatch[1]) {
+            try {
+              console.log("Attempting to parse extracted JSON...");
+              data = JSON.parse(jsonMatch[1]);
+            } catch (extractParseError) {
+              console.error("Extract JSON parse error:", extractParseError);
+              
+              // Fallback 2: Look for JSON in code blocks (in case the API returned markdown)
+              const codeBlockMatch = responseText.match(/```(?:json)?([\s\S]*?)```/);
+              if (codeBlockMatch && codeBlockMatch[1]) {
+                try {
+                  console.log("Attempting to parse JSON from code block...");
+                  data = JSON.parse(codeBlockMatch[1].trim());
+                } catch (codeBlockParseError) {
+                  console.error("Code block JSON parse error:", codeBlockParseError);
+                  throw new Error("Unable to parse response data. Please try again with a simpler idea description.");
+                }
+              } else {
+                throw new Error("Received malformed data from server. Please try a shorter or simpler description.");
+              }
+            }
+          } else {
+            throw new Error("Received invalid response format. Please try again with a different description.");
+          }
+        }
+        
+        if (!data) {
+          throw new Error("Empty response received from server. Please try again.");
+        }
+        
         console.log("Analysis response data keys:", Object.keys(data));
       } catch (parseError) {
-        console.error("Error parsing response JSON:", parseError);
-        throw new Error("Received invalid data from server. Please try again.");
+        console.error("Error handling response data:", parseError);
+        throw new Error(parseError instanceof Error ? parseError.message : "Failed to process analysis results. Please try again.");
       }
       
       // Set remaining free analyses for anonymous users
