@@ -702,8 +702,58 @@ export default function AnalysisPage() {
             console.warn("Missing riskAnalysis data");
           }
           
-          // Other sections...
-          // (Add similar logic for other required sections)
+          // Go To Market Strategy
+          if (processedData.goToMarketStrategy) {
+            processedData.budgetAnalysis.goToMarketStrategy = processedData.goToMarketStrategy;
+          } else if (planData.goToMarketStrategy) {
+            processedData.budgetAnalysis.goToMarketStrategy = planData.goToMarketStrategy;
+          } else {
+            processedData.budgetAnalysis.goToMarketStrategy = {
+              timeline: [],
+              message: "Go to market strategy not available. Try again later."
+            };
+            console.warn("Missing goToMarketStrategy data");
+          }
+          
+          // Long Term Vision
+          if (processedData.longTermVision) {
+            processedData.budgetAnalysis.longTermVision = processedData.longTermVision;
+          } else if (planData.longTermVision) {
+            processedData.budgetAnalysis.longTermVision = planData.longTermVision;
+          } else {
+            processedData.budgetAnalysis.longTermVision = {
+              milestones: [],
+              message: "Long term vision not available. Try again later."
+            };
+            console.warn("Missing longTermVision data");
+          }
+          
+          // Team Execution
+          if (processedData.teamExecution) {
+            processedData.budgetAnalysis.teamExecution = processedData.teamExecution;
+          } else if (planData.teamExecution) {
+            processedData.budgetAnalysis.teamExecution = planData.teamExecution;
+          } else {
+            processedData.budgetAnalysis.teamExecution = {
+              requiredRoles: [],
+              hiringTimeline: "Not available",
+              message: "Team execution plan not available. Try again later."
+            };
+            console.warn("Missing teamExecution data");
+          }
+          
+          // Funding and Investors
+          if (processedData.fundingInvestors) {
+            processedData.budgetAnalysis.fundingInvestors = processedData.fundingInvestors;
+          } else if (planData.fundingInvestors) {
+            processedData.budgetAnalysis.fundingInvestors = planData.fundingInvestors;
+          } else {
+            processedData.budgetAnalysis.fundingInvestors = {
+              investors: [],
+              message: "Funding and investor recommendations not available. Try again later."
+            };
+            console.warn("Missing fundingInvestors data");
+          }
         }
       } else {
         console.warn("Missing execution plan data in the response");
@@ -718,8 +768,24 @@ export default function AnalysisPage() {
             overallRisk: 50,
             risks: [],
             message: "Risk analysis not available. Try again later."
+          },
+          goToMarketStrategy: {
+            timeline: [],
+            message: "Go to market strategy not available. Try again later."
+          },
+          longTermVision: {
+            milestones: [],
+            message: "Long term vision not available. Try again later."
+          },
+          teamExecution: {
+            requiredRoles: [],
+            hiringTimeline: "Not available",
+            message: "Team execution plan not available. Try again later."
+          },
+          fundingInvestors: {
+            investors: [],
+            message: "Funding and investor recommendations not available. Try again later."
           }
-          // Add other required sections with minimal data
         };
       }
       

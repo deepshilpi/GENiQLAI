@@ -410,16 +410,16 @@ export async function generateBudgetAnalysis(
       throw new Error("OpenAI API key is not configured");
     }
     
-    console.log("Sending request to OpenAI API for budget analysis...");
+    console.log(`Generating comprehensive execution plan for budget of $${initialBudget} in ${country}...`);
     
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o", // the newest OpenAI model
       messages: [
         {
           role: "system",
           content: `You are a senior startup execution planning and financial analysis expert with experience in venture capital and startup financing. Create a DETAILED, INDUSTRY-SPECIFIC, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of $${initialBudget}. Use realistic market figures and industry benchmarks applicable to ${country}.
           
-          Return a JSON object with exactly the following structure:
+          Return a comprehensive JSON object with exactly the following structure:
           
           {
             "initialBudget": ${initialBudget},
@@ -433,21 +433,21 @@ export async function generateBudgetAnalysis(
                   "potentialReturns": number (estimated ROI),
                   "feasibilityScore": number from 0-100
                 },
-                ... 2-3 scaling points only
+                ... 3-4 scaling points
               ],
-              "message": string (short explanation, max 30 words)
+              "message": string (concrete and actionable assessment)
             },
             
             "riskAnalysis": {
               "overallRisk": number from 0-100 (higher means more risky),
               "risks": [
                 {
-                  "category": string (risk category),
+                  "category": string (specific risk category),
                   "likelihood": number from 0-100,
                   "impact": number from 0-100,
-                  "mitigationStrategy": string (brief explanation, max 15 words)
+                  "mitigationStrategy": string (specific, actionable strategy)
                 },
-                ... 3 different risks only
+                ... 4-5 different risks
               ],
               "message": string (short explanation, max 25 words)
             },
