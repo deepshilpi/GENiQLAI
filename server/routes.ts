@@ -167,20 +167,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine plan type (free for anonymous users)
       const planType = req.isAuthenticated() ? req.user.planType : 'free';
       
-      // Add shorter timeout to prevent long-running requests
+      // Add longer timeout to prevent long-running requests but give enough time for quality analysis
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Request timeout")), 60000); // 60 seconds timeout for detailed analysis
+        setTimeout(() => reject(new Error("Analysis request timeout after 90 seconds")), 90000); // 90 seconds timeout for detailed analysis
       });
       
-      // Get analysis results
+      // Get analysis results using a more robust, multi-step approach
       let analysisResults;
       try {
+        console.log("Using multi-step analysis workflow for better reliability");
+        
+        // Step 1: Get core analysis
+        console.log("Step 1: Requesting core analysis data");
         analysisResults = await Promise.race([
           analyzeStartupIdea(startupIdea, country, planType),
           timeoutPromise
         ]);
         
-        console.log("Analysis completed successfully");
+        console.log("Core analysis completed successfully");
+        
+        // Step 2: Extend with execution plan (if we have core analysis)
+        if (analysisResults) {
+          try {
+            console.log("Step 2: Enhancing analysis with execution planning data");
+            const initialBudget = analysisResults.fundingRequired?.total || 500000;
+            
+            // Use a separate promise race for the execution plan with a shorter timeout
+            const planningPromise = new Promise((_, planReject) => {
+              setTimeout(() => planReject(new Error("Planning step timeout")), 45000);
+            });
+            
+            const planToExecute = await Promise.race([
+              generateExecutionPlan(startupIdea, initialBudget, country),
+              planningPromise
+            ]);
+            
+            // Add planning data if available, but don't fail if this step fails
+            if (planToExecute) {
+              console.log("Successfully added execution planning data");
+              analysisResults.planToExecute = planToExecute;
+            }
+          } catch (planningError) {
+            // Don't fail the whole analysis if just the planning step fails
+            console.warn("Planning enhancement failed, continuing with core analysis:", planningError.message);
+          }
+        }
+        
+        console.log("Multi-step analysis workflow completed");
       } catch (innerError) {
         console.error("Error in OpenAI analysis:", innerError);
         throw innerError;
