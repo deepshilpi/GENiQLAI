@@ -947,8 +947,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Update an existing saved idea
+  // Update an existing saved idea (PUT method)
   app.put("/api/saved-ideas/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    
+    try {
+      const existingSavedIdea = await storage.getSavedIdeaById(id);
+      
+      if (!existingSavedIdea) {
+        return res.status(404).json({ message: "Saved idea not found" });
+      }
+      
+      // Check if the saved idea belongs to the authenticated user
+      if (existingSavedIdea.userId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Only update fields that are provided
+      const updates: Partial<InsertSavedIdea> = {};
+      
+      if (req.body.title !== undefined) updates.title = req.body.title;
+      if (req.body.description !== undefined) updates.description = req.body.description;
+      if (req.body.ideaType !== undefined) updates.ideaType = req.body.ideaType;
+      if (req.body.notes !== undefined) updates.notes = req.body.notes;
+      if (req.body.resultsSnapshot !== undefined) updates.resultsSnapshot = req.body.resultsSnapshot;
+      
+      const updatedSavedIdea = await storage.updateSavedIdea(id, updates);
+      return res.status(200).json(updatedSavedIdea);
+    } catch (error) {
+      console.error("Error updating saved idea:", error);
+      return res.status(500).json({ message: "Failed to update saved idea" });
+    }
+  });
+  
+  // Update an existing saved idea (PATCH method - partial update)
+  app.patch("/api/saved-ideas/:id", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }

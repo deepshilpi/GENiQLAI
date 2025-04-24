@@ -20,7 +20,8 @@ import {
   Menu,
   Bell,
   Mail,
-  BookmarkIcon
+  BookmarkIcon,
+  Bookmark
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -96,7 +97,9 @@ export function Sidebar() {
   };
   
   const handleLogout = () => {
-    logoutMutation.mutate();
+    if (logoutMutation) {
+      logoutMutation.mutate();
+    }
   };
   
   // Add backdrop overlay for mobile
