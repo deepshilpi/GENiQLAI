@@ -129,18 +129,18 @@ export function PostForm({ onComplete }: PostFormProps) {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Title</FormLabel>
+              <FormLabel className="text-white font-medium">Title</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Enter a catchy title for your startup idea" 
-                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 focus-visible:bg-vision-purple-100/10"
+                  className="bg-vision-purple-100/20 border-vision-purple-200/30 text-white placeholder:text-white/60 focus-visible:bg-vision-purple-100/30"
                   {...field} 
                 />
               </FormControl>
-              <FormDescription className="text-vision-purple-200/70">
+              <FormDescription className="text-white/70">
                 This will be the main headline for your post.
               </FormDescription>
-              <FormMessage />
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />
@@ -150,19 +150,19 @@ export function PostForm({ onComplete }: PostFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Description</FormLabel>
+              <FormLabel className="text-white font-medium">Description</FormLabel>
               <FormControl>
                 <Textarea 
                   placeholder="Describe your startup idea in detail..." 
                   rows={6}
-                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 resize-none focus-visible:bg-vision-purple-100/10"
+                  className="bg-vision-purple-100/20 border-vision-purple-200/30 text-white placeholder:text-white/60 resize-none focus-visible:bg-vision-purple-100/30"
                   {...field} 
                 />
               </FormControl>
-              <FormDescription className="text-vision-purple-200/70">
+              <FormDescription className="text-white/70">
                 Explain your idea, target market, and why it's unique.
               </FormDescription>
-              <FormMessage />
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />
@@ -172,7 +172,7 @@ export function PostForm({ onComplete }: PostFormProps) {
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white flex items-center gap-2">
+              <FormLabel className="text-white font-medium flex items-center gap-2">
                 <Hash className="h-4 w-4 text-vision-purple-400" /> Tags
               </FormLabel>
               <div className="flex mb-2">
@@ -187,7 +187,7 @@ export function PostForm({ onComplete }: PostFormProps) {
                         handleAddTag();
                       }
                     }}
-                    className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white/90 focus-visible:bg-vision-purple-100/10"
+                    className="bg-vision-purple-100/20 border-vision-purple-200/30 text-white placeholder:text-white/60 focus-visible:bg-vision-purple-100/30"
                   />
                 </FormControl>
                 <Button 
@@ -206,7 +206,7 @@ export function PostForm({ onComplete }: PostFormProps) {
                     <button 
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="ml-2 text-vision-purple-200/70 hover:text-white transition-colors"
+                      className="ml-2 text-white/80 hover:text-white transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -214,10 +214,10 @@ export function PostForm({ onComplete }: PostFormProps) {
                 ))}
               </div>
               
-              <FormDescription className="text-vision-purple-200/70">
+              <FormDescription className="text-white/70">
                 Add up to 5 tags to categorize your startup idea.
               </FormDescription>
-              <FormMessage />
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />

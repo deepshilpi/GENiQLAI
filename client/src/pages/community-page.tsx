@@ -224,7 +224,7 @@ export default function CommunityPage() {
                 <DialogDescription>
                   Get feedback from the community and AI analysis to validate your concept.
                 </DialogDescription>
-                <PostForm onSubmit={(data) => createPostMutation.mutate(data)} />
+                <PostForm onComplete={() => setShowPostForm(false)} />
               </DialogContent>
             </Dialog>
           </div>

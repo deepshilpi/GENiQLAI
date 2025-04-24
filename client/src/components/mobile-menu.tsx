@@ -50,13 +50,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         side="left" 
         className="p-0 w-[270px] bg-vision-dark/95 backdrop-blur-md border-r border-vision-purple-200/10 text-white"
       >
-        <SheetHeader className="p-4 border-b border-vision-purple-200/10">
+        <div className="p-4 border-b border-vision-purple-200/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 flex items-center justify-center">
                 <img src="/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
               </div>
-              <SheetTitle className="font-heading font-bold text-lg text-white">GENIQL</SheetTitle>
+              <div className="font-heading font-bold text-lg text-white">GENIQL</div>
             </div>
             <SheetClose asChild>
               <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-white/70 hover:text-white hover:bg-vision-purple-100/10">
@@ -73,11 +73,11 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div>
                 <p className="text-sm font-medium text-white">{user?.username || 'User'}</p>
-                <p className="text-xs text-white/50">{user?.planType || "Free"} Plan</p>
+                <p className="text-xs text-white/50">Free Plan</p>
               </div>
             </div>
           )}
-        </SheetHeader>
+        </div>
         
         <div className="py-4">
           <div className="px-3 pb-2">
