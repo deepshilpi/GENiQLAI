@@ -58,7 +58,6 @@ import { GoToMarketStrategy } from "@/components/analysis/go-to-market-strategy"
 import { LongTermVision } from "@/components/analysis/long-term-vision";
 import { TeamExecution } from "@/components/analysis/team-execution";
 import { FundingInvestors } from "@/components/analysis/funding-investors";
-import { WeatherWidget } from "@/components/weather-widget";
 import { StartupNews } from "@/components/startup-news";
 import { MarketSizeChart } from "@/components/analysis/market-size-chart";
 import { BusinessModelStrengthChart } from "@/components/analysis/business-model-strength";
@@ -1233,14 +1232,9 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
             </CardContent>
           </Card>
           
-          {/* Weather Widget and News section - Moved below the prompt box as requested */}
+          {/* News section - Weather widget removed as requested */}
           <div className="mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-              <WeatherWidget />
-            </div>
-            <div className="mt-6">
-              <StartupNews />
-            </div>
+            <StartupNews />
           </div>
         </>
       )}
