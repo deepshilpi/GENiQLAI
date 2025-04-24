@@ -169,9 +169,9 @@ export async function analyzeStartupIdea(
       messages: [
         { 
           role: "system", 
-          content: systemPrompt + "\n\nIMPORTANT: Provide DEEP, EXPERT-LEVEL ANALYSIS with detailed insights and realistic data. Focus on QUALITY and ACCURACY."
+          content: systemPrompt + "\n\nIMPORTANT: Provide DEEP, EXPERT-LEVEL ANALYSIS with industry-specific insights and realistic market data. Focus on QUALITY, ACCURACY, and ACTIONABLE INTELLIGENCE. Include country-specific market metrics and industry benchmarks where appropriate."
         },
-        { role: "user", content: `Analyze this startup idea for the ${country} market in detail: ${startupIdea}` }
+        { role: "user", content: `Provide a comprehensive, expert-level analysis of this startup idea for the ${country} market, including detailed industry-specific metrics, realistic market figures, and actionable recommendations: ${startupIdea}` }
       ],
       response_format: { type: "json_object" },
       temperature: 0.2, // Lower temperature for consistent, high-quality expert responses
@@ -323,7 +323,7 @@ export async function generateBudgetAnalysis(
       messages: [
         {
           role: "system",
-          content: `You are a startup execution planning and financial analysis expert. Create a DETAILED, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of $${initialBudget}. 
+          content: `You are a senior startup execution planning and financial analysis expert with experience in venture capital and startup financing. Create a DETAILED, INDUSTRY-SPECIFIC, EXPERT-LEVEL budget-based analysis for a startup idea with an initial budget of $${initialBudget}. Use realistic market figures and industry benchmarks applicable to ${country}.
           
           Return a JSON object with exactly the following structure:
           
@@ -416,9 +416,9 @@ export async function generateBudgetAnalysis(
             }
           }
           
-          Make sure all monetary values are realistic for the startup type and scale in ${country}.
-          Provide COMPREHENSIVE, EXPERT-LEVEL ANALYSIS with detailed insights.
-          IMPORTANT: Focus on QUALITY and ACCURACY with realistic data specific to this startup type.
+          Make sure all monetary values are realistic and use industry benchmarks for the startup type and scale in ${country}.
+          Provide COMPREHENSIVE, EXPERT-LEVEL ANALYSIS with detailed insights and market-specific recommendations.
+          IMPORTANT: Focus on QUALITY and ACCURACY with realistic market data specific to this startup type and industry trends.
           Return ONLY valid JSON format without any additional text.`
         },
         {
