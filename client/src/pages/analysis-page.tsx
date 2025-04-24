@@ -27,6 +27,7 @@ import {
   Cog,
   Coins,
   Compass,
+  DollarSign,
   Eye,
   FileDown,
   Gauge,
@@ -1554,7 +1555,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
             {analysisData.targetAudienceFit && visibleBlocks.includes("targetAudience") && (
               <motion.div 
                 variants={itemVariants} 
-                className="lg:col-span-1"
+                className="lg:col-span-3 md:col-span-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -1570,15 +1571,23 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   </CardHeader>
                   <CardContent className="p-4 sm:p-5">
                     <div className="space-y-5">
-                      <div className="h-64">
-                        {/* Radar chart will go here */}
-                        <div className="flex flex-col items-center justify-center h-full">
-                          <div className="p-5 text-center border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
-                            <p className="text-white/90 leading-relaxed">{analysisData.targetAudienceFit.message}</p>
+                      <div className="md:flex gap-6">
+                        <div className="h-64 md:w-1/2 mb-5 md:mb-0">
+                          {/* Radar chart will go here */}
+                          <div className="flex flex-col items-center justify-center h-full">
+                            <div className="p-5 h-full w-full text-center border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm flex items-center justify-center">
+                              <p className="text-white/90 leading-relaxed">{analysisData.targetAudienceFit.message}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="h-64 md:w-1/2 flex items-center justify-center p-5 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
+                          <div className="text-center">
+                            <h3 className="text-lg font-medium text-white mb-2">Target Audience Insight</h3>
+                            <p className="text-white/70">Your product needs to address specific pain points for each segment while maintaining a cohesive value proposition.</p>
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
                         {analysisData.targetAudienceFit.segments.map((segment: {name: string, score: number}, i: number) => (
                           <div key={i} className="p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-colors duration-200">
                             <p className="text-sm font-medium text-white mb-2">{segment.name}</p>
@@ -2221,12 +2230,15 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
             </motion.div>
             
             {/* 6. Funding & Investment Potential - Full screen */}
-            <motion.div variants={itemVariants} className="lg:col-span-3">
+            <motion.div variants={itemVariants} className="lg:col-span-3 md:col-span-2">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
-                <CardHeader className="pb-0 pt-4">
-                  {/* Title moved to FundingInvestors component */}
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg text-white">
+                    <DollarSign className="w-5 h-5 mr-2 text-primary" />
+                    Funding & Investment Potential
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent>
                   <FundingInvestors
                     investors={budgetAnalysisData.investorsData?.investors || []}
                     message={budgetAnalysisData.investorsData?.message || "Funding and investment recommendations not available"}

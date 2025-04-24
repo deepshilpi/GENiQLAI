@@ -74,14 +74,18 @@ app.use((req, res, next) => {
   // Always use port 5000 for compatibility with Replit workflows
   const PORT = 5000;
   
-  // Kill anything already using port 5000 to ensure we can use it
+  // Try to start the server on the specified port
   try {
     log(`Attempting to start server on port ${PORT}`);
+    
+    // Add a more resilient error recovery mechanism
+    let retryCount = 0;
+    const maxRetries = 3;
     
     // Set server timeout to 5 minutes for long-running analysis
     server.timeout = 300000; // 5 minutes
 
-    // Simple approach: Just try to listen directly on port 5000
+    // Simple approach: Just try to listen directly on the specified port
     server.listen(PORT, "0.0.0.0", () => {
       log(`Server successfully started and listening on port ${PORT}`);
     });

@@ -24,21 +24,19 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   
   // Show the full UI to all users, regardless of authentication status
   return (
-    <div className="app-container min-h-screen flex flex-col">
+    <div className="app-container min-h-screen flex flex-col relative bg-vision-dark">
       {/* Always show sidebar on desktop for all users */}
       {!isMobile && <Sidebar />}
       
       {/* Header shown for all pages, but transforms for mobile */}
       <Header />
       
-      <main className={`main-content flex-1 ${isMobile ? 'pt-16' : ''}`}>
+      <main className={`main-content flex-1 ${isMobile ? 'pt-16' : ''} pb-16`}>
         {children}
       </main>
       
-      {/* Footer always shown at bottom */}
-      <div className="mt-auto">
-        <Footer />
-      </div>
+      {/* Footer removed from here as it's now sticky in the Footer component */}
+      <Footer />
     </div>
   );
 }

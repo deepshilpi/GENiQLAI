@@ -124,10 +124,7 @@ export function FundingInvestors({ investors = [], message = "No funding informa
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center mb-2">
-        <DollarSign className="w-5 h-5 mr-2 text-primary" />
-        <h3 className="text-lg font-medium text-white">Funding & Investment Potential</h3>
-      </div>
+      {/* Title moved to parent component */}
 
       {/* Investor portfolio fit visualization */}
       <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
