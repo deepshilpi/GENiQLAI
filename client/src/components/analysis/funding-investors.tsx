@@ -33,8 +33,8 @@ export function FundingInvestors({ investors = [], message = "No funding informa
   // Sort investors by portfolio fit (descending)
   const sortedInvestors = [...safeInvestors].sort((a, b) => b.portfolioFit - a.portfolioFit);
   
-  // Get top 3 investors for highlighting
-  const topInvestors = sortedInvestors.slice(0, 3);
+  // Get top 5 investors for highlighting
+  const topInvestors = sortedInvestors.slice(0, 5);
   
   // Prepare data for pie chart (investors by location)
   const getLocationCounts = () => {

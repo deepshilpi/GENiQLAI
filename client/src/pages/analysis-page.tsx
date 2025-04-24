@@ -1902,13 +1902,10 @@ export default function AnalysisPage() {
             {/* 6. Funding & Investment Potential */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-lg text-white">
-                    <Coins className="w-5 h-5 mr-2 text-primary" />
-                    Funding & Investment Potential
-                  </CardTitle>
+                <CardHeader className="pb-0 pt-4">
+                  {/* Title moved to FundingInvestors component */}
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0">
                   <FundingInvestors
                     investors={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.investors || []}
                     message={budgetAnalysisData.budgetAnalysis?.fundingAndInvestmentPotential?.message || "Funding and investment recommendations not available"}
