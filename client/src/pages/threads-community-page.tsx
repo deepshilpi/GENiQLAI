@@ -521,7 +521,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
         <Header />
         
         <main className="overflow-y-auto w-full h-full">
-          <div className="max-w-screen-md mx-auto">
+          <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-10 bg-vision-card/90 backdrop-blur-xl border-b border-vision-purple-200/10 px-4 py-3 flex justify-between items-center">
               <h1 className="text-xl font-semibold text-white flex items-center gap-2">
