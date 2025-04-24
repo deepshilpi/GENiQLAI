@@ -185,9 +185,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw innerError;
       }
       
-      // Validate the response structure
-      if (!analysisResults || !analysisResults.successRate) {
-        throw new Error("Invalid response format from AI service");
+      // Validate and ensure the response structure is complete
+      if (!analysisResults) {
+        console.error("Analysis results are undefined or null");
+        throw new Error("Empty response from AI service");
+      }
+
+      // Log the response keys to help with debugging
+      console.log("Analysis results keys:", Object.keys(analysisResults));
+
+      // Check if all required fields are present
+      const requiredFields = [
+        'successRate', 'competitors', 'targetAudienceFit', 'marketSize', 
+        'businessModelStrength', 'fundingRequired', 'swotAnalysis', 'previousFailedExecutions'
+      ];
+      
+      const missingFields = requiredFields.filter(field => !analysisResults[field]);
+      
+      if (missingFields.length > 0) {
+        console.error("Missing required fields in analysis results:", missingFields);
+        // Initialize missing fields with default values to prevent app crashes
+        missingFields.forEach(field => {
+          if (field === 'successRate') {
+            analysisResults.successRate = {
+              percentage: 50,
+              goodPoints: ["Analysis incomplete - please try again"],
+              badPoints: ["Server encountered an issue processing your request"],
+              message: "Analysis could not be fully completed"
+            };
+          } else if (field === 'competitors') {
+            analysisResults.competitors = {
+              competitors: [],
+              message: "Could not analyze competitors at this time"
+            };
+          } else if (field === 'targetAudienceFit') {
+            analysisResults.targetAudienceFit = {
+              segments: [],
+              message: "Could not analyze target audience at this time"
+            };
+          } else if (field === 'marketSize') {
+            analysisResults.marketSize = {
+              segments: [],
+              message: "Could not analyze market size at this time"
+            };
+          } else if (field === 'businessModelStrength') {
+            analysisResults.businessModelStrength = {
+              overall: 50,
+              components: [],
+              message: "Could not analyze business model at this time"
+            };
+          } else if (field === 'fundingRequired') {
+            analysisResults.fundingRequired = {
+              total: 0,
+              breakdown: [],
+              message: "Could not analyze funding requirements at this time"
+            };
+          } else if (field === 'swotAnalysis') {
+            analysisResults.swotAnalysis = {
+              strengths: ["Could not analyze strengths at this time"],
+              weaknesses: ["Could not analyze weaknesses at this time"],
+              opportunities: ["Could not analyze opportunities at this time"],
+              threats: ["Could not analyze threats at this time"]
+            };
+          } else if (field === 'previousFailedExecutions') {
+            analysisResults.previousFailedExecutions = {
+              failures: [],
+              message: "Could not analyze previous failures at this time"
+            };
+          }
+        });
+        
+        console.log("Added default values for missing fields");
       }
       
       // Cache the successful result
