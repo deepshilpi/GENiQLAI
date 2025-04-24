@@ -30,6 +30,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   // Local state to track manual log state to force re-renders
   const [forceAuthUpdate, setForceAuthUpdate] = useState(0);
+  
+  // Add timestamp to avoid browser caching
+  const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
+  
+  // Direct login helper function - used for critical auth operations
+  const directLogin = async (credentials: LoginCredentials): Promise<User | null> => {
+    try {
+      console.log("[Auth] Attempting direct login for:", credentials.username);
+      const timestamp = Date.now();
+      setLastRefreshTime(timestamp);
+      
+      // Make the login request
+      const response = await fetch(`/api/login?_t=${timestamp}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+        credentials: 'include',
+        body: JSON.stringify(credentials)
+      });
+      
+      if (!response.ok) {
+        console.error("[Auth] Direct login failed:", response.status);
+        return null;
+      }
+      
+      // Parse the response
+      const userData = await response.json();
+      console.log("[Auth] Direct login successful:", userData.username);
+      
+      // Directly set the cache data
+      queryClient.setQueryData(["/api/user"], userData);
+      queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+      
+      // Force a refresh to ensure all components update
+      setForceAuthUpdate(prev => prev + 5);
+      
+      return userData;
+    } catch (error) {
+      console.error("[Auth] Direct login error:", error);
+      return null;
+    }
+  };
 
   const {
     data: user,
