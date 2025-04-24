@@ -449,6 +449,7 @@ export function XStylePost({
       {/* User Profile Dialog */}
       <Dialog open={showUserProfile} onOpenChange={setShowUserProfile}>
         <DialogContent className="sm:max-w-[400px] bg-vision-dark border border-vision-purple-200/20">
+          <DialogTitle className="sr-only">User Profile</DialogTitle>
           <div className="flex flex-col items-center">
             <Avatar className="h-20 w-20 bg-vision-purple-900 border-2 border-primary/50">
               <AvatarFallback className="bg-vision-purple-100/10 text-white text-xl">

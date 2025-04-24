@@ -71,12 +71,29 @@ export function useNotifications() {
             throw new Error('Failed to fetch notifications');
           }
           
-          const data = await response.json();
-          if (data?.notifications) {
-            setNotifications(data.notifications || []);
-            setUnreadCount(data.unreadCount || 0);
+          // First check for response type to avoid JSON parsing errors
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const data = await response.json();
+              if (data?.notifications) {
+                setNotifications(data.notifications || []);
+                setUnreadCount(data.unreadCount || 0);
+              } else {
+                // Return to empty state if no proper response
+                setNotifications([]);
+                setUnreadCount(0);
+              }
+            } catch (jsonError) {
+              console.error('Error parsing JSON response:', 
+                jsonError && typeof jsonError === 'object' ? 
+                  (jsonError instanceof Error ? jsonError.message : JSON.stringify(jsonError) || 'Empty error object') 
+                  : 'Unknown error');
+              setNotifications([]);
+              setUnreadCount(0);
+            }
           } else {
-            // Return to empty state if no proper response
+            console.log('Non-JSON response received from notifications API');
             setNotifications([]);
             setUnreadCount(0);
           }
