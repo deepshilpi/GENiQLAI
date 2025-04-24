@@ -48,9 +48,9 @@ export function LongTermVision({ milestones, message }: LongTermVisionProps) {
                 style={{ backgroundColor: entry.color }}
               />
               <span className="font-medium">{entry.name}:</span>{" "}
-              {entry.name === "Revenue" ? "$" : ""}
+              {entry.name === "Revenue" ? "₹" : ""}
               {entry.name === "Revenue" || entry.name === "Users" 
-                ? entry.value.toLocaleString() 
+                ? entry.value.toLocaleString('en-IN') 
                 : `${entry.value}%`}
               {entry.name === "Users" ? " users" : ""}
             </p>
@@ -95,7 +95,7 @@ export function LongTermVision({ milestones, message }: LongTermVisionProps) {
               <YAxis 
                 yAxisId="left"
                 orientation="left"
-                tickFormatter={(value) => `$${value/1000}k`}
+                tickFormatter={(value) => `₹${value/1000}k`}
                 tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.7)' }}
                 axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
@@ -175,7 +175,7 @@ export function LongTermVision({ milestones, message }: LongTermVisionProps) {
                   <div className="px-2 py-1 rounded-md bg-primary/10 flex items-center">
                     <BarChart3 className="h-3 w-3 text-primary mr-1" />
                     <span className="text-xs text-primary">
-                      ${milestone.projectedMetrics.revenue.toLocaleString()}
+                      ₹{milestone.projectedMetrics.revenue.toLocaleString('en-IN')}
                     </span>
                   </div>
                 )}
@@ -183,7 +183,7 @@ export function LongTermVision({ milestones, message }: LongTermVisionProps) {
                   <div className="px-2 py-1 rounded-md bg-blue-500/10 flex items-center">
                     <UserCheck className="h-3 w-3 text-blue-400 mr-1" />
                     <span className="text-xs text-blue-400">
-                      {milestone.projectedMetrics.users.toLocaleString()} users
+                      {milestone.projectedMetrics.users.toLocaleString('en-IN')} users
                     </span>
                   </div>
                 )}
