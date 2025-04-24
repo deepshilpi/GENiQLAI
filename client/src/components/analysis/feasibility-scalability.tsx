@@ -90,10 +90,7 @@ export function FeasibilityScalability({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center mb-2">
-        <ScaleIcon className="w-5 h-5 mr-2 text-primary" />
-        <h3 className="text-lg font-medium text-white">Feasibility & Scaling Potential</h3>
-      </div>
+      {/* Remove duplicate title */}
 
       {/* Initial feasibility score */}
       <div className="p-4 rounded-md bg-vision-purple-100/5 border border-vision-purple-200/20">
@@ -149,7 +146,7 @@ export function FeasibilityScalability({
                 tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.7)' }}
                 axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-                tickFormatter={(value) => `$${value/1000}k`}
+                tickFormatter={(value) => `₹${value/1000}k`}
               />
               <YAxis 
                 yAxisId="right"

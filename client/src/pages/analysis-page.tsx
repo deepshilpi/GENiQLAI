@@ -2113,7 +2113,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 Execution Plan for Your Startup
               </CardTitle>
               <CardDescription className="text-white/70">
-                Detailed strategy based on your budget of ${budgetForm.getValues().budget}
+                Detailed strategy based on your budget of {formatCurrency(parseFloat(budgetForm.getValues().budget.replace(/[^0-9.-]+/g, "")))}
               </CardDescription>
             </CardHeader>
           </Card>
