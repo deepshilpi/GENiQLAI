@@ -846,7 +846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Race between the investors search and the timeout
       const investors = await Promise.race([
         findInvestors(startupIdea, country),
-        timeoutPromise
+        timeoutPromise as Promise<never>
       ]);
       
       // Cache the successful result
