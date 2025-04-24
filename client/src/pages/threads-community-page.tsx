@@ -812,13 +812,13 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           )}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                        <div className="flex flex-col items-center justify-center py-12 bg-[#11083C]/90 text-white">
                           {searchQuery ? (
                             <>
-                              <p className="text-vision-purple-300 mb-4">No results found for "{searchQuery}"</p>
+                              <p className="text-[#a09dd2] mb-4">No results found for "{searchQuery}"</p>
                               <Button
                                 variant="outline"
-                                className="border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                                className="border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white"
                                 onClick={() => {
                                   setSearchQuery("");
                                   setFilteredPosts(null);
@@ -899,12 +899,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center bg-vision-card/70 border-t border-vision-purple-200/10">
-                          <p className="text-sm text-vision-purple-300">You've seen all trending posts</p>
+                        <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                          <p className="text-sm text-[#a09dd2]">You've seen all trending posts</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="mt-2 border-vision-purple-200/20 text-vision-purple-300 hover:bg-vision-purple-900/20 hover:text-white"
+                            className="mt-2 border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white"
                             onClick={() => {
                               window.scrollTo(0, 0);
                               setPage(1);
@@ -918,7 +918,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                    <div className="flex flex-col items-center justify-center py-12 bg-[#11083C]/90 text-white">
                       <p className="text-[#a09dd2] mb-5 text-lg">No trending posts right now</p>
                       <Button 
                         className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
@@ -933,7 +933,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                 
                 <TabsContent value="following" className="mt-0 p-0">
                   {!user ? (
-                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                    <div className="flex flex-col items-center justify-center py-12 bg-[#11083C]/90 text-white">
                       <p className="text-[#a09dd2] mb-5 text-lg">Sign in to see posts from people you follow</p>
                       <Button 
                         className="bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white hover:shadow-lg hover:shadow-[#7551FF]/30 h-11 px-6 rounded-lg font-medium"
@@ -993,11 +993,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center">
-                          <p className="text-sm font-medium text-white">You've seen all posts from people you follow</p>
+                        <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                          <p className="text-sm text-[#a09dd2]">You've seen all posts from people you follow</p>
                           <Button 
+                            variant="outline" 
                             size="sm" 
-                            className="mt-2 bg-vision-primary-gradient font-semibold text-white hover:opacity-90"
+                            className="mt-2 border-[#A163F7]/20 bg-[#0B1437]/50 text-[#a09dd2] hover:bg-[#0B1437] hover:text-white"
                             onClick={() => {
                               window.scrollTo(0, 0);
                               setPage(1);
@@ -1011,7 +1012,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12 bg-vision-card/70 text-white">
+                    <div className="flex flex-col items-center justify-center py-12 bg-[#11083C]/90 text-white">
                       <p className="text-[#a09dd2] mb-5 text-lg">You're not following anyone yet or they haven't posted</p>
                       <Button
                         variant="outline"
