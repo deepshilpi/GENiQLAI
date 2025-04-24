@@ -65,19 +65,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Force a refetch to ensure we have the latest
-      queryClient.refetchQueries({ queryKey: ["/api/user"] });
-      
-      // Refresh other queries that might depend on authentication
-      queryClient.invalidateQueries();
-      
-      // Redirect to home page
-      navigate("/");
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${userData.username}!`,
-      });
+      // Give the UI time to update before redirecting
+      setTimeout(() => {
+        // Force a refetch to ensure we have the latest
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+        
+        // Refresh other queries that might depend on authentication
+        queryClient.invalidateQueries();
+        
+        // Redirect to home page after a slight delay to allow state updates
+        navigate("/");
+        
+        toast({
+          title: "Login successful",
+          description: `Welcome back, ${userData.username}!`,
+        });
+      }, 500);
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -105,19 +108,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Update user data in the cache
       queryClient.setQueryData(["/api/user"], userData);
       
-      // Force a refetch to ensure we have the latest
-      queryClient.refetchQueries({ queryKey: ["/api/user"] });
-      
-      // Refresh other queries that might depend on authentication
-      queryClient.invalidateQueries();
-      
-      // Redirect to home page
-      navigate("/");
-      
-      toast({
-        title: "Registration successful",
-        description: `Welcome to GENIQL, ${userData.username}!`,
-      });
+      // Give the UI time to update before redirecting
+      setTimeout(() => {
+        // Force a refetch to ensure we have the latest
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+        
+        // Refresh other queries that might depend on authentication
+        queryClient.invalidateQueries();
+        
+        // Redirect to home page after a slight delay to allow state updates
+        navigate("/");
+        
+        toast({
+          title: "Registration successful",
+          description: `Welcome to GENIQL, ${userData.username}!`,
+        });
+      }, 500);
     },
     onError: (error: Error) => {
       console.error("Registration error:", error);
@@ -142,15 +148,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear user data
       queryClient.setQueryData(["/api/user"], null);
       
-      // Invalidate all queries to make sure they're refreshed
-      queryClient.invalidateQueries();
-      
-      // Redirect to home page
-      navigate("/");
-      
-      toast({
-        title: "Logged out successfully",
-      });
+      // Give the UI time to update before redirecting
+      setTimeout(() => {
+        // Invalidate all queries to make sure they're refreshed
+        queryClient.invalidateQueries();
+        
+        // Force reload the page to clear all state and prevent any stale data
+        window.location.href = "/";
+        
+        toast({
+          title: "Logged out successfully",
+        });
+      }, 500);
     },
     onError: (error: Error) => {
       console.error("Logout error:", error);

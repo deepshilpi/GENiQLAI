@@ -144,7 +144,17 @@ export async function analyzeStartupIdea(
     
     try {
       const content = response.choices[0].message.content.trim();
-      const analysisContent = JSON.parse(content);
+      console.log("Raw OpenAI API response content:", content.substring(0, 200) + "...");
+      
+      // Attempt to parse the JSON content
+      let analysisContent;
+      try {
+        analysisContent = JSON.parse(content);
+      } catch (jsonError) {
+        console.error("JSON parsing error:", jsonError);
+        console.error("Problematic content:", content);
+        throw new Error("Failed to parse JSON from OpenAI response");
+      }
       
       // Validate the basic structure of the enhanced response
       if (!analysisContent.successRate || 
@@ -155,14 +165,17 @@ export async function analyzeStartupIdea(
           !analysisContent.fundingRequired ||
           !analysisContent.swotAnalysis ||
           !analysisContent.previousFailedExecutions) {
-        console.error("Missing required fields in enhanced analysis response:", analysisContent);
+        console.error("Missing required fields in enhanced analysis response:", Object.keys(analysisContent));
         throw new Error("Invalid response structure from AI service");
       }
       
       return analysisContent as AnalysisResults;
     } catch (parseError) {
       console.error("Failed to parse OpenAI enhanced analysis response:", parseError);
-      console.error("Response content:", response.choices[0].message.content);
+      if (response.choices && response.choices.length > 0) {
+        console.error("Response content snippet:", 
+          response.choices[0].message.content.substring(0, 500));
+      }
       throw new Error("Failed to parse analysis results");
     }
   } catch (error) {
