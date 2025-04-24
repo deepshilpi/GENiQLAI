@@ -656,8 +656,8 @@ export default function AnalysisPage() {
     }
   }, []);
   
-  // Handle budget submission
-  const onBudgetSubmit = async (values: z.infer<typeof budgetSchema>) => {
+  // Handle execution plan submission
+  const onPlanSubmit = async (values: z.infer<typeof budgetSchema>) => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
@@ -666,7 +666,7 @@ export default function AnalysisPage() {
     
     // All features are now available to everyone
     
-    setPhase("budget-loading");
+    setPhase("plan-loading");
     
     try {
       const budgetValue = parseFloat(values.budget.replace(/[^0-9.-]+/g, ""));
@@ -838,7 +838,7 @@ export default function AnalysisPage() {
       }
       
       setBudgetAnalysisData(processedData);
-      setPhase("budget-results");
+      setPhase("plan-results");
     } catch (err: any) {
       console.error("Error generating execution plan:", err);
       setPhase("results"); // Go back to initial results
@@ -1495,8 +1495,8 @@ export default function AnalysisPage() {
         </div>
       )}
       
-      {/* BUDGET AND TEAM INPUT PHASE */}
-      {phase === "budget-input" && (
+      {/* EXECUTION PLAN INPUT PHASE */}
+      {phase === "plan-input" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-xl text-white">Plan Your Execution</CardTitle>
@@ -1506,7 +1506,7 @@ export default function AnalysisPage() {
           </CardHeader>
           <CardContent>
             <Form {...budgetForm}>
-              <form onSubmit={budgetForm.handleSubmit(onBudgetSubmit)} className="space-y-6">
+              <form onSubmit={budgetForm.handleSubmit(onPlanSubmit)} className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   {/* Budget Section */}
                   <div className="space-y-4">
@@ -1759,8 +1759,8 @@ export default function AnalysisPage() {
         </Card>
       )}
       
-      {/* BUDGET LOADING STATE */}
-      {phase === "budget-loading" && (
+      {/* PLAN LOADING STATE */}
+      {phase === "plan-loading" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-xl text-white">Creating Your Execution Plan</CardTitle>
@@ -1783,8 +1783,8 @@ export default function AnalysisPage() {
         </Card>
       )}
       
-      {/* BUDGET RESULTS PHASE */}
-      {phase === "budget-results" && budgetAnalysisData && (
+      {/* PLAN RESULTS PHASE */}
+      {phase === "plan-results" && budgetAnalysisData && (
         <div className="space-y-6">
           {/* Budget Result Header */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
