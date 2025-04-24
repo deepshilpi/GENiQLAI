@@ -54,7 +54,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 flex items-center justify-center">
-                <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
+                <img src="/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
               </div>
               <SheetTitle className="font-heading font-bold text-lg text-white">GENIQL</SheetTitle>
             </div>

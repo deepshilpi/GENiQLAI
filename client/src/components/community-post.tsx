@@ -4,28 +4,33 @@ import { ArrowUp, ArrowDown, MessageSquare } from "lucide-react";
 import { Post, User } from "@shared/schema";
 import { timeAgo, truncateText } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthDialog } from "@/hooks/use-auth-dialog";
+
+// Extended post type with author information
+interface ExtendedPost extends Post {
+  author?: {
+    username: string;
+  };
+  commentsCount?: number;
+}
 
 interface CommunityPostProps {
-  post: Post;
+  post: ExtendedPost;
   onVote: (postId: number, voteType: string) => void;
   currentUser: User | null;
 }
 
 export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps) {
-  const authorUsername = useMemo(() => "Username", []);
+  const authorUsername = useMemo(() => post.author?.username || "User", [post.author]);
   const createdAt = useMemo(() => new Date(post.createdAt), [post.createdAt]);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
+  const { openAuthDialog } = useAuthDialog();
   
   const handlePump = () => {
     if (!currentUser) {
-      // Show toast and navigate to auth
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to vote on community posts",
-        variant: "default",
-      });
-      navigate('/auth');
+      // Show auth dialog instead of navigating
+      openAuthDialog("login");
       return;
     }
     onVote(post.id, "pump");
@@ -33,13 +38,8 @@ export function CommunityPost({ post, onVote, currentUser }: CommunityPostProps)
   
   const handleDump = () => {
     if (!currentUser) {
-      // Show toast and navigate to auth
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to vote on community posts",
-        variant: "default",
-      });
-      navigate('/auth');
+      // Show auth dialog instead of navigating
+      openAuthDialog("login");
       return;
     }
     onVote(post.id, "dump");
