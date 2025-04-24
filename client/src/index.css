@@ -199,6 +199,10 @@
     border-color: rgba(161, 99, 247, 0.5);
   }
   
+  .text-vision-purple-300 {
+    color: rgba(203, 159, 255, 0.8);
+  }
+  
   .text-vision-purple-700 {
     color: #A163F7;
   }
@@ -213,6 +217,18 @@
   
   .bg-vision-purple-700 {
     background-color: #A163F7;
+  }
+  
+  .bg-vision-purple-900 {
+    background-color: rgba(33, 5, 91, 0.8);
+  }
+  
+  .ring-vision-purple-500 {
+    --tw-ring-color: rgba(161, 99, 247, 0.5);
+  }
+  
+  .ring-offset-vision-purple-900 {
+    --tw-ring-offset-color: rgba(33, 5, 91, 0.5);
   }
 
   /* Vision UI specific components */

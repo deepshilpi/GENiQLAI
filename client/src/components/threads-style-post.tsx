@@ -495,14 +495,14 @@ export function ThreadsStylePost({
                 className="mt-3 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 mt-2">
+                <div className="bg-vision-purple-100/10 border border-vision-purple-200/20 backdrop-blur-sm rounded-lg p-3 mt-2">
                   {/* Comment input */}
                   <div className="flex gap-2">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 ring-2 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
                       {currentUser?.profilePictureUrl ? (
                         <AvatarImage src={currentUser.profilePictureUrl} alt={currentUser.username} />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-purple-400 to-violet-500 text-white text-xs">
+                        <AvatarFallback className="bg-vision-primary-gradient text-white text-xs">
                           {currentUser?.username ? currentUser.username.substring(0, 2).toUpperCase() : "?"}
                         </AvatarFallback>
                       )}
@@ -513,11 +513,11 @@ export function ThreadsStylePost({
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
-                        className="min-h-[80px] bg-white dark:bg-gray-800 resize-none focus:border-primary border-gray-200 dark:border-gray-700 text-sm w-full pr-10"
+                        className="min-h-[80px] bg-vision-purple-100/5 resize-none focus:border-vision-purple-500/30 border-vision-purple-200/20 text-white text-sm w-full pr-10"
                       />
                       <Button
                         size="icon"
-                        className={`absolute bottom-2 right-2 h-7 w-7 rounded-full ${newComment.trim() ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-700'}`}
+                        className={`absolute bottom-2 right-2 h-7 w-7 rounded-full ${newComment.trim() ? 'bg-vision-primary-gradient' : 'bg-vision-purple-100/10'}`}
                         disabled={!newComment.trim()}
                         onClick={handleComment}
                       >
@@ -531,33 +531,33 @@ export function ThreadsStylePost({
                     <div className="mt-3 space-y-3">
                       {post.comments.map((comment) => (
                         <div key={comment.id} className="flex gap-2">
-                          <Avatar className="h-6 w-6">
+                          <Avatar className="h-6 w-6 ring-1 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
                             {comment.profilePic ? (
                               <AvatarImage src={comment.profilePic} alt={comment.username} />
                             ) : (
-                              <AvatarFallback className="bg-gray-400 text-white text-xs">
+                              <AvatarFallback className="bg-vision-primary-gradient text-white text-xs">
                                 {comment.username.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             )}
                           </Avatar>
                           <div className="flex-1">
-                            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg">
+                            <div className="bg-vision-purple-100/10 border border-vision-purple-200/10 backdrop-blur-sm p-2 rounded-lg">
                               <div className="flex items-center">
-                                <span className="font-medium text-xs dark:text-gray-200">{comment.username}</span>
-                                <span className="text-[10px] text-gray-500 ml-1">• {timeAgo(new Date(comment.createdAt))}</span>
+                                <span className="font-medium text-xs text-white">{comment.username}</span>
+                                <span className="text-[10px] text-vision-purple-300 ml-1">• {timeAgo(new Date(comment.createdAt))}</span>
                               </div>
-                              <p className="text-sm text-gray-800 dark:text-gray-300 mt-0.5">{comment.content}</p>
+                              <p className="text-sm text-vision-purple-300 mt-0.5">{comment.content}</p>
                             </div>
                             <div className="flex items-center gap-3 ml-2 mt-1">
-                              <button className="text-[10px] text-gray-500 hover:text-gray-800 dark:hover:text-gray-300">Reply</button>
-                              <button className="text-[10px] text-gray-500 hover:text-gray-800 dark:hover:text-gray-300">Like</button>
+                              <button className="text-[10px] text-vision-purple-300 hover:text-white">Reply</button>
+                              <button className="text-[10px] text-vision-purple-300 hover:text-white">Like</button>
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-center py-2 text-sm text-vision-purple-300">
                       No comments yet. Be the first to comment!
                     </div>
                   )}
@@ -570,10 +570,10 @@ export function ThreadsStylePost({
       
       {/* Sharing Dialog */}
       <Dialog open={isSharingOpen} onOpenChange={setIsSharingOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 text-white">
           <DialogHeader>
-            <DialogTitle>Share this post</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white">Share this post</DialogTitle>
+            <DialogDescription className="text-vision-purple-300">
               Choose how you want to share this startup idea
             </DialogDescription>
           </DialogHeader>
@@ -581,7 +581,7 @@ export function ThreadsStylePost({
             <div className="grid grid-cols-2 gap-2">
               <Button 
                 variant="outline" 
-                className="flex flex-col items-center justify-center h-24 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex flex-col items-center justify-center h-24 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/community/post/${post.id}`);
                   toast({
@@ -597,7 +597,7 @@ export function ThreadsStylePost({
               
               <Button 
                 variant="outline" 
-                className="flex flex-col items-center justify-center h-24 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex flex-col items-center justify-center h-24 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
                 onClick={() => {
                   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title || '')}&url=${encodeURIComponent(`${window.location.origin}/community/post/${post.id}`)}`, '_blank');
                   setIsSharingOpen(false);
@@ -613,6 +613,7 @@ export function ThreadsStylePost({
           <DialogFooter className="sm:justify-start">
             <Button 
               variant="secondary" 
+              className="bg-vision-purple-100/10 hover:bg-vision-purple-100/20 text-white border-vision-purple-200/20"
               onClick={() => setIsSharingOpen(false)}
             >
               Close
@@ -623,15 +624,15 @@ export function ThreadsStylePost({
       
       {/* User Profile Dialog */}
       <Dialog open={showUserProfile} onOpenChange={setShowUserProfile}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 text-white">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-white">
               <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 ring-2 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
                   {post.author?.profilePic ? (
                     <AvatarImage src={post.author.profilePic} alt={post.author.username} />
                   ) : (
-                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-600 text-white">
+                    <AvatarFallback className="bg-vision-primary-gradient text-white">
                       {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : "UN"}
                     </AvatarFallback>
                   )}
@@ -642,18 +643,18 @@ export function ThreadsStylePost({
           </DialogHeader>
           
           <div className="py-2">
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-vision-purple-300">
               {post.author?.bio || "No bio available."}
             </p>
             
             <div className="flex items-center gap-6 mt-4">
               <div className="flex flex-col">
-                <span className="font-medium dark:text-white">{post.author?.followersCount || 0}</span>
-                <span className="text-xs text-gray-500">Followers</span>
+                <span className="font-medium text-white">{post.author?.followersCount || 0}</span>
+                <span className="text-xs text-vision-purple-300">Followers</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-medium dark:text-white">{post.author?.followingCount || 0}</span>
-                <span className="text-xs text-gray-500">Following</span>
+                <span className="font-medium text-white">{post.author?.followingCount || 0}</span>
+                <span className="text-xs text-vision-purple-300">Following</span>
               </div>
             </div>
           </div>
@@ -662,14 +663,14 @@ export function ThreadsStylePost({
             {post.author?.username !== currentUser?.username && (
               <>
                 <Button 
-                  className="flex-1"
+                  className="flex-1 bg-vision-primary-gradient hover:bg-vision-primary-gradient/90 text-white"
                   onClick={handleFollow}
                 >
                   {post.isFollowingAuthor ? "Unfollow" : "Follow"}
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1"
+                  className="flex-1 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
                   onClick={handleSendMessage}
                 >
                   Message
@@ -678,7 +679,7 @@ export function ThreadsStylePost({
             )}
             <Button 
               variant="ghost" 
-              className="w-10"
+              className="w-10 text-vision-purple-300 hover:text-white hover:bg-vision-purple-100/10"
               onClick={handleShareProfile}
             >
               <Share2 className="h-4 w-4" />
