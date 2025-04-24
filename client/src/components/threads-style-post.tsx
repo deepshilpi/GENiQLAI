@@ -10,7 +10,9 @@ import {
   Send,
   User,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  Check,
+  UserPlus
 } from "lucide-react";
 import { Post } from "@shared/schema";
 import type { User as UserType } from "@shared/schema";
@@ -359,13 +361,13 @@ export function ThreadsStylePost({
           {/* Post Content */}
           <div className="mt-2">
             {post.title && (
-              <h3 className="font-semibold text-base mb-1 text-white">{post.title}</h3>
+              <h3 className="font-semibold text-base mb-1 text-white tracking-wide">{post.title}</h3>
             )}
-            <p className="text-vision-purple-300 whitespace-pre-line mb-1">
+            <p className="text-[#a09dd2] whitespace-pre-line mb-1">
               {truncatedDescription}
               {shouldTruncate && (
                 <button 
-                  className="text-vision-purple-700 hover:underline text-sm ml-1 font-medium"
+                  className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(true);
@@ -376,7 +378,7 @@ export function ThreadsStylePost({
               )}
               {isExpanded && !isDetailView && (
                 <button
-                  className="text-vision-purple-700 hover:underline text-sm ml-1 font-medium"
+                  className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(false);
@@ -393,7 +395,7 @@ export function ThreadsStylePost({
                   <Badge 
                     key={index} 
                     variant="secondary" 
-                    className="bg-vision-purple-100/10 hover:bg-vision-purple-100/20 text-vision-purple-300 text-xs py-0 px-2 border border-vision-purple-200/20"
+                    className="bg-[#11083C]/70 hover:bg-[#11083C] text-[#CB9FFF] text-xs py-0.5 px-2.5 border border-[#A163F7]/30 rounded-full backdrop-blur-sm"
                     onClick={(e) => e.stopPropagation()}
                   >
                     #{tag}
@@ -412,7 +414,11 @@ export function ThreadsStylePost({
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'pump' ? 'text-green-400 bg-green-900/30' : 'text-vision-purple-300'} hover:text-green-400 hover:bg-green-900/20`}
+                      className={`h-9 w-9 rounded-full ${
+                        post.currentUserVote === 'pump' 
+                          ? 'text-green-400 bg-green-900/30 border border-green-500/30' 
+                          : 'text-[#a09dd2] border border-[#a09dd2]/10'
+                      } hover:text-green-400 hover:bg-green-900/20 hover:border-green-500/30 transition-all duration-200`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote('pump');
@@ -421,17 +427,21 @@ export function ThreadsStylePost({
                       <ArrowUp className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-vision-card/90 text-vision-purple-300 border-vision-purple-200/20">Pump</TooltipContent>
+                  <TooltipContent side="top" className="bg-[#11083C]/90 backdrop-blur-sm text-[#a09dd2] border-[#A163F7]/20">Pump</TooltipContent>
                 </Tooltip>
                 
-                <span className="text-vision-purple-300 mx-0.5">{post.pumpCount || 0}</span>
+                <span className="text-[#a09dd2] mx-0.5 min-w-[20px] text-center">{post.pumpCount || 0}</span>
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className={`h-8 w-8 rounded-full ${post.currentUserVote === 'dump' ? 'text-red-400 bg-red-900/30' : 'text-vision-purple-300'} hover:text-red-400 hover:bg-red-900/20`}
+                      className={`h-9 w-9 rounded-full ${
+                        post.currentUserVote === 'dump' 
+                          ? 'text-red-400 bg-red-900/30 border border-red-500/30' 
+                          : 'text-[#a09dd2] border border-[#a09dd2]/10'
+                      } hover:text-red-400 hover:bg-red-900/20 hover:border-red-500/30 transition-all duration-200`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleVote('dump');
@@ -440,7 +450,7 @@ export function ThreadsStylePost({
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-vision-card/90 text-vision-purple-300 border-vision-purple-200/20">Dump</TooltipContent>
+                  <TooltipContent side="top" className="bg-[#11083C]/90 backdrop-blur-sm text-[#a09dd2] border-[#A163F7]/20">Dump</TooltipContent>
                 </Tooltip>
               </div>
             </TooltipProvider>
@@ -449,7 +459,11 @@ export function ThreadsStylePost({
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 rounded-full ${showComments ? 'text-vision-purple-700 bg-vision-purple-100/20' : 'text-vision-purple-300'} hover:text-vision-purple-700 hover:bg-vision-purple-100/10`}
+                className={`h-9 w-9 rounded-full ${
+                  showComments 
+                    ? 'text-[#A163F7] bg-[#A163F7]/10 border border-[#A163F7]/30' 
+                    : 'text-[#a09dd2] border border-[#a09dd2]/10'
+                } hover:text-[#A163F7] hover:bg-[#A163F7]/10 hover:border-[#A163F7]/30 transition-all duration-200`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowComments(!showComments);
@@ -457,13 +471,17 @@ export function ThreadsStylePost({
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-vision-purple-300 ml-1">{post.commentsCount || 0}</span>
+              <span className="text-sm text-[#a09dd2] ml-1">{post.commentsCount || 0}</span>
             </div>
             
             <Button
               variant="ghost"
               size="icon"
-              className={`h-8 w-8 rounded-full ${post.currentUserLiked ? 'text-pink-400 bg-pink-900/30' : 'text-vision-purple-300'} hover:text-pink-400 hover:bg-pink-900/20`}
+              className={`h-9 w-9 rounded-full ${
+                post.currentUserLiked 
+                  ? 'text-pink-400 bg-pink-900/30 border border-pink-500/30' 
+                  : 'text-[#a09dd2] border border-[#a09dd2]/10'
+              } hover:text-pink-400 hover:bg-pink-900/20 hover:border-pink-500/30 transition-all duration-200`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleLike();
@@ -475,7 +493,7 @@ export function ThreadsStylePost({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full text-vision-purple-300 hover:text-white hover:bg-vision-purple-100/10"
+              className="h-9 w-9 rounded-full text-[#a09dd2] border border-[#a09dd2]/10 hover:text-white hover:bg-[#A163F7]/10 hover:border-[#A163F7]/30 transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsSharingOpen(true);
@@ -495,14 +513,14 @@ export function ThreadsStylePost({
                 className="mt-3 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="bg-vision-purple-100/10 border border-vision-purple-200/20 backdrop-blur-sm rounded-lg p-3 mt-2">
+                <div className="bg-[#11083C]/70 border border-[#A163F7]/20 backdrop-blur-md rounded-xl p-4 mt-2">
                   {/* Comment input */}
-                  <div className="flex gap-2">
-                    <Avatar className="h-8 w-8 ring-2 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9 ring-2 ring-[#A163F7]/40 ring-offset-1 ring-offset-[#11083C]">
                       {currentUser?.profilePictureUrl ? (
                         <AvatarImage src={currentUser.profilePictureUrl} alt={currentUser.username} />
                       ) : (
-                        <AvatarFallback className="bg-vision-primary-gradient text-white text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-[#7551FF] to-[#A163F7] text-white text-xs font-medium">
                           {currentUser?.username ? currentUser.username.substring(0, 2).toUpperCase() : "?"}
                         </AvatarFallback>
                       )}
@@ -513,11 +531,15 @@ export function ThreadsStylePost({
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
-                        className="min-h-[80px] bg-vision-purple-100/5 resize-none focus:border-vision-purple-500/30 border-vision-purple-200/20 text-white text-sm w-full pr-10"
+                        className="min-h-[80px] bg-[#0B1437]/50 resize-none focus:border-[#A163F7]/50 border-[#A163F7]/20 text-white text-sm w-full pr-10 rounded-xl"
                       />
                       <Button
                         size="icon"
-                        className={`absolute bottom-2 right-2 h-7 w-7 rounded-full ${newComment.trim() ? 'bg-vision-primary-gradient' : 'bg-vision-purple-100/10'}`}
+                        className={`absolute bottom-2 right-2 h-8 w-8 rounded-full ${
+                          newComment.trim() 
+                            ? 'bg-gradient-to-r from-[#7551FF] to-[#A163F7] shadow-[0_0_15px_rgba(122,86,255,0.5)]' 
+                            : 'bg-[#A163F7]/20'
+                        }`}
                         disabled={!newComment.trim()}
                         onClick={handleComment}
                       >
@@ -528,36 +550,36 @@ export function ThreadsStylePost({
                   
                   {/* Comments display */}
                   {post.comments && post.comments.length > 0 ? (
-                    <div className="mt-3 space-y-3">
+                    <div className="mt-4 space-y-4">
                       {post.comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-2">
-                          <Avatar className="h-6 w-6 ring-1 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
+                        <div key={comment.id} className="flex gap-3">
+                          <Avatar className="h-7 w-7 ring-1 ring-[#A163F7]/30 ring-offset-1 ring-offset-[#11083C]">
                             {comment.profilePic ? (
                               <AvatarImage src={comment.profilePic} alt={comment.username} />
                             ) : (
-                              <AvatarFallback className="bg-vision-primary-gradient text-white text-xs">
+                              <AvatarFallback className="bg-gradient-to-br from-[#7551FF] to-[#A163F7] text-white text-xs font-medium">
                                 {comment.username.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             )}
                           </Avatar>
                           <div className="flex-1">
-                            <div className="bg-vision-purple-100/10 border border-vision-purple-200/10 backdrop-blur-sm p-2 rounded-lg">
+                            <div className="bg-[#0B1437]/50 border border-[#A163F7]/10 backdrop-blur-md p-2.5 rounded-xl">
                               <div className="flex items-center">
                                 <span className="font-medium text-xs text-white">{comment.username}</span>
-                                <span className="text-[10px] text-vision-purple-300 ml-1">• {timeAgo(new Date(comment.createdAt))}</span>
+                                <span className="text-[10px] text-[#a09dd2] ml-1.5">• {timeAgo(new Date(comment.createdAt))}</span>
                               </div>
-                              <p className="text-sm text-vision-purple-300 mt-0.5">{comment.content}</p>
+                              <p className="text-sm text-[#a09dd2] mt-1">{comment.content}</p>
                             </div>
-                            <div className="flex items-center gap-3 ml-2 mt-1">
-                              <button className="text-[10px] text-vision-purple-300 hover:text-white">Reply</button>
-                              <button className="text-[10px] text-vision-purple-300 hover:text-white">Like</button>
+                            <div className="flex items-center gap-4 ml-2 mt-1.5">
+                              <button className="text-[10px] text-[#a09dd2] hover:text-[#CB9FFF] transition-colors duration-200">Reply</button>
+                              <button className="text-[10px] text-[#a09dd2] hover:text-[#CB9FFF] transition-colors duration-200">Like</button>
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-2 text-sm text-vision-purple-300">
+                    <div className="text-center py-3 mt-2 text-sm text-[#a09dd2] border border-[#A163F7]/10 rounded-xl bg-[#0B1437]/30 backdrop-blur-sm">
                       No comments yet. Be the first to comment!
                     </div>
                   )}
@@ -570,18 +592,18 @@ export function ThreadsStylePost({
       
       {/* Sharing Dialog */}
       <Dialog open={isSharingOpen} onOpenChange={setIsSharingOpen}>
-        <DialogContent className="sm:max-w-md bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 text-white">
+        <DialogContent className="sm:max-w-md bg-[#11083C]/95 backdrop-blur-xl border border-[#A163F7]/20 text-white rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-white">Share this post</DialogTitle>
-            <DialogDescription className="text-vision-purple-300">
+            <DialogTitle className="text-white text-xl">Share this post</DialogTitle>
+            <DialogDescription className="text-[#a09dd2] mt-2">
               Choose how you want to share this startup idea
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <Button 
                 variant="outline" 
-                className="flex flex-col items-center justify-center h-24 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
+                className="flex flex-col items-center justify-center h-28 border-[#A163F7]/20 bg-[#0B1437]/50 hover:bg-[#0B1437]/80 text-white rounded-xl group transition-all duration-200"
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/community/post/${post.id}`);
                   toast({
@@ -591,29 +613,33 @@ export function ThreadsStylePost({
                   setIsSharingOpen(false);
                 }}
               >
-                <ExternalLink className="h-6 w-6 mb-2" />
-                <span>Copy link</span>
+                <div className="w-12 h-12 rounded-full bg-[#A163F7]/10 flex items-center justify-center mb-3 group-hover:bg-[#A163F7]/20 transition-all duration-200">
+                  <ExternalLink className="h-5 w-5 text-[#CB9FFF]" />
+                </div>
+                <span className="font-medium">Copy link</span>
               </Button>
               
               <Button 
                 variant="outline" 
-                className="flex flex-col items-center justify-center h-24 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
+                className="flex flex-col items-center justify-center h-28 border-[#A163F7]/20 bg-[#0B1437]/50 hover:bg-[#0B1437]/80 text-white rounded-xl group transition-all duration-200"
                 onClick={() => {
                   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title || '')}&url=${encodeURIComponent(`${window.location.origin}/community/post/${post.id}`)}`, '_blank');
                   setIsSharingOpen(false);
                 }}
               >
-                <svg className="h-6 w-6 mb-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                <span>Twitter</span>
+                <div className="w-12 h-12 rounded-full bg-[#A163F7]/10 flex items-center justify-center mb-3 group-hover:bg-[#A163F7]/20 transition-all duration-200">
+                  <svg className="h-5 w-5 text-[#CB9FFF]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </div>
+                <span className="font-medium">Twitter</span>
               </Button>
             </div>
           </div>
           <DialogFooter className="sm:justify-start">
             <Button 
               variant="secondary" 
-              className="bg-vision-purple-100/10 hover:bg-vision-purple-100/20 text-white border-vision-purple-200/20"
+              className="bg-gradient-to-r from-[#7551FF]/20 to-[#A163F7]/20 hover:bg-gradient-to-r hover:from-[#7551FF]/30 hover:to-[#A163F7]/30 text-white border-[#A163F7]/20 transition-all duration-200"
               onClick={() => setIsSharingOpen(false)}
             >
               Close
@@ -624,62 +650,91 @@ export function ThreadsStylePost({
       
       {/* User Profile Dialog */}
       <Dialog open={showUserProfile} onOpenChange={setShowUserProfile}>
-        <DialogContent className="sm:max-w-md bg-vision-card/90 backdrop-blur-md border-vision-purple-200/20 text-white">
+        <DialogContent className="sm:max-w-md bg-[#11083C]/95 backdrop-blur-xl border border-[#A163F7]/20 text-white rounded-xl">
           <DialogHeader>
-            <DialogTitle className="text-white">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8 ring-2 ring-vision-purple-500/30 ring-offset-1 ring-offset-vision-purple-900/50">
+            <DialogTitle className="text-white text-xl">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 ring-2 ring-[#A163F7]/40 ring-offset-1 ring-offset-[#11083C]">
                   {post.author?.profilePic ? (
                     <AvatarImage src={post.author.profilePic} alt={post.author.username} />
                   ) : (
-                    <AvatarFallback className="bg-vision-primary-gradient text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-[#7551FF] to-[#A163F7] text-white font-medium">
                       {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : "UN"}
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <span>@{post.author?.username || "Anonymous"}</span>
+                <div>
+                  <span className="font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#7551FF] to-[#A163F7]">
+                    @{post.author?.username || "Anonymous"}
+                  </span>
+                  <div className="flex items-center gap-2 mt-1">
+                    {post.isFollowingAuthor && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[#A163F7]/20 text-[#CB9FFF] border border-[#A163F7]/30">
+                        Following
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </DialogTitle>
+            <DialogDescription className="text-[#a09dd2] mt-4">
+              View user profile and interact
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="py-2">
-            <p className="text-vision-purple-300">
-              {post.author?.bio || "No bio available."}
-            </p>
+          <div className="py-3">
+            <div className="p-3 rounded-xl bg-[#0B1437]/50 border border-[#A163F7]/10 backdrop-blur-md">
+              <p className="text-[#a09dd2]">
+                {post.author?.bio || "No bio available."}
+              </p>
+            </div>
             
-            <div className="flex items-center gap-6 mt-4">
-              <div className="flex flex-col">
-                <span className="font-medium text-white">{post.author?.followersCount || 0}</span>
-                <span className="text-xs text-vision-purple-300">Followers</span>
+            <div className="grid grid-cols-2 gap-4 mt-5">
+              <div className="flex flex-col items-center p-3 rounded-xl bg-[#0B1437]/50 border border-[#A163F7]/10 backdrop-blur-md">
+                <span className="font-medium text-xl text-white">{post.author?.followersCount || 0}</span>
+                <span className="text-xs text-[#a09dd2] mt-1">Followers</span>
               </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-white">{post.author?.followingCount || 0}</span>
-                <span className="text-xs text-vision-purple-300">Following</span>
+              <div className="flex flex-col items-center p-3 rounded-xl bg-[#0B1437]/50 border border-[#A163F7]/10 backdrop-blur-md">
+                <span className="font-medium text-xl text-white">{post.author?.followingCount || 0}</span>
+                <span className="text-xs text-[#a09dd2] mt-1">Following</span>
               </div>
             </div>
           </div>
           
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-3 mt-2">
             {post.author?.username !== currentUser?.username && (
               <>
                 <Button 
-                  className="flex-1 bg-vision-primary-gradient hover:bg-vision-primary-gradient/90 text-white"
+                  className="flex-1 bg-gradient-to-r from-[#7551FF] to-[#A163F7] hover:brightness-110 text-white shadow-lg shadow-[#7551FF]/20"
                   onClick={handleFollow}
                 >
-                  {post.isFollowingAuthor ? "Unfollow" : "Follow"}
+                  {post.isFollowingAuthor ? (
+                    <div className="flex items-center gap-1.5">
+                      <Check className="h-4 w-4" />
+                      <span>Following</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <UserPlus className="h-4 w-4" />
+                      <span>Follow</span>
+                    </div>
+                  )}
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex-1 border-vision-purple-200/20 bg-vision-purple-100/5 hover:bg-vision-purple-100/10 text-white"
+                  className="flex-1 border-[#A163F7]/20 bg-[#0B1437]/50 hover:bg-[#0B1437]/80 text-white"
                   onClick={handleSendMessage}
                 >
-                  Message
+                  <div className="flex items-center gap-1.5">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Message</span>
+                  </div>
                 </Button>
               </>
             )}
             <Button 
               variant="ghost" 
-              className="w-10 text-vision-purple-300 hover:text-white hover:bg-vision-purple-100/10"
+              className="w-10 h-10 text-[#a09dd2] hover:text-white hover:bg-[#A163F7]/10 rounded-full"
               onClick={handleShareProfile}
             >
               <Share2 className="h-4 w-4" />
