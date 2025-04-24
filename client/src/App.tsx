@@ -5,7 +5,6 @@ import HomePage from "@/pages/home-page";
 import CommunityPage from "@/pages/community-page";
 import ProfilePage from "@/pages/profile-page";
 import MessagesPage from "@/pages/messages-page";
-import AnalysisPageOptimized from "@/pages/analysis-page-optimized";
 import AnalysisPage from "@/pages/analysis-page";
 import SettingsPage from "@/pages/settings-page";
 import TermsPage from "@/pages/terms-page";
@@ -48,7 +47,7 @@ function Router() {
   return (
     <MainLayout>
       <Switch>
-        <Route path="/" component={AnalysisPageOptimized} />
+        <Route path="/" component={AnalysisPage} />
         <Route path="/home" component={HomePage} />
         <Route path="/community" component={CommunityPage} />
         <ProtectedRoute path="/messages" component={MessagesPage} />
