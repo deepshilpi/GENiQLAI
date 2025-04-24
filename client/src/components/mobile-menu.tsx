@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Badge } from "@/components/ui/badge";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
+import Logo from "@/assets/logo";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -59,7 +60,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 flex items-center justify-center">
-                <img src="/src/assets/logo.svg" alt="GENIQL Logo" className="w-full h-full" />
+                <Logo width={36} height={36} />
               </div>
               <div className="font-heading font-bold text-lg text-white">GENIQL</div>
             </div>
