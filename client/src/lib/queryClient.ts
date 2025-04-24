@@ -13,10 +13,17 @@ async function throwIfResNotOk(res: Response) {
         errorText = await res.text() || res.statusText;
       }
     } catch (e) {
-      console.error("Error parsing error response:", e);
-      errorText = await res.text() || res.statusText;
+      // Don't re-throw or log this error as it's already being handled
+      errorText = res.statusText || "Unknown error";
     }
-    throw new Error(errorText);
+    
+    // Create an error with additional properties for better debugging
+    const error: any = new Error(errorText);
+    error.status = res.status;
+    error.statusText = res.statusText;
+    error.url = res.url;
+    
+    throw error;
   }
 }
 
@@ -65,27 +72,60 @@ export const getQueryFn: <T>(options: {
       ? `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`
       : url;
     
-    // Log the query being made for debugging purposes
-    console.log(`Making query request to: ${finalUrl}, queryKey:`, queryKey);
-    
-    const res = await fetch(finalUrl, {
-      credentials: "include",
-      // Add cache busting for auth-related endpoints to prevent browser caching
-      headers: url.includes("/api/user") ? {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      } : {}
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      console.log(`Query to ${finalUrl} returned 401, handling with returnNull`);
-      return null;
+    // Only log auth requests when debugging is needed
+    const isAuthRequest = url.includes("/api/user");
+    if (isAuthRequest && queryKey.length > 1) {
+      // Only log non-standard auth requests for debugging (those with additional params)
+      console.log(`[Auth] Fetching user data with queryKey:`, queryKey);
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
+    
+    try {
+      const res = await fetch(finalUrl, {
+        credentials: "include",
+        // Add cache busting for auth-related endpoints to prevent browser caching
+        headers: isAuthRequest ? {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        } : {}
+      });
+  
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        // Don't log every 401 error as it's expected behavior when not logged in
+        return null;
+      }
+  
+      await throwIfResNotOk(res);
+      
+      const data = await res.json();
+      
+      // Only log successful auth responses for debugging
+      if (isAuthRequest && data && 'username' in data) {
+        console.log(`[Auth] User fetch successful:`, data.username);
+      }
+      
+      return data;
+    } catch (error: any) {
+      // For auth requests, we want to handle errors differently
+      if (isAuthRequest) {
+        console.error(`[Auth] Error fetching user:`, error);
+        
+        // For 401s with returnNull behavior, we should return null
+        if (unauthorizedBehavior === "returnNull" && error.status === 401) {
+          return null;
+        }
+      }
+      
+      // Re-throw the error for the caller to handle
+      throw error;
+    }
   };
+
+// Silent error handler for React Query - we handle errors in the components
+// This prevents unhandled promise rejections in the console
+const silentErrorHandler = () => {
+  // Intentionally empty - errors are handled at component level
+};
 
 // Enhanced QueryClient configuration for better performance and caching
 export const queryClient = new QueryClient({
@@ -93,17 +133,23 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: true, // Enable refetching on window focus for auth state
-      refetchOnMount: true, // Refetch when component mounts
-      staleTime: 0, // Set to 0 for auth-related queries to prevent stale data
-      retry: 1, // Allow one retry for better resilience and user experience
-      retryDelay: 1000, // Wait 1 second before retry
-      // Note: TanStack Query v5 doesn't use keepPreviousData or placeholderData in defaultOptions
-      gcTime: 1000 * 60 * 5, // Keep unused data in the cache for 5 minutes (reduced from 1 hour)
+      refetchOnWindowFocus: false, // Disable automatic refetching on window focus for better performance
+      refetchOnMount: 'always', // Always refetch when component mounts for consistency
+      staleTime: 30000, // Keep data fresh for 30 seconds before refetching
+      retry: (failureCount, error: any) => {
+        // Don't retry on 401 or 403 errors
+        if (error.status === 401 || error.status === 403) {
+          return false;
+        }
+        // Only retry other errors once
+        return failureCount < 1;
+      },
+      retryDelay: 2000, // Wait 2 seconds before retry
+      gcTime: 1000 * 60 * 60, // Keep unused data in the cache for 1 hour
     },
     mutations: {
-      retry: 1, // Allow one retry for better resilience
-      retryDelay: 1000 // Wait 1 second before retry
+      retry: false, // No automatic retries for mutations (handled manually in auth system)
+      onError: silentErrorHandler
     },
   },
 });

@@ -673,74 +673,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isProduction, authChecked, refetchUser]);
   
-  // Effect to periodically check auth state in Replit environment, but with less frequency
+  // Optimized effect to handle periodic auth state check when needed
+  // This effect should only run for a limited time and with strict limits
   useEffect(() => {
-    // Skip if user is already loaded
+    // Skip if user is already loaded - this is the most important optimization
     if (user) {
-      console.log("[AuthProvider] User already loaded:", user.username);
+      // User is already loaded, no need for additional checks
       return;
     }
     
-    // Track the number of attempts to avoid excessive API calls
-    let checkAttempts = 0;
-    const maxAttempts = 3;
+    // Use a reference to track attempts across renders
+    const checkAttempts = { count: 0 };
+    const maxAttempts = 2; // Reduced to 2 attempts maximum
     
-    // Replit-specific: Force check user state periodically, but with a longer interval
+    // Using a shorter interval but fewer attempts overall
     const checkInterval = setInterval(() => {
-      // Only run if we don't have a user yet AND we haven't exceeded attempt limit
-      if (!user && checkAttempts < maxAttempts) {
-        checkAttempts++;
-        console.log(`[AuthProvider] Scheduled auth check running (attempt ${checkAttempts}/${maxAttempts})`);
+      // Only continue if we still don't have a user and haven't reached max attempts
+      if (!user && checkAttempts.count < maxAttempts) {
+        checkAttempts.count++;
         
-        // Hard fetch for auth state with a unique timestamp to prevent caching
-        fetch('/api/user?_t=' + Date.now(), {
-          credentials: 'include',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        })
-        .then(res => {
-          if (res.ok) {
-            return res.json();
-          }
-          return null;
-        })
-        .then(userData => {
-          if (userData?.id) {
-            console.log("[AuthProvider] Direct auth check found user:", userData.username);
-            // Force update with this userData
-            queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
-            queryClient.setQueryData(["/api/user"], userData);
+        // Use a Promise wrapper with proper error handling to avoid unhandled rejections
+        const safeAuthCheck = async () => {
+          try {
+            // Use fetch with proper error handling
+            const res = await fetch('/api/user?_t=' + Date.now(), {
+              credentials: 'include',
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+              }
+            });
             
-            // Generate a single state update instead of incrementing
-            setForceAuthUpdate(Date.now());
+            // Handle non-200 responses gracefully
+            if (!res.ok) {
+              if (res.status === 401) {
+                // This is expected for unauthenticated users, no need to log it
+                return null;
+              }
+              throw new Error(`Auth check failed with status ${res.status}`);
+            }
             
-            // Also explicitly refetch via React Query, but only once
-            refetch();
+            // Parse the JSON response
+            const userData = await res.json();
             
-            // Clear interval since we've found a user
-            clearInterval(checkInterval);
-          } else if (checkAttempts >= maxAttempts) {
-            console.log("[AuthProvider] Max auth check attempts reached, stopping scheduled checks");
-            clearInterval(checkInterval);
+            if (userData?.id) {
+              // User found - update the cache with a single update
+              queryClient.setQueryData(["/api/user"], userData);
+              
+              // Use timestamp for forceAuthUpdate to avoid multiple increments
+              setForceAuthUpdate(Date.now());
+              
+              // Clear interval since we've found a user
+              clearInterval(checkInterval);
+            }
+            
+            return userData;
+          } catch (error) {
+            // Silence the error but stop trying if we've reached max attempts
+            if (checkAttempts.count >= maxAttempts) {
+              clearInterval(checkInterval);
+            }
+            return null;
           }
-        })
-        .catch(err => {
-          console.error("[AuthProvider] Direct auth check error:", err);
-          if (checkAttempts >= maxAttempts) {
-            clearInterval(checkInterval);
-          }
-        });
-      } else if (checkAttempts >= maxAttempts) {
-        console.log("[AuthProvider] Max auth check attempts reached, stopping scheduled checks");
+        };
+        
+        // Execute the auth check without awaiting (to avoid unhandled promise)
+        safeAuthCheck();
+      } else {
+        // We've either found a user or reached maximum attempts
         clearInterval(checkInterval);
       }
-    }, 10000); // Increased interval to 10 seconds to reduce API calls
+    }, 15000); // Longer interval (15 seconds) to reduce server load
     
+    // Cleanup the interval when the component unmounts
     return () => clearInterval(checkInterval);
-  }, [user, forceAuthUpdate, refetch]);
+  }, [user, setForceAuthUpdate]);
 
   return (
     <AuthContext.Provider
