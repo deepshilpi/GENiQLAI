@@ -39,6 +39,60 @@ function getCountryCurrency(country: string): string {
   return currencyMap[country] || "USD";
 }
 
+// Helper function to perform structured API calls for analysis steps
+async function executeAnalysisStep(stepName: string, systemPrompt: string, userPrompt: string) {
+  console.log(`Executing analysis step: ${stepName}`);
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+      max_tokens: 1500, // Reduced for single-step analysis
+      top_p: 0.9
+    });
+    
+    if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
+      console.error(`Empty response for ${stepName} step`);
+      throw new Error(`Failed to get ${stepName} analysis`);
+    }
+    
+    const content = response.choices[0].message.content.trim();
+    
+    // Parse JSON with fallback mechanisms
+    try {
+      // Direct parsing attempt
+      const result = JSON.parse(content);
+      console.log(`Successfully parsed ${stepName} JSON directly`);
+      return result;
+    } catch (parseError) {
+      console.log(`Direct JSON parse failed for ${stepName}, trying extraction`);
+      
+      // Try regex extraction
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const jsonContent = jsonMatch[0];
+          const result = JSON.parse(jsonContent);
+          console.log(`Successfully extracted and parsed ${stepName} JSON`);
+          return result;
+        } catch (extractError) {
+          console.error(`Failed to parse extracted ${stepName} JSON`);
+        }
+      }
+      
+      console.error(`All JSON parsing methods failed for ${stepName}`);
+      throw new Error(`Failed to parse ${stepName} response`);
+    }
+  } catch (error: any) {
+    console.error(`Error in ${stepName} step:`, error);
+    throw new Error(`${stepName} analysis failed: ${error.message}`);
+  }
+}
+
 /**
  * Multi-step startup idea analysis service that breaks down the analysis
  * into smaller, more focused API calls to improve reliability and quality
@@ -321,9 +375,9 @@ async function executeStepByStepAnalysis(
           
           // Compile metrics from various fields
           const keyMetrics = component.keyMetrics || 
-                             (component.metrics ? 
-                                (Array.isArray(component.metrics) ? component.metrics : [component.metrics]) 
-                                : undefined);
+                            (component.metrics ? 
+                              (Array.isArray(component.metrics) ? component.metrics : [component.metrics]) 
+                              : undefined);
           
           // Return properly formatted component
           return {
@@ -351,9 +405,9 @@ async function executeStepByStepAnalysis(
           const score = segment.score || segment.fitScore || 0;
           // Support different naming conventions in the API response
           const behaviors = segment.behaviorsAndPreferences || 
-                            segment.behaviors || 
-                            segment.needsFulfilled || 
-                            [];
+                          segment.behaviors || 
+                          segment.needsFulfilled || 
+                          [];
           
           // Return properly formatted segment
           return {
@@ -505,87 +559,4 @@ async function executeStepByStepAnalysis(
   
   console.log("Successfully completed all analysis steps");
   return analysisResults;
-}
-
-// Helper function to get appropriate currency for a country
-function getCountryCurrency(country: string): string {
-  const currencyMap: Record<string, string> = {
-    "United States": "USD",
-    "Canada": "CAD",
-    "United Kingdom": "GBP",
-    "European Union": "EUR",
-    "Germany": "EUR",
-    "France": "EUR",
-    "Italy": "EUR",
-    "Spain": "EUR",
-    "Australia": "AUD",
-    "New Zealand": "NZD",
-    "China": "CNY",
-    "Japan": "JPY",
-    "South Korea": "KRW",
-    "India": "INR",
-    "Brazil": "BRL",
-    "Mexico": "MXN",
-    "Russia": "RUB",
-    "South Africa": "ZAR",
-    "Nigeria": "NGN",
-    "Global": "USD"
-    // Add more countries as needed
-  };
-  
-  return currencyMap[country] || "USD";
-}
-
-// Helper function to perform structured API calls for analysis steps
-async function executeAnalysisStep(stepName: string, systemPrompt: string, userPrompt: string) {
-  console.log(`Executing analysis step: ${stepName}`);
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-      max_tokens: 1500, // Reduced for single-step analysis
-      top_p: 0.9
-    });
-    
-    if (!response.choices || response.choices.length === 0 || !response.choices[0].message.content) {
-      console.error(`Empty response for ${stepName} step`);
-      throw new Error(`Failed to get ${stepName} analysis`);
-    }
-    
-    const content = response.choices[0].message.content.trim();
-    
-    // Parse JSON with fallback mechanisms
-    try {
-      // Direct parsing attempt
-      const result = JSON.parse(content);
-      console.log(`Successfully parsed ${stepName} JSON directly`);
-      return result;
-    } catch (parseError) {
-      console.log(`Direct JSON parse failed for ${stepName}, trying extraction`);
-      
-      // Try regex extraction
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          const jsonContent = jsonMatch[0];
-          const result = JSON.parse(jsonContent);
-          console.log(`Successfully extracted and parsed ${stepName} JSON`);
-          return result;
-        } catch (extractError) {
-          console.error(`Failed to parse extracted ${stepName} JSON`);
-        }
-      }
-      
-      console.error(`All JSON parsing methods failed for ${stepName}`);
-      throw new Error(`Failed to parse ${stepName} response`);
-    }
-  } catch (error: any) {
-    console.error(`Error in ${stepName} step:`, error);
-    throw new Error(`${stepName} analysis failed: ${error.message}`);
-  }
 }
