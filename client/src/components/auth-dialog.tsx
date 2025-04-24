@@ -103,10 +103,17 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
         return;
       }
       
-      await loginMutation.mutateAsync({
+      // Attempt login
+      const userData = await loginMutation.mutateAsync({
         username: data.username,
         password: data.password
       });
+      
+      console.log("Login successful in dialog, userData:", userData);
+      
+      // Explicitly close the dialog
+      closeDialog();
+      
       toast({
         title: "Login Successful",
         description: "Welcome back!",
@@ -129,11 +136,18 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
         return;
       }
       
-      await registerMutation.mutateAsync({
+      // Attempt registration
+      const userData = await registerMutation.mutateAsync({
         username: data.username,
         email: data.email,
         password: data.password
       });
+      
+      console.log("Registration successful in dialog, userData:", userData);
+      
+      // Explicitly close the dialog
+      closeDialog();
+      
       toast({
         title: "Registration Successful",
         description: "Your account has been created",
@@ -141,6 +155,7 @@ export function AuthDialog({ isOpen, onClose, defaultTab = "login", returnTo }: 
       });
     } catch (error) {
       // Error is already handled by the mutation's onError
+      console.error("Registration error caught:", error);
     }
   };
 

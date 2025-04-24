@@ -42,11 +42,24 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    // Extract the URL from the query key (first element is always the URL)
+    const url = queryKey[0] as string;
+    
+    // Log the query being made for debugging purposes
+    console.log(`Making query request to: ${url}, queryKey:`, queryKey);
+    
+    const res = await fetch(url, {
       credentials: "include",
+      // Add cache busting for auth-related endpoints to prevent browser caching
+      headers: url.includes("/api/user") ? {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      } : {}
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      console.log(`Query to ${url} returned 401, handling with returnNull`);
       return null;
     }
 
