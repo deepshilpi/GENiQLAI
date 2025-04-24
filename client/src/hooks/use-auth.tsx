@@ -70,6 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Optimistically show loading state
       console.log("Login attempt started for:", credentials.username);
       
+      // Cancel any ongoing queries
+      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
+      
       // Force a refresh of the auth state immediately
       setForceAuthUpdate(prev => prev + 1);
     },
@@ -78,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Update all instances of user data in the cache
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+      queryClient.setQueryData(["/api/user"], userData);
       
       // Force a rerender of the auth context (increment twice for certainty)
       setForceAuthUpdate(prev => prev + 2);
@@ -135,14 +139,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(err.message || "Registration failed");
       }
     },
+    onMutate: async () => {
+      // Cancel any ongoing queries
+      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
+      
+      // Force a refresh of the auth state immediately
+      setForceAuthUpdate(prev => prev + 1);
+    },
     onSuccess: (userData) => {
       console.log("Registration successful, setting user data:", userData);
       
-      // Update user data in the cache
+      // Update user data in all caches
       queryClient.setQueryData(["/api/user", forceAuthUpdate], userData);
+      queryClient.setQueryData(["/api/user"], userData);
       
       // Force a rerender of the auth context
-      setForceAuthUpdate(prev => prev + 1);
+      setForceAuthUpdate(prev => prev + 2);
       
       // Immediately refresh data that depends on auth status
       queryClient.invalidateQueries({ 
@@ -195,13 +207,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Optimistically update UI
       console.log("Logout attempt started");
       
+      // Cancel any ongoing queries 
+      await queryClient.cancelQueries({ queryKey: ["/api/user"] });
+      
+      // Save the previous user value
+      const previousUser = queryClient.getQueryData<User | null>(["/api/user", forceAuthUpdate]);
+      
       // Immediately set user to null to update UI elements
       queryClient.setQueryData(["/api/user", forceAuthUpdate], null);
+      queryClient.setQueryData(["/api/user"], null);
       
       // Force a refresh of the auth state immediately
       setForceAuthUpdate(prev => prev + 1);
       
-      return { previousUser: user };
+      // Return properly typed context
+      return { previousUser: previousUser };
     },
     onSuccess: () => {
       console.log("Logout successful, clearing user data");
@@ -237,7 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logged out successfully",
       });
     },
-    onError: (error: Error, _, context) => {
+    onError: (error: Error, _, context: { previousUser: User | null } | undefined) => {
       console.error("Logout error:", error);
       
       // Restore previous user data if available
