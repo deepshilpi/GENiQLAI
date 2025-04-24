@@ -1468,6 +1468,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notifications API endpoints
+  app.get("/api/notifications", async (req, res) => {
+    // Set proper content type header
+    res.setHeader('Content-Type', 'application/json');
+    
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ 
+          message: "Authentication required to view notifications",
+          error: "auth_required"
+        });
+      }
+      
+      // For now, return empty notifications until fully implemented
+      return res.status(200).json({
+        notifications: [],
+        unreadCount: 0
+      });
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      return res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+  
+  // Mark notifications as read
+  app.post("/api/notifications/mark-read", async (req, res) => {
+    // Set proper content type header
+    res.setHeader('Content-Type', 'application/json');
+    
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const { notificationIds } = req.body;
+      
+      if (!Array.isArray(notificationIds) || notificationIds.length === 0) {
+        return res.status(400).json({ message: "Invalid notification IDs" });
+      }
+      
+      // For now, just return success
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+      return res.status(500).json({ message: "Failed to mark notifications as read" });
+    }
+  });
+  
+  // Mark all notifications as read
+  app.post("/api/notifications/mark-all-read", async (req, res) => {
+    // Set proper content type header
+    res.setHeader('Content-Type', 'application/json');
+    
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // For now, just return success
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      return res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
   // Return the HTTP server
   return httpServer;
 }
