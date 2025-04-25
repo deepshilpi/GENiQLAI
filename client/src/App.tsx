@@ -12,6 +12,7 @@ import SettingsPage from "@/pages/settings-page";
 import TermsPage from "@/pages/terms-page";
 import PrivacyPage from "@/pages/privacy-page";
 import SavedIdeasPage from "@/pages/saved-ideas-page";
+import NotificationsPage from "@/pages/notifications-page";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";

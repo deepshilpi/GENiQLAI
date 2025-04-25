@@ -247,7 +247,7 @@ export function ThreadsStylePost({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-[#111144] mb-2 hover:bg-[#191970]/60 cursor-pointer transition-all rounded-lg mx-2`}
+      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-[#111144] mb-2 hover:bg-[#191970]/60 cursor-pointer transition-all rounded-lg mx-2 overflow-hidden`}
       onClick={navigateToDetailView}
     >
       {/* Post Header */}
@@ -338,7 +338,7 @@ export function ThreadsStylePost({
             {post.title && (
               <h3 className="font-semibold text-base mb-1 text-white tracking-wide">{post.title}</h3>
             )}
-            <p className="text-[#a09dd2] whitespace-pre-line mb-1 break-words overflow-hidden w-full">
+            <p className="text-[#a09dd2] whitespace-pre-wrap mb-1 break-words overflow-hidden w-full max-w-full">
               {truncatedDescription}
               {shouldTruncate && (
                 <button 
