@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
@@ -44,11 +44,17 @@ import {
   UserPlus,
   HelpCircle,
   MessageSquare,
-  Moon
+  Moon,
+  Smartphone,
+  Computer,
+  Heart,
+  Settings,
+  Calendar
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 
 export default function SettingsPage() {
   const { user, logoutMutation, updateProfilePicture } = useAuth();
