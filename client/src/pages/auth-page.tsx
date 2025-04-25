@@ -11,7 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+
+// Custom FormMessage that never shows any errors
+const FormMessage = () => null;
 
 // Entrepreneur quotes with their images for the right column
 const entrepreneurQuotes = [
@@ -47,16 +50,16 @@ const entrepreneurQuotes = [
   }
 ];
 
-// Simplified auth form schemas with better error messages
+// Super relaxed validation schemas - will only validate on form submission
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().nonempty(""),
+  password: z.string().nonempty(""),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().nonempty(""),
+  email: z.string().nonempty(""),
+  password: z.string().nonempty(""),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
