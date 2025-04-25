@@ -1,11 +1,24 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
-// Create a special Input component just for the auth page that guarantees white text
+// Create a special Input component just for the auth page that guarantees white text and tracks value state
 const AuthInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
->(({ className, type, ...props }, ref) => {
+>(({ className, type, value, onChange, ...props }, ref) => {
+  // Internal state to ensure value is properly managed
+  const [inputValue, setInputValue] = useState(value || "");
+  
+  // Handle input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    // Pass the event to original onChange if provided
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
   return (
     <input
       type={type}
@@ -15,6 +28,8 @@ const AuthInput = React.forwardRef<
       )}
       ref={ref}
       style={{ color: "white", caretColor: "white" }}
+      value={inputValue}
+      onChange={handleChange}
       {...props}
     />
   );
