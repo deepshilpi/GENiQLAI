@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Send, PlusCircle, User, Users, ChevronLeft } from "lucide-react";
 import { format } from "date-fns";
+import { type User as UserType } from "@shared/schema";
 
 // WebSocket message types
 type WebSocketMessage = {
@@ -36,18 +37,7 @@ type Conversation = {
   updatedAt: string;
 };
 
-// User type
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  planType: string;
-  bio: string | null;
-  profilePictureUrl: string | null;
-  createdAt: string | Date;
-  followersCount?: number;
-  followingCount?: number;
-};
+// We're using the UserType imported from @shared/schema
 
 // Conversation participant
 type ConversationParticipant = {
@@ -55,7 +45,7 @@ type ConversationParticipant = {
   conversationId: number;
   userId: number;
   isAdmin: boolean;
-  user?: User;
+  user?: UserType;
 };
 
 export function ChatInterface() {
@@ -70,7 +60,7 @@ export function ChatInterface() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [communityUsers, setCommunityUsers] = useState<User[]>([]);
+  const [communityUsers, setCommunityUsers] = useState<UserType[]>([]);
   
   // WebSocket reference
   const wsRef = useRef<WebSocket | null>(null);
