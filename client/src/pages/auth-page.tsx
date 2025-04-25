@@ -3,7 +3,6 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, X, Quote as QuoteIcon } from "lucide-react";
 import { motion } from "framer-motion";
@@ -44,18 +43,6 @@ const entrepreneurQuotes = [
     author: "Bill Gates",
     company: "Microsoft",
     image: "https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-  },
-  {
-    quote: "It's not about ideas. It's about making ideas happen.",
-    author: "Scott Belsky",
-    company: "Behance",
-    image: "https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-  },
-  {
-    quote: "The only limit to our realization of tomorrow will be our doubts of today.",
-    author: "Franklin D. Roosevelt",
-    company: "Former US President",
-    image: "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
   }
 ];
 
@@ -75,69 +62,16 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
+  // The order of hooks declaration matters! Don't change it
   const [isLogin, setIsLogin] = useState(true);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
+  const [randomQuote] = useState(
+    entrepreneurQuotes[Math.floor(Math.random() * entrepreneurQuotes.length)]
+  );
   
-  // Select a random quote to display
-  const [randomQuote, setRandomQuote] = useState(entrepreneurQuotes[Math.floor(Math.random() * entrepreneurQuotes.length)]);
-  
-  // Enhanced redirect for logged-in users with useEffect to avoid state update during render
-  useEffect(() => {
-    if (user) {
-      console.log("[Auth] User already logged in, redirecting to home page");
-      
-      // Clean up any auth flags that might be lingering
-      sessionStorage.removeItem('auth_login_success');
-      sessionStorage.removeItem('auth_logout_requested');
-      
-      // Use setTimeout to ensure this happens after render
-      setTimeout(() => {
-        navigate("/");
-      }, 0);
-    }
-  }, [user, navigate]);
-  
-  // If user is already logged in, show loading state
-  if (user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-[400px] max-w-sm border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-white">Redirecting...</CardTitle>
-            <CardDescription className="text-white/70">
-              You're already logged in
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center py-4">
-            <Loader2 className="h-8 w-8 animate-spin text-vision-purple-400" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#11083c] to-[#0B1437]">
-        <Card className="w-[400px] max-w-sm border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-white">Loading...</CardTitle>
-            <CardDescription className="text-white/70">
-              Checking authentication status
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center py-4">
-            <Loader2 className="h-8 w-8 animate-spin text-vision-purple-400" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Get return URL from query params (if any)
+  // Get return URL from query params (for use later)
   const queryParams = new URLSearchParams(window.location.search);
   const returnUrl = queryParams.get("returnUrl") || "/";
   
@@ -159,7 +93,23 @@ export default function AuthPage() {
       password: "",
     },
   });
-
+  
+  // Enhanced redirect for logged-in users with useEffect to avoid state update during render
+  useEffect(() => {
+    if (user) {
+      console.log("[Auth] User already logged in, redirecting to home page");
+      
+      // Clean up any auth flags that might be lingering
+      sessionStorage.removeItem('auth_login_success');
+      sessionStorage.removeItem('auth_logout_requested');
+      
+      // Use setTimeout to ensure this happens after render
+      setTimeout(() => {
+        navigate("/");
+      }, 0);
+    }
+  }, [user, navigate]);
+  
   // Handle login submission
   const onLoginSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data, {
@@ -177,11 +127,47 @@ export default function AuthPage() {
       }
     });
   };
+  
+  // If user is already logged in, show loading state
+  if (user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#11083c] to-[#0B1437]">
+        <Card className="w-[400px] max-w-sm border-purple-500/20 bg-[#1a1045]/40 backdrop-blur-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Redirecting...</CardTitle>
+            <CardDescription className="text-white/70">
+              You're already logged in
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#11083c] to-[#0B1437]">
+        <Card className="w-[400px] max-w-sm border-purple-500/20 bg-[#1a1045]/40 backdrop-blur-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Loading...</CardTitle>
+            <CardDescription className="text-white/70">
+              Checking authentication status
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div 
-      className="flex min-h-screen bg-gradient-to-br from-[#11083c] to-[#0B1437] text-white"
-    >
+    <div className="flex min-h-screen bg-gradient-to-br from-[#11083c] to-[#0B1437] text-white">
       {/* Left Column - Auth Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-10 relative">
         <Link href="/" className="absolute top-6 left-6">

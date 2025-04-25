@@ -46,18 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     staleTime: 10000, // 10 seconds - keep user data fresh
     refetchOnWindowFocus: true, // Refetch when window focuses to ensure auth state is current
-    // Add error handler to prevent crashing the entire app on auth failure
-    onError: (error) => {
-      console.error("[Auth] Failed to fetch user data:", error);
-      // Don't show toast on auth page to avoid duplicate error messages
-      if (!location.startsWith("/auth")) {
-        toast({
-          title: "Authentication Error",
-          description: "Please try refreshing the page or logging in again.",
-          variant: "destructive",
-        });
-      }
-    },
   });
 
   // Simple refetch method that just calls the query's refetch
