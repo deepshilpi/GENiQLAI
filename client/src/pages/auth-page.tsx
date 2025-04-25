@@ -233,7 +233,8 @@ export default function AuthPage() {
                               }}
                             />
                           </FormControl>
-                          <FormMessage />
+                          {/* Only show errors after form submission */}
+                          {loginForm.formState.submitCount > 0 && <FormMessage />}
                         </FormItem>
                       )}
                     />
@@ -257,7 +258,8 @@ export default function AuthPage() {
                               }}
                             />
                           </FormControl>
-                          <FormMessage />
+                          {/* Only show errors after form submission */}
+                          {loginForm.formState.submitCount > 0 && <FormMessage />}
                         </FormItem>
                       )}
                     />
@@ -346,7 +348,8 @@ export default function AuthPage() {
                               }}
                             />
                           </FormControl>
-                          <FormMessage />
+                          {/* Only show errors after form submission */}
+                          {registerForm.formState.submitCount > 0 && <FormMessage />}
                         </FormItem>
                       )}
                     />

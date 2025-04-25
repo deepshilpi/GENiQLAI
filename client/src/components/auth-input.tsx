@@ -45,16 +45,18 @@ const AuthInput = React.forwardRef<
   // Filter out the onBlur prop since we handle it ourselves
   const { onBlur, ...restProps } = props;
   
-  // Directly handle blur event to trigger validation
+  // Handle blur event with improved validation
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // If there's an onBlur prop, call it
+    // If there's an onBlur prop, call it first
     if (onBlur) {
       onBlur(e);
     }
     
-    // We also explicitly update with trimmed value to ensure validation works
-    if (onValueChange && inputValue) {
-      onValueChange(inputValue.trim());
+    // Don't auto-trim on blur as it can cause unexpected behavior
+    // Only notify of the current value through onValueChange
+    if (onValueChange) {
+      // Just pass the current value without modifying it
+      onValueChange(inputValue);
     }
   };
   
