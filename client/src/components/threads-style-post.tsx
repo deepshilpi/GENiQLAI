@@ -70,7 +70,7 @@ function timeAgo(date: Date): string {
 interface ThreadsStylePostProps {
   post: ExtendedPost;
   onVote: (postId: number, voteType: string) => void;
-  onLike: (postId: number) => void;
+  // Like functionality removed per user request
   onComment: (postId: number, comment: string) => void;
   onFollow?: (userId: number) => void;
   onShareProfile?: (username: string) => void;
@@ -83,7 +83,6 @@ interface ThreadsStylePostProps {
 export function ThreadsStylePost({ 
   post, 
   onVote, 
-  onLike,
   onComment,
   onFollow,
   onShareProfile,
@@ -131,14 +130,7 @@ export function ThreadsStylePost({
     onVote(post.id, voteType);
   };
 
-  const handleLike = () => {
-    if (!currentUser) {
-      navigate('/auth');
-      return;
-    }
-    
-    onLike(post.id);
-  };
+  // Like functionality removed per user request
 
   const handleComment = () => {
     if (!currentUser) {
@@ -467,21 +459,7 @@ export function ThreadsStylePost({
               <span className="text-sm text-[#a09dd2] ml-1">{post.commentsCount || 0}</span>
             </div>
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-9 w-9 rounded-full ${
-                post.currentUserLiked 
-                  ? 'text-pink-400 bg-pink-900/30 border border-pink-500/30' 
-                  : 'text-[#a09dd2] border border-[#a09dd2]/10'
-              } hover:text-pink-400 hover:bg-pink-900/20 hover:border-pink-500/30 transition-all duration-200`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLike();
-              }}
-            >
-              <Heart className={`h-4 w-4 ${post.currentUserLiked ? 'fill-current' : ''}`} />
-            </Button>
+            {/* Like button removed as per user request */}
             
             <Button
               variant="ghost"
