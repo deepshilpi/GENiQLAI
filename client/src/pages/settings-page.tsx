@@ -77,7 +77,12 @@ export default function SettingsPage() {
   // Update password mutation
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      await apiRequest("PATCH", "/api/user/password", data);
+      const response = await apiRequest("PATCH", "/api/user/password", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update password");
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -130,6 +135,32 @@ export default function SettingsPage() {
       });
     }
   });
+  
+  // Add bio update mutation
+  const [bio, setBio] = useState(user?.bio || "");
+  const updateBioMutation = useMutation({
+    mutationFn: async (newBio: string) => {
+      await apiRequest("PATCH", "/api/user/bio", { bio: newBio });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Success",
+        description: "Your bio has been updated",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update bio: " + error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const handleBioUpdate = () => {
+    updateBioMutation.mutate(bio);
+  };
 
   const handlePasswordUpdate = () => {
     if (!currentPassword) {
@@ -449,7 +480,8 @@ export default function SettingsPage() {
                         <Label htmlFor="bio" className="text-white">Bio</Label>
                         <Textarea 
                           id="bio" 
-                          value={user.bio || ""}
+                          value={bio}
+                          onChange={(e) => setBio(e.target.value)}
                           placeholder="Tell others about yourself..."
                           className="min-h-[120px] bg-[#0B1437]/50 border-[#A163F7]/20 text-white/90 placeholder:text-white/40 resize-none"
                         />
@@ -457,8 +489,10 @@ export default function SettingsPage() {
                           <Button
                             size="sm"
                             className="ml-auto bg-gradient-to-r from-[#7551FF] to-[#A163F7] text-white"
+                            onClick={handleBioUpdate}
+                            disabled={updateBioMutation.isPending}
                           >
-                            Save Bio
+                            {updateBioMutation.isPending ? "Saving..." : "Save Bio"}
                           </Button>
                         </div>
                       </div>
@@ -522,47 +556,6 @@ export default function SettingsPage() {
                           <div className="flex justify-between items-center">
                             <Label className="text-white">Following</Label>
                             <span className="text-[#a09dd2] text-sm">{user.followingCount || 0}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2 pt-2">
-                          <Label className="text-white">Total Available Market</Label>
-                          <div className="relative">
-                            <div className="text-center">
-                              <div className="w-32 h-32 mx-auto relative">
-                                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                                  <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    fill="none"
-                                    stroke="#11083C"
-                                    strokeWidth="10"
-                                  />
-                                  <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    fill="none"
-                                    stroke="url(#gradient)"
-                                    strokeWidth="10"
-                                    strokeDasharray="251.2"
-                                    strokeDashoffset="125"
-                                    strokeLinecap="round"
-                                  />
-                                  <defs>
-                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                      <stop offset="0%" stopColor="#7551FF" />
-                                      <stop offset="100%" stopColor="#CB9FFF" />
-                                    </linearGradient>
-                                  </defs>
-                                </svg>
-                                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                  <span className="text-lg font-bold text-white">₹10,000</span>
-                                </div>
-                              </div>
-                              <p className="text-xs text-[#a09dd2] mt-2">50% of target market</p>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -1142,15 +1135,7 @@ export default function SettingsPage() {
             </TabsContent>
           </Tabs>
           
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-[#A163F7]/20 text-center text-sm text-[#a09dd2]">
-            <p>© 2025 Geniql.com. All rights reserved.</p>
-            <div className="flex justify-center gap-3 mt-2">
-              <a href="/terms" className="text-[#a09dd2] hover:text-white transition-colors">Terms</a>
-              <a href="/privacy" className="text-[#a09dd2] hover:text-white transition-colors">Privacy</a>
-              <span className="text-[#a09dd2]">Made with <Heart className="h-3 w-3 inline text-red-400" /> for founders</span>
-            </div>
-          </div>
+
         </main>
       </div>
     </div>
