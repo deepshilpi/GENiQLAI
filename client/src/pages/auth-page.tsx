@@ -47,21 +47,15 @@ const entrepreneurQuotes = [
   }
 ];
 
-// Auth form schemas - with explicit type validation
+// Simplified auth form schemas with better error messages
 const loginSchema = z.object({
-  username: z.string().min(1).transform(val => val.trim()).pipe(
-    z.string().min(3, "Username must be at least 3 characters")
-  ),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(1).transform(val => val.trim()).pipe(
-    z.string().min(3, "Username must be at least 3 characters")
-  ),
-  email: z.string().min(1).transform(val => val.trim()).pipe(
-    z.string().email("Please enter a valid email address")
-  ),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -82,17 +76,18 @@ export default function AuthPage() {
   const queryParams = new URLSearchParams(window.location.search);
   const returnUrl = queryParams.get("returnUrl") || "/";
   
-  // Login form setup with better validation timing
+  // Login form setup with validation only on submit
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
     },
-    mode: "onChange", // Validate on change to provide immediate feedback
+    mode: "onSubmit", // Only validate when the form is submitted
+    reValidateMode: "onSubmit",
   });
 
-  // Register form setup with better validation timing
+  // Register form setup with validation only on submit
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -100,7 +95,8 @@ export default function AuthPage() {
       email: "",
       password: "",
     },
-    mode: "onChange", // Validate on change to provide immediate feedback
+    mode: "onSubmit", // Only validate when the form is submitted
+    reValidateMode: "onSubmit",
   });
   
   // Enhanced redirect for logged-in users with useEffect to avoid state update during render
@@ -300,7 +296,8 @@ export default function AuthPage() {
                               }}
                             />
                           </FormControl>
-                          <FormMessage />
+                          {/* Only show errors after form submission */}
+                          {registerForm.formState.submitCount > 0 && <FormMessage />}
                         </FormItem>
                       )}
                     />
@@ -324,7 +321,8 @@ export default function AuthPage() {
                               }}
                             />
                           </FormControl>
-                          <FormMessage />
+                          {/* Only show errors after form submission */}
+                          {registerForm.formState.submitCount > 0 && <FormMessage />}
                         </FormItem>
                       )}
                     />
