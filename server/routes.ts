@@ -1176,15 +1176,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Notify all WebSocket clients about the new comment
       if (wss) {
+        console.log('Broadcasting new comment notification to all connected clients');
         wss.clients.forEach((client: UserWebSocket) => {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: 'new_comment',
-              payload: { 
-                comment: commentWithAuthor,
-                postId
-              }
-            }));
+            try {
+              client.send(JSON.stringify({
+                type: 'new_comment',
+                payload: { 
+                  comment: commentWithAuthor,
+                  postId
+                }
+              }));
+              console.log(`Sent new comment notification to client ${client.userId || 'anonymous'}`);
+            } catch (error) {
+              console.error('Error sending WebSocket message:', error);
+            }
           }
         });
       }
@@ -1234,15 +1240,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Notify all WebSocket clients about the new vote/like
         if (wss) {
+          console.log('Broadcasting vote update notification to all connected clients');
           wss.clients.forEach((client: UserWebSocket) => {
             if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({
-                type: 'new_vote',
-                payload: { 
-                  vote,
-                  postId
-                }
-              }));
+              try {
+                client.send(JSON.stringify({
+                  type: 'vote_update',
+                  payload: { 
+                    vote,
+                    postId,
+                    voteType: "pump"
+                  }
+                }));
+                console.log(`Sent vote update notification to client ${client.userId || 'anonymous'}`);
+              } catch (error) {
+                console.error('Error sending WebSocket message:', error);
+              }
             }
           });
         }
@@ -1300,15 +1313,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Notify all WebSocket clients about the new vote
         if (wss) {
+          console.log('Broadcasting vote update notification to all connected clients');
           wss.clients.forEach((client: UserWebSocket) => {
             if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({
-                type: 'new_vote',
-                payload: { 
-                  vote,
-                  postId
-                }
-              }));
+              try {
+                client.send(JSON.stringify({
+                  type: 'vote_update',
+                  payload: { 
+                    vote,
+                    postId,
+                    voteType
+                  }
+                }));
+                console.log(`Sent vote update notification to client ${client.userId || 'anonymous'}`);
+              } catch (error) {
+                console.error('Error sending WebSocket message:', error);
+              }
             }
           });
         }
@@ -1354,16 +1374,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Notify all WebSocket clients about the new follow relationship
       if (wss) {
+        console.log('Broadcasting follow notification to all connected clients');
         wss.clients.forEach((client: UserWebSocket) => {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: 'new_follow',
-              payload: { 
-                follow,
-                follower: req.user,
-                following: user
-              }
-            }));
+            try {
+              client.send(JSON.stringify({
+                type: 'new_follow',
+                payload: { 
+                  follow,
+                  follower: req.user,
+                  following: user
+                }
+              }));
+              console.log(`Sent follow notification to client ${client.userId || 'anonymous'}`);
+            } catch (error) {
+              console.error('Error sending WebSocket message:', error);
+            }
           }
         });
       }
@@ -1407,17 +1433,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Notify all WebSocket clients about the unfollow action
       if (wss && user) {
+        console.log('Broadcasting unfollow notification to all connected clients');
         wss.clients.forEach((client: UserWebSocket) => {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: 'unfollow',
-              payload: { 
-                followerId: req.user.id,
-                followingId,
-                follower: req.user,
-                following: user
-              }
-            }));
+            try {
+              client.send(JSON.stringify({
+                type: 'unfollow',
+                payload: { 
+                  followerId: req.user.id,
+                  followingId,
+                  follower: req.user,
+                  following: user
+                }
+              }));
+              console.log(`Sent unfollow notification to client ${client.userId || 'anonymous'}`);
+            } catch (error) {
+              console.error('Error sending WebSocket message:', error);
+            }
           }
         });
       }
