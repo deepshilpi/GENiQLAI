@@ -963,7 +963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const posts = await storage.getPosts();
       
       // Fetch author information for each post
-      const postsWithAuthors = await Promise.all(posts.map(async post => {
+      const postsWithAuthors: PostWithAuthor[] = await Promise.all(posts.map(async post => {
         if (post.authorId) {
           const author = await storage.getUser(post.authorId);
           return {
@@ -972,9 +972,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               username: author.username,
               profilePic: author.profilePictureUrl || null
             } : null
-          };
+          } as PostWithAuthor;
         }
-        return post;
+        return post as PostWithAuthor;
       }));
       
       console.log(`Successfully fetched ${posts.length} posts`);
@@ -1001,7 +1001,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Add author information
-      let postWithAuthor = post;
+      let postWithAuthor: PostWithAuthor = post as PostWithAuthor;
       if (post.authorId) {
         const author = await storage.getUser(post.authorId);
         postWithAuthor = {
@@ -1010,7 +1010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: author.username,
             profilePic: author.profilePictureUrl || null
           } : null
-        };
+        } as PostWithAuthor;
       }
       
       return res.status(200).json(postWithAuthor);
@@ -1062,19 +1062,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const post = await storage.createPost(newPost);
       console.log("Post created successfully:", post);
       
+      // Add author information to the post for WebSocket notification
+      const author = await storage.getUser(req.user.id);
+      const postWithAuthor: PostWithAuthor = {
+        ...post,
+        author: author ? {
+          username: author.username || "Anonymous",
+          profilePic: author.profilePictureUrl || null
+        } : null
+      };
+      
       // Notify all WebSocket clients about the new post
       if (wss) {
         wss.clients.forEach((client: UserWebSocket) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({
               type: 'new_post',
-              payload: { post }
+              payload: { post: postWithAuthor }
             }));
           }
         });
       }
       
-      return res.status(201).json(post);
+      return res.status(201).json(postWithAuthor);
     } catch (error) {
       console.error("Error creating post:", error);
       return res.status(500).json({ message: "Failed to create post" });
@@ -1093,7 +1103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const comments = await storage.getCommentsByPostId(postId);
       
       // Add author information to each comment
-      const commentsWithAuthors = await Promise.all(comments.map(async comment => {
+      const commentsWithAuthors: CommentWithAuthor[] = await Promise.all(comments.map(async comment => {
         if (comment.authorId) {
           const author = await storage.getUser(comment.authorId);
           return {
@@ -1102,9 +1112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               username: author.username,
               profilePic: author.profilePictureUrl || null
             } : null
-          };
+          } as CommentWithAuthor;
         }
-        return comment;
+        return comment as CommentWithAuthor;
       }));
       
       return res.status(200).json(commentsWithAuthors);
@@ -1148,6 +1158,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const comment = await storage.createComment(newComment);
       
+      // Get author info for the comment
+      const author = await storage.getUser(req.user.id);
+      const commentWithAuthor: CommentWithAuthor = {
+        ...comment,
+        author: author ? {
+          username: author.username || "Anonymous",
+          profilePic: author.profilePictureUrl || null
+        } : null
+      };
+      
       // Notify all WebSocket clients about the new comment
       if (wss) {
         wss.clients.forEach((client: UserWebSocket) => {
@@ -1155,7 +1175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             client.send(JSON.stringify({
               type: 'new_comment',
               payload: { 
-                comment,
+                comment: commentWithAuthor,
                 postId
               }
             }));
@@ -1163,7 +1183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      return res.status(201).json(comment);
+      return res.status(201).json(commentWithAuthor);
     } catch (error) {
       console.error("Error creating comment:", error);
       return res.status(500).json({ message: "Failed to create comment" });
