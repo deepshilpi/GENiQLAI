@@ -338,7 +338,7 @@ export function ThreadsStylePost({
             {post.title && (
               <h3 className="font-semibold text-base mb-1 text-white tracking-wide">{post.title}</h3>
             )}
-            <p className="text-[#a09dd2] whitespace-pre-line mb-1">
+            <p className="text-[#a09dd2] whitespace-pre-line mb-1 break-words overflow-hidden w-full">
               {truncatedDescription}
               {shouldTruncate && (
                 <button 

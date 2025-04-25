@@ -34,7 +34,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       {/* Header shown for all pages, but transforms for mobile */}
       <Header />
       
-      <main className={`main-content flex-1 ${isMobile ? 'pt-10' : ''}`}>
+      <main className={`main-content flex-1 ${isMobile ? 'pt-1' : ''}`}>
         {children}
       </main>
       
