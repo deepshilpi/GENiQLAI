@@ -49,7 +49,7 @@ export default function MessagesPage() {
 
   return (
     <div className="container max-w-7xl mx-auto py-1 px-0 md:py-3 md:px-4">
-      <div className="hidden md:flex items-center pt-2 px-4 pb-1 md:mb-3 md:px-0">
+      <div className="flex items-center pt-2 px-4 pb-1 md:mb-3 md:px-0">
         <div className="bg-vision-primary-gradient/20 p-2 rounded-lg mr-3">
           <Mail className="h-5 w-5 text-vision-purple-500" />
         </div>
