@@ -23,7 +23,9 @@ import {
   Mail,
   BookmarkIcon,
   Bookmark,
-  Check
+  Check,
+  Users,
+  DollarSign
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -142,9 +144,13 @@ export function Sidebar() {
   };
   
   // Add backdrop overlay for mobile
-  const handleBackdropClick = () => {
+  const handleBackdropClick = (e) => {
+    // Stop propagation to prevent event bubbling
+    e.stopPropagation();
+    
     if (isMobile) {
-      toggleSidebar();
+      setSidebarOpen(false);
+      document.body.classList.remove('sidebar-open');
     }
   };
   
@@ -212,8 +218,8 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/community/threads")}
             >
-              <MessageSquare className="w-5 h-5" />
-              {!collapsed && <span>Community</span>}
+              <Users className="w-5 h-5" />
+              {!collapsed && <span>Hustlers Community</span>}
             </div>
           </li>
           {user && (
@@ -226,8 +232,8 @@ export function Sidebar() {
                 )}
                 onClick={() => navigate("/messages")}
               >
-                <Mail className="w-5 h-5" />
-                {!collapsed && <span>Messages</span>}
+                <DollarSign className="w-5 h-5" />
+                {!collapsed && <span>Money Serious Talks</span>}
               </div>
             </li>
           )}
