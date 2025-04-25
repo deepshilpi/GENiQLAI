@@ -1001,14 +1001,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      // Make sure tags is an array
+      let tagsArray = [];
+      
+      if (Array.isArray(tags)) {
+        tagsArray = tags;
+      } else if (tags) {
+        // If tags is a string, convert to array
+        try {
+          const parsedTags = JSON.parse(tags);
+          if (Array.isArray(parsedTags)) {
+            tagsArray = parsedTags;
+          }
+        } catch (e) {
+          // If not valid JSON, use empty array
+          console.log("Tags is not a valid JSON array, using empty array");
+        }
+      }
+      
       const newPost: InsertPost = {
         authorId: req.user.id,
         title,
         description,
-        tags: tags || []
+        tags: tagsArray
       };
       
+      console.log("Creating post with data:", newPost);
       const post = await storage.createPost(newPost);
+      console.log("Post created successfully:", post);
+      
+      // Notify all WebSocket clients about the new post
+      wss.clients.forEach((client: UserWebSocket) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'new_post',
+            payload: { post }
+          }));
+        }
+      });
+      
       return res.status(201).json(post);
     } catch (error) {
       console.error("Error creating post:", error);
@@ -1066,6 +1097,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const comment = await storage.createComment(newComment);
+      
+      // Notify all WebSocket clients about the new comment
+      wss.clients.forEach((client: UserWebSocket) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'new_comment',
+            payload: { 
+              comment,
+              postId
+            }
+          }));
+        }
+      });
+      
       return res.status(201).json(comment);
     } catch (error) {
       console.error("Error creating comment:", error);
