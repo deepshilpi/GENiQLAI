@@ -773,7 +773,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                                 onFollow={handleFollow}
                                 onShareProfile={handleShareProfile}
                                 onSendMessage={handleSendMessage}
-                                currentUser={user || null}
+                                currentUser={user}
                               />
                             ))}
                           </AnimatePresence>
