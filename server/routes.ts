@@ -1033,8 +1033,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Add a comment to a post
-  app.post("/api/posts/:id/comments", async (req, res) => {
+  // Add a comment to a post - support both singular and plural endpoints
+  app.post(["/api/posts/:id/comments", "/api/posts/:id/comment"], async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -1166,8 +1166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Follow a user
-  app.post("/api/follow/:id", async (req, res) => {
+  // Follow a user - support both endpoint formats
+  app.post(["/api/follow/:id", "/api/users/:id/follow"], async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Authentication required" });
     }
