@@ -845,6 +845,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                                 onFollow={handleFollow}
                                 onShareProfile={handleShareProfile}
                                 onSendMessage={handleSendMessage}
+                                onDelete={handleDeletePost}
                                 currentUser={user}
                               />
                             ))}
@@ -951,6 +952,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             onFollow={handleFollow}
                             onShareProfile={handleShareProfile}
                             onSendMessage={handleSendMessage}
+                            onDelete={handleDeletePost}
                             currentUser={user}
                           />
                         ))}
@@ -1045,6 +1047,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             onFollow={handleFollow}
                             onShareProfile={handleShareProfile}
                             onSendMessage={handleSendMessage}
+                            onDelete={handleDeletePost}
                             currentUser={user}
                           />
                         ))}
