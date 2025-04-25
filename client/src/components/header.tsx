@@ -354,9 +354,6 @@ export function Header() {
   // Desktop Header
   return (
     <div>
-      {/* Header spacing */}
-      <div className="p-1"></div>
-      
       <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
