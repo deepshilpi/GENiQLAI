@@ -1204,6 +1204,13 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
   return (
     <div className="container px-4 py-8 mx-auto max-w-7xl">
+      {/* Auth prompt dialog */}
+      <AuthPromptDialog
+        isOpen={authPromptOpen}
+        onClose={() => setAuthPromptOpen(false)}
+        onConfirm={handleAuthConfirm}
+        action={authAction}
+      />
 
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (
