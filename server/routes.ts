@@ -1256,71 +1256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Like a post (simplified implementation - uses "pump" vote type)
-  app.post("/api/posts/:id/like", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      const postId = parseInt(req.params.id);
-      
-      if (isNaN(postId)) {
-        return res.status(400).json({ message: "Invalid post ID" });
-      }
-      
-      // Verify post exists
-      const post = await storage.getPostById(postId);
-      if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-      }
-      
-      // Check if user already voted
-      const existingVote = await storage.getVoteByUserAndPost(req.user!.id, postId);
-      
-      if (existingVote) {
-        // Update existing vote
-        const updatedVote = await storage.updateVote(existingVote.id, "pump");
-        return res.status(200).json(updatedVote);
-      } else {
-        // Create new vote
-        const newVote: InsertVote = {
-          userId: req.user!.id,
-          postId: postId,
-          voteType: "pump"
-        };
-        
-        const vote = await storage.createVote(newVote);
-        
-        // Notify all WebSocket clients about the new vote/like
-        if (wss) {
-          console.log('Broadcasting vote update notification to all connected clients');
-          wss.clients.forEach((client: UserWebSocket) => {
-            if (client.readyState === WebSocket.OPEN) {
-              try {
-                client.send(JSON.stringify({
-                  type: 'vote_update',
-                  payload: { 
-                    vote,
-                    postId,
-                    voteType: "pump"
-                  }
-                }));
-                console.log(`Sent vote update notification to client ${client.userId || 'anonymous'}`);
-              } catch (error) {
-                console.error('Error sending WebSocket message:', error);
-              }
-            }
-          });
-        }
-        
-        return res.status(200).json(vote);
-      }
-    } catch (error) {
-      console.error("Error liking post:", error);
-      return res.status(500).json({ message: "Failed to like post" });
-    }
-  });
+  // Like functionality removed per user request
 
   // Vote on a post (pump or dump)
   app.post("/api/posts/:id/vote", async (req, res) => {

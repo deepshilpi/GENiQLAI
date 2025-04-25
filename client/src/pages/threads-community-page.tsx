@@ -322,23 +322,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
     }
   });
 
-  // Like post mutation
-  const likeMutation = useMutation({
-    mutationFn: async (postId: number) => {
-      const res = await apiRequest("POST", `/api/posts/${postId}/like`, {});
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: `Failed to like post: ${error.message}`,
-        variant: "destructive",
-      });
-    }
-  });
+  // Like functionality removed per user request
 
   // Comment mutation
   const commentMutation = useMutation({
