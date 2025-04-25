@@ -25,6 +25,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserPlan(userId: number, planType: string): Promise<User>;
   updateUserBio(userId: number, bio: string): Promise<User>;
+  updateUserPassword(userId: number, password: string): Promise<User>;
   updateUserProfilePicture(userId: number, profilePictureUrl: string): Promise<User>;
   
   // Post operations
@@ -126,6 +127,19 @@ export class DatabaseStorage implements IStorage {
   async updateUserBio(userId: number, bio: string): Promise<User> {
     const [updatedUser] = await db.update(users)
       .set({ bio })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+    
+    return updatedUser;
+  }
+  
+  async updateUserPassword(userId: number, password: string): Promise<User> {
+    const [updatedUser] = await db.update(users)
+      .set({ password })
       .where(eq(users.id, userId))
       .returning();
     
