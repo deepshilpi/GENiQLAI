@@ -8,6 +8,7 @@ import { AuthContext } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ExtendedPost } from "@/lib/types";
 import { 
   Sheet,
   SheetContent,
@@ -42,30 +43,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Extended post type for UI with author and current user vote
-interface ExtendedPost extends Omit<Post, 'tags'> {
-  author?: {
-    username?: string;
-    profilePic?: string;
-    bio?: string;
-    followersCount?: number;
-    followingCount?: number;
-  };
-  currentUserVote?: 'pump' | 'dump' | null;
-  currentUserLiked?: boolean;
-  isFollowingAuthor?: boolean;
-  tags: string[];
-  commentsCount?: number;
-  likesCount?: number;
-  comments?: Array<{
-    id: number;
-    content: string;
-    userId: number;
-    username: string;
-    profilePic?: string;
-    createdAt: string;
-  }>;
-}
+// Using ExtendedPost interface from shared types file
 
 interface ThreadsCommunityPageProps {
   postId?: string;
@@ -74,7 +52,7 @@ interface ThreadsCommunityPageProps {
 export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPageProps = {}) {
   // Context and state
   const auth = useContext(AuthContext);
-  const user = auth?.user;
+  const user = auth?.user || null;
   const [postInput, setPostInput] = useState("");
   const [postTitle, setPostTitle] = useState("");
   const [postTags, setPostTags] = useState("");

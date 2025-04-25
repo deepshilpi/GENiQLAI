@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Post } from "@shared/schema";
 import type { User as UserType } from "@shared/schema";
+import { ExtendedPost, PostComment } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -64,33 +65,7 @@ function timeAgo(date: Date): string {
   return Math.floor(seconds) + "s";
 }
 
-// Extended post interface with additional properties
-interface ExtendedPost extends Post {
-  author?: {
-    username: string;
-    profilePic?: string;
-    bio?: string;
-    followersCount?: number;
-    followingCount?: number;
-  };
-  commentsCount?: number;
-  comments?: PostComment[];
-  likesCount?: number;
-  currentUserLiked?: boolean;
-  currentUserVote?: 'pump' | 'dump' | null;
-  isFollowingAuthor?: boolean;
-}
-
-interface PostComment {
-  id: number;
-  content: string;
-  userId: number;
-  username: string;
-  profilePic?: string;
-  createdAt: string;
-  likesCount?: number;
-  currentUserLiked?: boolean;
-}
+// Using ExtendedPost and PostComment interfaces from shared types
 
 interface ThreadsStylePostProps {
   post: ExtendedPost;
