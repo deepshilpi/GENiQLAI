@@ -32,6 +32,7 @@ export interface IStorage {
   getPosts(): Promise<Post[]>;
   getPostById(id: number): Promise<Post | undefined>;
   getPostsByUserId(userId: number): Promise<Post[]>;
+  deletePost(id: number): Promise<boolean>;
   
   // Comment operations
   createComment(comment: InsertComment): Promise<Comment>;
@@ -169,6 +170,24 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(posts)
       .where(eq(posts.authorId, userId))
       .orderBy(desc(posts.createdAt));
+  }
+  
+  async deletePost(id: number): Promise<boolean> {
+    try {
+      // Delete related comments first
+      await db.delete(comments).where(eq(comments.postId, id));
+      
+      // Delete related votes
+      await db.delete(votes).where(eq(votes.postId, id));
+      
+      // Delete the post itself
+      const result = await db.delete(posts).where(eq(posts.id, id));
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      return false;
+    }
   }
   
   // Comment operations

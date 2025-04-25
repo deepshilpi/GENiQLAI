@@ -1020,6 +1020,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete a post
+  app.delete("/api/posts/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    try {
+      const postId = parseInt(req.params.id);
+      if (isNaN(postId)) {
+        return res.status(400).json({ message: "Invalid post ID" });
+      }
+      
+      // Get the post to check ownership
+      const post = await storage.getPostById(postId);
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      // Ensure the user is the author of the post
+      if (post.authorId !== req.user.id) {
+        return res.status(403).json({ message: "You can only delete your own posts" });
+      }
+      
+      // Delete the post
+      const success = await storage.deletePost(postId);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to delete post" });
+      }
+      
+      // Notify connected WebSocket clients about the deletion
+      const postWithAuthor = {
+        id: postId,
+        author: {
+          id: req.user.id,
+          username: req.user.username || "Anonymous"
+        }
+      };
+      
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'post_deleted',
+            data: postWithAuthor
+          }));
+        }
+      });
+      
+      res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+  
   // Create a new post
   app.post("/api/posts", async (req, res) => {
     if (!req.isAuthenticated()) {
