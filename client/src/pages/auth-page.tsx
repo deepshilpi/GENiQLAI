@@ -54,8 +54,8 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Please enter a valid email address"),
+  username: z.string().trim().min(3, "Username must be at least 3 characters"),
+  email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -219,10 +219,7 @@ export default function AuthPage() {
                           <FormControl>
                             <AuthInput 
                               placeholder="Enter your username" 
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -239,10 +236,7 @@ export default function AuthPage() {
                             <AuthInput 
                               type="password" 
                               placeholder="Enter your password" 
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -274,10 +268,7 @@ export default function AuthPage() {
                           <FormControl>
                             <AuthInput 
                               placeholder="Choose a username" 
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -294,10 +285,7 @@ export default function AuthPage() {
                             <AuthInput 
                               type="email" 
                               placeholder="Enter your email" 
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -314,10 +302,7 @@ export default function AuthPage() {
                             <AuthInput 
                               type="password" 
                               placeholder="Create a password" 
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
