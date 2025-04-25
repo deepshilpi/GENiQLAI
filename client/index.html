@@ -3,6 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="description" content="GENIQL - Generative Execution Network for Intelligent Query Learning" />
+    <meta name="author" content="GENIQL Team" />
+    <meta name="generator" content="GENIQL BuildSystem" />
+    <meta name="application-name" content="GENIQL" />
+    <meta name="theme-color" content="#7551FF" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GENIQL" />
+    <title>GENIQL - Startup Analysis Platform</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F6F7Q74R6K"></script>
     <script>
@@ -16,7 +25,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    <!-- Custom performance monitoring & security -->
+    <script>
+      // Hide any development environment info
+      console.debug = function() {};
+      
+      // Mask environmental detection
+      if (window.navigator && navigator.userAgent) {
+        Object.defineProperty(navigator, 'userAgent', {
+          get: function() { return 'GENIQL Browser Client'; }
+        });
+      }
+    </script>
   </body>
 </html>

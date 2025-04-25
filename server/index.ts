@@ -6,6 +6,34 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Hide Replit information and add security headers
+app.use((req, res, next) => {
+  // Remove x-powered-by header
+  res.removeHeader("X-Powered-By");
+  
+  // Remove Replit-specific headers if any
+  res.removeHeader("X-Replit-User-Id");
+  res.removeHeader("X-Replit-User-Name");
+  res.removeHeader("X-Replit-User-Roles");
+  
+  // Add generic server info
+  res.setHeader("Server", "GENIQL-Server");
+  
+  // Set strict security headers
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  
+  // Add custom CSP to restrict Replit-specific domains
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:; font-src 'self' data:; object-src 'none'; media-src 'self';"
+  );
+  
+  next();
+});
+
 // Increase server timeouts for expert-level analysis (3 minutes)
 app.use((req, res, next) => {
   // Only increase timeouts for analysis and related endpoints

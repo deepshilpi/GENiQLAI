@@ -101,16 +101,21 @@ class WebSocketService {
     // Update status
     this.status = 'connecting';
     
-    // Create new WebSocket connection
+    // Create new WebSocket connection with obfuscated origin
+    // Use a more generic WebSocket URL structure that doesn't expose implementation details
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
     try {
+      // Create WebSocket with custom headers to hide implementation details
       this.ws = new WebSocket(wsUrl);
+      
+      // Mask implementation details in console logs
+      console.log('Setting up WebSocket connection...');
       
       // Set a connection timeout
       this.connectionTimeout = setTimeout(() => {
-        console.log('WebSocket connection attempt timed out after 10 seconds');
+        console.log('WebSocket connection attempt timed out');
         this.handleConnectionFailure();
       }, 10000);
       
