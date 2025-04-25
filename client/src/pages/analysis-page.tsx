@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { useLocation } from "wouter";
+import { useLocation, useNavigate } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -613,8 +613,8 @@ export default function AnalysisPage() {
   // Handle execution plan submission
   const onPlanSubmit = async (values: z.infer<typeof budgetSchema>) => {
     if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
+      // Use the new auth page instead of the auth dialog
+      navigate(`/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
@@ -817,8 +817,8 @@ export default function AnalysisPage() {
 
   const handleExportPDF = async () => {
     if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
+      // Use the new auth page instead of the auth dialog
+      navigate(`/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
