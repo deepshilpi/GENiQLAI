@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { ThreadsStylePost } from "@/components/threads-style-post";
 import { AuthContext } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";

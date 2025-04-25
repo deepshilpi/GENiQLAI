@@ -132,7 +132,7 @@ export function Header() {
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         
         {/* Header spacing for fixed positioning */}
-        <div className="p-2 mb-16"></div>
+        <div className="p-1 mb-10"></div>
 
         <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-40 vision-card shadow-lg">
           {/* Logo section with menu toggle */}
@@ -355,7 +355,7 @@ export function Header() {
   return (
     <div>
       {/* Header spacing */}
-      <div className="p-2 mb-4"></div>
+      <div className="p-1 mb-2"></div>
       
       <header className="vision-header px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-10 w-full transition-all duration-300 md:hidden">
         <div className="flex items-center gap-3">
