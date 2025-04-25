@@ -206,8 +206,11 @@ export default function AuthPage() {
                           <FormControl>
                             <Input 
                               placeholder="Enter your username" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30" 
-                              {...field} 
+                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
@@ -224,8 +227,11 @@ export default function AuthPage() {
                             <Input 
                               type="password" 
                               placeholder="Enter your password" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30" 
-                              {...field} 
+                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
@@ -257,8 +263,11 @@ export default function AuthPage() {
                           <FormControl>
                             <Input 
                               placeholder="Choose a username" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30" 
-                              {...field} 
+                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
@@ -275,8 +284,11 @@ export default function AuthPage() {
                             <Input 
                               type="email" 
                               placeholder="Enter your email" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30" 
-                              {...field} 
+                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
@@ -293,8 +305,11 @@ export default function AuthPage() {
                             <Input 
                               type="password" 
                               placeholder="Create a password" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30" 
-                              {...field} 
+                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                           <FormMessage />
