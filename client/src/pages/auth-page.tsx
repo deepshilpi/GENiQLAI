@@ -47,15 +47,21 @@ const entrepreneurQuotes = [
   }
 ];
 
-// Auth form schemas
+// Auth form schemas - with explicit type validation
 const loginSchema = z.object({
-  username: z.string().trim().min(3, "Username must be at least 3 characters"),
+  username: z.string().min(1).transform(val => val.trim()).pipe(
+    z.string().min(3, "Username must be at least 3 characters")
+  ),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  username: z.string().trim().min(3, "Username must be at least 3 characters"),
-  email: z.string().trim().email("Please enter a valid email address"),
+  username: z.string().min(1).transform(val => val.trim()).pipe(
+    z.string().min(3, "Username must be at least 3 characters")
+  ),
+  email: z.string().min(1).transform(val => val.trim()).pipe(
+    z.string().email("Please enter a valid email address")
+  ),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 

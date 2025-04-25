@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useRef, useState, useEffect } from "react";
 
-// Completely redesigned AuthInput component with explicit value handling
+// Completely redesigned AuthInput component with explicit value handling and validation
 const AuthInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & {
@@ -13,32 +13,51 @@ const AuthInput = React.forwardRef<
   const inputRef = useRef<HTMLInputElement | null>(null);
   const resolvedRef = (ref as React.RefObject<HTMLInputElement>) || inputRef;
   
+  // Convert undefined/null values to empty string to avoid uncontrolled->controlled warnings
+  const currentValue = value === undefined || value === null ? "" : value;
+  
   // Setup local value state that always matches the input
-  const [inputValue, setInputValue] = useState(value as string || "");
+  const [inputValue, setInputValue] = useState(currentValue as string);
   
   // Make sure to update local state if value prop changes
   useEffect(() => {
-    if (value !== undefined && value !== inputValue) {
-      setInputValue(value as string);
+    if (currentValue !== inputValue) {
+      setInputValue(currentValue as string);
     }
-  }, [value]);
+  }, [currentValue]);
 
   // Handle input changes with multiple callbacks
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     
-    // Call the original onChange if provided
-    if (onChange) {
-      onChange(e);
-    }
-    
-    // Call additional value change handler if provided
+    // We immediately call onValueChange with the raw value
     if (onValueChange) {
       onValueChange(newValue);
     }
+    
+    // Call the original onChange after our internal update
+    if (onChange) {
+      onChange(e);
+    }
   };
 
+  // Filter out the onBlur prop since we handle it ourselves
+  const { onBlur, ...restProps } = props;
+  
+  // Directly handle blur event to trigger validation
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // If there's an onBlur prop, call it
+    if (onBlur) {
+      onBlur(e);
+    }
+    
+    // We also explicitly update with trimmed value to ensure validation works
+    if (onValueChange && inputValue) {
+      onValueChange(inputValue.trim());
+    }
+  };
+  
   return (
     <input
       ref={resolvedRef}
@@ -53,7 +72,8 @@ const AuthInput = React.forwardRef<
       }}
       value={inputValue}
       onChange={handleChange}
-      {...props}
+      onBlur={handleBlur}
+      {...restProps}
     />
   );
 });
