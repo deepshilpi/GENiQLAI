@@ -43,8 +43,9 @@ interface UserWebSocket extends WebSocket {
   userId?: number;
 }
 
-// Map to store active WebSocket connections by user ID
-// Using non-null assertion to ensure we only add connections with valid IDs
+// Global WebSocketServer instance - will be initialized in setupWebSocketServer
+let wss: WebSocketServer | null = null;
+// Global map to track active user connections
 const activeConnections = new Map<number, Set<UserWebSocket>>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1099,17 +1100,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const comment = await storage.createComment(newComment);
       
       // Notify all WebSocket clients about the new comment
-      wss.clients.forEach((client: UserWebSocket) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'new_comment',
-            payload: { 
-              comment,
-              postId
-            }
-          }));
-        }
-      });
+      if (wss) {
+        wss.clients.forEach((client: UserWebSocket) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'new_comment',
+              payload: { 
+                comment,
+                postId
+              }
+            }));
+          }
+        });
+      }
       
       return res.status(201).json(comment);
     } catch (error) {
@@ -1640,7 +1643,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 // WebSocket server setup
 function setupWebSocketServer(httpServer: Server) {
-  const wss = new WebSocketServer({ 
+  // Initialize global WebSocket server
+  wss = new WebSocketServer({ 
     server: httpServer,
     path: '/ws'
   });
