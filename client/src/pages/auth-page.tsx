@@ -221,7 +221,14 @@ export default function AuthPage() {
                           <FormControl>
                             <AuthInput 
                               placeholder="Enter your username" 
-                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                // This helps ensure the field value is updated
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -238,7 +245,14 @@ export default function AuthPage() {
                             <AuthInput 
                               type="password" 
                               placeholder="Enter your password" 
-                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                // This helps ensure the field value is updated
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -270,7 +284,14 @@ export default function AuthPage() {
                           <FormControl>
                             <AuthInput 
                               placeholder="Choose a username" 
-                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                // This helps ensure the field value is updated
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -287,7 +308,14 @@ export default function AuthPage() {
                             <AuthInput 
                               type="email" 
                               placeholder="Enter your email" 
-                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                // This helps ensure the field value is updated
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -304,7 +332,14 @@ export default function AuthPage() {
                             <AuthInput 
                               type="password" 
                               placeholder="Create a password" 
-                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                // This helps ensure the field value is updated
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
