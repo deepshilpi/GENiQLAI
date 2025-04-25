@@ -47,7 +47,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-// AuthDialog removed - using redirect to auth page instead
+// Using auth prompt dialog before redirecting to auth page
+import { AuthPromptDialog } from "@/components/auth-prompt-dialog";
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";
 import { CompetitorsChart } from "@/components/analysis/competitors-chart";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
@@ -218,6 +219,11 @@ export default function AnalysisPage() {
   const { toast } = useToast();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.search.toString());
+  
+  // Auth prompt dialog state
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [authAction, setAuthAction] = useState("");
+  const [pendingAuthRedirect, setPendingAuthRedirect] = useState<string | null>(null);
 
   // State management
   const [phase, setPhase] = useState<AnalysisPhase>("input");
@@ -346,6 +352,21 @@ export default function AnalysisPage() {
       clearInterval(refreshInterval);
     };
   }, [user, refetchUser]);
+
+  // Function to handle auth prompt display
+  const handleAuthRequired = (action: string) => {
+    setAuthAction(action);
+    setAuthPromptOpen(true);
+    setPendingAuthRedirect(`/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+  };
+
+  // Function to handle confirmation from auth prompt
+  const handleAuthConfirm = () => {
+    setAuthPromptOpen(false);
+    if (pendingAuthRedirect) {
+      window.location.href = pendingAuthRedirect;
+    }
+  };
 
   // Effect for progressive loading of blocks
   useEffect(() => {
@@ -611,8 +632,8 @@ export default function AnalysisPage() {
   // Handle execution plan submission
   const onPlanSubmit = async (values: z.infer<typeof budgetSchema>) => {
     if (!user) {
-      // Use the new auth page instead of the auth dialog
-      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+      // Show the auth prompt with the specific action
+      handleAuthRequired("create an execution plan");
       return;
     }
 
@@ -815,8 +836,8 @@ export default function AnalysisPage() {
 
   const handleExportPDF = async () => {
     if (!user) {
-      // Use the new auth page instead of the auth dialog
-      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+      // Show the auth prompt with the specific action
+      handleAuthRequired("export your analysis");
       return;
     }
 
@@ -1046,8 +1067,8 @@ export default function AnalysisPage() {
 
   const handleShareToCommunity = async () => {
     if (!user) {
-      // Use the new auth page instead of the auth dialog
-      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+      // Show the auth prompt with the specific action
+      handleAuthRequired("share to community");
       return;
     }
 
@@ -1125,8 +1146,8 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
   const handleSaveAnalysis = async () => {
     if (!user) {
-      // Use the new auth page instead of the auth dialog
-      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+      // Show the auth prompt with the specific action
+      handleAuthRequired("save your analysis");
       return;
     }
 
