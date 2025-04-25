@@ -70,6 +70,7 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(true);
   const [language, setLanguage] = useState("english");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [activeTab, setActiveTab] = useState("profile");
   
   // File input reference for profile picture uploads
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -265,10 +266,33 @@ export default function SettingsPage() {
     updateProfilePicture.mutate(formData);
   };
   
-  // Trigger file input click
+  // Trigger file input click - improved with error handling and logging
   const triggerFileUpload = () => {
+    console.log("Triggering file upload with ref:", fileInputRef.current);
     if (fileInputRef.current) {
-      fileInputRef.current.click();
+      // Use a timeout to ensure the click event is processed correctly
+      setTimeout(() => {
+        try {
+          fileInputRef.current?.click();
+          console.log("File input click triggered");
+        } catch (error) {
+          console.error("Error triggering file input click:", error);
+          // Fallback method if the click() method fails
+          const event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          });
+          fileInputRef.current?.dispatchEvent(event);
+        }
+      }, 0);
+    } else {
+      console.error("File input reference is null");
+      toast({
+        title: "Error",
+        description: "Could not open file selector, please try again",
+        variant: "destructive",
+      });
     }
   };
 
@@ -329,27 +353,47 @@ export default function SettingsPage() {
             </Button>
           </div>
           
-          {/* Tabs - Improved for mobile */}
-          <Tabs defaultValue="profile" className="w-full">
+          {/* Tabs - Improved for mobile with controlled state */}
+          <Tabs 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <div className="relative mb-6 overflow-hidden">
               <ScrollArea className="w-full">
                 <TabsList className="bg-[#11083C]/90 backdrop-blur-md border-[#A163F7]/20 w-auto min-w-full inline-flex rounded-lg shadow-lg">
-                  <TabsTrigger value="profile" className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="profile" 
+                    className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white"
+                    onClick={() => console.log("Profile tab clicked")}
+                  >
                     <User className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Profile</span>
                     <span className="sm:hidden">Profile</span>
                   </TabsTrigger>
-                  <TabsTrigger value="security" className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="security" 
+                    className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white"
+                    onClick={() => console.log("Security tab clicked")}
+                  >
                     <Shield className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Security</span>
                     <span className="sm:hidden">Security</span>
                   </TabsTrigger>
-                  <TabsTrigger value="notifications" className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="notifications" 
+                    className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white"
+                    onClick={() => console.log("Notifications tab clicked")}
+                  >
                     <Bell className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Notifications</span>
                     <span className="sm:hidden">Alerts</span>
                   </TabsTrigger>
-                  <TabsTrigger value="preferences" className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white">
+                  <TabsTrigger 
+                    value="preferences" 
+                    className="py-3 px-4 whitespace-nowrap text-white data-[state=active]:bg-[#A163F7]/20 data-[state=active]:text-white"
+                    onClick={() => console.log("Preferences tab clicked")}
+                  >
                     <Monitor className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Preferences</span>
                     <span className="sm:hidden">Prefs</span>
