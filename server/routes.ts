@@ -1785,6 +1785,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Get all users for messaging
+  app.get("/api/users", async (req, res) => {
+    // Set proper content type header
+    res.setHeader('Content-Type', 'application/json');
+    
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ 
+          message: "Authentication required to view users",
+          error: "auth_required"
+        });
+      }
+      
+      // Get all users from storage
+      const allUsers = await storage.getAllUsers();
+      
+      // Filter out sensitive information and the current user
+      const currentUserId = req.user.id;
+      const filteredUsers = allUsers
+        .filter(user => user.id !== currentUserId)
+        .map(user => {
+          // Remove sensitive information like password
+          const { password, ...userWithoutPassword } = user;
+          return userWithoutPassword;
+        });
+      
+      console.log(`Successfully fetched ${filteredUsers.length} users for messaging`);
+      return res.status(200).json(filteredUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ 
+        message: "Failed to fetch users",
+        error: "server_error"
+      });
+    }
+  });
   
   // Mark notifications as read
   app.post("/api/notifications/mark-read", async (req, res) => {
