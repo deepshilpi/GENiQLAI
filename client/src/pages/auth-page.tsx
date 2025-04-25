@@ -114,7 +114,13 @@ export default function AuthPage() {
   const onLoginSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data, {
       onSuccess: () => {
-        navigate(returnUrl);
+        // Set a session flag to indicate successful login for post-redirect detection
+        sessionStorage.setItem('auth_login_success', 'true');
+        
+        // Add a delay before navigating to ensure the flag is set
+        setTimeout(() => {
+          navigate(returnUrl);
+        }, 100);
       }
     });
   };
@@ -123,7 +129,13 @@ export default function AuthPage() {
   const onRegisterSubmit = (data: RegisterFormValues) => {
     registerMutation.mutate(data, {
       onSuccess: () => {
-        navigate(returnUrl);
+        // Set a session flag to indicate successful registration/login for post-redirect detection
+        sessionStorage.setItem('auth_login_success', 'true');
+        
+        // Add a delay before navigating to ensure the flag is set
+        setTimeout(() => {
+          navigate(returnUrl);
+        }, 100);
       }
     });
   };

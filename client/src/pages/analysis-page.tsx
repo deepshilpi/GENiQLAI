@@ -312,7 +312,7 @@ export default function AnalysisPage() {
     }, 200);
   };
 
-  // Effect to refresh user data when component mounts
+  // Effect to refresh user data when component mounts and handle analysis state persistence
   useEffect(() => {
     // Create a function to check login status
     const checkAuthStatus = async () => {
@@ -325,6 +325,30 @@ export default function AnalysisPage() {
         try {
           const updatedUser = await refetchUser();
           console.log("[Analysis] Auth refresh complete, user:", updatedUser ? "Found" : "Not found");
+          
+          // If user just logged in, check for saved analysis state
+          if (updatedUser && loginElement) {
+            const savedState = localStorage.getItem('pendingAnalysisState');
+            if (savedState) {
+              try {
+                const parsedState = JSON.parse(savedState);
+                console.log("[Analysis] Found saved analysis state, restoring...");
+                
+                // Restore all saved state
+                if (parsedState.phase) setPhase(parsedState.phase);
+                if (parsedState.analysisData) setAnalysisData(parsedState.analysisData);
+                if (parsedState.budgetAnalysisData) setBudgetAnalysisData(parsedState.budgetAnalysisData);
+                if (parsedState.idea) ideaForm.setValue('idea', parsedState.idea);
+                if (parsedState.country) ideaForm.setValue('country', parsedState.country);
+                
+                // Clear saved state after restoring
+                localStorage.removeItem('pendingAnalysisState');
+              } catch (err) {
+                console.error("[Analysis] Error restoring saved analysis state:", err);
+                localStorage.removeItem('pendingAnalysisState');
+              }
+            }
+          }
         } catch (err) {
           console.error("[Analysis] Error refreshing auth state:", err);
         }
@@ -351,7 +375,7 @@ export default function AnalysisPage() {
       timeoutIds.forEach(id => clearTimeout(id));
       clearInterval(refreshInterval);
     };
-  }, [user, refetchUser]);
+  }, [user, refetchUser, ideaForm]);
 
   // Function to handle auth prompt display
   const handleAuthRequired = (action: string) => {
@@ -363,6 +387,27 @@ export default function AnalysisPage() {
   // Function to handle confirmation from auth prompt
   const handleAuthConfirm = () => {
     setAuthPromptOpen(false);
+
+    // Save current analysis state before redirecting
+    if (phase === "results" || phase === "plan-results") {
+      try {
+        // Prepare state to save
+        const stateToSave = {
+          phase,
+          analysisData,
+          budgetAnalysisData,
+          idea: ideaForm.getValues().idea,
+          country: ideaForm.getValues().country
+        };
+        
+        // Save to localStorage for retrieval after login
+        localStorage.setItem('pendingAnalysisState', JSON.stringify(stateToSave));
+        console.log("[Analysis] Saved analysis state to localStorage before redirecting");
+      } catch (err) {
+        console.error("[Analysis] Error saving analysis state:", err);
+      }
+    }
+
     if (pendingAuthRedirect) {
       window.location.href = pendingAuthRedirect;
     }
@@ -599,6 +644,29 @@ export default function AnalysisPage() {
       });
     }
   };
+
+  // Check for login success to show toast
+  useEffect(() => {
+    // Check session storage for login success flag
+    const loginSuccess = sessionStorage.getItem('auth_login_success');
+    if (loginSuccess === 'true') {
+      // Clear the flag to avoid showing the toast on refresh
+      sessionStorage.removeItem('auth_login_success');
+      
+      // Get restored state info (if any)
+      const savedState = localStorage.getItem('pendingAnalysisState');
+      const restoredMsg = savedState ? " Analysis data has been restored." : "";
+      
+      // Show success toast with login success message
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user?.username || 'user'}!${restoredMsg}`,
+        variant: "default",
+        className: "login-success-toast bg-green-600 text-white", // Add a class for detection
+        duration: 5000, // Show for 5 seconds
+      });
+    }
+  }, [user, toast]);
 
   // Check for pending analysis from sessionStorage (populated by home page)
   useEffect(() => {
