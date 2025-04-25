@@ -220,19 +220,19 @@ export default function AnalysisPage() {
   const searchParams = new URLSearchParams(location.search.toString());
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("");
-  
+
   // State management
   const [phase, setPhase] = useState<AnalysisPhase>("input");
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [budgetAnalysisData, setBudgetAnalysisData] = useState<any>(null);
   const [remainingFreeAnalyses, setRemainingFreeAnalyses] = useState<number | null>(null);
   const [relatedIdeasData, setRelatedIdeasData] = useState<any[]>([]);
-  
+
   // Progressive loading states
   const [visibleBlocks, setVisibleBlocks] = useState<string[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Analysis blocks to be loaded progressively
   const analysisBlocks = [
     "header",           // Analysis header with the user's idea
@@ -247,7 +247,7 @@ export default function AnalysisPage() {
     "relatedIdeas",     // Related startup ideas
     "actionButtons"     // Action buttons (save, export, etc.)
   ];
-  
+
   // Execution plan blocks to be loaded progressively after "Plan to Execute"
   const executionPlanBlocks = [
     "planHeader",          // Plan header with idea summary
@@ -258,7 +258,7 @@ export default function AnalysisPage() {
     "successMetrics",      // KPIs to track progress
     "planActionButtons"    // Action buttons (share, save, export, etc.)
   ];
-  
+
   // Forms setup
   const ideaForm = useForm<z.infer<typeof startupIdeaSchema>>({
     resolver: zodResolver(startupIdeaSchema),
@@ -267,7 +267,7 @@ export default function AnalysisPage() {
       country: "India",
     },
   });
-  
+
   const budgetForm = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -282,18 +282,18 @@ export default function AnalysisPage() {
       existingSkills: "",
     },
   });
-  
+
   // Progressive loading function
   const startProgressiveLoading = () => {
     // Reset visible blocks and progress
     setVisibleBlocks([]);
     setLoadingProgress(0);
-    
+
     // Clear any existing timer
     if (progressTimerRef.current) {
       clearInterval(progressTimerRef.current);
     }
-    
+
     // Start progress animation
     progressTimerRef.current = setInterval(() => {
       setLoadingProgress(prev => {
@@ -307,13 +307,13 @@ export default function AnalysisPage() {
       });
     }, 200);
   };
-  
+
   // Effect to refresh user data when component mounts
   useEffect(() => {
     // Create a function to check login status
     const checkAuthStatus = async () => {
       console.log("[Analysis] Checking auth status, current user:", user ? `Logged in as ${user.username}` : "Not logged in");
-      
+
       // Only refetch if we can see the login success message (which indicates a recent login)
       const loginElement = document.querySelector('.login-success-toast');
       if (loginElement || !user) {
@@ -326,23 +326,23 @@ export default function AnalysisPage() {
         }
       }
     };
-    
+
     // Call immediately
     checkAuthStatus();
-    
+
     // Set an interval with exponential backoff timing
     // 200ms, 500ms, 1000ms, 2000ms, then every 5s
     const timeouts = [200, 500, 1000, 2000];
-    
+
     const timeoutIds = timeouts.map(delay => 
       setTimeout(() => checkAuthStatus(), delay)
     );
-    
+
     // Regular interval after initial quick checks
     const refreshInterval = setInterval(() => {
       checkAuthStatus();
     }, 5000);
-    
+
     return () => {
       timeoutIds.forEach(id => clearTimeout(id));
       clearInterval(refreshInterval);
@@ -356,27 +356,27 @@ export default function AnalysisPage() {
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
       }
-      
+
       setLoadingProgress(100); // Complete the loading progress bar
-      
+
       // Progressive loading of blocks with staggered timing
       const blockTimers: NodeJS.Timeout[] = [];
-      
+
       analysisBlocks.forEach((block, index) => {
         const timer = setTimeout(() => {
           setVisibleBlocks(prev => [...prev, block]);
         }, 300 + (index * 200)); // 300ms initial delay, then 200ms between each block
-        
+
         blockTimers.push(timer);
       });
-      
+
       // Cleanup timers
       return () => {
         blockTimers.forEach(timer => clearTimeout(timer));
       };
     }
   }, [phase, analysisData]);
-  
+
   // Handle startup idea submission
   const onIdeaSubmit = async (values: z.infer<typeof startupIdeaSchema>) => {
     if (!values.idea || values.idea.trim() === "") {
@@ -387,25 +387,25 @@ export default function AnalysisPage() {
       });
       return;
     }
-    
+
     setPhase("loading");
     startProgressiveLoading(); // Start the progressive loading animation
-    
+
     try {
       console.log("Submitting idea for analysis:", {
         startupIdea: values.idea,
         country: values.country || "Global"
       });
-      
+
       // Add timeout handling with AbortController
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout (increased from 2 min)
-      
+
       // Implement retry mechanism for network failures
       let maxRetries = 2;
       let retries = 0;
       let response = null;
-      
+
       while (retries <= maxRetries) {
         try {
           response = await fetch("/api/analyze", {
@@ -419,12 +419,12 @@ export default function AnalysisPage() {
             }),
             signal: controller.signal
           });
-          
+
           // If we got a successful response or a non-retriable error, break the loop
           if (response.status < 500 || response.status === 504) {
             break;
           }
-          
+
           // If we get a 502/500 error, retry after a short delay
           if (response.status === 502 || response.status === 500) {
             retries++;
@@ -434,7 +434,7 @@ export default function AnalysisPage() {
               continue;
             }
           }
-          
+
           break;
         } catch (fetchError: unknown) {
           // If the error is not a timeout, retry
@@ -449,20 +449,20 @@ export default function AnalysisPage() {
           throw fetchError;
         }
       }
-      
+
       if (!response) {
         throw new Error("Failed to connect to the analysis server. Please try again later.");
       }
-      
+
       // Clear timeout since we got a response
       clearTimeout(timeoutId);
-      
+
       console.log("Analysis response status:", response.status);
-      
+
       if (!response.ok) {
         // Handle different error status codes appropriately
         let errorMessage = "Failed to analyze startup idea";
-        
+
         if (response.status === 502 || response.status === 504) {
           errorMessage = "The analysis server is taking too long to respond. Please try a shorter description or try again later.";
         } else if (response.status === 429) {
@@ -472,7 +472,7 @@ export default function AnalysisPage() {
         } else if (response.status === 503) {
           errorMessage = "AI analysis service is temporarily unavailable. Please try again later.";
         }
-        
+
         // Try to get more detailed error message from response
         try {
           const errorData = await response.json();
@@ -485,25 +485,25 @@ export default function AnalysisPage() {
           // Fallback to status text if we can't parse the JSON
           errorMessage = response.statusText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
       }
-      
+
       // Parse the response data with robust error handling
       let data;
       try {
         // Try standard JSON parsing first
         const responseText = await response.text();
-        
+
         // Log the first part of the response for debugging
         console.log("Response text (first 100 chars):", responseText.substring(0, 100) + "...");
-        
+
         try {
           // Attempt direct JSON parsing
           data = JSON.parse(responseText);
         } catch (directParseError) {
           console.error("Direct JSON parse error:", directParseError);
-          
+
           // Fallback 1: Try to extract JSON from the response using regex
           const jsonMatch = responseText.match(/(\{[\s\S]*\})/);
           if (jsonMatch && jsonMatch[1]) {
@@ -512,7 +512,7 @@ export default function AnalysisPage() {
               data = JSON.parse(jsonMatch[1]);
             } catch (extractParseError) {
               console.error("Extract JSON parse error:", extractParseError);
-              
+
               // Fallback 2: Look for JSON in code blocks (in case the API returned markdown)
               const codeBlockMatch = responseText.match(/```(?:json)?([\s\S]*?)```/);
               if (codeBlockMatch && codeBlockMatch[1]) {
@@ -531,48 +531,48 @@ export default function AnalysisPage() {
             throw new Error("Received invalid response format. Please try again with a different description.");
           }
         }
-        
+
         if (!data) {
           throw new Error("Empty response received from server. Please try again.");
         }
-        
+
         console.log("Analysis response data keys:", Object.keys(data));
       } catch (parseError) {
         console.error("Error handling response data:", parseError);
         throw new Error(parseError instanceof Error ? parseError.message : "Failed to process analysis results. Please try again.");
       }
-      
+
       // Set remaining free analyses for anonymous users
       if (data.meta && data.meta.remainingFreeAnalyses !== null) {
         setRemainingFreeAnalyses(data.meta.remainingFreeAnalyses);
       }
-      
+
       // Store related ideas separately
       if (data.relatedIdeas && data.relatedIdeas.length > 0) {
         setRelatedIdeasData(data.relatedIdeas);
       }
-      
+
       console.log("Analysis completed successfully");
       setAnalysisData(data);
       setPhase("results");
     } catch (err: any) {
       console.error("Error analyzing startup idea:", err);
       setPhase("input");
-      
+
       // Clear any loading animations
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
       }
-      
+
       // Special handling for timeout/abort errors
       let errorTitle = "Analysis Failed";
       let errorMessage = err instanceof Error ? err.message : "Failed to analyze your startup idea. Please try again.";
-      
+
       if (err.name === 'AbortError') {
         errorTitle = "Analysis Timeout";
         errorMessage = "The analysis is taking too long to complete. Please try again with a shorter description.";
       }
-      
+
       toast({
         title: errorTitle,
         description: errorMessage,
@@ -580,23 +580,23 @@ export default function AnalysisPage() {
       });
     }
   };
-  
+
   // Check for pending analysis from sessionStorage (populated by home page)
   useEffect(() => {
     const pendingIdea = sessionStorage.getItem('pendingStartupIdea');
     const userCountry = sessionStorage.getItem('userCountry');
-    
+
     if (pendingIdea) {
       // Clear sessionStorage to prevent resubmission
       sessionStorage.removeItem('pendingStartupIdea');
       sessionStorage.removeItem('userCountry');
-      
+
       // Set form values
       ideaForm.setValue('idea', pendingIdea);
       if (userCountry) {
         ideaForm.setValue('country', userCountry);
       }
-      
+
       // Auto-submit the form with the current values
       const formValues = ideaForm.getValues();
       const timer = setTimeout(() => {
@@ -605,11 +605,11 @@ export default function AnalysisPage() {
           country: formValues.country
         });
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, []);
-  
+
   // Handle execution plan submission
   const onPlanSubmit = async (values: z.infer<typeof budgetSchema>) => {
     if (!user) {
@@ -617,14 +617,14 @@ export default function AnalysisPage() {
       setAuthDialogOpen(true);
       return;
     }
-    
+
     // All features are now available to everyone
-    
+
     setPhase("plan-loading");
-    
+
     try {
       const budgetValue = parseFloat(values.budget.replace(/[^0-9.-]+/g, ""));
-      
+
       const response = await apiRequest("POST", "/api/execution-plan", {
         startupIdea: ideaForm.getValues().idea,
         initialBudget: budgetValue,
@@ -633,26 +633,26 @@ export default function AnalysisPage() {
         teamComposition: values.teamComposition,
         existingSkills: values.existingSkills,
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || "Failed to generate execution plan");
       }
-      
+
       // Log the response data to debug
       console.log("Execution plan response:", data);
       console.log("Response data keys:", Object.keys(data));
-      
+
       // Process response data - ensure we have a consistent structure regardless of server response format
       let processedData = { ...data };
-      
+
       // If plan data is in planToExecute (preferred) or planningToExecute, use it
       const planData = data.planToExecute || data.planningToExecute;
-      
+
       if (planData) {
         console.log("Found execution plan data");
-        
+
         // Make sure budgetAnalysis exists and has the correct structure
         if (!processedData.budgetAnalysis && data.budgetAnalysis) {
           // If budgetAnalysis is at the top level, keep it
@@ -661,10 +661,10 @@ export default function AnalysisPage() {
           // If budgetAnalysis doesn't exist, create it from the plan data or elsewhere
           console.log("Creating budgetAnalysis structure from available data");
           processedData.budgetAnalysis = {};
-          
+
           // Handle all possible locations of analysis data
           // First check top level, then in planData
-          
+
           // Feasibility and Scalability
           if (processedData.feasibilityAndScalability) {
             processedData.budgetAnalysis.feasibilityAndScalability = processedData.feasibilityAndScalability;
@@ -679,7 +679,7 @@ export default function AnalysisPage() {
             };
             console.warn("Missing feasibilityAndScalability data");
           }
-          
+
           // Risk Analysis
           if (processedData.riskAnalysis) {
             processedData.budgetAnalysis.riskAnalysis = processedData.riskAnalysis;
@@ -693,7 +693,7 @@ export default function AnalysisPage() {
             };
             console.warn("Missing riskAnalysis data");
           }
-          
+
           // Go To Market Strategy
           if (processedData.goToMarketStrategy) {
             processedData.budgetAnalysis.goToMarketStrategy = processedData.goToMarketStrategy;
@@ -706,7 +706,7 @@ export default function AnalysisPage() {
             };
             console.warn("Missing goToMarketStrategy data");
           }
-          
+
           // Long Term Vision
           if (processedData.longTermVision) {
             processedData.budgetAnalysis.longTermVision = processedData.longTermVision;
@@ -719,7 +719,7 @@ export default function AnalysisPage() {
             };
             console.warn("Missing longTermVision data");
           }
-          
+
           // Team Execution
           if (processedData.teamExecution) {
             processedData.budgetAnalysis.teamExecution = processedData.teamExecution;
@@ -733,7 +733,7 @@ export default function AnalysisPage() {
             };
             console.warn("Missing teamExecution data");
           }
-          
+
           // Funding and Investors
           if (processedData.fundingInvestors) {
             processedData.budgetAnalysis.fundingInvestors = processedData.fundingInvestors;
@@ -780,23 +780,23 @@ export default function AnalysisPage() {
           }
         };
       }
-      
+
       // Also get investor recommendations
       const investorsResponse = await apiRequest("POST", "/api/investors", {
         startupIdea: ideaForm.getValues().idea,
       });
-      
+
       if (investorsResponse.ok) {
         const investorsData = await investorsResponse.json();
         processedData.investorsData = investorsData;
       }
-      
+
       setBudgetAnalysisData(processedData);
       setPhase("plan-results");
     } catch (err: any) {
       console.error("Error generating execution plan:", err);
       setPhase("results"); // Go back to initial results
-      
+
       toast({
         title: "Execution Plan Failed",
         description: err instanceof Error ? err.message : "Failed to generate your execution plan. Please try again.",
@@ -804,7 +804,7 @@ export default function AnalysisPage() {
       });
     }
   };
-  
+
   // Action handlers
   const handleReset = () => {
     ideaForm.reset();
@@ -814,66 +814,66 @@ export default function AnalysisPage() {
     setBudgetAnalysisData(null);
     setRelatedIdeasData([]);
   };
-  
+
   const handleExportPDF = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
-    
+
     try {
       // Show a loading toast
       toast({
         title: "Export Started",
         description: "Your PDF is being generated and will download shortly.",
       });
-      
+
       // Dynamically import jsPDF and html2canvas
       const { default: jsPDF } = await import('jspdf');
       const { default: html2canvas } = await import('html2canvas');
-      
+
       // Create a new PDF document
       const pdf = new jsPDF('p', 'mm', 'a4');
       const width = pdf.internal.pageSize.getWidth();
       const height = pdf.internal.pageSize.getHeight();
-      
+
       // Set up the document title and properties
       const ideaText = ideaForm.getValues().idea || "Startup Idea";
       const country = ideaForm.getValues().country || "Global";
       const title = `Startup Analysis: ${ideaText.substring(0, 40)}${ideaText.length > 40 ? '...' : ''}`;
-      
+
       // Add a header to the PDF
       pdf.setFontSize(22);
       pdf.setTextColor(117, 81, 255); // Vision purple
       pdf.text(title, width / 2, 20, { align: 'center' });
-      
+
       pdf.setFontSize(12);
       pdf.setTextColor(80, 80, 80);
       pdf.text(`Generated on ${new Date().toLocaleDateString()}`, width / 2, 28, { align: 'center' });
       pdf.text(`Market: ${country}`, width / 2, 34, { align: 'center' });
-      
+
       // Add the startup idea description
       pdf.setFontSize(14);
       pdf.setTextColor(0, 0, 0);
       pdf.text('Startup Idea:', 14, 45);
-      
+
       pdf.setFontSize(12);
       pdf.setTextColor(80, 80, 80);
       const splitTitle = pdf.splitTextToSize(ideaText, width - 28);
       pdf.text(splitTitle, 14, 52);
-      
+
       let currentY = 52 + (splitTitle.length * 5);
-      
+
       // Add a small gap
       currentY += 10;
-      
+
       // Add the success rate and business model strength
       pdf.setFontSize(14);
       pdf.setTextColor(0, 0, 0);
       pdf.text('Key Metrics:', 14, currentY);
       currentY += 8;
-      
+
       pdf.setFontSize(12);
       pdf.setTextColor(80, 80, 80);
       pdf.text(`Success Rate: ${analysisData.successRate}%`, 14, currentY);
@@ -883,99 +883,99 @@ export default function AnalysisPage() {
       pdf.text(`Market Size: ${analysisData.marketSize}`, 14, currentY);
       currentY += 6;
       pdf.text(`Funding Required: ${analysisData.fundingRequired}`, 14, currentY);
-      
+
       // Add a small gap
       currentY += 10;
-      
+
       // Add the SWOT analysis
       pdf.setFontSize(14);
       pdf.setTextColor(0, 0, 0);
       pdf.text('SWOT Analysis:', 14, currentY);
       currentY += 8;
-      
+
       // Strengths
       pdf.setFontSize(12);
       pdf.setTextColor(39, 174, 96); // Green
       pdf.text('Strengths:', 14, currentY);
       currentY += 6;
-      
+
       pdf.setTextColor(80, 80, 80);
       for (const strength of analysisData.swotAnalysis.strengths) {
         const lines = pdf.splitTextToSize(`• ${strength}`, width - 28);
         pdf.text(lines, 14, currentY);
         currentY += lines.length * 5 + 2;
       }
-      
+
       // Weaknesses
       pdf.setFontSize(12);
       pdf.setTextColor(231, 76, 60); // Red
       pdf.text('Weaknesses:', 14, currentY);
       currentY += 6;
-      
+
       pdf.setTextColor(80, 80, 80);
       for (const weakness of analysisData.swotAnalysis.weaknesses) {
         const lines = pdf.splitTextToSize(`• ${weakness}`, width - 28);
         pdf.text(lines, 14, currentY);
         currentY += lines.length * 5 + 2;
       }
-      
+
       // Check if we need a new page (if y position > 250mm)
       if (currentY > 250) {
         pdf.addPage();
         currentY = 20;
       }
-      
+
       // Opportunities
       pdf.setFontSize(12);
       pdf.setTextColor(52, 152, 219); // Blue
       pdf.text('Opportunities:', 14, currentY);
       currentY += 6;
-      
+
       pdf.setTextColor(80, 80, 80);
       for (const opportunity of analysisData.swotAnalysis.opportunities) {
         const lines = pdf.splitTextToSize(`• ${opportunity}`, width - 28);
         pdf.text(lines, 14, currentY);
         currentY += lines.length * 5 + 2;
       }
-      
+
       // Threats
       pdf.setFontSize(12);
       pdf.setTextColor(230, 126, 34); // Orange
       pdf.text('Threats:', 14, currentY);
       currentY += 6;
-      
+
       pdf.setTextColor(80, 80, 80);
       for (const threat of analysisData.swotAnalysis.threats) {
         const lines = pdf.splitTextToSize(`• ${threat}`, width - 28);
         pdf.text(lines, 14, currentY);
         currentY += lines.length * 5 + 2;
       }
-      
+
       // Check if we need a new page
       if (currentY > 250) {
         pdf.addPage();
         currentY = 20;
       }
-      
+
       // Add execution plan data if available
       if (phase === "plan-results" && budgetAnalysisData) {
         // Add a small gap
         currentY += 10;
-        
+
         pdf.setFontSize(16);
         pdf.setTextColor(117, 81, 255); // Vision purple
         pdf.text('Execution Plan', width / 2, currentY, { align: 'center' });
         currentY += 10;
-        
+
         if (budgetAnalysisData.budgetAnalysis?.breakdown) {
           pdf.setFontSize(14);
           pdf.setTextColor(0, 0, 0);
           pdf.text('Budget Breakdown:', 14, currentY);
           currentY += 8;
-          
+
           pdf.setFontSize(12);
           pdf.setTextColor(80, 80, 80);
-          
+
           for (const category of budgetAnalysisData.budgetAnalysis.breakdown) {
             const text = `${category.category}: ${category.amount} (${category.percentage}%)`;
             const lines = pdf.splitTextToSize(text, width - 28);
@@ -983,28 +983,28 @@ export default function AnalysisPage() {
             currentY += lines.length * 5 + 2;
           }
         }
-        
+
         // Check if we need a new page
         if (currentY > 250) {
           pdf.addPage();
           currentY = 20;
         }
-        
+
         // Add top investor recommendations if available
         if (budgetAnalysisData.investorsData?.investors && budgetAnalysisData.investorsData.investors.length > 0) {
           pdf.setFontSize(14);
           pdf.setTextColor(0, 0, 0);
           pdf.text('Potential Investors:', 14, currentY);
           currentY += 8;
-          
+
           pdf.setFontSize(12);
           pdf.setTextColor(80, 80, 80);
-          
+
           for (const investor of budgetAnalysisData.investorsData.investors) {
             pdf.setTextColor(117, 81, 255); // Vision purple
             pdf.text(`${investor.name} (${investor.firm})`, 14, currentY);
             currentY += 6;
-            
+
             pdf.setTextColor(80, 80, 80);
             pdf.text(`Focus: ${investor.investmentFocus.join(', ')}`, 20, currentY);
             currentY += 5;
@@ -1012,25 +1012,25 @@ export default function AnalysisPage() {
             currentY += 5;
             pdf.text(`Portfolio Fit: ${investor.portfolioFit}%`, 20, currentY);
             currentY += 5;
-            
+
             if (investor.contactInfo) {
               pdf.text(`Contact: ${investor.contactInfo}`, 20, currentY);
               currentY += 5;
             }
-            
+
             currentY += 5; // Add space between investors
           }
         }
       }
-      
+
       // Add disclaimer at the bottom of the last page
       pdf.setFontSize(8);
       pdf.setTextColor(150, 150, 150);
       pdf.text('Generated by GENIQL - AI Startup Analysis Platform. For informational purposes only.', width / 2, height - 10, { align: 'center' });
-      
+
       // Save the PDF
       pdf.save(`GENIQL-Startup-Analysis-${new Date().toISOString().split('T')[0]}.pdf`);
-      
+
       // Show success message
       toast({
         title: "Export Complete",
@@ -1045,19 +1045,19 @@ export default function AnalysisPage() {
       });
     }
   };
-  
+
   const handleShareToCommunity = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
-    
+
     try {
       // Get the current startup idea
       const ideaText = ideaForm.getValues().idea;
       const country = ideaForm.getValues().country || "Global";
-      
+
       // Prepare the post content with analysis highlights
       const postContent = `
 ## Startup Idea: ${ideaText.substring(0, 100)}${ideaText.length > 100 ? '...' : ''}
@@ -1083,7 +1083,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
 *Analysis performed on ${new Date().toLocaleDateString()} for ${country} market using GENIQL AI*
       `;
-      
+
       // Make API call to create the community post
       const response = await fetch("/api/posts", {
         method: "POST",
@@ -1098,19 +1098,19 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         }),
         credentials: "include"
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to create community post: ${response.statusText}`);
       }
-      
+
       const postData = await response.json();
-      
+
       // Success message with redirection
       toast({
         title: "Post Created",
         description: "Your analysis has been shared to the community.",
       });
-      
+
       // Redirect to the community page/post
       setTimeout(() => {
         window.location.href = `/community/post/${postData.id}`;
@@ -1124,19 +1124,19 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
       });
     }
   };
-  
+
   const handleSaveAnalysis = async () => {
     if (!user) {
       setReturnTo(window.location.pathname);
       setAuthDialogOpen(true);
       return;
     }
-    
+
     try {
       // Get the current startup idea
       const ideaText = ideaForm.getValues().idea;
       const country = ideaForm.getValues().country || "Global";
-      
+
       // Create a results snapshot from the current analysis data
       const resultsSnapshot = {
         successRate: analysisData.successRate,
@@ -1147,7 +1147,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         ...(budgetAnalysisData?.budgetAnalysis && { budgetAnalysis: budgetAnalysisData.budgetAnalysis }),
         ...(budgetAnalysisData?.investorsData && { investorsData: budgetAnalysisData.investorsData })
       };
-      
+
       // Make API call to save the idea
       const response = await fetch("/api/saved-ideas", {
         method: "POST",
@@ -1163,11 +1163,11 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         }),
         credentials: "include"
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to save analysis: ${response.statusText}`);
       }
-      
+
       // Success message
       toast({
         title: "Analysis Saved",
@@ -1190,11 +1190,11 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
         onClose={() => setAuthDialogOpen(false)} 
         returnTo={returnTo}
       />
-      
+
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (
         <>
-          <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+          <Card className="mt-4 border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-xl text-white">What's in your mind?</CardTitle>
               <CardDescription className="text-white/70">
@@ -1237,10 +1237,10 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                         </FormItem>
                       )}
                     />
-                    
+
 
                   </div>
-                  
+
                   <div className="mt-4">
                     <FormField
                       control={ideaForm.control}
@@ -1260,7 +1260,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                       )}
                     />
                   </div>
-                  
+
                   <Button 
                     type="submit" 
                     className="w-full bg-vision-primary-gradient hover:bg-vision-primary-gradient/90"
@@ -1271,14 +1271,14 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </Form>
             </CardContent>
           </Card>
-          
+
           {/* News section - Weather widget removed as requested */}
           <div className="mt-8">
             <StartupNews />
           </div>
         </>
       )}
-      
+
       {/* LOADING STATE */}
       {phase === "loading" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
@@ -1307,7 +1307,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
           </CardContent>
         </Card>
       )}
-      
+
       {/* RESULTS PHASE */}
       {phase === "results" && analysisData && (
         <div className="space-y-8">
@@ -1353,7 +1353,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* The 8 Analysis Blocks Grid - Bento Grid Layout */}
           <motion.div 
             className="grid gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto"
@@ -1392,7 +1392,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* 2. Competitors & Market Share */}
             {analysisData.competitors && visibleBlocks.includes("competitors") && (
               <motion.div 
@@ -1420,7 +1420,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* 3. Target Audience Fit */}
             {analysisData.targetAudienceFit && visibleBlocks.includes("targetAudience") && (
               <motion.div 
@@ -1482,9 +1482,9 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* Market Size Analysis block has been removed as requested */}
-            
+
             {/* 5. Business Model Strength */}
             {analysisData.businessModelStrength && visibleBlocks.includes("businessModel") && (
               <motion.div 
@@ -1514,7 +1514,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* 6. Funding Requirements */}
             {analysisData.fundingRequired && visibleBlocks.includes("fundingRequired") && (
               <motion.div 
@@ -1544,7 +1544,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* 7. SWOT Analysis */}
             {analysisData.swotAnalysis && visibleBlocks.includes("swotAnalysis") && (
               <motion.div 
@@ -1574,7 +1574,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </Card>
               </motion.div>
             )}
-            
+
             {/* 8. Previous Failed Executions */}
             {analysisData.previousFailedExecutions && visibleBlocks.includes("failedExecutions") && (
               <motion.div 
@@ -1603,7 +1603,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </motion.div>
             )}
           </motion.div>
-          
+
           {/* Related Ideas Section */}
           {relatedIdeasData.length > 0 && visibleBlocks.includes("relatedIdeas") && (
             <motion.div
@@ -1619,7 +1619,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:gridcols-3">
                     {relatedIdeasData.slice(0, 3).map((idea, index) => (
                       <Card key={index} className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition">
                         <CardHeader className="pb-2">
@@ -1650,7 +1650,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </Card>
             </motion.div>
           )}
-          
+
           {/* Four Option Buttons */}
           {visibleBlocks.includes("actionButtons") && (
             <motion.div
@@ -1675,7 +1675,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                         <div className="text-xs text-white/70">Analyze a different startup concept</div>
                       </div>
                     </Button>
-                    
+
                     <Button 
                       variant="outline" 
                       className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
@@ -1694,7 +1694,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
           )}
         </div>
       )}
-      
+
       {/* EXECUTION PLAN INPUT PHASE */}
       {phase === "plan-input" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
@@ -1711,7 +1711,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   {/* Budget Section */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-white">Budget Information</h3>
-                    
+
                     <FormField
                       control={budgetForm.control}
                       name="budget"
@@ -1732,7 +1732,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={budgetForm.control}
                       name="currency"
@@ -1765,11 +1765,11 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                       )}
                     />
                   </div>
-                  
+
                   {/* Team Section */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-white">Team Information</h3>
-                    
+
                     <FormField
                       control={budgetForm.control}
                       name="teamSize"
@@ -1807,7 +1807,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={budgetForm.control}
                       name="existingSkills"
@@ -1830,11 +1830,11 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                     />
                   </div>
                 </div>
-                
+
                 {/* Team Composition Section - Dynamic roles */}
                 <div className="mt-6">
                   <h3 className="text-lg font-medium text-white mb-4">Key Team Roles Needed</h3>
-                  
+
                   {budgetForm.watch("teamComposition").map((_, index) => (
                     <div key={index} className="grid gap-4 md:grid-cols-3 mb-4 p-4 border border-vision-purple-200/20 rounded-md">
                       <FormField
@@ -1854,7 +1854,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={budgetForm.control}
                         name={`teamComposition.${index}.skills`}
@@ -1872,7 +1872,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={budgetForm.control}
                         name={`teamComposition.${index}.importance`}
@@ -1898,7 +1898,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                       />
                     </div>
                   ))}
-                  
+
                   <div className="flex space-x-2 mt-2">
                     <Button
                       type="button"
@@ -1916,7 +1916,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                       <Plus className="w-4 h-4 mr-1" />
                       Add Role
                     </Button>
-                    
+
                     {budgetForm.watch("teamComposition").length > 1 && (
                       <Button
                         type="button"
@@ -1936,7 +1936,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-3 mt-8">
                   <Button 
                     type="button" 
@@ -1958,7 +1958,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
           </CardContent>
         </Card>
       )}
-      
+
       {/* PLAN LOADING STATE */}
       {phase === "plan-loading" && (
         <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
@@ -1982,7 +1982,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
           </CardContent>
         </Card>
       )}
-      
+
       {/* PLAN RESULTS PHASE */}
       {phase === "plan-results" && budgetAnalysisData && (
         <div className="space-y-6">
@@ -1997,7 +1997,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </CardDescription>
             </CardHeader>
           </Card>
-          
+
           {/* 6 Budget Analysis Results Blocks - Bento Grid Layout */}
           <motion.div 
             className="grid gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto"
@@ -2024,7 +2024,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             {/* 2. Risk Analysis */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
@@ -2043,7 +2043,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             {/* 3. Go-to-Market Strategy */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
@@ -2061,7 +2061,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             {/* 4. Long Term Vision */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
@@ -2079,7 +2079,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             {/* 5. Team Execution Capability */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
@@ -2098,7 +2098,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                 </CardContent>
               </Card>
             </motion.div>
-            
+
             {/* 6. Funding & Investment Potential - Full screen */}
             <motion.div variants={itemVariants} className="lg:col-span-3 md:col-span-2">
               <Card className="overflow-hidden border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md hover:border-vision-purple-200/30 transition h-full">
@@ -2117,7 +2117,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
               </Card>
             </motion.div>
           </motion.div>
-          
+
           {/* Final Three Options */}
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
             <CardHeader>
@@ -2136,7 +2136,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                     <div className="text-xs text-white/70">Store for future reference</div>
                   </div>
                 </Button>
-                
+
                 <Button 
                   variant="outline" 
                   className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
@@ -2148,7 +2148,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                     <div className="text-xs text-white/70">Download complete report</div>
                   </div>
                 </Button>
-                
+
                 <Button 
                   variant="outline" 
                   className="flex items-center justify-center h-auto py-6 space-x-2 bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
@@ -2161,7 +2161,7 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   </div>
                 </Button>
               </div>
-              
+
               <div className="flex justify-center mt-6">
                 <Button 
                   variant="outline" 
