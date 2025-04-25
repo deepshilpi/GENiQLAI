@@ -288,7 +288,7 @@ export default function ProfilePage() {
           <Card className="border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md shadow-lg mb-6">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row items-start gap-6">
-                <div className="relative">
+                <div className="relative flex flex-col items-center">
                   {/* Hidden file input */}
                   <input
                     type="file"
@@ -318,11 +318,41 @@ export default function ProfilePage() {
                       <span className="text-white">{username.charAt(0).toUpperCase()}</span>
                     )}
                     
-                    {/* Edit overlay button for own profile */}
+                    {/* Edit overlay button for own profile - Improved with better click handling */}
                     {isOwnProfile && (
                       <div 
                         className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("Profile image edit overlay clicked");
+                          
+                          // Use a timeout to ensure the click event is processed correctly
+                          setTimeout(() => {
+                            if (fileInputRef.current) {
+                              try {
+                                fileInputRef.current.click();
+                                console.log("File input click triggered");
+                              } catch (error) {
+                                console.error("Error triggering file input click:", error);
+                                // Fallback method if the click() method fails
+                                const event = new MouseEvent('click', {
+                                  view: window,
+                                  bubbles: true,
+                                  cancelable: true
+                                });
+                                fileInputRef.current.dispatchEvent(event);
+                              }
+                            } else {
+                              console.error("File input reference is null");
+                              toast({
+                                title: "Error",
+                                description: "Could not open file selector, please try again",
+                                variant: "destructive",
+                              });
+                            }
+                          }, 0);
+                        }}
                       >
                         <Camera className="text-white h-6 w-6" />
                       </div>
@@ -335,6 +365,34 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Add explicit Select Image button below the profile image for better accessibility */}
+                  {isOwnProfile && (
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 border-vision-purple-200/30 text-white hover:bg-vision-purple-100/10"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (fileInputRef.current) {
+                          try {
+                            fileInputRef.current.click();
+                            console.log("File input click triggered from button");
+                          } catch (error) {
+                            console.error("Error triggering file input click:", error);
+                            toast({
+                              title: "Error",
+                              description: "Could not open file selector, please try again",
+                              variant: "destructive",
+                            });
+                          }
+                        }
+                      }}
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Select Image
+                    </Button>
+                  )}
                 </div>
                 
                 <div className="flex-1">
