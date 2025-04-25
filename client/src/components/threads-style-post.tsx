@@ -241,14 +241,14 @@ export function ThreadsStylePost({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-[#111144] mb-2 hover:bg-[#191970]/60 cursor-pointer transition-all rounded-lg mx-2 overflow-hidden`}
+      className={`border border-[#A163F7]/20 ${isDetailView ? 'pt-5' : 'py-5'} px-5 bg-[#11083C]/90 mb-4 hover:bg-[#11083C] cursor-pointer transition-all rounded-xl mx-2 overflow-hidden shadow-sm`}
       onClick={navigateToDetailView}
     >
       {/* Post Header */}
       <div className="flex items-start gap-3">
         <div className="flex flex-col items-center">
           <Avatar 
-            className="h-10 w-10 rounded-full cursor-pointer ring-2 ring-offset-2 ring-vision-purple-500/30" 
+            className="h-10 w-10 rounded-full cursor-pointer ring-2 ring-offset-2 ring-[#A163F7]/30" 
             onClick={(e) => {
               e.stopPropagation();
               viewProfile();
@@ -257,12 +257,12 @@ export function ThreadsStylePost({
             {post.author?.profilePic ? (
               <AvatarImage src={post.author.profilePic} alt={post.author.username} />
             ) : (
-              <AvatarFallback className="bg-vision-primary-gradient text-white">
+              <AvatarFallback className="bg-gradient-to-br from-[#7551FF] to-[#A163F7] text-white">
                 {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : "UN"}
               </AvatarFallback>
             )}
           </Avatar>
-          <div className="w-0.5 flex-grow mt-2 bg-vision-purple-200/20"></div>
+          <div className="w-0.5 flex-grow mt-2 bg-[#A163F7]/20"></div>
         </div>
         
         <div className="flex-1">
@@ -346,8 +346,8 @@ export function ThreadsStylePost({
             {post.title && (
               <h3 className="font-semibold text-base mb-1 text-white tracking-wide">{post.title}</h3>
             )}
-            <div className="w-full break-words overflow-hidden">
-              <p className="text-[#a09dd2] whitespace-pre-wrap mb-1 break-words max-w-full">
+            <div className="w-full break-words overflow-hidden rounded-lg bg-[#11083C]/50 p-3 border border-[#A163F7]/10">
+              <p className="text-[#a09dd2] whitespace-pre-wrap mb-1 break-words max-w-full overflow-hidden text-sm">
                 {truncatedDescription}
                 {shouldTruncate && (
                   <button 
