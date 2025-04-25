@@ -75,6 +75,7 @@ interface ThreadsStylePostProps {
   onFollow?: (userId: number) => void;
   onShareProfile?: (username: string) => void;
   onSendMessage?: (userId: number) => void;
+  onDelete?: (postId: number) => void; // Add delete handler prop
   currentUser: UserType | null;
   isDetailView?: boolean;
 }
@@ -87,6 +88,7 @@ export function ThreadsStylePost({
   onFollow,
   onShareProfile,
   onSendMessage,
+  onDelete,
   currentUser,
   isDetailView = false
 }: ThreadsStylePostProps) {
@@ -317,7 +319,7 @@ export function ThreadsStylePost({
                   >
                     View profile
                   </DropdownMenuItem>
-                  {post.author?.username !== currentUser?.username && (
+                  {post.author?.username !== currentUser?.username ? (
                     <DropdownMenuItem 
                       className="hover:bg-vision-purple-100/10 focus:bg-vision-purple-100/10"
                       onClick={(e) => {
@@ -326,6 +328,20 @@ export function ThreadsStylePost({
                       }}
                     >
                       {post.isFollowingAuthor ? "Unfollow" : "Follow"} @{post.author?.username}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem 
+                      className="hover:bg-red-600/20 focus:bg-red-600/20 text-red-400"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onDelete) {
+                          if (confirm("Are you sure you want to delete this post? This cannot be undone.")) {
+                            onDelete(post.id);
+                          }
+                        }
+                      }}
+                    >
+                      Delete post
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>

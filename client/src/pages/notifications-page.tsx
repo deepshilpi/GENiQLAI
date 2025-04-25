@@ -15,8 +15,8 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem 
 } from "@/components/ui/dropdown-menu";
-import Header from "@/components/header";
-import Sidebar from "@/components/sidebar";
+import { Header } from "@/components/header";
+import { Sidebar } from "@/components/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 
 // Define notification types

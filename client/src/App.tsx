@@ -70,6 +70,7 @@ function Router() {
             </Route>
             <ProtectedRoute path="/messages" component={MessagesPage} />
             <ProtectedRoute path="/profile/:username" component={ProfilePage} />
+            <ProtectedRoute path="/notifications" component={NotificationsPage} />
             <ProtectedRoute path="/settings" component={SettingsPage} />
             <ProtectedRoute path="/saved-ideas" component={SavedIdeasPage} />
             <Route path="/terms" component={TermsPage} />
