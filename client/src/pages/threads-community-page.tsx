@@ -447,14 +447,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
     voteMutation.mutate({ postId, voteType });
   };
 
-  // Handle post liking
-  const handleLike = (postId: number) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    likeMutation.mutate(postId);
-  };
+  // Like functionality removed per user request
 
   // Handle post commenting
   const handleComment = (postId: number, comment: string) => {
@@ -788,7 +781,6 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                         <ThreadsStylePost
                           post={singlePostData}
                           onVote={handleVote}
-                          onLike={handleLike}
                           onComment={handleComment}
                           onFollow={handleFollow}
                           onShareProfile={handleShareProfile}
@@ -840,7 +832,6 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                                 key={post.id}
                                 post={post}
                                 onVote={handleVote}
-                                onLike={handleLike}
                                 onComment={handleComment}
                                 onFollow={handleFollow}
                                 onShareProfile={handleShareProfile}
@@ -947,7 +938,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             key={post.id}
                             post={post}
                             onVote={handleVote}
-                            onLike={handleLike}
+                            
                             onComment={handleComment}
                             onFollow={handleFollow}
                             onShareProfile={handleShareProfile}
@@ -1042,7 +1033,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                             key={post.id}
                             post={post}
                             onVote={handleVote}
-                            onLike={handleLike}
+                            
                             onComment={handleComment}
                             onFollow={handleFollow}
                             onShareProfile={handleShareProfile}
