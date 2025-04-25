@@ -144,7 +144,7 @@ export function Sidebar() {
   };
   
   // Add backdrop overlay for mobile
-  const handleBackdropClick = (e) => {
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Stop propagation to prevent event bubbling
     e.stopPropagation();
     
