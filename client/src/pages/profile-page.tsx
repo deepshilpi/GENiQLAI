@@ -102,10 +102,30 @@ export default function ProfilePage() {
   // Update profile picture mutation
   const updateProfilePicMutation = useMutation({
     mutationFn: async (imageData: string) => {
-      await apiRequest("PATCH", "/api/user/profile-picture", { profilePictureUrl: imageData });
+      // Support both direct URL update and file upload
+      if (imageData.startsWith('data:')) {
+        // It's a data URL, use the PATCH endpoint
+        await apiRequest("PATCH", "/api/user/profile-picture", { profilePictureUrl: imageData });
+      } else {
+        // It's a file path, use the FormData upload endpoint
+        const formData = new FormData();
+        
+        // Create a blob from dataURL if it's a data URL
+        const response = await fetch(imageData);
+        const blob = await response.blob();
+        
+        formData.append('profilePicture', blob, 'profile.jpg');
+        
+        await fetch('/api/profile-picture', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/users/${username}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] }); // Also invalidate the global user
       toast({
         title: "Success",
         description: "Your profile picture has been updated",

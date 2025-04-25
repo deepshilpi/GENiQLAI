@@ -956,6 +956,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user profile picture (alternative endpoint for direct URL updates)
+  app.patch("/api/user/profile-picture", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    const { profilePictureUrl } = req.body;
+    
+    if (!profilePictureUrl) {
+      return res.status(400).json({ message: "Profile picture URL is required" });
+    }
+    
+    try {
+      const updatedUser = await storage.updateUserProfilePicture(req.user.id, profilePictureUrl);
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      return res.status(500).json({ message: "Failed to update profile picture" });
+    }
+  });
+  
   // Update user password
   app.patch("/api/user/password", async (req, res) => {
     if (!req.isAuthenticated()) {
