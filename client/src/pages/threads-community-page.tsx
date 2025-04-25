@@ -491,6 +491,56 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
   const handleSendMessage = (userId: number) => {
     navigate(`/messages?userId=${userId}`);
   };
+  
+  // Handle deleting a post
+  const handleDeletePost = (postId: number) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Create delete post mutation
+    const deletePost = async () => {
+      try {
+        const res = await apiRequest("DELETE", `/api/posts/${postId}`);
+        
+        if (!res.ok) throw new Error("Failed to delete post");
+        
+        toast({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
+        
+        // If viewing a single post and it's deleted, go back to the main feed
+        if (window.location.pathname.includes(`/community/threads/${postId}`)) {
+          navigate('/community/threads');
+        } else {
+          // Refresh posts list
+          queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+        }
+        
+        // Send WebSocket update
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({
+            type: 'post_deleted',
+            payload: { 
+              postId,
+              userId: user.id 
+            }
+          }));
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast({
+          title: "Error",
+          description: `Failed to delete post: ${errorMessage}`,
+          variant: "destructive",
+        });
+      }
+    };
+    
+    deletePost();
+  };
 
   // Handle search operations
   const handleSearch = () => {
@@ -743,6 +793,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           onFollow={handleFollow}
                           onShareProfile={handleShareProfile}
                           onSendMessage={handleSendMessage}
+                          onDelete={handleDeletePost}
                           currentUser={user}
                           isDetailView={true}
                         />
