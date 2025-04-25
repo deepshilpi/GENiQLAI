@@ -49,7 +49,7 @@ const entrepreneurQuotes = [
 
 // Auth form schemas
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  username: z.string().trim().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -76,16 +76,17 @@ export default function AuthPage() {
   const queryParams = new URLSearchParams(window.location.search);
   const returnUrl = queryParams.get("returnUrl") || "/";
   
-  // Login form setup
+  // Login form setup with better validation timing
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
     },
+    mode: "onChange", // Validate on change to provide immediate feedback
   });
 
-  // Register form setup
+  // Register form setup with better validation timing
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -93,6 +94,7 @@ export default function AuthPage() {
       email: "",
       password: "",
     },
+    mode: "onChange", // Validate on change to provide immediate feedback
   });
   
   // Enhanced redirect for logged-in users with useEffect to avoid state update during render
