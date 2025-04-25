@@ -793,7 +793,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           
                           {/* End of feed indicator */}
                           {!hasMore && posts.length > 0 && (
-                            <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                            <div className="py-8 text-center border-t border-[#A163F7]/10 mx-4 my-2">
                               <p className="text-sm text-[#a09dd2]">You've seen all posts</p>
                               <Button 
                                 variant="outline" 
@@ -899,7 +899,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                        <div className="py-8 text-center border-t border-[#A163F7]/10 mx-4 my-2">
                           <p className="text-sm text-[#a09dd2]">You've seen all trending posts</p>
                           <Button 
                             variant="outline" 
@@ -993,7 +993,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                       
                       {/* End of feed indicator */}
                       {!hasMore && posts.length > 0 && (
-                        <div className="py-8 text-center bg-[#11083C]/90 border-t border-[#A163F7]/10">
+                        <div className="py-8 text-center border-t border-[#A163F7]/10 mx-4 my-2">
                           <p className="text-sm text-[#a09dd2]">You've seen all posts from people you follow</p>
                           <Button 
                             variant="outline" 

@@ -272,7 +272,7 @@ export function ThreadsStylePost({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-[#111144] mb-2 hover:bg-[#191970]/60 cursor-pointer transition-all`}
+      className={`border-b border-vision-purple-200/10 ${isDetailView ? 'pt-4' : 'py-4'} px-4 bg-[#111144] mb-2 hover:bg-[#191970]/60 cursor-pointer transition-all rounded-lg mx-2`}
       onClick={navigateToDetailView}
     >
       {/* Post Header */}
