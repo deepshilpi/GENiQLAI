@@ -78,7 +78,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, isLoading, loginMutation, registerMutation } = useAuth();
   
   // Select a random quote to display
   const [randomQuote, setRandomQuote] = useState(entrepreneurQuotes[Math.floor(Math.random() * entrepreneurQuotes.length)]);
@@ -108,6 +108,25 @@ export default function AuthPage() {
             <CardTitle className="text-white">Redirecting...</CardTitle>
             <CardDescription className="text-white/70">
               You're already logged in
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-vision-purple-400" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#11083c] to-[#0B1437]">
+        <Card className="w-[400px] max-w-sm border-vision-purple-200/20 bg-vision-card/90 backdrop-blur-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Loading...</CardTitle>
+            <CardDescription className="text-white/70">
+              Checking authentication status
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center py-4">
