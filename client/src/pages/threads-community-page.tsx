@@ -46,7 +46,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // Extended post type for UI with author and current user vote
 interface ExtendedPost extends Omit<Post, 'tags'> {
   author?: {
-    username?: string;
+    username: string;
     profilePic?: string;
     bio?: string;
     followersCount?: number;
@@ -521,8 +521,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
       <div className="flex-1 flex flex-col w-full max-w-full transition-all duration-300">
         <Header />
         
-        <main className="overflow-y-auto w-full h-full">
-          <div className="w-full">
+        <main className="overflow-y-auto w-full flex-1">
+          <div className="w-full flex flex-col min-h-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-10 bg-[#11083C] backdrop-blur-xl border-b border-[#A163F7]/20 px-6 py-4 flex justify-between items-center">
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -1028,6 +1028,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
               </Tabs>
             )}
           </div>
+          <Footer />
         </main>
       </div>
 
