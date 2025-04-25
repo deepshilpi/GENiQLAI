@@ -1074,12 +1074,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Notify all WebSocket clients about the new post
       if (wss) {
+        console.log('Broadcasting new post notification to all connected clients');
         wss.clients.forEach((client: UserWebSocket) => {
           if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({
-              type: 'new_post',
-              payload: { post: postWithAuthor }
-            }));
+            try {
+              client.send(JSON.stringify({
+                type: 'new_post',
+                payload: { post: postWithAuthor }
+              }));
+              console.log(`Sent new post notification to client ${client.userId || 'anonymous'}`);
+            } catch (error) {
+              console.error('Error sending WebSocket message:', error);
+            }
           }
         });
       }

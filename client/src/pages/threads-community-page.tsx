@@ -89,10 +89,12 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
         console.log('WebSocket connection established');
         // Authenticate the WebSocket connection if user is logged in
         if (user) {
+          console.log('WebSocket connected, authenticating...');
           socket.send(JSON.stringify({
-            type: 'authenticate',
+            type: 'auth',
             payload: { userId: user.id }
           }));
+          console.log('Authentication message sent');
         }
       };
       
@@ -101,15 +103,22 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
           const data = JSON.parse(event.data);
           
           // Handle different types of messages
-          if (data.type === 'new_post') {
+          if (data.type === 'auth_success') {
+            console.log('Authentication successful');
+          } else if (data.type === 'new_post') {
             // Add new post to the list
+            console.log('Received new post notification, refreshing posts...');
             queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
           } else if (data.type === 'new_comment') {
             // Update comments for a specific post
+            console.log('Received new comment notification, refreshing posts...');
             queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
           } else if (data.type === 'vote_update') {
             // Update votes for a specific post
+            console.log('Received vote update notification, refreshing posts...');
             queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+          } else if (data.type === 'error') {
+            console.error('WebSocket error from server:', data.payload?.message);
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
