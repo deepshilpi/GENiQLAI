@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { formatCurrency } from "@/lib/utils";
-import { useLocation, useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-import { AuthDialog } from "@/components/auth-dialog";
+// AuthDialog removed - using redirect to auth page instead
 import { SuccessRateChart } from "@/components/analysis/success-rate-chart";
 import { CompetitorsChart } from "@/components/analysis/competitors-chart";
 import { FundingRequirementsCard } from "@/components/analysis/funding-requirements-card";
@@ -218,8 +218,6 @@ export default function AnalysisPage() {
   const { toast } = useToast();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.search.toString());
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [returnTo, setReturnTo] = useState("");
 
   // State management
   const [phase, setPhase] = useState<AnalysisPhase>("input");
@@ -614,7 +612,7 @@ export default function AnalysisPage() {
   const onPlanSubmit = async (values: z.infer<typeof budgetSchema>) => {
     if (!user) {
       // Use the new auth page instead of the auth dialog
-      navigate(`/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
@@ -818,7 +816,7 @@ export default function AnalysisPage() {
   const handleExportPDF = async () => {
     if (!user) {
       // Use the new auth page instead of the auth dialog
-      navigate(`/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
@@ -1048,8 +1046,8 @@ export default function AnalysisPage() {
 
   const handleShareToCommunity = async () => {
     if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
+      // Use the new auth page instead of the auth dialog
+      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
@@ -1127,8 +1125,8 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
   const handleSaveAnalysis = async () => {
     if (!user) {
-      setReturnTo(window.location.pathname);
-      setAuthDialogOpen(true);
+      // Use the new auth page instead of the auth dialog
+      window.location.href = `/auth?returnUrl=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
@@ -1185,11 +1183,6 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
 
   return (
     <div className="container px-4 py-8 mx-auto max-w-7xl">
-      <AuthDialog 
-        isOpen={authDialogOpen} 
-        onClose={() => setAuthDialogOpen(false)} 
-        returnTo={returnTo}
-      />
 
       {/* IDEA INPUT PHASE */}
       {phase === "input" && (
