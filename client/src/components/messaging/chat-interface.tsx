@@ -42,7 +42,11 @@ type User = {
   username: string;
   email: string;
   planType: string;
-  bio: string;
+  bio: string | null;
+  profilePictureUrl: string | null;
+  createdAt: string | Date;
+  followersCount?: number;
+  followingCount?: number;
 };
 
 // Conversation participant
@@ -63,8 +67,10 @@ export function ChatInterface() {
   const [newMessage, setNewMessage] = useState("");
   const [participants, setParticipants] = useState<ConversationParticipant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [communityUsers, setCommunityUsers] = useState<User[]>([]);
   
   // WebSocket reference
   const wsRef = useRef<WebSocket | null>(null);
@@ -318,6 +324,7 @@ export function ChatInterface() {
   // Check if we're on mobile
   const isMobile = window.innerWidth < 768;
   const [showConversationList, setShowConversationList] = useState(!isMobile || !activeConversation);
+  const [activeTab, setActiveTab] = useState<string>("chats");
   
   useEffect(() => {
     const handleResize = () => {
@@ -328,6 +335,13 @@ export function ChatInterface() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [activeConversation]);
+  
+  // Load community users when the Users tab is active
+  useEffect(() => {
+    if (activeTab === "users" && communityUsers.length === 0 && !loadingUsers) {
+      fetchCommunityUsers();
+    }
+  }, [activeTab, communityUsers.length, loadingUsers]);
   
   // Back button handler for mobile view
   const handleBackToList = () => {
@@ -342,10 +356,46 @@ export function ChatInterface() {
       setShowConversationList(false);
     }
   };
+  
+  // Fetch community users for the Users tab
+  const fetchCommunityUsers = async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingUsers(true);
+      const response = await fetch('/api/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      const data = await response.json();
+      setCommunityUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load community members',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   return (
     <Card className="w-full h-[92vh] md:h-[85vh] max-h-[92vh] md:max-h-[85vh] shadow-md overflow-hidden bg-vision-card/90 backdrop-blur-md">
-      <Tabs defaultValue="chats" className="h-full flex flex-col">
+      <Tabs 
+        defaultValue="chats" 
+        className="h-full flex flex-col"
+        onValueChange={(value) => setActiveTab(value)}
+      >
         <CardHeader className="py-2 px-4 md:py-3 md:px-5 border-b border-vision-purple-200/10 flex flex-row items-center justify-between">
           <CardTitle className="text-xl text-white">Chats</CardTitle>
           <div className="flex items-center space-x-2">
@@ -440,7 +490,10 @@ export function ChatInterface() {
                     <p className="text-sm text-white/60 mt-1 mb-4 text-center max-w-sm px-4">
                       Send private messages to other entrepreneurs and investors
                     </p>
-                    <Button className="bg-vision-primary-gradient hover:bg-vision-primary-gradient/90 text-white border-none">
+                    <Button 
+                      className="bg-vision-primary-gradient hover:bg-vision-primary-gradient/90 text-white border-none"
+                      onClick={() => setActiveTab("users")}
+                    >
                       <PlusCircle className="h-4 w-4 mr-2" />
                       New Message
                     </Button>
@@ -558,12 +611,69 @@ export function ChatInterface() {
           </TabsContent>
           
           <TabsContent value="users" className="h-full">
-            <div className="p-4 text-white">
-              <h3 className="text-lg font-semibold mb-4">Start a Conversation</h3>
-              {/* User list would go here - connect with users from the community */}
-              <p className="text-sm text-white/60">
-                You'll be able to start new conversations with community members here.
-              </p>
+            <div className="p-4 h-full flex flex-col text-white">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="bg-vision-primary-gradient/20 p-2 rounded-lg">
+                  <Users className="h-5 w-5 text-vision-purple-500" />
+                </div>
+                <h3 className="text-lg font-semibold">Community Members</h3>
+              </div>
+              
+              <div className="mb-4">
+                <Input
+                  placeholder="Search users..."
+                  className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white placeholder:text-white/50"
+                />
+              </div>
+              
+              <ScrollArea className="flex-1">
+                {loadingUsers ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-vision-purple-500" />
+                  </div>
+                ) : communityUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-white/60">No users found in the community.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1 pr-2">
+                    {communityUsers.map((communityUser) => (
+                      <div
+                        key={communityUser.id}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-vision-purple-100/10 transition-colors"
+                      >
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 border border-vision-purple-200/20">
+                            <AvatarImage 
+                              src={communityUser.profilePictureUrl || undefined} 
+                              alt={communityUser.username} 
+                            />
+                            <AvatarFallback className="bg-vision-primary-gradient text-white">
+                              {communityUser.username.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="ml-3">
+                            <h4 className="text-sm font-medium text-white">{communityUser.username}</h4>
+                            <p className="text-xs text-white/60 truncate max-w-[150px]">
+                              {communityUser.bio ? communityUser.bio : 'No bio'}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-vision-purple-100/10 border-vision-purple-200/20 text-white hover:bg-vision-purple-200/20"
+                          onClick={() => createNewConversation(communityUser.id)}
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Message
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
             </div>
           </TabsContent>
         </CardContent>
