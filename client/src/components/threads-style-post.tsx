@@ -354,31 +354,33 @@ export function ThreadsStylePost({
             {post.title && (
               <h3 className="font-semibold text-base mb-1 text-white tracking-wide">{post.title}</h3>
             )}
-            <p className="text-[#a09dd2] whitespace-pre-wrap mb-1 break-words overflow-hidden w-full max-w-full">
-              {truncatedDescription}
-              {shouldTruncate && (
-                <button 
-                  className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(true);
-                  }}
-                >
-                  Show more
-                </button>
-              )}
-              {isExpanded && !isDetailView && (
-                <button
-                  className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsExpanded(false);
-                  }}
-                >
-                  Show less
-                </button>
-              )}
-            </p>
+            <div className="w-full break-words overflow-hidden">
+              <p className="text-[#a09dd2] whitespace-pre-wrap mb-1 break-words max-w-full">
+                {truncatedDescription}
+                {shouldTruncate && (
+                  <button 
+                    className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsExpanded(true);
+                    }}
+                  >
+                    Show more
+                  </button>
+                )}
+                {isExpanded && !isDetailView && (
+                  <button
+                    className="text-[#CB9FFF] hover:text-[#A163F7] hover:underline text-sm ml-1 font-medium"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsExpanded(false);
+                    }}
+                  >
+                    Show less
+                  </button>
+                )}
+              </p>
+            </div>
             
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">

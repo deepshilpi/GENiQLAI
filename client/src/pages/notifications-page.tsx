@@ -44,10 +44,10 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   
   // Fetch notifications
-  const { data: notifications, isLoading, refetch } = useQuery<Notification[]>({
+  const { data: notificationsData, isLoading, refetch } = useQuery({
     queryKey: ['/api/notifications'],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) return { notifications: [], unreadCount: 0 };
       
       try {
         const res = await fetch(`/api/notifications?filter=${activeTab}`, { credentials: 'include' });
@@ -55,11 +55,14 @@ export default function NotificationsPage() {
         return res.json();
       } catch (error) {
         console.error('Error fetching notifications:', error);
-        return [];
+        return { notifications: [], unreadCount: 0 };
       }
     },
     enabled: !!user,
   });
+  
+  // Extract notifications from the response
+  const notifications = notificationsData?.notifications || [];
   
   // Fetch notifications when tab changes
   useEffect(() => {
