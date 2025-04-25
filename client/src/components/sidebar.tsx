@@ -232,8 +232,8 @@ export function Sidebar() {
                 )}
                 onClick={() => navigate("/messages")}
               >
-                <DollarSign className="w-5 h-5" />
-                {!collapsed && <span>Money Serious Talks</span>}
+                <MessageSquare className="w-5 h-5" />
+                {!collapsed && <span>Chats</span>}
               </div>
             </li>
           )}

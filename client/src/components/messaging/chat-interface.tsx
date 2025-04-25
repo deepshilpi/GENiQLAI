@@ -344,10 +344,10 @@ export function ChatInterface() {
   };
 
   return (
-    <Card className="w-full h-[85vh] max-h-[85vh] shadow-md overflow-hidden bg-vision-card/90 backdrop-blur-md">
+    <Card className="w-full h-[92vh] md:h-[85vh] max-h-[92vh] md:max-h-[85vh] shadow-md overflow-hidden bg-vision-card/90 backdrop-blur-md">
       <Tabs defaultValue="chats" className="h-full flex flex-col">
-        <CardHeader className="py-3 px-5 border-b border-vision-purple-200/10 flex flex-row items-center justify-between">
-          <CardTitle className="text-xl text-white">Messages</CardTitle>
+        <CardHeader className="py-2 px-4 md:py-3 md:px-5 border-b border-vision-purple-200/10 flex flex-row items-center justify-between">
+          <CardTitle className="text-xl text-white">Chats</CardTitle>
           <div className="flex items-center space-x-2">
             <TabsList className="bg-vision-primary-gradient/20">
               <TabsTrigger value="chats" className="relative data-[state=active]:bg-vision-primary-gradient">
@@ -436,7 +436,7 @@ export function ChatInterface() {
                     <div className="rounded-full bg-vision-primary-gradient/20 p-4 mb-4">
                       <Send className="h-8 w-8 text-vision-purple-700" />
                     </div>
-                    <h3 className="text-lg font-semibold">Your Messages</h3>
+                    <h3 className="text-lg font-semibold">Your Chats</h3>
                     <p className="text-sm text-white/60 mt-1 mb-4 text-center max-w-sm px-4">
                       Send private messages to other entrepreneurs and investors
                     </p>
