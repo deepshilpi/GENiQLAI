@@ -1530,25 +1530,23 @@ ${analysisData.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}
                   </CardHeader>
                   <CardContent className="p-4 sm:p-5">
                     <div className="space-y-5">
-                      <div className="md:flex gap-6">
-                        <div className="h-64 md:w-1/2 mb-5 md:mb-0">
-                          {/* Radar chart will go here */}
-                          <div className="flex flex-col items-center justify-center h-full">
-                            <div className="p-5 h-full w-full text-center border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm flex items-center justify-center">
-                              <p className="text-white/90 leading-relaxed">{analysisData.targetAudienceFit.message}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="h-64 md:w-1/2 flex items-center justify-center p-5 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
-                          <div className="text-center">
-                            <h3 className="text-lg font-medium text-white mb-2">Target Audience Insight</h3>
-                            <p className="text-white/70">Your product needs to address specific pain points for each segment while maintaining a cohesive value proposition.</p>
-                          </div>
-                        </div>
+                      {/* Target audience description - improved mobile layout */}
+                      <div className="p-4 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
+                        <p className="text-white/90 leading-relaxed text-sm sm:text-base">
+                          {analysisData.targetAudienceFit.message}
+                        </p>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
+                      
+                      {/* Target audience insight - improved mobile layout */}
+                      <div className="p-4 border rounded-lg bg-gradient-to-br from-vision-purple-100/10 to-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm">
+                        <h3 className="text-base sm:text-lg font-medium text-white mb-2">Target Audience Insight</h3>
+                        <p className="text-white/70 text-sm sm:text-base">Your product needs to address specific pain points for each segment while maintaining a cohesive value proposition.</p>
+                      </div>
+                      
+                      {/* Audience segments - improved mobile layout */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         {analysisData.targetAudienceFit.segments.map((segment: {name: string, score: number}, i: number) => (
-                          <div key={i} className="p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-colors duration-200">
+                          <div key={i} className="p-3 sm:p-4 border rounded-lg bg-vision-purple-100/5 border-vision-purple-200/20 backdrop-blur-sm hover:bg-vision-purple-200/10 transition-colors duration-200">
                             <p className="text-sm font-medium text-white mb-2">{segment.name}</p>
                             <div className="flex items-center mt-2">
                               <div className="flex-1 h-2.5 mr-2 rounded-full bg-vision-purple-200/20 overflow-hidden">
