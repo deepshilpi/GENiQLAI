@@ -1032,14 +1032,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Post created successfully:", post);
       
       // Notify all WebSocket clients about the new post
-      wss.clients.forEach((client: UserWebSocket) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'new_post',
-            payload: { post }
-          }));
-        }
-      });
+      if (wss) {
+        wss.clients.forEach((client: UserWebSocket) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'new_post',
+              payload: { post }
+            }));
+          }
+        });
+      }
       
       return res.status(201).json(post);
     } catch (error) {
@@ -1156,6 +1158,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const vote = await storage.createVote(newVote);
+        
+        // Notify all WebSocket clients about the new vote/like
+        if (wss) {
+          wss.clients.forEach((client: UserWebSocket) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({
+                type: 'new_vote',
+                payload: { 
+                  vote,
+                  postId
+                }
+              }));
+            }
+          });
+        }
+        
         return res.status(200).json(vote);
       }
     } catch (error) {
@@ -1206,6 +1224,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const vote = await storage.createVote(newVote);
+        
+        // Notify all WebSocket clients about the new vote
+        if (wss) {
+          wss.clients.forEach((client: UserWebSocket) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({
+                type: 'new_vote',
+                payload: { 
+                  vote,
+                  postId
+                }
+              }));
+            }
+          });
+        }
+        
         return res.status(200).json(vote);
       }
     } catch (error) {
@@ -1244,6 +1278,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const follow = await storage.createFollow(newFollow);
+      
+      // Notify all WebSocket clients about the new follow relationship
+      if (wss) {
+        wss.clients.forEach((client: UserWebSocket) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'new_follow',
+              payload: { 
+                follow,
+                follower: req.user,
+                following: user
+              }
+            }));
+          }
+        });
+      }
+      
       return res.status(200).json(follow);
     } catch (error) {
       console.error("Error following user:", error);
@@ -1277,6 +1328,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.deleteFollow(req.user.id, followingId);
+      
+      // Get user info for WebSocket notification
+      const user = await storage.getUser(followingId);
+      
+      // Notify all WebSocket clients about the unfollow action
+      if (wss && user) {
+        wss.clients.forEach((client: UserWebSocket) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'unfollow',
+              payload: { 
+                followerId: req.user.id,
+                followingId,
+                follower: req.user,
+                following: user
+              }
+            }));
+          }
+        });
+      }
+      
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error("Error unfollowing user:", error);
