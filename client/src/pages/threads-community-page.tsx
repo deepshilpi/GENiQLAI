@@ -102,63 +102,100 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
   // Connect to WebSocket for real-time updates
   useEffect(() => {
     const connectWebSocket = () => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
-      
-      const socket = new WebSocket(wsUrl);
-      ws.current = socket;
-      
-      socket.onopen = () => {
-        console.log('WebSocket connection established');
-        // Authenticate the WebSocket connection if user is logged in
-        if (user) {
-          socket.send(JSON.stringify({
-            type: 'authenticate',
-            payload: { userId: user.id }
-          }));
+      try {
+        console.log('Setting up WebSocket connection...');
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        
+        // Close existing connection if it exists
+        if (ws.current) {
+          ws.current.close();
         }
-      };
-      
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          // Handle different types of messages
-          if (data.type === 'new_post') {
-            // Add new post to the list
-            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-          } else if (data.type === 'new_comment') {
-            // Update comments for a specific post
-            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-          } else if (data.type === 'vote_update') {
-            // Update votes for a specific post
-            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+        
+        const socket = new WebSocket(wsUrl);
+        ws.current = socket;
+        
+        let timeoutId: number | null = null;
+        
+        // Set a timeout to detect connection failures
+        timeoutId = window.setTimeout(() => {
+          console.log('WebSocket connection attempt timed out after 10 seconds');
+          if (socket.readyState !== WebSocket.OPEN) {
+            socket.close();
           }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
-        }
-      };
-      
-      socket.onclose = () => {
-        console.log('WebSocket connection closed, attempting to reconnect...');
-        // Set up reconnection logic
+        }, 10000);
+        
+        socket.onopen = () => {
+          console.log('WebSocket connected, authenticating...');
+          // Clear the timeout since connection was successful
+          if (timeoutId) clearTimeout(timeoutId);
+          
+          // Authenticate the WebSocket connection if user is logged in
+          if (user) {
+            console.log('Authentication message sent');
+            socket.send(JSON.stringify({
+              type: 'authenticate',
+              payload: { userId: user.id }
+            }));
+          }
+        };
+        
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            // Handle authentication confirmation
+            if (data.type === 'auth_success') {
+              console.log('Authentication successful');
+            } 
+            // Handle different types of messages
+            else if (data.type === 'new_post') {
+              // Add new post to the list
+              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+            } else if (data.type === 'new_comment') {
+              // Update comments for a specific post
+              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+            } else if (data.type === 'vote_update') {
+              // Update votes for a specific post
+              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
+        
+        socket.onclose = () => {
+          console.log('WebSocket connection closed, attempting to reconnect...');
+          // Set up reconnection logic with exponential backoff
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
+          
+          reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 3000);
+        };
+        
+        socket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          if (timeoutId) clearTimeout(timeoutId);
+          socket.close();
+        };
+      } catch (err) {
+        console.error('Error setting up WebSocket:', err);
+        // Retry connection after delay
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
-        reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 3000);
-      };
-      
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        socket.close();
-      };
+        reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 5000);
+      }
     };
     
     connectWebSocket();
     
     // Clean up the WebSocket connection when the component unmounts
     return () => {
+      console.log('Cleaning up WebSocket connection');
       if (ws.current) {
+        console.log('WebSocket disconnected');
         ws.current.close();
       }
       if (reconnectTimeoutRef.current) {
