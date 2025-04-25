@@ -132,7 +132,7 @@ export function Header() {
         <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         
         {/* Header spacing for fixed positioning */}
-        <div className="p-2 mb-16"></div>
+        <div className="p-2 mb-10"></div>
 
         <header className="vision-header px-4 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-40 vision-card shadow-lg">
           {/* Logo section with menu toggle */}
