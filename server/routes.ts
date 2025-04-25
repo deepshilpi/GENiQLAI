@@ -1726,20 +1726,22 @@ function setupWebSocketServer(httpServer: Server) {
   
   // Set up interval for checking stale connections
   const heartbeatInterval = setInterval(() => {
-    wss.clients.forEach((ws: UserWebSocket) => {
-      // Check if connection hasn't sent anything in over 60 seconds
-      const lastSeenTime = lastSeen.get(ws);
-      if (lastSeenTime && Date.now() - lastSeenTime > 60000) {
-        // This is a stale connection that hasn't sent a ping recently
-        if (ws.userId) {
-          console.log(`Terminating stale connection for user ${ws.userId} (inactive for >60s)`);
-        } else {
-          console.log('Terminating stale unauthenticated connection (inactive for >60s)');
+    if (wss) {
+      wss.clients.forEach((ws: UserWebSocket) => {
+        // Check if connection hasn't sent anything in over 60 seconds
+        const lastSeenTime = lastSeen.get(ws);
+        if (lastSeenTime && Date.now() - lastSeenTime > 60000) {
+          // This is a stale connection that hasn't sent a ping recently
+          if (ws.userId) {
+            console.log(`Terminating stale connection for user ${ws.userId} (inactive for >60s)`);
+          } else {
+            console.log('Terminating stale unauthenticated connection (inactive for >60s)');
+          }
+          ws.terminate();
+          lastSeen.delete(ws);
         }
-        ws.terminate();
-        lastSeen.delete(ws);
-      }
-    });
+      });
+    }
   }, 30000); // Check every 30 seconds
   
   // Clean up interval on server close
@@ -1748,7 +1750,8 @@ function setupWebSocketServer(httpServer: Server) {
     console.log('WebSocket heartbeat interval cleared on server shutdown');
   });
 
-  wss.on('connection', (ws: UserWebSocket, req) => {
+  if (wss) {
+    wss.on('connection', (ws: UserWebSocket, req) => {
     // Initialize user as unauthenticated
     // Later, client will need to send authentication with user ID
     ws.userId = undefined;
@@ -2072,4 +2075,5 @@ function setupWebSocketServer(httpServer: Server) {
       }
     });
   });
+  }
 }
