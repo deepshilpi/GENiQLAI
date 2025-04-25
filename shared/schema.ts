@@ -179,8 +179,23 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type InsertPost = z.infer<typeof insertPostSchema>;
+
+// Extended types for API responses
+export interface PostWithAuthor extends Post {
+  author?: {
+    username: string;
+    profilePic: string | null;
+  } | null;
+}
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
+
+export interface CommentWithAuthor extends Comment {
+  author?: {
+    username: string;
+    profilePic: string | null;
+  } | null;
+}
 export type Vote = typeof votes.$inferSelect;
 export type InsertVote = z.infer<typeof insertVoteSchema>;
 export type Follow = typeof follows.$inferSelect;

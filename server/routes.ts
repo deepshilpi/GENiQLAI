@@ -8,8 +8,10 @@ import { analyzeStartupIdeaStepByStep } from "./analysis-service";
 import { searchStartupNews } from "./tavily";
 import { detectCountryFromIP } from "./utils";
 import { 
-  InsertPost, 
-  InsertComment, 
+  InsertPost,
+  PostWithAuthor,
+  InsertComment,
+  CommentWithAuthor,
   InsertVote, 
   InsertFollow, 
   AnalysisResults, 
@@ -959,8 +961,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Attempting to fetch posts...");
       const posts = await storage.getPosts();
+      
+      // Fetch author information for each post
+      const postsWithAuthors = await Promise.all(posts.map(async post => {
+        if (post.authorId) {
+          const author = await storage.getUser(post.authorId);
+          return {
+            ...post,
+            author: author ? {
+              username: author.username,
+              profilePic: author.profilePictureUrl || null
+            } : null
+          };
+        }
+        return post;
+      }));
+      
       console.log(`Successfully fetched ${posts.length} posts`);
-      return res.status(200).json(posts);
+      return res.status(200).json(postsWithAuthors);
     } catch (error) {
       console.error("Error fetching posts:", error);
       return res.status(500).json({ message: "Failed to fetch posts" });
@@ -982,7 +1000,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Post not found" });
       }
       
-      return res.status(200).json(post);
+      // Add author information
+      let postWithAuthor = post;
+      if (post.authorId) {
+        const author = await storage.getUser(post.authorId);
+        postWithAuthor = {
+          ...post,
+          author: author ? {
+            username: author.username,
+            profilePic: author.profilePictureUrl || null
+          } : null
+        };
+      }
+      
+      return res.status(200).json(postWithAuthor);
     } catch (error) {
       console.error("Error fetching post:", error);
       return res.status(500).json({ message: "Failed to fetch post" });
@@ -1060,7 +1091,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const comments = await storage.getCommentsByPostId(postId);
-      return res.status(200).json(comments);
+      
+      // Add author information to each comment
+      const commentsWithAuthors = await Promise.all(comments.map(async comment => {
+        if (comment.authorId) {
+          const author = await storage.getUser(comment.authorId);
+          return {
+            ...comment,
+            author: author ? {
+              username: author.username,
+              profilePic: author.profilePictureUrl || null
+            } : null
+          };
+        }
+        return comment;
+      }));
+      
+      return res.status(200).json(commentsWithAuthors);
     } catch (error) {
       console.error("Error fetching comments:", error);
       return res.status(500).json({ message: "Failed to fetch comments" });
