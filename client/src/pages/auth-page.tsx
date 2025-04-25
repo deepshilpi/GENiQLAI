@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { AuthInput } from "@/components/auth-input";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, X, Quote as QuoteIcon } from "lucide-react";
 import { motion } from "framer-motion";
@@ -216,10 +217,8 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input 
+                            <AuthInput 
                               placeholder="Enter your username" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white caret-white" 
-                              style={{ color: 'white' }}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
@@ -237,11 +236,9 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input 
+                            <AuthInput 
                               type="password" 
                               placeholder="Enter your password" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white caret-white" 
-                              style={{ color: 'white' }}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
@@ -275,10 +272,8 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input 
+                            <AuthInput 
                               placeholder="Choose a username" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white caret-white" 
-                              style={{ color: 'white' }}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
@@ -296,11 +291,9 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input 
+                            <AuthInput 
                               type="email" 
                               placeholder="Enter your email" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white caret-white" 
-                              style={{ color: 'white' }}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
@@ -318,11 +311,9 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input 
+                            <AuthInput 
                               type="password" 
                               placeholder="Create a password" 
-                              className="bg-[#25135a]/40 border-[#6f42c1]/30 text-white caret-white" 
-                              style={{ color: 'white' }}
                               value={field.value}
                               onChange={field.onChange}
                               onBlur={field.onBlur}
