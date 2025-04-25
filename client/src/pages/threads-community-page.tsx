@@ -3,7 +3,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { ThreadsStylePost } from "@/components/threads-style-post";
 import { AuthContext } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // Extended post type for UI with author and current user vote
 interface ExtendedPost extends Omit<Post, 'tags'> {
   author?: {
-    username: string;
+    username?: string;
     profilePic?: string;
     bio?: string;
     followersCount?: number;
@@ -102,100 +101,63 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
   // Connect to WebSocket for real-time updates
   useEffect(() => {
     const connectWebSocket = () => {
-      try {
-        console.log('Setting up WebSocket connection...');
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = `${protocol}//${window.location.host}/ws`;
-        
-        // Close existing connection if it exists
-        if (ws.current) {
-          ws.current.close();
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      
+      const socket = new WebSocket(wsUrl);
+      ws.current = socket;
+      
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        // Authenticate the WebSocket connection if user is logged in
+        if (user) {
+          socket.send(JSON.stringify({
+            type: 'authenticate',
+            payload: { userId: user.id }
+          }));
         }
-        
-        const socket = new WebSocket(wsUrl);
-        ws.current = socket;
-        
-        let timeoutId: number | null = null;
-        
-        // Set a timeout to detect connection failures
-        timeoutId = window.setTimeout(() => {
-          console.log('WebSocket connection attempt timed out after 10 seconds');
-          if (socket.readyState !== WebSocket.OPEN) {
-            socket.close();
-          }
-        }, 10000);
-        
-        socket.onopen = () => {
-          console.log('WebSocket connected, authenticating...');
-          // Clear the timeout since connection was successful
-          if (timeoutId) clearTimeout(timeoutId);
+      };
+      
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
           
-          // Authenticate the WebSocket connection if user is logged in
-          if (user) {
-            console.log('Authentication message sent');
-            socket.send(JSON.stringify({
-              type: 'authenticate',
-              payload: { userId: user.id }
-            }));
+          // Handle different types of messages
+          if (data.type === 'new_post') {
+            // Add new post to the list
+            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+          } else if (data.type === 'new_comment') {
+            // Update comments for a specific post
+            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
+          } else if (data.type === 'vote_update') {
+            // Update votes for a specific post
+            queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
           }
-        };
-        
-        socket.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            
-            // Handle authentication confirmation
-            if (data.type === 'auth_success') {
-              console.log('Authentication successful');
-            } 
-            // Handle different types of messages
-            else if (data.type === 'new_post') {
-              // Add new post to the list
-              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-            } else if (data.type === 'new_comment') {
-              // Update comments for a specific post
-              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-            } else if (data.type === 'vote_update') {
-              // Update votes for a specific post
-              queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
-            }
-          } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-          }
-        };
-        
-        socket.onclose = () => {
-          console.log('WebSocket connection closed, attempting to reconnect...');
-          // Set up reconnection logic with exponential backoff
-          if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-          }
-          
-          reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 3000);
-        };
-        
-        socket.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          if (timeoutId) clearTimeout(timeoutId);
-          socket.close();
-        };
-      } catch (err) {
-        console.error('Error setting up WebSocket:', err);
-        // Retry connection after delay
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+      
+      socket.onclose = () => {
+        console.log('WebSocket connection closed, attempting to reconnect...');
+        // Set up reconnection logic
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
-        reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 5000);
-      }
+        reconnectTimeoutRef.current = window.setTimeout(connectWebSocket, 3000);
+      };
+      
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        socket.close();
+      };
     };
     
     connectWebSocket();
     
     // Clean up the WebSocket connection when the component unmounts
     return () => {
-      console.log('Cleaning up WebSocket connection');
       if (ws.current) {
-        console.log('WebSocket disconnected');
         ws.current.close();
       }
       if (reconnectTimeoutRef.current) {
@@ -558,8 +520,8 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
       <div className="flex-1 flex flex-col w-full max-w-full transition-all duration-300">
         <Header />
         
-        <main className="overflow-y-auto w-full flex-1">
-          <div className="w-full flex flex-col min-h-full">
+        <main className="overflow-y-auto w-full h-full">
+          <div className="w-full">
             {/* Header Bar */}
             <div className="sticky top-0 z-10 bg-[#11083C] backdrop-blur-xl border-b border-[#A163F7]/20 px-6 py-4 flex justify-between items-center">
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -759,7 +721,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                           onFollow={handleFollow}
                           onShareProfile={handleShareProfile}
                           onSendMessage={handleSendMessage}
-                          currentUser={user || null}
+                          currentUser={user}
                           isDetailView={true}
                         />
                       ) : (
@@ -810,7 +772,7 @@ export default function ThreadsCommunityPage({ postId }: ThreadsCommunityPagePro
                                 onFollow={handleFollow}
                                 onShareProfile={handleShareProfile}
                                 onSendMessage={handleSendMessage}
-                                currentUser={user || null}
+                                currentUser={user}
                               />
                             ))}
                           </AnimatePresence>
