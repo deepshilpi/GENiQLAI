@@ -169,16 +169,7 @@ const BrandNameGeneratorPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col max-w-6xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent inline-flex items-center">
-            <Sparkles className="w-8 h-8 mr-2 text-purple-500" />
-            Brand Name Generator
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Create memorable, distinctive brand names for your startup using AI. Enter your 
-            keywords, business category, and target audience to generate tailored suggestions.
-          </p>
-        </div>
+        
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Form */}
