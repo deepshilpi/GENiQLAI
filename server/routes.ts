@@ -915,6 +915,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Brand name generator endpoint
+  app.post("/api/brand-names", async (req, res) => {
+    try {
+      console.log("Received request for brand name generation");
+      const { keywords, category, audienceType, count } = req.body;
+      
+      // Validate request
+      if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
+        return res.status(400).json({ message: "Keywords array is required" });
+      }
+      
+      if (!category || typeof category !== 'string') {
+        return res.status(400).json({ message: "Category is required" });
+      }
+      
+      if (!audienceType || typeof audienceType !== 'string') {
+        return res.status(400).json({ message: "Audience type is required" });
+      }
+      
+      // Check for OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          message: "Brand name generation is currently unavailable. Please try again later.",
+          error: "missing_api_key"
+        });
+      }
+      
+      const request: BrandNameRequest = {
+        keywords,
+        category,
+        audienceType,
+        count: count && typeof count === 'number' ? count : undefined
+      };
+      
+      console.log("Generating brand names with parameters:", {
+        keywordsCount: keywords.length,
+        category,
+        audienceType,
+        count: request.count || 5
+      });
+      
+      // Generate brand names
+      const brandNames = await generateBrandNames(request);
+      
+      return res.status(200).json(brandNames);
+    } catch (error) {
+      console.error("Error generating brand names:", error);
+      return res.status(500).json({ 
+        message: "Failed to generate brand names. Please try again later.",
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+  
   // Update user plan
   app.post("/api/user/plan", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1120,14 +1174,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'post_deleted',
-            data: postWithAuthor
-          }));
-        }
-      });
+      if (wss) {
+        wss.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({
+              type: 'post_deleted',
+              data: postWithAuthor
+            }));
+          }
+        });
+      }
       
       res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {

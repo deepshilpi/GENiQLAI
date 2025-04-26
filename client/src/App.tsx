@@ -13,6 +13,7 @@ import TermsPage from "@/pages/terms-page";
 import PrivacyPage from "@/pages/privacy-page";
 import SavedIdeasPage from "@/pages/saved-ideas-page";
 import NotificationsPage from "@/pages/notifications-page";
+import BrandNameGeneratorPage from "@/pages/brand-name-generator-page";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { Sidebar } from "@/components/sidebar";
@@ -73,6 +74,7 @@ function Router() {
             <ProtectedRoute path="/notifications" component={NotificationsPage} />
             <ProtectedRoute path="/settings" component={SettingsPage} />
             <ProtectedRoute path="/saved-ideas" component={SavedIdeasPage} />
+            <Route path="/brand-name-generator" component={BrandNameGeneratorPage} />
             <Route path="/terms" component={TermsPage} />
             <Route path="/privacy" component={PrivacyPage} />
             <Route component={NotFound} />
