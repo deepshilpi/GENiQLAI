@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SavedIdeasDropdown } from "@/components/saved-ideas-dropdown";
 import { 
   LayoutDashboard, 
-  BrainCircuit, 
+  Brain, // Replaced BrainCircuit
   MessageSquare, 
   BarChart3, 
   Newspaper, 
@@ -52,7 +52,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  
+
   // Use real notifications from hook instead of dummy data
   const { 
     notifications, 
@@ -61,13 +61,13 @@ export function Sidebar() {
     markAsRead, 
     markAllAsRead 
   } = useNotifications();
-  
+
   // Always show sidebar for everyone, but adapt content based on auth status
-  
+
   // Set initial collapsed state based on screen size
   useEffect(() => {
     setCollapsed(isMobile);
-    
+
     // Add class to body for mobile sidebar control
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -78,18 +78,18 @@ export function Sidebar() {
         document.body.classList.remove('sidebar-open');
       }
     };
-    
+
     // Initial setup
     handleResize();
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobile]);
-  
+
   const toggleSidebar = () => {
     if (isMobile) {
       setSidebarOpen(!sidebarOpen);
-      
+
       if (!sidebarOpen) {
         document.body.classList.add('sidebar-open');
       } else {
@@ -97,7 +97,7 @@ export function Sidebar() {
       }
     } else {
       setCollapsed(!collapsed);
-      
+
       if (collapsed) {
         document.body.classList.remove('sidebar-collapsed');
       } else {
@@ -105,11 +105,11 @@ export function Sidebar() {
       }
     }
   };
-  
+
   const isActive = (path: string) => {
     return location === path;
   };
-  
+
   // Fixed logout handler with improved error handling
   const handleLogout = () => {
     // Check if already logging out
@@ -117,24 +117,24 @@ export function Sidebar() {
       console.log("Logout already in progress, ignoring duplicate request");
       return;
     }
-    
+
     // Check if logged in first
     if (!user) {
       console.log("User already logged out, no need to logout again");
       navigate("/auth");
       return;
     }
-    
+
     if (logoutMutation) {
       console.log("Executing logout");
-      
+
       // Set UI state immediately for better feedback
       queryClient.setQueryData(["/api/user"], null);
-      
+
       // Clear session storage
       sessionStorage.removeItem('auth_login_success');
       sessionStorage.removeItem('auth_logout_requested');
-      
+
       // Do the actual logout API call
       logoutMutation.mutate(undefined, {
         onSettled: () => {
@@ -144,18 +144,18 @@ export function Sidebar() {
       });
     }
   };
-  
+
   // Add backdrop overlay for mobile
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Stop propagation to prevent event bubbling
     e.stopPropagation();
-    
+
     if (isMobile) {
       setSidebarOpen(false);
       document.body.classList.remove('sidebar-open');
     }
   };
-  
+
   return (
     <div className="sidebar-container">
       {/* Backdrop overlay for mobile */}
@@ -166,7 +166,7 @@ export function Sidebar() {
           aria-hidden="true"
         />
       )}
-      
+
       <aside 
         className={cn(
           "sidebar fixed left-0 top-0 h-full vision-sidebar flex flex-col z-20 transition-all duration-300",
@@ -194,7 +194,7 @@ export function Sidebar() {
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
-      
+
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2">
         <ul className="space-y-2">
@@ -207,7 +207,7 @@ export function Sidebar() {
               )}
               onClick={() => navigate("/")}
             >
-              <BrainCircuit className="w-5 h-5" />
+              <Brain className="w-5 h-5" /> {/* Replaced BrainCircuit with Brain */}
               {!collapsed && <span>Startup Analysis</span>}
             </div>
           </li>
@@ -239,7 +239,7 @@ export function Sidebar() {
               </div>
             </li>
           )}
-          
+
           {user && (
             <li>
               <div 
@@ -255,7 +255,7 @@ export function Sidebar() {
               </div>
             </li>
           )}
-          
+
           {/* Brand Name Generator Tool */}
           <li>
             <div 
@@ -270,19 +270,19 @@ export function Sidebar() {
               {!collapsed && <span>Brand Name Generator</span>}
             </div>
           </li>
-          
+
           {/* Removed duplicate Saved Ideas dropdown in favor of dedicated page */}
 
-          
+
         </ul>
       </nav>
-      
+
       {/* Account section */}
       <div className="px-3 py-2 border-t border-vision-purple-200/10 mb-16">
         {!collapsed && (
           <h4 className="text-white/40 uppercase text-xs tracking-wide px-4 py-2">Account</h4>
         )}
-        
+
         {user ? (
           // Authenticated user view
           <ul className="space-y-1 mb-4">
@@ -331,7 +331,7 @@ export function Sidebar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-vision-purple-200/10" />
-                  
+
                   {notificationsLoading ? (
                     <div className="py-8 flex justify-center items-center">
                       <div className="w-6 h-6 border-2 border-vision-purple-300 border-t-transparent rounded-full animate-spin"></div>
@@ -347,9 +347,9 @@ export function Sidebar() {
                         let Icon = MessageSquare;
                         let iconBgClass = "bg-vision-primary-gradient/20"; 
                         let iconClass = "text-vision-purple-700";
-                        
+
                         if (notification.type === 'analysis') {
-                          Icon = BrainCircuit;
+                          Icon = Brain; // Replaced BrainCircuit with Brain
                           iconBgClass = "bg-green-500/20";
                           iconClass = "text-green-500";
                         } else if (notification.type === 'follow') {
@@ -357,10 +357,10 @@ export function Sidebar() {
                           iconBgClass = "bg-blue-500/20";
                           iconClass = "text-blue-500";
                         }
-                        
+
                         // Format time
                         const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
-                        
+
                         return (
                           <DropdownMenuItem 
                             key={notification.id} 
@@ -387,7 +387,7 @@ export function Sidebar() {
                       })}
                     </div>
                   )}
-                  
+
                   <DropdownMenuSeparator className="bg-vision-purple-200/10" />
                   <DropdownMenuItem 
                     className="cursor-pointer hover:bg-vision-purple-100/10 justify-center py-2"
@@ -398,7 +398,7 @@ export function Sidebar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
-            
+
 
             <li>
               <div 
@@ -445,8 +445,8 @@ export function Sidebar() {
           </ul>
         )}
       </div>
-      
-      
+
+
     </aside>
     </div>
   );
