@@ -164,7 +164,7 @@ const BrandNameGeneratorPage: React.FC = () => {
 
   // Get visible brand names based on current display count
   const visibleBrandNames = brandNameMutation.data?.brandNames?.slice(0, displayCount) || [];
-  const hasMoreToShow = brandNameMutation.data?.brandNames?.length > displayCount;
+  const hasMoreToShow = (brandNameMutation.data?.brandNames?.length || 0) > displayCount;
 
   return (
     <div className="container mx-auto px-4 py-8">

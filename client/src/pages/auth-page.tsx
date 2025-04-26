@@ -6,6 +6,7 @@ import { Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import Logo from "@/assets/logo";
 
 // Entrepreneur quotes with their images for the right column
 const entrepreneurQuotes = [
@@ -339,27 +340,47 @@ export default function AuthPage() {
         </motion.div>
       </div>
       
-      {/* Right Column - Inspiring Content (Only visible on medium screens and above) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-r from-[#0B1437] to-[#11083c] p-10 flex-col justify-center items-center relative">
+      {/* Right Column - Clean, attractive design with background image */}
+      <div className="hidden md:flex md:w-1/2 relative overflow-hidden">
+        {/* Background image with overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center" 
+          style={{ 
+            backgroundImage: "url('https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+            filter: "brightness(0.3)"
+          }}
+        />
+        
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1437]/90 to-[#11083c]/80" />
+        
+        {/* Content container */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="max-w-md text-center"
+          className="relative z-10 flex flex-col items-center justify-center w-full h-full p-8 text-center"
         >
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#A163F7] to-[#7551FF]">
-              Accelerate Your Startup Journey
-            </h2>
-            <p className="text-gray-300 mb-8">
-              Join thousands of founders who use GENIQL to validate and refine their startup ideas with AI-powered analysis
-            </p>
+          {/* Logo */}
+          <div className="mb-4">
+            <Logo width={80} height={80} className="mx-auto" />
           </div>
           
-          <div className="relative mb-8">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#A163F7]/20 to-[#7551FF]/20 backdrop-blur-sm -m-2 transform rotate-2"></div>
-            <div className="relative bg-[#1a1045]/80 border border-purple-500/30 p-6 rounded-xl shadow-xl">
-              <p className="text-xl italic mb-4 text-gray-100">{randomQuote.quote}</p>
+          {/* Brand name */}
+          <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#A163F7] to-[#7551FF]">
+            GENIQL
+          </h1>
+          
+          {/* Short description */}
+          <p className="text-gray-300 text-lg max-w-md mx-auto mb-12">
+            AI-powered startup analysis to transform your business ideas into success
+          </p>
+          
+          {/* Quote card */}
+          <div className="relative w-full max-w-md mb-8">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#A163F7]/20 to-[#7551FF]/20 backdrop-blur-sm -m-2 transform rotate-1"></div>
+            <div className="relative bg-[#1a1045]/60 border border-purple-500/40 p-6 rounded-xl shadow-xl backdrop-blur-sm">
+              <p className="text-xl italic mb-4 text-white">{randomQuote.quote}</p>
               <div className="flex items-center justify-center">
                 <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
                   <img 
@@ -373,33 +394,6 @@ export default function AuthPage() {
                   <p className="text-xs text-gray-400">{randomQuote.company}</p>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <div className="rounded-full bg-[#7551FF]/20 p-2 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7551FF]" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-gray-300">AI-powered business model evaluation</p>
-            </div>
-            <div className="flex items-center">
-              <div className="rounded-full bg-[#7551FF]/20 p-2 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7551FF]" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-gray-300">Connect with passionate entrepreneurs</p>
-            </div>
-            <div className="flex items-center">
-              <div className="rounded-full bg-[#7551FF]/20 p-2 mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7551FF]" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="text-gray-300">Gain insights on market opportunities</p>
             </div>
           </div>
         </motion.div>
