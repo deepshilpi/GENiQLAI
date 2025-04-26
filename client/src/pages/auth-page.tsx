@@ -359,7 +359,7 @@ export default function AuthPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="relative z-10 flex flex-col items-center justify-center w-full h-full p-8 text-center bg-[#0a0d2b] bg-opacity-50 [background-image:linear-gradient(rgba(11,20,55,0.7)_2px,transparent_2px),linear-gradient(90deg,rgba(11,20,55,0.7)_2px,transparent_2px)] [background-size:40px_40px]"
+          className="relative z-10 flex flex-col items-center justify-center w-full h-full p-8 text-center"
         >
           {/* Logo */}
           <div className="mb-4">
