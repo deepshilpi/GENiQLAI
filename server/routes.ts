@@ -6,6 +6,7 @@ import { setupAuth, comparePasswords, hashPassword } from "./auth";
 import { analyzeStartupIdea, generateBudgetAnalysis, generateExecutionPlan, findInvestors } from "./openai";
 import { analyzeStartupIdeaStepByStep } from "./analysis-service";
 import { searchStartupNews } from "./tavily";
+import { generateBrandNames, type BrandNameRequest } from "./brand-name-service";
 import { detectCountryFromIP } from "./utils";
 import { 
   InsertPost,
