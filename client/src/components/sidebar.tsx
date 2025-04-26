@@ -25,7 +25,9 @@ import {
   Bookmark,
   Check,
   Users,
-  DollarSign
+  DollarSign,
+  BookText,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -253,6 +255,21 @@ export function Sidebar() {
               </div>
             </li>
           )}
+          
+          {/* Brand Name Generator Tool */}
+          <li>
+            <div 
+              className={cn(
+                "vision-sidebar-item cursor-pointer",
+                isActive("/brand-name-generator") && "active",
+                collapsed && "justify-center px-2"
+              )}
+              onClick={() => navigate("/brand-name-generator")}
+            >
+              <Sparkles className="w-5 h-5" />
+              {!collapsed && <span>Brand Name Generator</span>}
+            </div>
+          </li>
           
           {/* Removed duplicate Saved Ideas dropdown in favor of dedicated page */}
 
